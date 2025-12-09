@@ -26,13 +26,13 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | Column          | Type        | Constraints                           | Description                    |
 |-----------------|------------|----------------------------------------|--------------------------------|
 | id              | uuid       | PK, default gen_random_uuid()         | アプリ内でのユーザID（将来拡張用） |
-| user_id         | uuid       | NOT NULL, UNIQUE, FK → auth.users(id) | Supabase Auth のユーザID       |
+| user_auth_id         | uuid       | NOT NULL, UNIQUE, FK → auth.users(id) | Supabase Auth のユーザID       |
 | last_name       | text       | NOT NULL                               | 姓                            |
 | first_name      | text       | NOT NULL                               | 名                            |
 | nickname        | text       | NOT NULL                               | ニックネーム                   |
-| birthday        | date       | NULLABLE                               | 生年月日                       |
-| gender          | text       | NULLABLE                               | 性別（'male' / 'female' / ... 想定） |
-| prefecture      | text       | NULLABLE                               | 都道府県（文字列で持つ）       |
+| birthday        | date       | NOT NULL                               | 生年月日                       |
+| gender          | text       | NOT NULL                               | 性別（'male' / 'female' / ... 想定） |
+| prefecture      | text       | NOT NULL                               | 都道府県（文字列で持つ）       |
 | is_active       | boolean    | NOT NULL DEFAULT true                  | 退会フラグなどに利用           |
 | created_at      | timestamptz| NOT NULL DEFAULT now()                 | 作成日時                       |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()                 | 更新日時                       |
@@ -61,7 +61,8 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | latitude        | numeric(10,7) | NULLABLE                      | 緯度（Google Maps 表示用）             |
 | longitude       | numeric(10,7) | NULLABLE                      | 経度                                    |
 | phone_number    | text       | NULLABLE                         | 電話番号（タップで発信）               |
-| opening_hours   | text       | NULLABLE                         | 営業時間（例: "17:00〜24:00"）         |
+| opening_time   | time       | NULLABLE                          | 17:00                               |
+| ending_time   | time       | NULLABLE                           | 24:00                               |
 | regular_holiday | text       | NULLABLE                         | 定休日                                  |
 | access          | text       | NULLABLE                         | 交通手段・最寄駅など                    |
 | website_url     | text       | NULLABLE                         | 店舗公式サイト URL                      |
@@ -105,7 +106,6 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 |-------------|------------|--------------------------|----------------------|
 | id          | bigserial  | PK                       | カテゴリID           |
 | name        | text       | NOT NULL, UNIQUE         | カテゴリ名（IPA 等） |
-| description | text       | NULLABLE                 | 備考                 |
 | is_active   | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
 | created_at  | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
