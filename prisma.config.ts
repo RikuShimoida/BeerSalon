@@ -10,5 +10,7 @@ export default defineConfig({
 	},
 	datasource: {
 		url: env("DATABASE_URL"),
+		// Supabase ローカル環境では directUrl は不要
+		// 本番環境で接続プーリングを使う場合は shadowDatabaseUrl を検討
 	},
 });
