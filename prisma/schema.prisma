@@ -1,11 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Beer Salon - Prisma Schema
+// database.md の設計に基づいて作成
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -13,11 +10,374 @@ datasource db {
   provider = "postgresql"
 }
 
-// 接続確認用のテストモデル
-model ConnectionTest {
-  id        Int      @id @default(autoincrement())
-  message   String
-  createdAt DateTime @default(now()) @map("created_at")
+// ================================
+// 1. 認証・ユーザー
+// ================================
 
-  @@map("connection_test")
+/// ユーザープロフィール（Supabase Auth の auth.users に紐づく）
+model UserProfile {
+  id           String    @id @default(uuid()) @db.Uuid
+  userAuthId   String    @unique @map("user_auth_id") @db.Uuid // FK to auth.users(id)
+  lastName     String    @map("last_name")
+  firstName    String    @map("first_name")
+  nickname     String
+  birthday     DateTime  @db.Date
+  gender       String
+  prefecture   String
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  posts              Post[]
+  postLikes          PostLike[]
+  followedBy         UserFollowRelation[] @relation("Follower")
+  following          UserFollowRelation[] @relation("Followee")
+  favoriteBars       FavoriteBar[]
+  userCoupons        UserCoupon[]
+  viewHistories      ViewHistory[]
+  notifications      Notification[]
+  loginHistories     LoginHistory[]
+
+  @@map("user_profiles")
+}
+
+// ================================
+// 2. 店舗・メニュー関連
+// ================================
+
+/// ビアバー基本情報
+model Bar {
+  id             BigInt    @id @default(autoincrement())
+  name           String
+  prefecture     String
+  city           String
+  addressLine1   String    @map("address_line1")
+  addressLine2   String?   @map("address_line2")
+  latitude       Decimal?  @db.Decimal(10, 7)
+  longitude      Decimal?  @db.Decimal(10, 7)
+  phoneNumber    String?   @map("phone_number")
+  openingTime    DateTime? @map("opening_time") @db.Time(6)
+  endingTime     DateTime? @map("ending_time") @db.Time(6)
+  regularHoliday String?   @map("regular_holiday")
+  access         String?
+  websiteUrl     String?   @map("website_url")
+  description    String?
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  barImages      BarImage[]
+  beerMenus      BarBeerMenu[]
+  foodMenus      BarFoodMenu[]
+  coupons        Coupon[]
+  articles       Article[]
+  posts          Post[]
+  favoriteBars   FavoriteBar[]
+  viewHistories  ViewHistory[]
+
+  @@map("bars")
+}
+
+/// 店舗画像
+model BarImage {
+  id        BigInt   @id @default(autoincrement())
+  barId     BigInt   @map("bar_id")
+  imageType String   @map("image_type")
+  imageUrl  String   @map("image_url")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  bar Bar @relation(fields: [barId], references: [id], onDelete: Cascade)
+
+  @@map("bar_images")
+}
+
+/// ビールカテゴリマスタ
+model BeerCategory {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  beers Beer[]
+
+  @@map("beer_categories")
+}
+
+/// 醸造所マスタ
+model Brewery {
+  id         BigInt   @id @default(autoincrement())
+  name       String   @unique
+  country    String?
+  region     String?
+  websiteUrl String?  @map("website_url")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  beers Beer[]
+
+  @@map("breweries")
+}
+
+/// ビール銘柄マスタ
+model Beer {
+  id             BigInt   @id @default(autoincrement())
+  name           String
+  beerCategoryId BigInt   @map("beer_category_id")
+  breweryId      BigInt?  @map("brewery_id")
+  origin         String?
+  abv            Decimal? @db.Decimal(4, 2)
+  ibu            Int?
+  description    String?
+  imageUrl       String?  @map("image_url")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  beerCategory BeerCategory @relation(fields: [beerCategoryId], references: [id])
+  brewery      Brewery?     @relation(fields: [breweryId], references: [id])
+  beerMenus    BarBeerMenu[]
+
+  @@map("beers")
+}
+
+/// 店舗ビールメニュー
+model BarBeerMenu {
+  id          BigInt   @id @default(autoincrement())
+  barId       BigInt   @map("bar_id")
+  beerId      BigInt   @map("beer_id")
+  price       Int?
+  size        String?
+  description String?
+  imageUrl    String?  @map("image_url")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  bar  Bar  @relation(fields: [barId], references: [id], onDelete: Cascade)
+  beer Beer @relation(fields: [beerId], references: [id])
+
+  @@map("bar_beer_menus")
+}
+
+/// 店舗フードメニュー
+model BarFoodMenu {
+  id          BigInt   @id @default(autoincrement())
+  barId       BigInt   @map("bar_id")
+  name        String
+  price       Int?
+  description String?
+  imageUrl    String?  @map("image_url")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  bar Bar @relation(fields: [barId], references: [id], onDelete: Cascade)
+
+  @@map("bar_food_menus")
+}
+
+// ================================
+// 3. クーポン・記事
+// ================================
+
+/// クーポン
+model Coupon {
+  id          BigInt    @id @default(autoincrement())
+  barId       BigInt    @map("bar_id")
+  title       String
+  description String
+  conditions  String?
+  validFrom   DateTime? @map("valid_from") @db.Timestamptz(6)
+  validUntil  DateTime? @map("valid_until") @db.Timestamptz(6)
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  bar         Bar          @relation(fields: [barId], references: [id], onDelete: Cascade)
+  userCoupons UserCoupon[]
+
+  @@map("coupons")
+}
+
+/// ユーザー取得済みクーポン
+model UserCoupon {
+  id         BigInt    @id @default(autoincrement())
+  userId     String    @map("user_id") @db.Uuid
+  couponId   BigInt    @map("coupon_id")
+  obtainedAt DateTime  @default(now()) @map("obtained_at") @db.Timestamptz(6)
+  usedAt     DateTime? @map("used_at") @db.Timestamptz(6)
+  isUsed     Boolean   @default(false) @map("is_used")
+
+  // Relations
+  user   UserProfile @relation(fields: [userId], references: [id])
+  coupon Coupon      @relation(fields: [couponId], references: [id])
+
+  @@map("user_coupons")
+}
+
+/// 店舗記事
+model Article {
+  id          BigInt    @id @default(autoincrement())
+  barId       BigInt    @map("bar_id")
+  title       String
+  body        String
+  imageUrl    String?   @map("image_url")
+  publishedAt DateTime? @map("published_at") @db.Timestamptz(6)
+  isPublished Boolean   @default(false) @map("is_published")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  bar Bar @relation(fields: [barId], references: [id], onDelete: Cascade)
+
+  @@map("articles")
+}
+
+// ================================
+// 4. 投稿・タイムライン・お気に入り
+// ================================
+
+/// ユーザー投稿
+model Post {
+  id        BigInt   @id @default(autoincrement())
+  userId    String   @map("user_id") @db.Uuid
+  barId     BigInt   @map("bar_id")
+  body      String
+  likeCount Int      @default(0) @map("like_count")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relations
+  user       UserProfile @relation(fields: [userId], references: [id])
+  bar        Bar         @relation(fields: [barId], references: [id], onDelete: Cascade)
+  postImages PostImage[]
+  postLikes  PostLike[]
+
+  @@map("posts")
+}
+
+/// 投稿画像
+model PostImage {
+  id        BigInt   @id @default(autoincrement())
+  postId    BigInt   @map("post_id")
+  imageUrl  String   @map("image_url")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("post_images")
+}
+
+/// 投稿いいね
+model PostLike {
+  id        BigInt   @id @default(autoincrement())
+  postId    BigInt   @map("post_id")
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  post Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user UserProfile @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
+  @@map("post_likes")
+}
+
+/// フォロー関係
+model UserFollowRelation {
+  id         BigInt   @id @default(autoincrement())
+  followerId String   @map("follower_id") @db.Uuid
+  followeeId String   @map("followee_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  follower UserProfile @relation("Follower", fields: [followerId], references: [id])
+  followee UserProfile @relation("Followee", fields: [followeeId], references: [id])
+
+  @@unique([followerId, followeeId])
+  @@map("user_follow_relations")
+}
+
+/// お気に入り店舗
+model FavoriteBar {
+  id        BigInt   @id @default(autoincrement())
+  userId    String   @map("user_id") @db.Uuid
+  barId     BigInt   @map("bar_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user UserProfile @relation(fields: [userId], references: [id])
+  bar  Bar         @relation(fields: [barId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, barId])
+  @@map("favorite_bars")
+}
+
+// ================================
+// 5. 閲覧履歴・通知
+// ================================
+
+/// 閲覧履歴
+model ViewHistory {
+  id       BigInt   @id @default(autoincrement())
+  userId   String   @map("user_id") @db.Uuid
+  barId    BigInt   @map("bar_id")
+  viewedAt DateTime @default(now()) @map("viewed_at") @db.Timestamptz(6)
+
+  // Relations
+  user UserProfile @relation(fields: [userId], references: [id])
+  bar  Bar         @relation(fields: [barId], references: [id], onDelete: Cascade)
+
+  @@map("view_histories")
+}
+
+/// 通知
+model Notification {
+  id        BigInt   @id @default(autoincrement())
+  userId    String   @map("user_id") @db.Uuid
+  type      String
+  title     String
+  message   String
+  linkUrl   String?  @map("link_url")
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Relations
+  user UserProfile @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+// ================================
+// 6. ログ関連（任意）
+// ================================
+
+/// ログイン履歴
+model LoginHistory {
+  id           BigInt   @id @default(autoincrement())
+  userId       String   @map("user_id") @db.Uuid
+  loggedInAt   DateTime @default(now()) @map("logged_in_at") @db.Timestamptz(6)
+  loginStatus  String   @map("login_status")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  authProvider String?  @map("auth_provider")
+
+  // Relations
+  user UserProfile @relation(fields: [userId], references: [id])
+
+  @@map("login_histories")
 }
