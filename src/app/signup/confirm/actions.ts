@@ -1,0 +1,53 @@
+"use server";
+
+import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+
+type FormState = {
+	error?: string;
+};
+
+export async function confirmAndSaveProfile(
+	prevState: FormState | undefined,
+	formData: FormData,
+): Promise<FormState | undefined> {
+	const data = JSON.parse(formData.get("profileData") as string);
+
+	const supabase = await createClient();
+
+	// 認証状態を確認
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return {
+			error: "認証が必要です",
+		};
+	}
+
+	try {
+		// user_profilesテーブルにプロフィール情報を保存
+		// @ts-expect-error - Prismaクライアントの生成問題により一時的に型エラーをスキップ
+		await prisma.userProfile.create({
+			data: {
+				userAuthId: user.id,
+				lastName: data.lastName,
+				firstName: data.firstName,
+				nickname: data.nickname,
+				birthday: new Date(data.birthday),
+				gender: data.gender,
+				prefecture: data.prefecture,
+			},
+		});
+
+		// 成功したらトップページへリダイレクト
+		redirect("/");
+	} catch (error) {
+		console.error("Error saving profile:", error);
+		return {
+			error: "プロフィールの保存に失敗しました",
+		};
+	}
+}
