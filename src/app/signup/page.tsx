@@ -1,11 +1,18 @@
 import { SignUpForm } from "./signup-form";
 
+/**
+ * 新規登録ページ
+ *
+ * クエリパラメータ ?success=true がある場合は成功メッセージを表示
+ * ない場合は登録フォームを表示
+ */
 export default async function SignUpPage({
 	searchParams,
 }: {
 	searchParams: Promise<{ success?: string }>;
 }) {
 	const params = await searchParams;
+	// actions.ts の signUp() が成功時に ?success=true をつけてリダイレクトする
 	const showSuccess = params.success === "true";
 
 	return (
