@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 export default async function ProfilePage() {
 	const supabase = await createClient();
 
-	// 認証状態を確認
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();

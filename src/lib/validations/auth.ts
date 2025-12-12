@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// サインアップフォームのバリデーションスキーマ
 export const signUpSchema = z.object({
 	email: z
 		.string()
@@ -23,7 +22,6 @@ export const signUpSchema = z.object({
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
 
-// ログインフォームのバリデーションスキーマ
 export const loginSchema = z.object({
 	email: z
 		.string()
@@ -34,7 +32,6 @@ export const loginSchema = z.object({
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 
-// プロフィール入力フォームのバリデーションスキーマ
 export const profileSchema = z.object({
 	lastName: z.string().min(1, { message: "姓を入力してください" }),
 	firstName: z.string().min(1, { message: "名を入力してください" }),

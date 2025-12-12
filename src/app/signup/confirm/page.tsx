@@ -16,7 +16,6 @@ export default async function ConfirmPage({
 
 	const supabase = await createClient();
 
-	// 認証状態を確認
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();
@@ -27,7 +26,6 @@ export default async function ConfirmPage({
 
 	const profileData = JSON.parse(decodeURIComponent(params.data));
 
-	// 性別の表示用ラベルを取得
 	const genderLabel =
 		GENDERS.find((g) => g.value === profileData.gender)?.label || "不明";
 

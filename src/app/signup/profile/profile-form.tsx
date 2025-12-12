@@ -10,14 +10,11 @@ export function ProfileForm() {
 		undefined,
 	);
 
-	// 年の選択肢（現在年から100年前まで）
 	const currentYear = new Date().getFullYear();
 	const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
-	// 月の選択肢
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
-	// 日の選択肢
 	const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
 	return (
@@ -166,7 +163,6 @@ export function ProfileForm() {
 				disabled={isPending}
 				className="w-full px-4 py-3 text-white bg-blue-600 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
 				onClick={(e) => {
-					// 生年月日を結合
 					const form = e.currentTarget.form;
 					if (form) {
 						const year = (form.elements.namedItem("year") as HTMLSelectElement)

@@ -16,7 +16,6 @@ export async function confirmAndSaveProfile(
 
 	const supabase = await createClient();
 
-	// 認証状態を確認
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();
@@ -28,8 +27,6 @@ export async function confirmAndSaveProfile(
 	}
 
 	try {
-		// user_profilesテーブルにプロフィール情報を保存
-		// @ts-expect-error - Prismaクライアントの生成問題により一時的に型エラーをスキップ
 		await prisma.userProfile.create({
 			data: {
 				userAuthId: user.id,
@@ -42,10 +39,8 @@ export async function confirmAndSaveProfile(
 			},
 		});
 
-		// 成功したらトップページへリダイレクト
 		redirect("/");
 	} catch (error) {
-		console.error("Error saving profile:", error);
 		return {
 			error: "プロフィールの保存に失敗しました",
 		};

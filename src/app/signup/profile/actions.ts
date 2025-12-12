@@ -21,7 +21,6 @@ export async function saveProfileToSession(
 		prefecture: formData.get("prefecture") as string,
 	};
 
-	// バリデーション
 	const result = profileSchema.safeParse(data);
 	if (!result.success) {
 		return {
@@ -31,7 +30,6 @@ export async function saveProfileToSession(
 
 	const supabase = await createClient();
 
-	// 認証状態を確認
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();
