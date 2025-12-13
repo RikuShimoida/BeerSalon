@@ -1,8 +1,8 @@
 "use client";
 
-import { login } from "./actions";
 import Link from "next/link";
 import { useActionState } from "react";
+import { login } from "./actions";
 
 export function LoginForm() {
 	const [state, formAction, isPending] = useActionState(login, undefined);
@@ -24,10 +24,7 @@ export function LoginForm() {
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="password"
-					className="text-sm font-medium text-gray-700"
-				>
+				<label htmlFor="password" className="text-sm font-medium text-gray-700">
 					パスワード
 				</label>
 				<input
@@ -58,10 +55,7 @@ export function LoginForm() {
 				<Link href="/signup" className="text-blue-600 hover:underline">
 					新規登録はこちら
 				</Link>
-				<Link
-					href="/password/reset"
-					className="text-gray-600 hover:underline"
-				>
+				<Link href="/password/reset" className="text-gray-600 hover:underline">
 					パスワードをお忘れの方
 				</Link>
 			</div>

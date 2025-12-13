@@ -1,10 +1,10 @@
 "use client";
 
-import { PREFECTURES, GENDERS } from "@/lib/constants/prefectures";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { profileSchema, type ProfileFormData } from "@/lib/validations/auth";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { GENDERS, PREFECTURES } from "@/lib/constants/prefectures";
+import { type ProfileFormData, profileSchema } from "@/lib/validations/auth";
 
 interface ProfileFormProps {
 	initialData?: {
@@ -26,8 +26,8 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 				firstName: initialData.firstName,
 				nickname: initialData.nickname,
 				year: initialData.birthday.split("-")[0],
-				month: String(Number.parseInt(initialData.birthday.split("-")[1])),
-				day: String(Number.parseInt(initialData.birthday.split("-")[2])),
+				month: String(Number.parseInt(initialData.birthday.split("-")[1], 10)),
+				day: String(Number.parseInt(initialData.birthday.split("-")[2], 10)),
 				gender: initialData.gender,
 				prefecture: initialData.prefecture,
 			}
@@ -63,10 +63,16 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 	};
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full">
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			className="flex flex-col gap-4 w-full"
+		>
 			<div className="grid grid-cols-2 gap-4">
 				<div className="flex flex-col gap-2">
-					<label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+					<label
+						htmlFor="lastName"
+						className="text-sm font-medium text-gray-700"
+					>
 						姓
 					</label>
 					<input
@@ -82,7 +88,10 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 				</div>
 
 				<div className="flex flex-col gap-2">
-					<label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+					<label
+						htmlFor="firstName"
+						className="text-sm font-medium text-gray-700"
+					>
 						名
 					</label>
 					<input
@@ -115,9 +124,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<label className="text-sm font-medium text-gray-700">
-					生年月日
-				</label>
+				<label className="text-sm font-medium text-gray-700">生年月日</label>
 				<div className="grid grid-cols-3 gap-2">
 					<select
 						className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -155,7 +162,9 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 				</div>
 				{(errors.year || errors.month || errors.day) && (
 					<p className="text-sm text-red-600">
-						{errors.year?.message || errors.month?.message || errors.day?.message}
+						{errors.year?.message ||
+							errors.month?.message ||
+							errors.day?.message}
 					</p>
 				)}
 			</div>
@@ -182,7 +191,10 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<label htmlFor="prefecture" className="text-sm font-medium text-gray-700">
+				<label
+					htmlFor="prefecture"
+					className="text-sm font-medium text-gray-700"
+				>
 					お住まいの都道府県
 				</label>
 				<select

@@ -1,15 +1,15 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { profileSchema } from "@/lib/validations/auth";
-import { redirect } from "next/navigation";
 
 type FormState = {
 	error?: string;
 };
 
 export async function saveProfileToSession(
-	prevState: FormState | undefined,
+	_prevState: FormState | undefined,
 	formData: FormData,
 ): Promise<FormState | undefined> {
 	const data = {

@@ -1,6 +1,6 @@
-import { ProfileForm } from "./profile-form";
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { ProfileForm } from "./profile-form";
 
 export default async function ProfilePage({
 	searchParams,
