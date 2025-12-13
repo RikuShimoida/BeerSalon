@@ -1,8 +1,8 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { PREFECTURES } from "@/lib/constants/prefectures";
 import { useState } from "react";
+import { PREFECTURES } from "@/lib/constants/prefectures";
 
 interface SearchFormProps {
 	onSearch?: (params: {

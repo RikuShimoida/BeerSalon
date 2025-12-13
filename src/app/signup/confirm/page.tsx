@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { GENDERS } from "@/lib/constants/prefectures";
+import { createClient } from "@/lib/supabase/server";
 import { ConfirmForm } from "./confirm-form";
 
 export default async function ConfirmPage({
@@ -80,7 +80,6 @@ export default async function ConfirmPage({
 
 					<ConfirmForm
 						profileData={profileData}
-						genderLabel={genderLabel}
 						backUrl={`/signup/profile?data=${encodeURIComponent(params.data)}`}
 					/>
 				</div>

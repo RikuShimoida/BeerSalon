@@ -1,7 +1,7 @@
-import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
-import { SearchForm } from "@/components/search/search-form";
-import { MapPlaceholder } from "@/components/map/map-placeholder";
 import { BarList } from "@/components/bar/bar-list";
+import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
+import { MapPlaceholder } from "@/components/map/map-placeholder";
+import { SearchForm } from "@/components/search/search-form";
 
 export default function Home() {
 	return (

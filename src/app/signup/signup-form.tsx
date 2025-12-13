@@ -1,8 +1,8 @@
 "use client";
 
-import { signUp } from "./actions";
 import Link from "next/link";
 import { useActionState } from "react";
+import { signUp } from "./actions";
 
 export function SignUpForm() {
 	const [state, formAction, isPending] = useActionState(signUp, undefined);
@@ -24,10 +24,7 @@ export function SignUpForm() {
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="password"
-					className="text-sm font-medium text-gray-700"
-				>
+				<label htmlFor="password" className="text-sm font-medium text-gray-700">
 					パスワード
 				</label>
 				<input

@@ -2,9 +2,21 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
-	const { pathname } = request.nextUrl;
+	const { pathname, searchParams } = request.nextUrl;
 
-	const publicPaths = ["/login", "/signup", "/password/reset"];
+	const code = searchParams.get("code");
+	if (code && pathname === "/") {
+		const url = new URL("/auth/callback", request.url);
+		url.searchParams.set("code", code);
+		return NextResponse.redirect(url);
+	}
+
+	const publicPaths = [
+		"/login",
+		"/signup",
+		"/password/reset",
+		"/auth/callback",
+	];
 	const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
 	let supabaseResponse = NextResponse.next({

@@ -1,5 +1,5 @@
+import { Clock, FileText, PlusCircle, Star } from "lucide-react";
 import Link from "next/link";
-import { Star, FileText, PlusCircle, Clock } from "lucide-react";
 
 export function Footer() {
 	return (

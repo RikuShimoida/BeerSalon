@@ -1,5 +1,5 @@
+import { Bell, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { Bell, User, LogOut } from "lucide-react";
 import { logout } from "./actions";
 
 export function Header() {
