@@ -36,7 +36,9 @@ export const profileSchema = z.object({
 	lastName: z.string().min(1, { message: "姓を入力してください" }),
 	firstName: z.string().min(1, { message: "名を入力してください" }),
 	nickname: z.string().min(1, { message: "ニックネームを入力してください" }),
-	birthday: z.string().min(1, { message: "生年月日を選択してください" }),
+	year: z.string().min(1, { message: "年を選択してください" }),
+	month: z.string().min(1, { message: "月を選択してください" }),
+	day: z.string().min(1, { message: "日を選択してください" }),
 	gender: z.string().min(1, { message: "性別を選択してください" }),
 	prefecture: z.string().min(1, { message: "都道府県を選択してください" }),
 });

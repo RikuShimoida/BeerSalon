@@ -1,24 +1,69 @@
 "use client";
 
-import { saveProfileToSession } from "./actions";
 import { PREFECTURES, GENDERS } from "@/lib/constants/prefectures";
-import { useActionState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { profileSchema, type ProfileFormData } from "@/lib/validations/auth";
+import { useRouter } from "next/navigation";
 
-export function ProfileForm() {
-	const [state, formAction, isPending] = useActionState(
-		saveProfileToSession,
-		undefined,
-	);
+interface ProfileFormProps {
+	initialData?: {
+		lastName: string;
+		firstName: string;
+		nickname: string;
+		birthday: string;
+		gender: string;
+		prefecture: string;
+	};
+}
+
+export function ProfileForm({ initialData }: ProfileFormProps) {
+	const router = useRouter();
+
+	const defaultValues = initialData
+		? {
+				lastName: initialData.lastName,
+				firstName: initialData.firstName,
+				nickname: initialData.nickname,
+				year: initialData.birthday.split("-")[0],
+				month: String(Number.parseInt(initialData.birthday.split("-")[1])),
+				day: String(Number.parseInt(initialData.birthday.split("-")[2])),
+				gender: initialData.gender,
+				prefecture: initialData.prefecture,
+			}
+		: undefined;
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors, isSubmitting },
+	} = useForm<ProfileFormData>({
+		resolver: zodResolver(profileSchema),
+		defaultValues,
+	});
 
 	const currentYear = new Date().getFullYear();
 	const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
 	const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
+	const onSubmit = async (data: ProfileFormData) => {
+		const birthdayString = `${data.year}-${data.month.padStart(2, "0")}-${data.day.padStart(2, "0")}`;
+		const profileData = {
+			lastName: data.lastName,
+			firstName: data.firstName,
+			nickname: data.nickname,
+			birthday: birthdayString,
+			gender: data.gender,
+			prefecture: data.prefecture,
+		};
+
+		const encodedData = encodeURIComponent(JSON.stringify(profileData));
+		router.push(`/signup/confirm?data=${encodedData}`);
+	};
+
 	return (
-		<form action={formAction} className="flex flex-col gap-4 w-full">
+		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full">
 			<div className="grid grid-cols-2 gap-4">
 				<div className="flex flex-col gap-2">
 					<label htmlFor="lastName" className="text-sm font-medium text-gray-700">
@@ -27,28 +72,29 @@ export function ProfileForm() {
 					<input
 						type="text"
 						id="lastName"
-						name="lastName"
 						placeholder="下井田"
 						className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-						required
+						{...register("lastName")}
 					/>
+					{errors.lastName && (
+						<p className="text-sm text-red-600">{errors.lastName.message}</p>
+					)}
 				</div>
 
 				<div className="flex flex-col gap-2">
-					<label
-						htmlFor="firstName"
-						className="text-sm font-medium text-gray-700"
-					>
+					<label htmlFor="firstName" className="text-sm font-medium text-gray-700">
 						名
 					</label>
 					<input
 						type="text"
 						id="firstName"
-						name="firstName"
 						placeholder="陸"
 						className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-						required
+						{...register("firstName")}
 					/>
+					{errors.firstName && (
+						<p className="text-sm text-red-600">{errors.firstName.message}</p>
+					)}
 				</div>
 			</div>
 
@@ -59,22 +105,23 @@ export function ProfileForm() {
 				<input
 					type="text"
 					id="nickname"
-					name="nickname"
 					placeholder="りく"
 					className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-					required
+					{...register("nickname")}
 				/>
+				{errors.nickname && (
+					<p className="text-sm text-red-600">{errors.nickname.message}</p>
+				)}
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<label htmlFor="birthday" className="text-sm font-medium text-gray-700">
+				<label className="text-sm font-medium text-gray-700">
 					生年月日
 				</label>
 				<div className="grid grid-cols-3 gap-2">
 					<select
-						name="year"
 						className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-						required
+						{...register("year")}
 					>
 						<option value="">年</option>
 						{years.map((year) => (
@@ -84,9 +131,8 @@ export function ProfileForm() {
 						))}
 					</select>
 					<select
-						name="month"
 						className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-						required
+						{...register("month")}
 					>
 						<option value="">月</option>
 						{months.map((month) => (
@@ -96,9 +142,8 @@ export function ProfileForm() {
 						))}
 					</select>
 					<select
-						name="day"
 						className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-						required
+						{...register("day")}
 					>
 						<option value="">日</option>
 						{days.map((day) => (
@@ -108,7 +153,11 @@ export function ProfileForm() {
 						))}
 					</select>
 				</div>
-				<input type="hidden" name="birthday" id="birthday" />
+				{(errors.year || errors.month || errors.day) && (
+					<p className="text-sm text-red-600">
+						{errors.year?.message || errors.month?.message || errors.day?.message}
+					</p>
+				)}
 			</div>
 
 			<div className="flex flex-col gap-2">
@@ -117,9 +166,8 @@ export function ProfileForm() {
 				</label>
 				<select
 					id="gender"
-					name="gender"
 					className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-					required
+					{...register("gender")}
 				>
 					<option value="">選択してください</option>
 					{GENDERS.map((gender) => (
@@ -128,20 +176,19 @@ export function ProfileForm() {
 						</option>
 					))}
 				</select>
+				{errors.gender && (
+					<p className="text-sm text-red-600">{errors.gender.message}</p>
+				)}
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="prefecture"
-					className="text-sm font-medium text-gray-700"
-				>
+				<label htmlFor="prefecture" className="text-sm font-medium text-gray-700">
 					お住まいの都道府県
 				</label>
 				<select
 					id="prefecture"
-					name="prefecture"
 					className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-					required
+					{...register("prefecture")}
 				>
 					<option value="">選択してください</option>
 					{PREFECTURES.map((pref) => (
@@ -150,38 +197,17 @@ export function ProfileForm() {
 						</option>
 					))}
 				</select>
+				{errors.prefecture && (
+					<p className="text-sm text-red-600">{errors.prefecture.message}</p>
+				)}
 			</div>
-
-			{state?.error && (
-				<div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg">
-					{state.error}
-				</div>
-			)}
 
 			<button
 				type="submit"
-				disabled={isPending}
+				disabled={isSubmitting}
 				className="w-full px-4 py-3 text-white bg-blue-600 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-				onClick={(e) => {
-					const form = e.currentTarget.form;
-					if (form) {
-						const year = (form.elements.namedItem("year") as HTMLSelectElement)
-							.value;
-						const month = (
-							form.elements.namedItem("month") as HTMLSelectElement
-						).value;
-						const day = (form.elements.namedItem("day") as HTMLSelectElement)
-							.value;
-						const birthdayInput = form.elements.namedItem(
-							"birthday",
-						) as HTMLInputElement;
-						if (year && month && day) {
-							birthdayInput.value = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-						}
-					}
-				}}
 			>
-				{isPending ? "確認中..." : "登録内容を確認"}
+				{isSubmitting ? "確認中..." : "登録内容を確認"}
 			</button>
 		</form>
 	);

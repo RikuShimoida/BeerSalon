@@ -2,7 +2,11 @@ import { ProfileForm } from "./profile-form";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+	searchParams,
+}: {
+	searchParams: Promise<{ data?: string }>;
+}) {
 	const supabase = await createClient();
 
 	const {
@@ -12,6 +16,11 @@ export default async function ProfilePage() {
 	if (!user) {
 		redirect("/signup");
 	}
+
+	const params = await searchParams;
+	const initialData = params.data
+		? JSON.parse(decodeURIComponent(params.data))
+		: undefined;
 
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
@@ -24,7 +33,7 @@ export default async function ProfilePage() {
 				</div>
 
 				<div className="bg-white p-8 rounded-lg shadow-md">
-					<ProfileForm />
+					<ProfileForm initialData={initialData} />
 				</div>
 			</div>
 		</div>

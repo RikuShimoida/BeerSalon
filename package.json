@@ -13,6 +13,7 @@
 		"e2e": "playwright test"
 	},
 	"dependencies": {
+		"@hookform/resolvers": "^5.2.2",
 		"@prisma/client": "^7.1.0",
 		"@supabase/ssr": "^0.8.0",
 		"@supabase/supabase-js": "^2.87.1",
