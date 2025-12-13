@@ -1,21 +1,29 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
 	const requestUrl = new URL(request.url);
-	const code = requestUrl.searchParams.get("code");
-	const next = requestUrl.searchParams.get("next") ?? "/";
+	const next = requestUrl.searchParams.get("next");
 
-	if (code) {
-		const supabase = await createClient();
-		const { error } = await supabase.auth.exchangeCodeForSession(code);
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
 
-		if (error) {
-			return NextResponse.redirect(
-				`${requestUrl.origin}/signup?error=${encodeURIComponent(error.message)}`,
-			);
-		}
+	if (!user) {
+		return NextResponse.redirect(
+			`${requestUrl.origin}/signup?error=${encodeURIComponent("認証に失敗しました")}`,
+		);
 	}
 
-	return NextResponse.redirect(`${requestUrl.origin}${next}`);
+	const profile = await prisma.userProfile.findUnique({
+		where: { userAuthId: user.id },
+	});
+
+	if (!profile) {
+		return NextResponse.redirect(`${requestUrl.origin}/signup/profile`);
+	}
+
+	return NextResponse.redirect(`${requestUrl.origin}${next ?? "/"}`);
 }
