@@ -1,8 +1,8 @@
 "use client";
 
-import { saveProfileToSession } from "./actions";
-import { PREFECTURES, GENDERS } from "@/lib/constants/prefectures";
 import { useActionState } from "react";
+import { GENDERS, PREFECTURES } from "@/lib/constants/prefectures";
+import { saveProfileToSession } from "./actions";
 
 export function ProfileForm() {
 	const [state, formAction, isPending] = useActionState(
@@ -21,7 +21,10 @@ export function ProfileForm() {
 		<form action={formAction} className="flex flex-col gap-4 w-full">
 			<div className="grid grid-cols-2 gap-4">
 				<div className="flex flex-col gap-2">
-					<label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+					<label
+						htmlFor="lastName"
+						className="text-sm font-medium text-gray-700"
+					>
 						姓
 					</label>
 					<input

@@ -1,15 +1,15 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 
 type FormState = {
 	error?: string;
 };
 
 export async function confirmAndSaveProfile(
-	prevState: FormState | undefined,
+	_prevState: FormState | undefined,
 	formData: FormData,
 ): Promise<FormState | undefined> {
 	const data = JSON.parse(formData.get("profileData") as string);
@@ -40,7 +40,7 @@ export async function confirmAndSaveProfile(
 		});
 
 		redirect("/");
-	} catch (error) {
+	} catch (_error) {
 		return {
 			error: "プロフィールの保存に失敗しました",
 		};
