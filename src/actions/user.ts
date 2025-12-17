@@ -42,3 +42,43 @@ export async function getCurrentUser() {
 		couponsCount: userProfile._count.userCoupons,
 	};
 }
+
+export async function getFollowingUsers() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return null;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return null;
+	}
+
+	const followingRelations = await prisma.userFollowRelation.findMany({
+		where: {
+			followerId: userProfile.id,
+		},
+		include: {
+			followee: true,
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return followingRelations.map((relation) => ({
+		id: relation.followee.id,
+		nickname: relation.followee.nickname,
+		lastName: relation.followee.lastName,
+		firstName: relation.followee.firstName,
+	}));
+}

@@ -21,7 +21,9 @@ test.describe("マイページ", () => {
 
 		await page.goto("http://localhost:3000/mypage");
 
-		await expect(page.getByRole("heading", { name: "マイページ" })).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "マイページ" }),
+		).toBeVisible();
 		await expect(page.getByText("テストユーザー")).toBeVisible();
 	});
 
