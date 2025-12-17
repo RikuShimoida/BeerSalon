@@ -82,3 +82,51 @@ export async function getFollowingUsers() {
 		firstName: relation.followee.firstName,
 	}));
 }
+
+export async function getUserCoupons() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return null;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return null;
+	}
+
+	const userCoupons = await prisma.userCoupon.findMany({
+		where: {
+			userId: userProfile.id,
+		},
+		include: {
+			coupon: {
+				include: {
+					bar: true,
+				},
+			},
+		},
+		orderBy: {
+			obtainedAt: "desc",
+		},
+	});
+
+	return userCoupons.map((userCoupon) => ({
+		id: userCoupon.id,
+		title: userCoupon.coupon.title,
+		description: userCoupon.coupon.description,
+		conditions: userCoupon.coupon.conditions,
+		barName: userCoupon.coupon.bar.name,
+		validUntil: userCoupon.coupon.validUntil,
+		isUsed: userCoupon.isUsed,
+		obtainedAt: userCoupon.obtainedAt,
+	}));
+}
