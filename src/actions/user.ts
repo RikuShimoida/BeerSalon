@@ -130,3 +130,204 @@ export async function getUserCoupons() {
 		obtainedAt: userCoupon.obtainedAt,
 	}));
 }
+
+export async function getUserById(userId: string) {
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			id: userId,
+		},
+		include: {
+			_count: {
+				select: {
+					following: true,
+					followedBy: true,
+					posts: true,
+				},
+			},
+		},
+	});
+
+	if (!userProfile) {
+		return null;
+	}
+
+	return {
+		id: userProfile.id,
+		nickname: userProfile.nickname,
+		lastName: userProfile.lastName,
+		firstName: userProfile.firstName,
+		followingCount: userProfile._count.following,
+		followersCount: userProfile._count.followedBy,
+		postsCount: userProfile._count.posts,
+	};
+}
+
+export async function getUserPosts(userId: string) {
+	const posts = await prisma.post.findMany({
+		where: {
+			userId: userId,
+		},
+		include: {
+			postImages: {
+				orderBy: {
+					sortOrder: "asc",
+				},
+			},
+			bar: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return posts.map((post) => ({
+		id: post.id,
+		body: post.body,
+		createdAt: post.createdAt,
+		images: post.postImages.map((img) => ({
+			id: img.id,
+			url: img.imageUrl,
+		})),
+		bar: {
+			id: post.bar.id,
+			name: post.bar.name,
+		},
+	}));
+}
+
+export async function isFollowing(targetUserId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return false;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return false;
+	}
+
+	const followRelation = await prisma.userFollowRelation.findUnique({
+		where: {
+			followerId_followeeId: {
+				followerId: userProfile.id,
+				followeeId: targetUserId,
+			},
+		},
+	});
+
+	return followRelation !== null;
+}
+
+export async function followUser(targetUserId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		throw new Error("Not authenticated");
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		throw new Error("User profile not found");
+	}
+
+	await prisma.userFollowRelation.create({
+		data: {
+			followerId: userProfile.id,
+			followeeId: targetUserId,
+		},
+	});
+}
+
+export async function unfollowUser(targetUserId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		throw new Error("Not authenticated");
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		throw new Error("User profile not found");
+	}
+
+	await prisma.userFollowRelation.delete({
+		where: {
+			followerId_followeeId: {
+				followerId: userProfile.id,
+				followeeId: targetUserId,
+			},
+		},
+	});
+}
+
+export async function getUserFollowing(userId: string) {
+	const followingRelations = await prisma.userFollowRelation.findMany({
+		where: {
+			followerId: userId,
+		},
+		include: {
+			followee: true,
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return followingRelations.map((relation) => ({
+		id: relation.followee.id,
+		nickname: relation.followee.nickname,
+		lastName: relation.followee.lastName,
+		firstName: relation.followee.firstName,
+	}));
+}
+
+export async function getUserFollowers(userId: string) {
+	const followerRelations = await prisma.userFollowRelation.findMany({
+		where: {
+			followeeId: userId,
+		},
+		include: {
+			follower: true,
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return followerRelations.map((relation) => ({
+		id: relation.follower.id,
+		nickname: relation.follower.nickname,
+		lastName: relation.follower.lastName,
+		firstName: relation.follower.firstName,
+	}));
+}
