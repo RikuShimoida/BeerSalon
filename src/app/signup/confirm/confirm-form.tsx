@@ -1,7 +1,7 @@
 "use client";
 
-import { confirmAndSaveProfile } from "./actions";
 import { useActionState } from "react";
+import { confirmAndSaveProfile } from "./actions";
 
 interface ProfileData {
 	lastName: string;

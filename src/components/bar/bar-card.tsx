@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { MapPin } from "lucide-react";
+import Link from "next/link";
 
 interface BarCardProps {
 	id: string;
@@ -9,7 +9,13 @@ interface BarCardProps {
 	imageUrl?: string;
 }
 
-export function BarCard({ id, name, prefecture, city, imageUrl }: BarCardProps) {
+export function BarCard({
+	id,
+	name,
+	prefecture,
+	city,
+	imageUrl,
+}: BarCardProps) {
 	return (
 		<Link
 			href={`/bars/${id}`}

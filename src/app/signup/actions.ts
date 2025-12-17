@@ -1,15 +1,15 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signUpSchema } from "@/lib/validations/auth";
-import { redirect } from "next/navigation";
 
 type FormState = {
 	error?: string;
 };
 
 export async function signUp(
-	prevState: FormState | undefined,
+	_prevState: FormState | undefined,
 	formData: FormData,
 ): Promise<FormState | undefined> {
 	const email = formData.get("email") as string;
