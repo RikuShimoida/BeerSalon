@@ -26,6 +26,7 @@ export default async function SignUpPage({
 									stroke="currentColor"
 									viewBox="0 0 24 24"
 								>
+									<title>確認完了</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"

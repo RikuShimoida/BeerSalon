@@ -179,6 +179,12 @@ export async function getUserPosts(userId: string) {
 					name: true,
 				},
 			},
+			user: {
+				select: {
+					id: true,
+					nickname: true,
+				},
+			},
 		},
 		orderBy: {
 			createdAt: "desc",
@@ -196,6 +202,10 @@ export async function getUserPosts(userId: string) {
 		bar: {
 			id: post.bar.id,
 			name: post.bar.name,
+		},
+		user: {
+			id: post.user.id,
+			nickname: post.user.nickname,
 		},
 	}));
 }

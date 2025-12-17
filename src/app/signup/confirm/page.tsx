@@ -80,7 +80,6 @@ export default async function ConfirmPage({
 
 					<ConfirmForm
 						profileData={profileData}
-						genderLabel={genderLabel}
 						backUrl={`/signup/profile?data=${encodeURIComponent(params.data)}`}
 					/>
 				</div>
