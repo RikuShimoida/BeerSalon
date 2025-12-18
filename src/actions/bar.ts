@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 
 export async function getBarDetail(barId: string) {
 	const bar = await prisma.bar.findUnique({
@@ -133,4 +134,152 @@ export async function getBarDetail(barId: string) {
 			barId: coupon.barId.toString(),
 		})),
 	};
+}
+
+export async function getFavoriteBars() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return null;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return null;
+	}
+
+	const favoriteBars = await prisma.favoriteBar.findMany({
+		where: {
+			userId: userProfile.id,
+		},
+		include: {
+			bar: {
+				include: {
+					barImages: {
+						orderBy: {
+							sortOrder: "asc",
+						},
+						take: 4,
+					},
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return favoriteBars.map((favorite) => ({
+		id: favorite.id.toString(),
+		createdAt: favorite.createdAt,
+		bar: {
+			id: favorite.bar.id.toString(),
+			name: favorite.bar.name,
+			prefecture: favorite.bar.prefecture,
+			city: favorite.bar.city,
+			images: favorite.bar.barImages.map((img) => ({
+				id: img.id.toString(),
+				imageUrl: img.imageUrl,
+				imageType: img.imageType,
+			})),
+		},
+	}));
+}
+
+export async function addFavoriteBar(barId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		throw new Error("Not authenticated");
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		throw new Error("User profile not found");
+	}
+
+	await prisma.favoriteBar.create({
+		data: {
+			userId: userProfile.id,
+			barId: BigInt(barId),
+		},
+	});
+}
+
+export async function removeFavoriteBar(barId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		throw new Error("Not authenticated");
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		throw new Error("User profile not found");
+	}
+
+	await prisma.favoriteBar.delete({
+		where: {
+			userId_barId: {
+				userId: userProfile.id,
+				barId: BigInt(barId),
+			},
+		},
+	});
+}
+
+export async function isFavoriteBar(barId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return false;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return false;
+	}
+
+	const favorite = await prisma.favoriteBar.findUnique({
+		where: {
+			userId_barId: {
+				userId: userProfile.id,
+				barId: BigInt(barId),
+			},
+		},
+	});
+
+	return favorite !== null;
 }
