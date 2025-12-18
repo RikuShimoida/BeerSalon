@@ -331,3 +331,85 @@ export async function getUserFollowers(userId: string) {
 		firstName: relation.follower.firstName,
 	}));
 }
+
+export async function getTimelinePosts() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return null;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return null;
+	}
+
+	const followingRelations = await prisma.userFollowRelation.findMany({
+		where: {
+			followerId: userProfile.id,
+		},
+		select: {
+			followeeId: true,
+		},
+	});
+
+	const followingUserIds = followingRelations.map(
+		(relation) => relation.followeeId,
+	);
+
+	const posts = await prisma.post.findMany({
+		where: {
+			userId: {
+				in: followingUserIds,
+			},
+		},
+		include: {
+			user: {
+				select: {
+					id: true,
+					nickname: true,
+				},
+			},
+			postImages: {
+				orderBy: {
+					sortOrder: "asc",
+				},
+			},
+			bar: {
+				select: {
+					id: true,
+					name: true,
+				},
+			},
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return posts.map((post) => ({
+		id: post.id,
+		body: post.body,
+		createdAt: post.createdAt,
+		user: {
+			id: post.user.id,
+			nickname: post.user.nickname,
+		},
+		images: post.postImages.map((img) => ({
+			id: img.id,
+			url: img.imageUrl,
+		})),
+		bar: {
+			id: post.bar.id,
+			name: post.bar.name,
+		},
+	}));
+}

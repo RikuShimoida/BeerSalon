@@ -1,4 +1,5 @@
 import { MapPin } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface BarCardProps {
@@ -23,11 +24,7 @@ export function BarCard({
 		>
 			<div className="aspect-video bg-gray-200 relative">
 				{imageUrl ? (
-					<img
-						src={imageUrl}
-						alt={name}
-						className="w-full h-full object-cover"
-					/>
+					<Image src={imageUrl} alt={name} fill className="object-cover" />
 				) : (
 					<div className="w-full h-full flex items-center justify-center text-gray-400">
 						<MapPin className="w-12 h-12" />
