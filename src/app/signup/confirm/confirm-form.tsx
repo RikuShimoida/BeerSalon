@@ -14,15 +14,10 @@ interface ProfileData {
 
 interface ConfirmFormProps {
 	profileData: ProfileData;
-	genderLabel: string;
 	backUrl: string;
 }
 
-export function ConfirmForm({
-	profileData,
-	genderLabel,
-	backUrl,
-}: ConfirmFormProps) {
+export function ConfirmForm({ profileData, backUrl }: ConfirmFormProps) {
 	const [state, formAction, isPending] = useActionState(
 		confirmAndSaveProfile,
 		undefined,
