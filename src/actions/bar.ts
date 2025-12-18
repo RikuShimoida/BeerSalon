@@ -283,3 +283,85 @@ export async function isFavoriteBar(barId: string) {
 
 	return favorite !== null;
 }
+
+export async function recordViewHistory(barId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return;
+	}
+
+	await prisma.viewHistory.create({
+		data: {
+			userId: userProfile.id,
+			barId: BigInt(barId),
+		},
+	});
+}
+
+export async function getViewHistories() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return null;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return null;
+	}
+
+	const viewHistories = await prisma.viewHistory.findMany({
+		where: {
+			userId: userProfile.id,
+		},
+		include: {
+			bar: {
+				include: {
+					barImages: {
+						orderBy: {
+							sortOrder: "asc",
+						},
+						take: 1,
+					},
+				},
+			},
+		},
+		orderBy: {
+			viewedAt: "desc",
+		},
+	});
+
+	return viewHistories.map((history) => ({
+		id: history.id.toString(),
+		viewedAt: history.viewedAt,
+		bar: {
+			id: history.bar.id.toString(),
+			name: history.bar.name,
+			prefecture: history.bar.prefecture,
+			city: history.bar.city,
+			imageUrl: history.bar.barImages[0]?.imageUrl,
+		},
+	}));
+}

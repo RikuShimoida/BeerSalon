@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getBarDetail } from "@/actions/bar";
+import { getBarDetail, recordViewHistory } from "@/actions/bar";
 import { BarTabs } from "@/components/bar/bar-tabs";
 import { ArticlesTab } from "@/components/bar/tabs/articles-tab";
 import { CouponsTab } from "@/components/bar/tabs/coupons-tab";
@@ -20,6 +20,8 @@ export default async function BarDetailPage({
 	if (!bar) {
 		notFound();
 	}
+
+	await recordViewHistory(barId);
 
 	return (
 		<AuthenticatedLayout>
