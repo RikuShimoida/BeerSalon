@@ -36,22 +36,24 @@ export default async function MyPage() {
 	return (
 		<AuthenticatedLayout>
 			<div className="max-w-7xl mx-auto px-4 py-6">
-				<div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
-					<div className="p-6 border-b border-border">
-						<h1 className="text-2xl font-bold text-foreground mb-2">
+				<div className="glass-card rounded-2xl modern-shadow overflow-hidden animate-fade-in">
+					<div className="p-6 border-b border-border/50">
+						<h1 className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">
 							マイページ
 						</h1>
-						<p className="text-lg text-muted-foreground">{user.nickname}</p>
+						<p className="text-lg text-muted-foreground tracking-wide">
+							{user.nickname}
+						</p>
 					</div>
 
-					<div className="divide-y divide-border">
+					<div className="divide-y divide-border/50">
 						{menuItems.map((item) => (
 							<Link
 								key={item.href}
 								href={item.href}
-								className="flex items-center justify-between p-4 hover:bg-accent transition-colors"
+								className="flex items-center justify-between p-4 hover:bg-primary/10 transition-all duration-300"
 							>
-								<span className="text-foreground font-medium">
+								<span className="text-card-foreground font-medium tracking-wide">
 									{item.label}
 								</span>
 								<div className="flex items-center gap-2">

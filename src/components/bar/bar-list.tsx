@@ -30,8 +30,10 @@ const DUMMY_BARS = [
 
 export function BarList() {
 	return (
-		<div>
-			<h2 className="text-2xl font-semibold text-foreground mb-6">店舗一覧</h2>
+		<div className="animate-fade-in">
+			<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">
+				店舗一覧
+			</h2>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{DUMMY_BARS.map((bar) => (
@@ -41,7 +43,7 @@ export function BarList() {
 
 			{DUMMY_BARS.length === 0 && (
 				<div className="text-center py-12 text-muted-foreground">
-					<p>店舗が見つかりませんでした</p>
+					<p className="tracking-wide">店舗が見つかりませんでした</p>
 				</div>
 			)}
 		</div>

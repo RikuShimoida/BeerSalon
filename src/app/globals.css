@@ -120,3 +120,56 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+@layer utilities {
+	.glass-card {
+		@apply bg-card/80 backdrop-blur-xl border border-border/20 shadow-2xl;
+	}
+
+	.glass-input {
+		@apply bg-card-foreground/5 backdrop-blur-sm border border-border/30 focus:border-primary/50 focus:ring-2 focus:ring-primary/20;
+	}
+
+	.modern-shadow {
+		box-shadow:
+			0 20px 50px -12px rgba(0, 0, 0, 0.25),
+			0 8px 16px -8px rgba(0, 0, 0, 0.1);
+	}
+
+	.modern-shadow-lg {
+		box-shadow:
+			0 25px 60px -15px rgba(0, 0, 0, 0.3),
+			0 10px 20px -10px rgba(0, 0, 0, 0.15);
+	}
+
+	.gradient-primary {
+		background: linear-gradient(
+			135deg,
+			oklch(0.68 0.15 60) 0%,
+			oklch(0.72 0.18 55) 100%
+		);
+	}
+
+	.hover-lift {
+		@apply transition-all duration-300 ease-out;
+	}
+
+	.hover-lift:hover {
+		@apply -translate-y-1 scale-[1.02];
+	}
+
+	.animate-fade-in {
+		animation: fadeIn 0.5s ease-out;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+}

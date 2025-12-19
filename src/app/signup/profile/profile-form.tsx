@@ -23,7 +23,7 @@ export function ProfileForm() {
 				<div className="flex flex-col gap-2">
 					<label
 						htmlFor="lastName"
-						className="text-sm font-medium text-foreground"
+						className="text-sm font-medium text-card-foreground tracking-wide"
 					>
 						姓
 					</label>
@@ -32,7 +32,7 @@ export function ProfileForm() {
 						id="lastName"
 						name="lastName"
 						placeholder="下井田"
-						className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+						className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 						required
 					/>
 				</div>
@@ -40,7 +40,7 @@ export function ProfileForm() {
 				<div className="flex flex-col gap-2">
 					<label
 						htmlFor="firstName"
-						className="text-sm font-medium text-foreground"
+						className="text-sm font-medium text-card-foreground tracking-wide"
 					>
 						名
 					</label>
@@ -49,7 +49,7 @@ export function ProfileForm() {
 						id="firstName"
 						name="firstName"
 						placeholder="陸"
-						className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+						className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 						required
 					/>
 				</div>
@@ -58,7 +58,7 @@ export function ProfileForm() {
 			<div className="flex flex-col gap-2">
 				<label
 					htmlFor="nickname"
-					className="text-sm font-medium text-foreground"
+					className="text-sm font-medium text-card-foreground tracking-wide"
 				>
 					ニックネーム
 				</label>
@@ -67,7 +67,7 @@ export function ProfileForm() {
 					id="nickname"
 					name="nickname"
 					placeholder="りく"
-					className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 					required
 				/>
 			</div>
@@ -75,14 +75,14 @@ export function ProfileForm() {
 			<div className="flex flex-col gap-2">
 				<label
 					htmlFor="birthday"
-					className="text-sm font-medium text-foreground"
+					className="text-sm font-medium text-card-foreground tracking-wide"
 				>
 					生年月日
 				</label>
 				<div className="grid grid-cols-3 gap-2">
 					<select
 						name="year"
-						className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
 						<option value="">年</option>
@@ -94,7 +94,7 @@ export function ProfileForm() {
 					</select>
 					<select
 						name="month"
-						className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
 						<option value="">月</option>
@@ -106,7 +106,7 @@ export function ProfileForm() {
 					</select>
 					<select
 						name="day"
-						className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
 						<option value="">日</option>
@@ -121,13 +121,16 @@ export function ProfileForm() {
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<label htmlFor="gender" className="text-sm font-medium text-foreground">
+				<label
+					htmlFor="gender"
+					className="text-sm font-medium text-card-foreground tracking-wide"
+				>
 					性別
 				</label>
 				<select
 					id="gender"
 					name="gender"
-					className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+					className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 					required
 				>
 					<option value="">選択してください</option>
@@ -142,14 +145,14 @@ export function ProfileForm() {
 			<div className="flex flex-col gap-2">
 				<label
 					htmlFor="prefecture"
-					className="text-sm font-medium text-foreground"
+					className="text-sm font-medium text-card-foreground tracking-wide"
 				>
 					お住まいの都道府県
 				</label>
 				<select
 					id="prefecture"
 					name="prefecture"
-					className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+					className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 					required
 				>
 					<option value="">選択してください</option>
@@ -162,7 +165,7 @@ export function ProfileForm() {
 			</div>
 
 			{state?.error && (
-				<div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg">
+				<div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20">
 					{state.error}
 				</div>
 			)}
@@ -170,7 +173,7 @@ export function ProfileForm() {
 			<button
 				type="submit"
 				disabled={isPending}
-				className="w-full px-4 py-3 text-primary-foreground bg-primary rounded-lg font-medium hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
+				className="w-full px-4 py-3 text-primary-foreground gradient-primary rounded-xl font-medium hover:shadow-lg hover:scale-105 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-all duration-300 shadow-md"
 				onClick={(e) => {
 					const form = e.currentTarget.form;
 					if (form) {
