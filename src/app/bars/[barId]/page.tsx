@@ -25,13 +25,13 @@ export default async function BarDetailPage({
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto px-4 py-6">
-				<div className="bg-white rounded-lg shadow-md overflow-hidden">
-					<div className="p-6 border-b border-gray-200">
-						<h1 className="text-3xl font-bold text-gray-900 mb-2">
+			<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+				<div className="bg-card rounded-lg shadow-md overflow-hidden">
+					<div className="p-6 border-b border-border/50">
+						<h1 className="text-3xl font-semibold text-foreground mb-2">
 							{bar.name}
 						</h1>
-						<p className="text-gray-600">
+						<p className="text-muted-foreground">
 							{bar.prefecture} {bar.city}
 						</p>
 					</div>

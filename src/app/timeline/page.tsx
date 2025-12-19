@@ -13,34 +13,36 @@ export default async function TimelinePage() {
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto px-4 py-6">
-				<div className="bg-white rounded-lg shadow-md overflow-hidden">
-					<div className="p-6 border-b border-gray-200">
-						<h1 className="text-2xl font-bold text-gray-900">タイムライン</h1>
+			<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+				<div className="bg-card rounded-lg shadow-md overflow-hidden">
+					<div className="p-6 border-b border-border/50">
+						<h1 className="text-2xl font-semibold text-foreground">
+							タイムライン
+						</h1>
 					</div>
 
 					{posts.length === 0 ? (
 						<div className="p-8 text-center">
-							<p className="text-gray-500 mb-4">
+							<p className="text-muted-foreground mb-4">
 								フォローしているユーザーの投稿がありません
 							</p>
-							<p className="text-sm text-gray-400">
+							<p className="text-sm text-muted-foreground/70">
 								他のユーザーをフォローして、投稿をチェックしましょう
 							</p>
 						</div>
 					) : (
-						<div className="divide-y divide-gray-200">
+						<div className="divide-y divide-border/50">
 							{posts.map((post) => (
 								<div key={post.id} className="p-6">
 									<div className="flex items-center mb-4">
 										<Link
 											href={`/users/${post.user.id}`}
-											className="text-gray-900 font-semibold hover:underline"
+											className="text-card-foreground font-semibold hover:underline"
 										>
 											{post.user.nickname}
 										</Link>
-										<span className="mx-2 text-gray-400">•</span>
-										<span className="text-sm text-gray-500">
+										<span className="mx-2 text-muted-foreground">•</span>
+										<span className="text-sm text-muted-foreground">
 											{new Date(post.createdAt).toLocaleDateString("ja-JP")}
 										</span>
 									</div>
@@ -58,14 +60,14 @@ export default async function TimelinePage() {
 										</div>
 									)}
 
-									<p className="text-gray-800 mb-3 whitespace-pre-wrap">
+									<p className="text-card-foreground mb-3 whitespace-pre-wrap">
 										{post.body}
 									</p>
 
 									<div className="flex items-center gap-2">
 										<Link
 											href={`/bars/${post.bar.id}`}
-											className="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100 transition-colors"
+											className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors"
 										>
 											{post.bar.name}
 										</Link>

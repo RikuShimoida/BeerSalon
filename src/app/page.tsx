@@ -6,8 +6,8 @@ import { SearchForm } from "@/components/search/search-form";
 export default function Home() {
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto px-4 py-6">
-				<div className="flex flex-col gap-6">
+			<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+				<div className="flex flex-col gap-8 md:gap-12">
 					{/* 検索セクション */}
 					<SearchForm />
 

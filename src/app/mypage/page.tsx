@@ -36,26 +36,28 @@ export default async function MyPage() {
 	return (
 		<AuthenticatedLayout>
 			<div className="max-w-7xl mx-auto px-4 py-6">
-				<div className="bg-white rounded-lg shadow-md overflow-hidden">
-					<div className="p-6 border-b border-gray-200">
-						<h1 className="text-2xl font-bold text-gray-900 mb-2">
+				<div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+					<div className="p-6 border-b border-border">
+						<h1 className="text-2xl font-bold text-foreground mb-2">
 							マイページ
 						</h1>
-						<p className="text-lg text-gray-700">{user.nickname}</p>
+						<p className="text-lg text-muted-foreground">{user.nickname}</p>
 					</div>
 
-					<div className="divide-y divide-gray-200">
+					<div className="divide-y divide-border">
 						{menuItems.map((item) => (
 							<Link
 								key={item.href}
 								href={item.href}
-								className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+								className="flex items-center justify-between p-4 hover:bg-accent transition-colors"
 							>
-								<span className="text-gray-900 font-medium">{item.label}</span>
+								<span className="text-foreground font-medium">
+									{item.label}
+								</span>
 								<div className="flex items-center gap-2">
-									<span className="text-gray-600">{item.count}</span>
+									<span className="text-muted-foreground">{item.count}</span>
 									<svg
-										className="w-5 h-5 text-gray-400"
+										className="w-5 h-5 text-muted-foreground"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"

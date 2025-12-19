@@ -10,7 +10,7 @@ export function SignUpForm() {
 	return (
 		<form action={formAction} className="flex flex-col gap-4 w-full">
 			<div className="flex flex-col gap-2">
-				<label htmlFor="email" className="text-sm font-medium text-gray-700">
+				<label htmlFor="email" className="text-sm font-medium text-foreground">
 					メールアドレス
 				</label>
 				<input
@@ -18,13 +18,16 @@ export function SignUpForm() {
 					id="email"
 					name="email"
 					placeholder="example@mail.com"
-					className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+					className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
 					required
 				/>
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<label htmlFor="password" className="text-sm font-medium text-gray-700">
+				<label
+					htmlFor="password"
+					className="text-sm font-medium text-foreground"
+				>
 					パスワード
 				</label>
 				<input
@@ -32,16 +35,16 @@ export function SignUpForm() {
 					id="password"
 					name="password"
 					placeholder="••••••••"
-					className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+					className="px-4 py-3 border border-input bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
 					required
 				/>
-				<p className="text-xs text-gray-500">
+				<p className="text-xs text-muted-foreground">
 					8文字以上、大文字・小文字・数字・記号を含めてください
 				</p>
 			</div>
 
 			{state?.error && (
-				<div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg">
+				<div className="p-3 text-sm text-destructive bg-destructive/10 rounded-lg">
 					{state.error}
 				</div>
 			)}
@@ -49,13 +52,16 @@ export function SignUpForm() {
 			<button
 				type="submit"
 				disabled={isPending}
-				className="w-full px-4 py-3 text-white bg-blue-600 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+				className="w-full px-4 py-3 text-primary-foreground bg-primary rounded-lg font-medium hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
 			>
 				{isPending ? "登録中..." : "登録"}
 			</button>
 
 			<div className="flex flex-col gap-2 text-sm text-center">
-				<Link href="/login" className="text-blue-600 hover:underline">
+				<Link
+					href="/login"
+					className="text-primary hover:text-primary/80 hover:underline font-medium"
+				>
 					ログインはこちら
 				</Link>
 			</div>
