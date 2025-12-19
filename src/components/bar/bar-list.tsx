@@ -30,18 +30,20 @@ const DUMMY_BARS = [
 
 export function BarList() {
 	return (
-		<div className="bg-white p-4 rounded-lg shadow-md">
-			<h2 className="text-lg font-bold text-gray-900 mb-4">店舗一覧</h2>
+		<div className="animate-fade-in">
+			<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">
+				店舗一覧
+			</h2>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{DUMMY_BARS.map((bar) => (
 					<BarCard key={bar.id} {...bar} />
 				))}
 			</div>
 
 			{DUMMY_BARS.length === 0 && (
-				<div className="text-center py-12 text-gray-500">
-					<p>店舗が見つかりませんでした</p>
+				<div className="text-center py-12 text-muted-foreground">
+					<p className="tracking-wide">店舗が見つかりませんでした</p>
 				</div>
 			)}
 		</div>

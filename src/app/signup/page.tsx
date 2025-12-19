@@ -9,17 +9,19 @@ export default async function SignUpPage({
 	const showSuccess = params.success === "true";
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-			<div className="w-full max-w-md">
+		<div className="flex min-h-screen items-center justify-center bg-background px-4">
+			<div className="w-full max-w-md animate-fade-in">
 				<div className="text-center mb-8">
-					<h1 className="text-3xl font-bold text-gray-900 mb-2">Beer Salon</h1>
-					<p className="text-gray-600">新規登録</p>
+					<h1 className="text-3xl font-bold text-primary mb-2 tracking-tight">
+						Beer Salon
+					</h1>
+					<p className="text-muted-foreground tracking-wide">新規登録</p>
 				</div>
 
 				{showSuccess ? (
-					<div className="bg-white p-8 rounded-lg shadow-md">
+					<div className="glass-card p-8 rounded-2xl modern-shadow">
 						<div className="text-center">
-							<div className="mb-4 text-green-600">
+							<div className="mb-4 text-primary">
 								<svg
 									className="w-16 h-16 mx-auto"
 									fill="none"
@@ -35,16 +37,16 @@ export default async function SignUpPage({
 									/>
 								</svg>
 							</div>
-							<h2 className="text-xl font-semibold text-gray-900 mb-2">
+							<h2 className="text-xl font-semibold text-card-foreground mb-2 tracking-tight">
 								確認メールを送信しました
 							</h2>
-							<p className="text-gray-600 mb-6">
+							<p className="text-muted-foreground mb-6 tracking-wide">
 								メールに記載されたリンクをクリックして、アカウントを有効化してください。
 							</p>
 						</div>
 					</div>
 				) : (
-					<div className="bg-white p-8 rounded-lg shadow-md">
+					<div className="glass-card p-8 rounded-2xl modern-shadow">
 						<SignUpForm />
 					</div>
 				)}

@@ -23,32 +23,33 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="bg-white p-4 rounded-lg shadow-md">
-			<div className="flex flex-col gap-4">
-				{/* テキスト検索バー */}
-				<div className="flex gap-2">
+		<form
+			onSubmit={handleSubmit}
+			className="glass-card p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in"
+		>
+			<div className="flex flex-col gap-6">
+				<div className="flex gap-3">
 					<input
 						type="text"
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
 						placeholder="店名・説明・タグで検索"
-						className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+						className="glass-input flex-1 px-5 py-3.5 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 					/>
 					<button
 						type="submit"
-						className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+						className="gradient-primary px-8 py-3.5 text-primary-foreground rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md"
 						aria-label="検索"
 					>
 						<Search className="w-5 h-5" />
 					</button>
 				</div>
 
-				{/* フィルター */}
 				<div className="grid grid-cols-2 gap-4">
 					<div>
 						<label
 							htmlFor="prefecture"
-							className="block text-sm font-medium text-gray-700 mb-1"
+							className="block text-sm font-medium text-card-foreground mb-2 tracking-wide"
 						>
 							都道府県
 						</label>
@@ -56,7 +57,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 							id="prefecture"
 							value={prefecture}
 							onChange={(e) => setPrefecture(e.target.value)}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+							className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						>
 							<option value="">全て</option>
 							{PREFECTURES.map((pref) => (
@@ -70,7 +71,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 					<div>
 						<label
 							htmlFor="category"
-							className="block text-sm font-medium text-gray-700 mb-1"
+							className="block text-sm font-medium text-card-foreground mb-2 tracking-wide"
 						>
 							ビールカテゴリ
 						</label>
@@ -78,7 +79,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 							id="category"
 							value={category}
 							onChange={(e) => setCategory(e.target.value)}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+							className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						>
 							<option value="">全て</option>
 							<option value="ipa">IPA</option>
