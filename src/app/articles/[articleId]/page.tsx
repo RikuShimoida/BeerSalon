@@ -26,27 +26,27 @@ export default async function ArticlePage({
 	return (
 		<AuthenticatedLayout>
 			<div className="max-w-4xl mx-auto px-4 py-6">
-				<article className="bg-white rounded-lg shadow-md overflow-hidden">
-					<div className="p-6">
+				<article className="glass-card rounded-2xl modern-shadow overflow-hidden animate-fade-in">
+					<div className="p-6 md:p-8">
 						<Link
 							href={`/bars/${article.bar.id}`}
-							className="text-sm text-blue-600 hover:text-blue-800 mb-2 inline-block"
+							className="text-sm text-primary hover:text-primary/80 mb-2 inline-block transition-colors duration-300 tracking-wide"
 						>
 							{article.bar.name}
 						</Link>
 
-						<h1 className="text-3xl font-bold text-gray-900 mb-4">
+						<h1 className="text-3xl font-bold text-card-foreground mb-4 tracking-tight">
 							{article.title}
 						</h1>
 
 						{article.publishedAt && (
-							<p className="text-sm text-gray-500 mb-6">
+							<p className="text-sm text-muted-foreground mb-6 tracking-wide">
 								{formatDate(article.publishedAt)}
 							</p>
 						)}
 
 						{article.imageUrl && (
-							<div className="relative w-full h-96 mb-6 rounded-lg overflow-hidden bg-gray-100">
+							<div className="relative w-full h-96 mb-6 rounded-xl overflow-hidden bg-muted/30">
 								<Image
 									src={article.imageUrl}
 									alt={article.title}
@@ -57,15 +57,15 @@ export default async function ArticlePage({
 						)}
 
 						<div className="prose prose-lg max-w-none">
-							<p className="text-gray-700 whitespace-pre-wrap">
+							<p className="text-card-foreground whitespace-pre-wrap tracking-wide leading-relaxed">
 								{article.body}
 							</p>
 						</div>
 
-						<div className="mt-8 pt-6 border-t border-gray-200">
+						<div className="mt-8 pt-6 border-t border-border/50">
 							<Link
 								href={`/bars/${article.bar.id}`}
-								className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+								className="inline-block gradient-primary text-primary-foreground px-6 py-3 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md tracking-wide"
 							>
 								店舗詳細を見る
 							</Link>

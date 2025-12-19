@@ -40,11 +40,11 @@ export function FollowButton({
 			type="button"
 			onClick={handleToggleFollow}
 			disabled={isLoading}
-			className={`px-6 py-2 rounded-md font-medium transition-colors ${
+			className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 tracking-wide ${
 				isFollowing
-					? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-					: "bg-blue-600 text-white hover:bg-blue-700"
-			} disabled:opacity-50`}
+					? "bg-muted text-card-foreground hover:bg-muted/80"
+					: "gradient-primary text-primary-foreground hover:shadow-lg hover:scale-105 shadow-md"
+			} disabled:opacity-50 disabled:cursor-not-allowed`}
 		>
 			{isLoading ? "処理中..." : isFollowing ? "フォロー中" : "フォロー"}
 		</button>
