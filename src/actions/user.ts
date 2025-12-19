@@ -361,9 +361,10 @@ export async function getTimelinePosts() {
 		},
 	});
 
-	const followingUserIds = followingRelations.map(
-		(relation) => relation.followeeId,
-	);
+	const followingUserIds = [
+		userProfile.id,
+		...followingRelations.map((relation) => relation.followeeId),
+	];
 
 	const posts = await prisma.post.findMany({
 		where: {
