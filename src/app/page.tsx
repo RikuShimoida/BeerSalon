@@ -1,6 +1,6 @@
 import { BarList } from "@/components/bar/bar-list";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
-import { MapPlaceholder } from "@/components/map/map-placeholder";
+import { GoogleMap } from "@/components/map/google-map";
 import { SearchForm } from "@/components/search/search-form";
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
 					<SearchForm />
 
 					{/* 地図エリア */}
-					<MapPlaceholder />
+					<GoogleMap />
 
 					{/* 店舗一覧 */}
 					<BarList />

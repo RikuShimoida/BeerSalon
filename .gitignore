@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# test user credentials
+email-pass.txt
 
 # vercel
 .vercel
@@ -51,3 +55,6 @@ next-env.d.ts
 
 # vitest
 /coverage/
+
+# images (design reference)
+/images/
