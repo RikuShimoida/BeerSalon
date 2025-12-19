@@ -3,6 +3,33 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
+export async function getBars() {
+	const bars = await prisma.bar.findMany({
+		where: {
+			isActive: true,
+		},
+		include: {
+			barImages: {
+				orderBy: {
+					sortOrder: "asc",
+				},
+				take: 1,
+			},
+		},
+		orderBy: {
+			id: "asc",
+		},
+	});
+
+	return bars.map((bar) => ({
+		id: bar.id.toString(),
+		name: bar.name,
+		prefecture: bar.prefecture,
+		city: bar.city,
+		imageUrl: bar.barImages[0]?.imageUrl,
+	}));
+}
+
 export async function getBarDetail(barId: string) {
 	const bar = await prisma.bar.findUnique({
 		where: {
