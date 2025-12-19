@@ -285,6 +285,7 @@ model ViewHistory {
   bar      Bar         @relation(fields: [barId], references: [id], onDelete: Cascade)
   user     UserProfile @relation(fields: [userId], references: [id])
 
+  @@unique([userId, barId])
   @@map("view_histories")
 }
 

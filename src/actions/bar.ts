@@ -331,8 +331,17 @@ export async function recordViewHistory(barId: string) {
 		return;
 	}
 
-	await prisma.viewHistory.create({
-		data: {
+	await prisma.viewHistory.upsert({
+		where: {
+			userId_barId: {
+				userId: userProfile.id,
+				barId: BigInt(barId),
+			},
+		},
+		update: {
+			viewedAt: new Date(),
+		},
+		create: {
 			userId: userProfile.id,
 			barId: BigInt(barId),
 		},
