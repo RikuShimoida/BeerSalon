@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	const publicPaths = ["/login", "/signup", "/password/reset"];
+	const publicPaths = ["/login", "/signup", "/password/reset", "/auth"];
 	const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
 	let supabaseResponse = NextResponse.next({
@@ -41,7 +41,26 @@ export async function middleware(request: NextRequest) {
 		data: { user },
 	} = await supabase.auth.getUser();
 
-	if (user && (pathname === "/login" || pathname === "/signup")) {
+	// メール確認後、ユーザープロフィールが未作成の場合は /signup/profile にリダイレクト
+	if (user && pathname === "/") {
+		// user_profilesテーブルを確認する必要があるが、ここでは簡易的にsession確認のみ
+		// 実際のプロフィール存在確認は別途実装
+		const { data: profile } = await supabase
+			.from("user_profiles")
+			.select("id")
+			.eq("user_auth_id", user.id)
+			.single();
+
+		if (!profile) {
+			return NextResponse.redirect(new URL("/signup/profile", request.url));
+		}
+	}
+
+	if (
+		user &&
+		(pathname === "/login" ||
+			(pathname === "/signup" && !pathname.startsWith("/signup/")))
+	) {
 		return NextResponse.redirect(new URL("/", request.url));
 	}
 
