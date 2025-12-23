@@ -8,6 +8,7 @@ import {
 	isFollowing,
 } from "@/actions/user";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
+import { LikeButton } from "@/components/post/like-button";
 import { FollowButton } from "./_components/follow-button";
 
 type UserDetailPageProps = {
@@ -119,7 +120,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 										<p className="text-card-foreground mb-2 tracking-wide">
 											{post.body}
 										</p>
-										<div className="flex items-center justify-between text-sm">
+										<div className="flex items-center justify-between text-sm mb-2">
 											<Link
 												href={`/bars/${post.bar.id}`}
 												className="text-primary hover:text-primary/80 transition-colors duration-300 tracking-wide"
@@ -129,6 +130,13 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 											<span className="text-muted-foreground tracking-wide">
 												{new Date(post.createdAt).toLocaleDateString("ja-JP")}
 											</span>
+										</div>
+										<div className="flex justify-end">
+											<LikeButton
+												postId={post.id}
+												initialLikeCount={post.likeCount}
+												initialIsLiked={post.isLikedByCurrentUser}
+											/>
 										</div>
 									</div>
 								))}
