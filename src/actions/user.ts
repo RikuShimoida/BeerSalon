@@ -163,6 +163,22 @@ export async function getUserById(userId: string) {
 }
 
 export async function getUserPosts(userId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	let currentUserProfileId: string | null = null;
+
+	if (user) {
+		const currentUserProfile = await prisma.userProfile.findUnique({
+			where: {
+				userAuthId: user.id,
+			},
+		});
+		currentUserProfileId = currentUserProfile?.id ?? null;
+	}
+
 	const posts = await prisma.post.findMany({
 		where: {
 			userId: userId,
@@ -179,6 +195,13 @@ export async function getUserPosts(userId: string) {
 					name: true,
 				},
 			},
+			postLikes: currentUserProfileId
+				? {
+						where: {
+							userId: currentUserProfileId,
+						},
+					}
+				: false,
 		},
 		orderBy: {
 			createdAt: "desc",
@@ -189,6 +212,11 @@ export async function getUserPosts(userId: string) {
 		id: post.id,
 		body: post.body,
 		createdAt: post.createdAt,
+		likeCount: post.likeCount,
+		isLikedByCurrentUser:
+			currentUserProfileId && Array.isArray(post.postLikes)
+				? post.postLikes.length > 0
+				: false,
 		images: post.postImages.map((img) => ({
 			id: img.id,
 			url: img.imageUrl,
@@ -390,6 +418,11 @@ export async function getTimelinePosts() {
 					name: true,
 				},
 			},
+			postLikes: {
+				where: {
+					userId: userProfile.id,
+				},
+			},
 		},
 		orderBy: {
 			createdAt: "desc",
@@ -400,6 +433,8 @@ export async function getTimelinePosts() {
 		id: post.id,
 		body: post.body,
 		createdAt: post.createdAt,
+		likeCount: post.likeCount,
+		isLikedByCurrentUser: post.postLikes.length > 0,
 		user: {
 			id: post.user.id,
 			nickname: post.user.nickname,

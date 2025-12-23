@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTimelinePosts } from "@/actions/user";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
+import { LikeButton } from "@/components/post/like-button";
 
 export default async function TimelinePage() {
 	const posts = await getTimelinePosts();
@@ -77,13 +78,18 @@ export default async function TimelinePage() {
 										{post.body}
 									</p>
 
-									<div className="flex items-center gap-2">
+									<div className="flex items-center justify-between">
 										<Link
 											href={`/bars/${post.bar.id}`}
 											className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors"
 										>
 											{post.bar.name}
 										</Link>
+										<LikeButton
+											postId={post.id}
+											initialLikeCount={post.likeCount}
+											initialIsLiked={post.isLikedByCurrentUser}
+										/>
 									</div>
 								</div>
 							))}
