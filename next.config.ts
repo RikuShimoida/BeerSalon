@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
 				port: "54321",
 			},
 		],
+		// ローカル開発環境ではプライベートIPへのアクセスを許可
+		dangerouslyAllowSVG: true,
+		unoptimized: process.env.NODE_ENV === "development",
 	},
 };
 
