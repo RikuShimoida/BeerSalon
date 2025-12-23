@@ -55,6 +55,24 @@ export async function togglePostLike(postId: bigint) {
 			}),
 		]);
 	} else {
+		const post = await prisma.post.findUnique({
+			where: {
+				id: postId,
+			},
+			include: {
+				user: {
+					select: {
+						id: true,
+						nickname: true,
+					},
+				},
+			},
+		});
+
+		if (!post) {
+			throw new Error("Post not found");
+		}
+
 		await prisma.$transaction([
 			prisma.postLike.create({
 				data: {
@@ -73,6 +91,18 @@ export async function togglePostLike(postId: bigint) {
 				},
 			}),
 		]);
+
+		if (post.userId !== userProfile.id) {
+			await prisma.notification.create({
+				data: {
+					userId: post.userId,
+					type: "post_liked",
+					title: "いいね",
+					message: `${userProfile.nickname}さんがあなたの投稿にいいねしました`,
+					linkUrl: `/timeline`,
+				},
+			});
+		}
 	}
 
 	revalidatePath("/timeline");
