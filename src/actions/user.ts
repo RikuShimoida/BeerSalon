@@ -83,6 +83,46 @@ export async function getFollowingUsers() {
 	}));
 }
 
+export async function getFollowerUsers() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return null;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return null;
+	}
+
+	const followerRelations = await prisma.userFollowRelation.findMany({
+		where: {
+			followeeId: userProfile.id,
+		},
+		include: {
+			follower: true,
+		},
+		orderBy: {
+			createdAt: "desc",
+		},
+	});
+
+	return followerRelations.map((relation) => ({
+		id: relation.follower.id,
+		nickname: relation.follower.nickname,
+		lastName: relation.follower.lastName,
+		firstName: relation.follower.firstName,
+	}));
+}
+
 export async function getUserCoupons() {
 	const supabase = await createClient();
 	const {
