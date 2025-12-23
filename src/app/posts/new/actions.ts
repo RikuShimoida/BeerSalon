@@ -87,8 +87,9 @@ export async function createPost(
 					});
 
 				if (uploadError) {
-					console.error("画像アップロードエラー:", uploadError);
-					continue;
+					throw new Error(
+						`画像アップロードに失敗しました: ${uploadError.message}`,
+					);
 				}
 
 				const {
