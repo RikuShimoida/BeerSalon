@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { createPostSchema } from "@/lib/validations/post";
 
 type FormState = {
@@ -15,6 +15,7 @@ export async function createPost(
 	formData: FormData,
 ): Promise<FormState | undefined> {
 	const supabase = await createClient();
+	const supabaseAdmin = await createAdminClient();
 
 	const {
 		data: { user },
@@ -80,7 +81,8 @@ export async function createPost(
 				const arrayBuffer = await image.arrayBuffer();
 				const buffer = Buffer.from(arrayBuffer);
 
-				const { error: uploadError } = await supabase.storage
+				// Service Role キーを使用して、RLS ポリシーを無視
+				const { error: uploadError } = await supabaseAdmin.storage
 					.from("post-images")
 					.upload(filePath, buffer, {
 						contentType: image.type,
@@ -94,7 +96,7 @@ export async function createPost(
 
 				const {
 					data: { publicUrl },
-				} = supabase.storage.from("post-images").getPublicUrl(filePath);
+				} = supabaseAdmin.storage.from("post-images").getPublicUrl(filePath);
 
 				await prisma.postImage.create({
 					data: {
