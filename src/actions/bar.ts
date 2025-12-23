@@ -31,6 +31,21 @@ export async function getBars() {
 }
 
 export async function getBarDetail(barId: string) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	let currentUserId: string | null = null;
+	if (user) {
+		const userProfile = await prisma.userProfile.findUnique({
+			where: {
+				userAuthId: user.id,
+			},
+		});
+		currentUserId = userProfile?.id ?? null;
+	}
+
 	const bar = await prisma.bar.findUnique({
 		where: {
 			id: BigInt(barId),
@@ -72,6 +87,18 @@ export async function getBarDetail(barId: string) {
 					postImages: {
 						orderBy: {
 							sortOrder: "asc",
+						},
+					},
+					postLikes: currentUserId
+						? {
+								where: {
+									userId: currentUserId,
+								},
+							}
+						: false,
+					_count: {
+						select: {
+							postLikes: true,
 						},
 					},
 				},
@@ -144,6 +171,8 @@ export async function getBarDetail(barId: string) {
 			...post,
 			id: post.id.toString(),
 			barId: post.barId.toString(),
+			likeCount: post._count.postLikes,
+			isLikedByCurrentUser: post.postLikes.length > 0,
 			postImages: post.postImages.map((img) => ({
 				...img,
 				id: img.id.toString(),

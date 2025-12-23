@@ -53,7 +53,9 @@ export default async function BarDetailPage({
 							menu: (
 								<MenuTab beerMenus={bar.beerMenus} foodMenus={bar.foodMenus} />
 							),
-							posts: <PostsTab posts={bar.posts} />,
+							posts: (
+								<PostsTab posts={bar.posts} barId={barId} barName={bar.name} />
+							),
 							articles: <ArticlesTab articles={bar.articles} />,
 							coupons: <CouponsTab coupons={bar.coupons} />,
 						}}

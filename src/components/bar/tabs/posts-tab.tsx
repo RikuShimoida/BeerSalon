@@ -1,10 +1,15 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { LikeButton } from "@/components/post/like-button";
 
 interface Post {
 	id: string;
 	body: string;
 	createdAt: Date;
+	likeCount: number;
+	isLikedByCurrentUser: boolean;
 	user: {
 		id: string;
 		nickname: string;
@@ -17,9 +22,11 @@ interface Post {
 
 interface PostsTabProps {
 	posts: Post[];
+	barId: string;
+	barName: string;
 }
 
-export function PostsTab({ posts }: PostsTabProps) {
+export function PostsTab({ posts, barId, barName }: PostsTabProps) {
 	if (posts.length === 0) {
 		return (
 			<div className="text-center py-8">
@@ -69,7 +76,21 @@ export function PostsTab({ posts }: PostsTabProps) {
 						</div>
 					)}
 
-					<p className="text-gray-800 whitespace-pre-wrap">{post.body}</p>
+					<p className="text-gray-800 whitespace-pre-wrap mb-3">{post.body}</p>
+
+					<div className="flex items-center justify-between">
+						<Link
+							href={`/bars/${barId}`}
+							className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors"
+						>
+							{barName}
+						</Link>
+						<LikeButton
+							postId={BigInt(post.id)}
+							initialLikeCount={post.likeCount}
+							initialIsLiked={post.isLikedByCurrentUser}
+						/>
+					</div>
 				</div>
 			))}
 		</div>
