@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { getBarDetail, recordViewHistory } from "@/actions/bar";
+import { getBarDetail, isFavoriteBar, recordViewHistory } from "@/actions/bar";
 import { BarTabs } from "@/components/bar/bar-tabs";
+import { FavoriteButton } from "@/components/bar/favorite-button";
 import { ArticlesTab } from "@/components/bar/tabs/articles-tab";
 import { CouponsTab } from "@/components/bar/tabs/coupons-tab";
 import { MenuTab } from "@/components/bar/tabs/menu-tab";
@@ -23,17 +24,27 @@ export default async function BarDetailPage({
 
 	await recordViewHistory(barId);
 
+	const initialIsFavorite = await isFavoriteBar(barId);
+
 	return (
 		<AuthenticatedLayout>
 			<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
 				<div className="bg-card rounded-lg shadow-md overflow-hidden">
 					<div className="p-6 border-b border-border/50">
-						<h1 className="text-3xl font-semibold text-foreground mb-2">
-							{bar.name}
-						</h1>
-						<p className="text-muted-foreground">
-							{bar.prefecture} {bar.city}
-						</p>
+						<div className="flex items-start justify-between">
+							<div className="flex-1">
+								<h1 className="text-3xl font-semibold text-foreground mb-2">
+									{bar.name}
+								</h1>
+								<p className="text-muted-foreground">
+									{bar.prefecture} {bar.city}
+								</p>
+							</div>
+							<FavoriteButton
+								barId={barId}
+								initialIsFavorite={initialIsFavorite}
+							/>
+						</div>
 					</div>
 
 					<BarTabs>
