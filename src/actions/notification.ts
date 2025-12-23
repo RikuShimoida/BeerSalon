@@ -43,6 +43,36 @@ export async function getNotifications() {
 	}));
 }
 
+export async function getUnreadNotificationCount() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return 0;
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		return 0;
+	}
+
+	const count = await prisma.notification.count({
+		where: {
+			userId: userProfile.id,
+			isRead: false,
+		},
+	});
+
+	return count;
+}
+
 export async function markNotificationAsRead(notificationId: string) {
 	const supabase = await createClient();
 	const {
