@@ -49,13 +49,26 @@ export default async function TimelinePage() {
 
 									{post.images.length > 0 && (
 										<div className="mb-4">
-											<div className="aspect-square relative max-w-md">
-												<Image
-													src={post.images[0].url}
-													alt=""
-													fill
-													className="object-cover rounded-lg"
-												/>
+											<div
+												className={`grid gap-2 max-w-2xl ${
+													post.images.length === 1
+														? "grid-cols-1"
+														: "grid-cols-2"
+												}`}
+											>
+												{post.images.map((image) => (
+													<div
+														key={image.id}
+														className="aspect-square relative overflow-hidden rounded-lg"
+													>
+														<Image
+															src={image.url}
+															alt=""
+															fill
+															className="object-cover"
+														/>
+													</div>
+												))}
 											</div>
 										</div>
 									)}
