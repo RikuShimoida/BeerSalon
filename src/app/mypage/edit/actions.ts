@@ -8,12 +8,10 @@ type FormState = {
 	error?: string;
 };
 
-export async function confirmAndSaveProfile(
+export async function updateProfile(
 	_prevState: FormState | undefined,
 	formData: FormData,
 ): Promise<FormState | undefined> {
-	const data = JSON.parse(formData.get("profileData") as string);
-
 	const supabase = await createClient();
 
 	const {
@@ -26,11 +24,20 @@ export async function confirmAndSaveProfile(
 		};
 	}
 
-	try {
-		let profileImageUrl: string | undefined;
+	const bio = formData.get("bio") as string | null;
+	const profileImageUrl = formData.get("profileImageUrl") as string | null;
 
-		if (data.profileImageUrl) {
-			const base64Data = data.profileImageUrl.split(",")[1];
+	if (bio && bio.length > 500) {
+		return {
+			error: "プロフィール文は500文字以内で入力してください",
+		};
+	}
+
+	try {
+		let imageUrl: string | null = null;
+
+		if (profileImageUrl?.startsWith("data:image")) {
+			const base64Data = profileImageUrl.split(",")[1];
 			const buffer = Buffer.from(base64Data, "base64");
 			const fileName = `${user.id}-${Date.now()}.png`;
 
@@ -48,28 +55,35 @@ export async function confirmAndSaveProfile(
 				const {
 					data: { publicUrl },
 				} = supabase.storage.from("profile-images").getPublicUrl(fileName);
-				profileImageUrl = publicUrl;
+				imageUrl = publicUrl;
 			}
+		} else if (profileImageUrl) {
+			imageUrl = profileImageUrl;
 		}
 
-		await prisma.userProfile.create({
-			data: {
+		const updateData: {
+			profileImageUrl?: string | null;
+			bio: string | null;
+		} = {
+			bio: bio || null,
+		};
+
+		if (imageUrl !== null) {
+			updateData.profileImageUrl = imageUrl;
+		}
+
+		await prisma.userProfile.update({
+			where: {
 				userAuthId: user.id,
-				lastName: data.lastName,
-				firstName: data.firstName,
-				nickname: data.nickname,
-				birthday: new Date(data.birthday),
-				gender: data.gender,
-				prefecture: data.prefecture,
-				profileImageUrl: profileImageUrl,
-				bio: data.bio,
 			},
+			data: updateData,
 		});
 
-		redirect("/");
-	} catch (_error) {
+		redirect("/mypage");
+	} catch (error) {
+		console.error("プロフィール更新エラー:", error);
 		return {
-			error: "プロフィールの保存に失敗しました",
+			error: "プロフィールの更新に失敗しました",
 		};
 	}
 }

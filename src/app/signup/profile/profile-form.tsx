@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import Image from "next/image";
 import { GENDERS, PREFECTURES } from "@/lib/constants/prefectures";
 import { saveProfileToSession } from "./actions";
 
@@ -9,6 +10,8 @@ export function ProfileForm() {
 		saveProfileToSession,
 		undefined,
 	);
+	const [imagePreview, setImagePreview] = useState<string | null>(null);
+	const [bioLength, setBioLength] = useState(0);
 
 	const currentYear = new Date().getFullYear();
 	const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
@@ -16,6 +19,23 @@ export function ProfileForm() {
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
 	const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			if (file.size > 5 * 1024 * 1024) {
+				alert("画像サイズは5MB以下にしてください");
+				e.target.value = "";
+				return;
+			}
+
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setImagePreview(reader.result as string);
+			};
+			reader.readAsDataURL(file);
+		}
+	};
 
 	return (
 		<form action={formAction} className="flex flex-col gap-4 w-full">
@@ -162,6 +182,64 @@ export function ProfileForm() {
 						</option>
 					))}
 				</select>
+			</div>
+
+			<div className="flex flex-col gap-2">
+				<label
+					htmlFor="profileImage"
+					className="text-sm font-medium text-card-foreground tracking-wide"
+				>
+					プロフィール画像（任意）
+				</label>
+				<div className="flex flex-col items-center gap-4">
+					{imagePreview && (
+						<div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary relative">
+							<Image
+								src={imagePreview}
+								alt="プロフィール画像プレビュー"
+								fill
+								className="object-cover"
+							/>
+						</div>
+					)}
+					<input
+						type="file"
+						id="profileImage"
+						name="profileImage"
+						accept="image/*"
+						onChange={handleImageChange}
+						className="glass-input px-4 py-3 rounded-xl text-card-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 focus:outline-none transition-all duration-300"
+					/>
+					<input
+						type="hidden"
+						name="profileImageUrl"
+						value={imagePreview || ""}
+					/>
+					<p className="text-xs text-muted-foreground">
+						推奨: 正方形の画像、最大5MB
+					</p>
+				</div>
+			</div>
+
+			<div className="flex flex-col gap-2">
+				<label
+					htmlFor="bio"
+					className="text-sm font-medium text-card-foreground tracking-wide"
+				>
+					プロフィール文（任意）
+				</label>
+				<textarea
+					id="bio"
+					name="bio"
+					placeholder="自己紹介やビールの好みを入力してください"
+					maxLength={500}
+					rows={4}
+					onChange={(e) => setBioLength(e.target.value.length)}
+					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300 resize-none"
+				/>
+				<p className="text-xs text-muted-foreground text-right">
+					{bioLength}/500文字
+				</p>
 			</div>
 
 			{state?.error && (

@@ -19,15 +19,44 @@ export default async function MyPage() {
 			<div className="max-w-7xl mx-auto px-4 py-6">
 				<div className="glass-card rounded-2xl modern-shadow overflow-hidden animate-fade-in">
 					<div className="p-6 border-b border-border/50">
-						<div className="flex items-center justify-between mb-4">
-							<div>
+						<div className="flex items-center gap-4 mb-4">
+							<div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
+								{user.profileImageUrl ? (
+									<Image
+										src={user.profileImageUrl}
+										alt={`${user.nickname}のプロフィール画像`}
+										width={96}
+										height={96}
+										className="w-full h-full object-cover"
+									/>
+								) : (
+									<div className="w-full h-full bg-muted flex items-center justify-center text-4xl text-muted-foreground">
+										{user.nickname.charAt(0)}
+									</div>
+								)}
+							</div>
+							<div className="flex-1">
 								<h1 className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">
 									{user.nickname}
 								</h1>
+								{user.bio && (
+									<p className="text-sm text-muted-foreground whitespace-pre-wrap">
+										{user.bio}
+									</p>
+								)}
 							</div>
+						</div>
+
+						<div className="flex gap-2 mb-4">
+							<Link
+								href="/mypage/edit"
+								className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-300 font-medium tracking-wide"
+							>
+								プロフィールを編集
+							</Link>
 							<Link
 								href="/mypage/coupons"
-								className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-300 font-medium tracking-wide"
+								className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors duration-300 font-medium tracking-wide"
 							>
 								持っているクーポン
 							</Link>

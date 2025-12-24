@@ -36,6 +36,8 @@ export async function getCurrentUser() {
 	return {
 		id: userProfile.id,
 		nickname: userProfile.nickname,
+		profileImageUrl: userProfile.profileImageUrl,
+		bio: userProfile.bio,
 		followingCount: userProfile._count.following,
 		followersCount: userProfile._count.followedBy,
 		postsCount: userProfile._count.posts,
@@ -196,6 +198,8 @@ export async function getUserById(userId: string) {
 		nickname: userProfile.nickname,
 		lastName: userProfile.lastName,
 		firstName: userProfile.firstName,
+		profileImageUrl: userProfile.profileImageUrl,
+		bio: userProfile.bio,
 		followingCount: userProfile._count.following,
 		followersCount: userProfile._count.followedBy,
 		postsCount: userProfile._count.posts,

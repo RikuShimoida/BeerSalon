@@ -39,6 +39,11 @@ export const profileSchema = z.object({
 	birthday: z.string().min(1, { message: "生年月日を選択してください" }),
 	gender: z.string().min(1, { message: "性別を選択してください" }),
 	prefecture: z.string().min(1, { message: "都道府県を選択してください" }),
+	profileImageUrl: z.string().optional(),
+	bio: z
+		.string()
+		.max(500, { message: "プロフィール文は500文字以内で入力してください" })
+		.optional(),
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;
