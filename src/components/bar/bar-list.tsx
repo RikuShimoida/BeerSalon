@@ -5,11 +5,11 @@ import { getBars } from "@/actions/bar";
 import { BarCard } from "./bar-card";
 
 interface BarListProps {
-	prefecture?: string;
+	city?: string;
 	category?: string;
 }
 
-export function BarList({ prefecture, category }: BarListProps) {
+export function BarList({ city, category }: BarListProps) {
 	const [bars, setBars] = useState<
 		Array<{
 			id: string;
@@ -24,13 +24,13 @@ export function BarList({ prefecture, category }: BarListProps) {
 	useEffect(() => {
 		const fetchBars = async () => {
 			setIsLoading(true);
-			const result = await getBars({ prefecture, category });
+			const result = await getBars({ city, category });
 			setBars(result);
 			setIsLoading(false);
 		};
 
 		fetchBars();
-	}, [prefecture, category]);
+	}, [city, category]);
 
 	if (isLoading) {
 		return (

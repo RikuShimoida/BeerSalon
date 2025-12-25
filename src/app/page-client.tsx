@@ -7,14 +7,14 @@ import { SearchForm } from "@/components/search/search-form";
 
 export function HomeClient() {
 	const [searchParams, setSearchParams] = useState<{
-		prefecture: string;
+		city: string;
 		category: string;
 	}>({
-		prefecture: "",
+		city: "",
 		category: "",
 	});
 
-	const handleSearch = (params: { prefecture: string; category: string }) => {
+	const handleSearch = (params: { city: string; category: string }) => {
 		setSearchParams(params);
 	};
 
@@ -25,13 +25,10 @@ export function HomeClient() {
 				<SearchForm onSearch={handleSearch} />
 
 				{/* 地図エリア */}
-				<GoogleMap prefecture={searchParams.prefecture} />
+				<GoogleMap city={searchParams.city} />
 
 				{/* 店舗一覧 */}
-				<BarList
-					prefecture={searchParams.prefecture}
-					category={searchParams.category}
-				/>
+				<BarList city={searchParams.city} category={searchParams.category} />
 			</div>
 		</div>
 	);

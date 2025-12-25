@@ -3,13 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-export async function getBars(params?: {
-	prefecture?: string;
-	category?: string;
-}) {
+export async function getBars(params?: { city?: string; category?: string }) {
 	const where: {
 		isActive: boolean;
-		prefecture?: string;
+		city?: string;
 		beerMenus?: {
 			some: {
 				beer: {
@@ -23,8 +20,8 @@ export async function getBars(params?: {
 		isActive: true,
 	};
 
-	if (params?.prefecture) {
-		where.prefecture = params.prefecture;
+	if (params?.city) {
+		where.city = params.city;
 	}
 
 	if (params?.category) {
