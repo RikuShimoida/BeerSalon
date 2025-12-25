@@ -5,7 +5,8 @@ import {
 	APIProvider,
 	Map as GoogleMapComponent,
 } from "@vis.gl/react-google-maps";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { PREFECTURE_COORDINATES } from "@/lib/constants/prefecture-coordinates";
 
 interface BarLocation {
 	id: number;
@@ -16,23 +17,27 @@ interface BarLocation {
 
 interface GoogleMapProps {
 	bars?: BarLocation[];
-	defaultCenter?: { lat: number; lng: number };
+	prefecture?: string;
 	defaultZoom?: number;
 }
 
 export function GoogleMap({
 	bars = [],
-	defaultCenter = { lat: 35.6762, lng: 139.6503 }, // 東京駅をデフォルト
+	prefecture,
 	defaultZoom = 12,
 }: GoogleMapProps) {
-	const [center, setCenter] = useState(defaultCenter);
+	const [center, setCenter] = useState<{ lat: number; lng: number }>({
+		lat: 35.6762,
+		lng: 139.6503,
+	});
 	const [userLocation, setUserLocation] = useState<{
 		lat: number;
 		lng: number;
 	} | null>(null);
+	const hasSetUserLocation = useRef(false);
 
 	useEffect(() => {
-		if (navigator.geolocation) {
+		if (!hasSetUserLocation.current && navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
 					const newCenter = {
@@ -40,14 +45,26 @@ export function GoogleMap({
 						lng: position.coords.longitude,
 					};
 					setUserLocation(newCenter);
-					setCenter(newCenter);
+					if (!prefecture) {
+						setCenter(newCenter);
+					}
+					hasSetUserLocation.current = true;
 				},
 				(error) => {
 					console.warn("位置情報の取得に失敗しました:", error);
+					hasSetUserLocation.current = true;
 				},
 			);
 		}
-	}, []);
+	}, [prefecture]);
+
+	useEffect(() => {
+		if (prefecture && PREFECTURE_COORDINATES[prefecture]) {
+			setCenter(PREFECTURE_COORDINATES[prefecture]);
+		} else if (!prefecture && userLocation) {
+			setCenter(userLocation);
+		}
+	}, [prefecture, userLocation]);
 
 	const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -70,8 +87,8 @@ export function GoogleMap({
 		<div className="glass-card rounded-2xl overflow-hidden modern-shadow h-64 md:h-80">
 			<APIProvider apiKey={apiKey}>
 				<GoogleMapComponent
-					defaultCenter={center}
-					defaultZoom={defaultZoom}
+					center={center}
+					zoom={defaultZoom}
 					mapId="beer-salon-map"
 					className="w-full h-full"
 					gestureHandling="greedy"
