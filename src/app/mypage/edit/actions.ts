@@ -57,8 +57,6 @@ export async function updateProfile(
 				} = supabase.storage.from("profile-images").getPublicUrl(fileName);
 				imageUrl = publicUrl;
 			}
-		} else if (profileImageUrl) {
-			imageUrl = profileImageUrl;
 		}
 
 		const updateData: {
@@ -68,7 +66,7 @@ export async function updateProfile(
 			bio: bio || null,
 		};
 
-		if (imageUrl !== null) {
+		if (profileImageUrl?.startsWith("data:image") && imageUrl) {
 			updateData.profileImageUrl = imageUrl;
 		}
 
