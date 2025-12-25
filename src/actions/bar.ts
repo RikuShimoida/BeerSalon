@@ -3,11 +3,44 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-export async function getBars() {
+export async function getBars(params?: {
+	prefecture?: string;
+	category?: string;
+}) {
+	const where: {
+		isActive: boolean;
+		prefecture?: string;
+		beerMenus?: {
+			some: {
+				beer: {
+					beerCategory: {
+						name: string;
+					};
+				};
+			};
+		};
+	} = {
+		isActive: true,
+	};
+
+	if (params?.prefecture) {
+		where.prefecture = params.prefecture;
+	}
+
+	if (params?.category) {
+		where.beerMenus = {
+			some: {
+				beer: {
+					beerCategory: {
+						name: params.category,
+					},
+				},
+			},
+		};
+	}
+
 	const bars = await prisma.bar.findMany({
-		where: {
-			isActive: true,
-		},
+		where,
 		include: {
 			barImages: {
 				orderBy: {
