@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/actions/user";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
-import { ProfileEditForm } from "./profile-edit-form";
 import { GENDERS } from "@/lib/constants/prefectures";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { ProfileEditForm } from "./profile-edit-form";
 
 export default async function ProfileEditPage() {
 	const user = await getCurrentUser();

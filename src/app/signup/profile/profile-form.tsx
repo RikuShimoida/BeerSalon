@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
 import Image from "next/image";
+import { useActionState, useState } from "react";
 import { GENDERS, PREFECTURES } from "@/lib/constants/prefectures";
 import { saveProfileToSession } from "./actions";
 

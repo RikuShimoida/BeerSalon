@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
 import { updateProfile } from "./actions";
 
 interface ProfileEditFormProps {

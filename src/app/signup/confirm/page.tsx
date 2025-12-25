@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { GENDERS } from "@/lib/constants/prefectures";
 import { createClient } from "@/lib/supabase/server";
 import { ConfirmForm } from "./confirm-form";

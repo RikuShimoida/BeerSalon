@@ -78,12 +78,16 @@ export async function updateProfile(
 			},
 			data: updateData,
 		});
-
-		redirect("/mypage");
 	} catch (error) {
 		console.error("プロフィール更新エラー:", error);
+		if (error instanceof Error) {
+			console.error("エラーメッセージ:", error.message);
+			console.error("エラースタック:", error.stack);
+		}
 		return {
 			error: "プロフィールの更新に失敗しました",
 		};
 	}
+
+	redirect("/mypage");
 }
