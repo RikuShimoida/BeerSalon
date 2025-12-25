@@ -25,7 +25,7 @@ export function HomeClient() {
 				<SearchForm onSearch={handleSearch} />
 
 				{/* 地図エリア */}
-				<GoogleMap />
+				<GoogleMap prefecture={searchParams.prefecture} />
 
 				{/* 店舗一覧 */}
 				<BarList
