@@ -62,8 +62,10 @@ export async function createPost(
 		};
 	}
 
+	let post: { id: bigint } | null = null;
+
 	try {
-		const post = await prisma.post.create({
+		post = await prisma.post.create({
 			data: {
 				userId: userProfile.id,
 				barId: result.data.barId,
@@ -81,7 +83,6 @@ export async function createPost(
 				const arrayBuffer = await image.arrayBuffer();
 				const buffer = Buffer.from(arrayBuffer);
 
-				// Service Role キーを使用して、RLS ポリシーを無視
 				const { error: uploadError } = await supabaseAdmin.storage
 					.from("post-images")
 					.upload(filePath, buffer, {
@@ -89,6 +90,11 @@ export async function createPost(
 					});
 
 				if (uploadError) {
+					console.error("画像アップロードエラー:", {
+						fileName,
+						error: uploadError.message,
+						bucket: "post-images",
+					});
 					throw new Error(
 						`画像アップロードに失敗しました: ${uploadError.message}`,
 					);
@@ -109,6 +115,21 @@ export async function createPost(
 		}
 	} catch (error) {
 		console.error("投稿作成エラー:", error);
+
+		if (post?.id) {
+			try {
+				await prisma.postImage.deleteMany({
+					where: { postId: post.id },
+				});
+				await prisma.post.delete({
+					where: { id: post.id },
+				});
+				console.log(`投稿ID ${post.id} をロールバックしました`);
+			} catch (rollbackError) {
+				console.error("ロールバック失敗:", rollbackError);
+			}
+		}
+
 		return {
 			error: "投稿の作成に失敗しました",
 			barId,
