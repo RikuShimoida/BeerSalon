@@ -1,22 +1,22 @@
 "use client";
 
-import { PREFECTURES } from "@/lib/constants/prefectures";
+import { SHIZUOKA_CITIES } from "@/lib/constants/cities";
 
 interface SearchFormProps {
-	onSearch?: (params: { prefecture: string; category: string }) => void;
+	onSearch?: (params: { city: string; category: string }) => void;
 }
 
 export function SearchForm({ onSearch }: SearchFormProps) {
-	const handlePrefectureChange = (prefecture: string) => {
+	const handleCityChange = (city: string) => {
 		const category =
 			(document.getElementById("category") as HTMLSelectElement)?.value || "";
-		onSearch?.({ prefecture, category });
+		onSearch?.({ city, category });
 	};
 
 	const handleCategoryChange = (category: string) => {
-		const prefecture =
-			(document.getElementById("prefecture") as HTMLSelectElement)?.value || "";
-		onSearch?.({ prefecture, category });
+		const city =
+			(document.getElementById("city") as HTMLSelectElement)?.value || "";
+		onSearch?.({ city, category });
 	};
 
 	return (
@@ -24,20 +24,20 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 			<div className="grid grid-cols-2 gap-4">
 				<div>
 					<label
-						htmlFor="prefecture"
+						htmlFor="city"
 						className="block text-sm font-medium text-card-foreground mb-2 tracking-wide"
 					>
-						都道府県
+						市町村
 					</label>
 					<select
-						id="prefecture"
-						onChange={(e) => handlePrefectureChange(e.target.value)}
+						id="city"
+						onChange={(e) => handleCityChange(e.target.value)}
 						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 					>
 						<option value="">全て</option>
-						{PREFECTURES.map((pref) => (
-							<option key={pref} value={pref}>
-								{pref}
+						{SHIZUOKA_CITIES.map((city) => (
+							<option key={city} value={city}>
+								{city}
 							</option>
 						))}
 					</select>

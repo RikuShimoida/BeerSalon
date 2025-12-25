@@ -6,7 +6,7 @@ import {
 	Map as GoogleMapComponent,
 } from "@vis.gl/react-google-maps";
 import { useEffect, useRef, useState } from "react";
-import { PREFECTURE_COORDINATES } from "@/lib/constants/prefecture-coordinates";
+import { CITY_COORDINATES } from "@/lib/constants/city-coordinates";
 
 interface BarLocation {
 	id: number;
@@ -17,18 +17,18 @@ interface BarLocation {
 
 interface GoogleMapProps {
 	bars?: BarLocation[];
-	prefecture?: string;
+	city?: string;
 	defaultZoom?: number;
 }
 
 export function GoogleMap({
 	bars = [],
-	prefecture,
+	city,
 	defaultZoom = 12,
 }: GoogleMapProps) {
 	const [center, setCenter] = useState<{ lat: number; lng: number }>({
-		lat: 35.6762,
-		lng: 139.6503,
+		lat: 34.9756,
+		lng: 138.3833,
 	});
 	const [userLocation, setUserLocation] = useState<{
 		lat: number;
@@ -45,7 +45,7 @@ export function GoogleMap({
 						lng: position.coords.longitude,
 					};
 					setUserLocation(newCenter);
-					if (!prefecture) {
+					if (!city) {
 						setCenter(newCenter);
 					}
 					hasSetUserLocation.current = true;
@@ -56,15 +56,15 @@ export function GoogleMap({
 				},
 			);
 		}
-	}, [prefecture]);
+	}, [city]);
 
 	useEffect(() => {
-		if (prefecture && PREFECTURE_COORDINATES[prefecture]) {
-			setCenter(PREFECTURE_COORDINATES[prefecture]);
-		} else if (!prefecture && userLocation) {
+		if (city && CITY_COORDINATES[city]) {
+			setCenter(CITY_COORDINATES[city]);
+		} else if (!city && userLocation) {
 			setCenter(userLocation);
 		}
-	}, [prefecture, userLocation]);
+	}, [city, userLocation]);
 
 	const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
