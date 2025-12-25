@@ -10,6 +10,8 @@ interface ProfileData {
 	birthday: string;
 	gender: string;
 	prefecture: string;
+	profileImageUrl?: string;
+	bio?: string;
 }
 
 interface ConfirmFormProps {

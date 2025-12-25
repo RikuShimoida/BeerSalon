@@ -45,14 +45,34 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 			<div className="max-w-7xl mx-auto px-4 py-6">
 				<div className="glass-card rounded-2xl modern-shadow overflow-hidden animate-fade-in">
 					<div className="p-6 border-b border-border/50">
-						<div className="flex items-center justify-between mb-4">
-							<div>
+						<div className="flex items-center gap-4 mb-4">
+							<div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
+								{user.profileImageUrl ? (
+									<Image
+										src={user.profileImageUrl}
+										alt={`${user.nickname}のプロフィール画像`}
+										width={96}
+										height={96}
+										className="w-full h-full object-cover"
+									/>
+								) : (
+									<div className="w-full h-full bg-muted flex items-center justify-center text-4xl text-muted-foreground">
+										{user.nickname.charAt(0)}
+									</div>
+								)}
+							</div>
+							<div className="flex-1">
 								<h1 className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">
 									{user.nickname}
 								</h1>
-								<p className="text-muted-foreground tracking-wide">
+								<p className="text-muted-foreground tracking-wide mb-2">
 									{user.lastName} {user.firstName}
 								</p>
+								{user.bio && (
+									<p className="text-sm text-muted-foreground whitespace-pre-wrap">
+										{user.bio}
+									</p>
+								)}
 							</div>
 							<FollowButton userId={userId} initialIsFollowing={followStatus} />
 						</div>

@@ -19,6 +19,8 @@ export async function saveProfileToSession(
 		birthday: formData.get("birthday") as string,
 		gender: formData.get("gender") as string,
 		prefecture: formData.get("prefecture") as string,
+		profileImageUrl: formData.get("profileImageUrl") as string | undefined,
+		bio: formData.get("bio") as string | undefined,
 	};
 
 	const result = profileSchema.safeParse(data);

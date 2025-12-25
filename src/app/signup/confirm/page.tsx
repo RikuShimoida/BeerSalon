@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { GENDERS } from "@/lib/constants/prefectures";
 import { createClient } from "@/lib/supabase/server";
@@ -41,6 +42,20 @@ export default async function ConfirmPage({
 
 				<div className="bg-white p-8 rounded-lg shadow-md">
 					<div className="space-y-4 mb-6">
+						{profileData.profileImageUrl && (
+							<div className="border-b pb-3 flex flex-col items-center">
+								<p className="text-sm text-gray-500 mb-2">プロフィール画像</p>
+								<div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary relative">
+									<Image
+										src={profileData.profileImageUrl}
+										alt="プロフィール画像"
+										fill
+										className="object-cover"
+									/>
+								</div>
+							</div>
+						)}
+
 						<div className="border-b pb-3">
 							<p className="text-sm text-gray-500 mb-1">姓</p>
 							<p className="text-lg font-medium">{profileData.lastName}</p>
@@ -76,6 +91,15 @@ export default async function ConfirmPage({
 							<p className="text-sm text-gray-500 mb-1">お住まいの都道府県</p>
 							<p className="text-lg font-medium">{profileData.prefecture}</p>
 						</div>
+
+						{profileData.bio && (
+							<div className="border-b pb-3">
+								<p className="text-sm text-gray-500 mb-1">プロフィール文</p>
+								<p className="text-base whitespace-pre-wrap">
+									{profileData.bio}
+								</p>
+							</div>
+						)}
 					</div>
 
 					<ConfirmForm

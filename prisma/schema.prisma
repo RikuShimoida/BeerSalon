@@ -17,6 +17,8 @@ model UserProfile {
   birthday       DateTime             @db.Date
   gender         String
   prefecture     String
+  profileImageUrl String?             @map("profile_image_url")
+  bio            String?
   isActive       Boolean              @default(true) @map("is_active")
   createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
