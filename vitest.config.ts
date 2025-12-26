@@ -9,6 +9,23 @@ export default defineConfig({
 		setupFiles: ["./src/test/setup.ts"],
 		globals: true,
 		exclude: ["node_modules", "e2e", ".next"],
+		coverage: {
+			provider: "v8",
+			reporter: ["text", "html", "json"],
+			exclude: [
+				"node_modules/",
+				"e2e/",
+				".next/",
+				"src/generated/",
+				"src/test/",
+				"**/*.config.ts",
+				"**/*.config.js",
+				"**/*.test.ts",
+				"**/*.test.tsx",
+				"**/*.spec.ts",
+				"**/*.spec.tsx",
+			],
+		},
 	},
 	resolve: {
 		alias: {
