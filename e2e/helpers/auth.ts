@@ -62,3 +62,23 @@ export async function fillProfileForm(page: Page, user: TestUser) {
 	await page.selectOption('select[name="prefecture"]', user.prefecture);
 	await page.click('button[type="submit"]');
 }
+
+export async function createAuthenticatedUser(page: Page): Promise<TestUser> {
+	const user = generateTestUser();
+
+	await page.goto("/signup");
+	await fillSignUpForm(page, user);
+	await page.waitForURL(/\/signup\?success=true/, { timeout: 15000 });
+
+	await page.goto("/signup/profile");
+	await page.waitForURL(/\/signup\/profile/, { timeout: 15000 });
+
+	await fillProfileForm(page, user);
+	await page.waitForURL(/\/signup\/confirm/, { timeout: 15000 });
+
+	const confirmButton = page.locator('button:has-text("この内容で登録する")');
+	await confirmButton.click();
+	await page.waitForURL("/", { timeout: 15000 });
+
+	return user;
+}
