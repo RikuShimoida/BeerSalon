@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	const publicPaths = ["/login", "/signup", "/password/reset"];
+	const publicPaths = ["/login", "/signup", "/password/reset", "/auth"];
 	const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
 	let supabaseResponse = NextResponse.next({
@@ -41,8 +41,26 @@ export async function middleware(request: NextRequest) {
 		data: { user },
 	} = await supabase.auth.getUser();
 
-	if (user && (pathname === "/login" || pathname === "/signup")) {
-		return NextResponse.redirect(new URL("/", request.url));
+	if (user) {
+		const { data: profile } = await supabase
+			.from("user_profiles")
+			.select("id")
+			.eq("user_auth_id", user.id)
+			.single();
+
+		if (!profile) {
+			if (pathname !== "/signup/profile") {
+				return NextResponse.redirect(new URL("/signup/profile", request.url));
+			}
+		} else {
+			if (
+				pathname === "/login" ||
+				pathname === "/signup" ||
+				pathname === "/signup/profile"
+			) {
+				return NextResponse.redirect(new URL("/", request.url));
+			}
+		}
 	}
 
 	if (!user && !isPublicPath) {
