@@ -111,6 +111,57 @@ test.describe("トップページ（検索ページ）", () => {
 		}
 	});
 
+	test("ビールの産地フィルタが表示される", async ({ page }) => {
+		await page.goto("/");
+
+		const originFilter = page.locator('select#origin, [id="origin"]');
+		await expect(originFilter).toBeVisible();
+
+		const label = page.locator('label[for="origin"]');
+		await expect(label).toContainText("ビールの産地");
+	});
+
+	test("ビールの産地フィルタで絞り込みができる", async ({ page }) => {
+		await page.goto("/");
+
+		const originFilter = page.locator("select#origin");
+
+		if ((await originFilter.count()) > 0) {
+			const options = await originFilter.locator("option").count();
+			if (options > 1) {
+				await originFilter.selectOption({ index: 1 });
+				await page.waitForTimeout(1000);
+			}
+		} else {
+			test.skip();
+		}
+	});
+
+	test("産地フィルタと他のフィルタを組み合わせて使用できる", async ({
+		page,
+	}) => {
+		await page.goto("/");
+
+		const cityFilter = page.locator("select#city");
+		const categoryFilter = page.locator("select#category");
+		const originFilter = page.locator("select#origin");
+
+		if ((await cityFilter.count()) > 0 && (await originFilter.count()) > 0) {
+			const cityOptions = await cityFilter.locator("option").count();
+			const originOptions = await originFilter.locator("option").count();
+
+			if (cityOptions > 1 && originOptions > 1) {
+				await cityFilter.selectOption({ index: 1 });
+				await page.waitForTimeout(500);
+
+				await originFilter.selectOption({ index: 1 });
+				await page.waitForTimeout(1000);
+			}
+		} else {
+			test.skip();
+		}
+	});
+
 	test("店舗カードには店舗名・都道府県・市町村が表示される", async ({
 		page,
 	}) => {

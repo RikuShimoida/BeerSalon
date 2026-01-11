@@ -7,9 +7,10 @@ import { BarCard } from "./bar-card";
 interface BarListProps {
 	city?: string;
 	category?: string;
+	origin?: string;
 }
 
-export function BarList({ city, category }: BarListProps) {
+export function BarList({ city, category, origin }: BarListProps) {
 	const [bars, setBars] = useState<
 		Array<{
 			id: string;
@@ -24,13 +25,13 @@ export function BarList({ city, category }: BarListProps) {
 	useEffect(() => {
 		const fetchBars = async () => {
 			setIsLoading(true);
-			const result = await getBars({ city, category });
+			const result = await getBars({ city, category, origin });
 			setBars(result);
 			setIsLoading(false);
 		};
 
 		fetchBars();
-	}, [city, category]);
+	}, [city, category, origin]);
 
 	if (isLoading) {
 		return (

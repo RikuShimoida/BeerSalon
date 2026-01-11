@@ -1,27 +1,55 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { getBeerOrigins } from "@/actions/bar";
 import { SHIZUOKA_CITIES } from "@/lib/constants/cities";
 
 interface SearchFormProps {
-	onSearch?: (params: { city: string; category: string }) => void;
+	onSearch?: (params: {
+		city: string;
+		category: string;
+		origin: string;
+	}) => void;
 }
 
 export function SearchForm({ onSearch }: SearchFormProps) {
+	const [origins, setOrigins] = useState<string[]>([]);
+
+	useEffect(() => {
+		const fetchOrigins = async () => {
+			const result = await getBeerOrigins();
+			setOrigins(result);
+		};
+		fetchOrigins();
+	}, []);
+
 	const handleCityChange = (city: string) => {
 		const category =
 			(document.getElementById("category") as HTMLSelectElement)?.value || "";
-		onSearch?.({ city, category });
+		const origin =
+			(document.getElementById("origin") as HTMLSelectElement)?.value || "";
+		onSearch?.({ city, category, origin });
 	};
 
 	const handleCategoryChange = (category: string) => {
 		const city =
 			(document.getElementById("city") as HTMLSelectElement)?.value || "";
-		onSearch?.({ city, category });
+		const origin =
+			(document.getElementById("origin") as HTMLSelectElement)?.value || "";
+		onSearch?.({ city, category, origin });
+	};
+
+	const handleOriginChange = (origin: string) => {
+		const city =
+			(document.getElementById("city") as HTMLSelectElement)?.value || "";
+		const category =
+			(document.getElementById("category") as HTMLSelectElement)?.value || "";
+		onSearch?.({ city, category, origin });
 	};
 
 	return (
 		<div className="glass-card p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in">
-			<div className="grid grid-cols-2 gap-4">
+			<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 				<div>
 					<label
 						htmlFor="city"
@@ -61,6 +89,27 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 						<option value="スタウト">スタウト</option>
 						<option value="ヴァイツェン">ヴァイツェン</option>
 						<option value="ペールエール">ペールエール</option>
+					</select>
+				</div>
+
+				<div>
+					<label
+						htmlFor="origin"
+						className="block text-sm font-medium text-card-foreground mb-2 tracking-wide"
+					>
+						ビールの産地
+					</label>
+					<select
+						id="origin"
+						onChange={(e) => handleOriginChange(e.target.value)}
+						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
+					>
+						<option value="">全て</option>
+						{origins.map((origin) => (
+							<option key={origin} value={origin}>
+								{origin}
+							</option>
+						))}
 					</select>
 				</div>
 			</div>

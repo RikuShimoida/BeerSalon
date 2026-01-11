@@ -3,16 +3,21 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-export async function getBars(params?: { city?: string; category?: string }) {
+export async function getBars(params?: {
+	city?: string;
+	category?: string;
+	origin?: string;
+}) {
 	const where: {
 		isActive: boolean;
 		city?: string;
 		beerMenus?: {
 			some: {
 				beer: {
-					beerCategory: {
+					beerCategory?: {
 						name: string;
 					};
+					origin?: string;
 				};
 			};
 		};
@@ -24,16 +29,22 @@ export async function getBars(params?: { city?: string; category?: string }) {
 		where.city = params.city;
 	}
 
-	if (params?.category) {
+	if (params?.category || params?.origin) {
 		where.beerMenus = {
 			some: {
-				beer: {
-					beerCategory: {
-						name: params.category,
-					},
-				},
+				beer: {},
 			},
 		};
+
+		if (params?.category) {
+			where.beerMenus.some.beer.beerCategory = {
+				name: params.category,
+			};
+		}
+
+		if (params?.origin) {
+			where.beerMenus.some.beer.origin = params.origin;
+		}
 	}
 
 	const bars = await prisma.bar.findMany({
@@ -459,4 +470,26 @@ export async function getViewHistories() {
 			imageUrl: history.bar.barImages[0]?.imageUrl,
 		},
 	}));
+}
+
+export async function getBeerOrigins() {
+	const beers = await prisma.beer.findMany({
+		where: {
+			isActive: true,
+			origin: {
+				not: null,
+			},
+		},
+		select: {
+			origin: true,
+		},
+		distinct: ["origin"],
+		orderBy: {
+			origin: "asc",
+		},
+	});
+
+	return beers
+		.map((beer) => beer.origin)
+		.filter((origin): origin is string => origin !== null);
 }
