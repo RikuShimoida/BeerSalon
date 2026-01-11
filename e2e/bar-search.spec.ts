@@ -143,7 +143,6 @@ test.describe("トップページ（検索ページ）", () => {
 		await page.goto("/");
 
 		const cityFilter = page.locator("select#city");
-		const categoryFilter = page.locator("select#category");
 		const originFilter = page.locator("select#origin");
 
 		if ((await cityFilter.count()) > 0 && (await originFilter.count()) > 0) {

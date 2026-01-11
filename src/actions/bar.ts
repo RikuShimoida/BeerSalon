@@ -489,7 +489,25 @@ export async function getBeerOrigins() {
 		},
 	});
 
-	return beers
+	const origins = beers
 		.map((beer) => beer.origin)
 		.filter((origin): origin is string => origin !== null);
+
+	const grouped: Record<string, string[]> = {};
+
+	for (const origin of origins) {
+		const parts = origin.split("/");
+		const country = parts[0]?.trim() || origin;
+		const region = parts[1]?.trim();
+
+		if (!grouped[country]) {
+			grouped[country] = [];
+		}
+
+		if (region) {
+			grouped[country].push(region);
+		}
+	}
+
+	return grouped;
 }

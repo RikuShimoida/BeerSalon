@@ -13,7 +13,7 @@ interface SearchFormProps {
 }
 
 export function SearchForm({ onSearch }: SearchFormProps) {
-	const [origins, setOrigins] = useState<string[]>([]);
+	const [origins, setOrigins] = useState<Record<string, string[]>>({});
 
 	useEffect(() => {
 		const fetchOrigins = async () => {
@@ -105,10 +105,17 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 					>
 						<option value="">全て</option>
-						{origins.map((origin) => (
-							<option key={origin} value={origin}>
-								{origin}
-							</option>
+						{Object.entries(origins).map(([country, regions]) => (
+							<optgroup key={country} label={country}>
+								{regions.map((region) => (
+									<option
+										key={`${country}/${region}`}
+										value={`${country}/${region}`}
+									>
+										{region}
+									</option>
+								))}
+							</optgroup>
 						))}
 					</select>
 				</div>
