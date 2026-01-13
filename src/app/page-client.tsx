@@ -9,12 +9,18 @@ export function HomeClient() {
 	const [searchParams, setSearchParams] = useState<{
 		city: string;
 		category: string;
+		origin: string;
 	}>({
 		city: "",
 		category: "",
+		origin: "",
 	});
 
-	const handleSearch = (params: { city: string; category: string }) => {
+	const handleSearch = (params: {
+		city: string;
+		category: string;
+		origin: string;
+	}) => {
 		setSearchParams(params);
 	};
 
@@ -28,7 +34,11 @@ export function HomeClient() {
 				<GoogleMap city={searchParams.city} />
 
 				{/* 店舗一覧 */}
-				<BarList city={searchParams.city} category={searchParams.category} />
+				<BarList
+					city={searchParams.city}
+					category={searchParams.category}
+					origin={searchParams.origin}
+				/>
 			</div>
 		</div>
 	);

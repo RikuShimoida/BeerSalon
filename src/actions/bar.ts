@@ -3,14 +3,24 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-export async function getBars(params?: { city?: string; category?: string }) {
+export async function getBars(params?: {
+	city?: string;
+	category?: string;
+	origin?: string;
+}) {
 	const where: {
 		isActive: boolean;
 		city?: string;
 		beerMenus?: {
 			some: {
 				beer: {
-					beerCategory: {
+					beerCategory?: {
+						name: string;
+					};
+					region?: {
+						country: {
+							name: string;
+						};
 						name: string;
 					};
 				};
@@ -24,16 +34,33 @@ export async function getBars(params?: { city?: string; category?: string }) {
 		where.city = params.city;
 	}
 
-	if (params?.category) {
+	if (params?.category || params?.origin) {
 		where.beerMenus = {
 			some: {
-				beer: {
-					beerCategory: {
-						name: params.category,
-					},
-				},
+				beer: {},
 			},
 		};
+
+		if (params?.category) {
+			where.beerMenus.some.beer.beerCategory = {
+				name: params.category,
+			};
+		}
+
+		if (params?.origin) {
+			const parts = params.origin.split("/");
+			const countryName = parts[0]?.trim();
+			const regionName = parts[1]?.trim();
+
+			if (countryName && regionName) {
+				where.beerMenus.some.beer.region = {
+					country: {
+						name: countryName,
+					},
+					name: regionName,
+				};
+			}
+		}
 	}
 
 	const bars = await prisma.bar.findMany({
@@ -459,4 +486,39 @@ export async function getViewHistories() {
 			imageUrl: history.bar.barImages[0]?.imageUrl,
 		},
 	}));
+}
+
+export async function getBeerRegions() {
+	const regions = await prisma.region.findMany({
+		where: {
+			isActive: true,
+		},
+		include: {
+			country: true,
+		},
+		orderBy: [
+			{
+				country: {
+					name: "asc",
+				},
+			},
+			{
+				name: "asc",
+			},
+		],
+	});
+
+	const grouped: Record<string, string[]> = {};
+
+	for (const region of regions) {
+		const countryName = region.country.name;
+
+		if (!grouped[countryName]) {
+			grouped[countryName] = [];
+		}
+
+		grouped[countryName].push(region.name);
+	}
+
+	return grouped;
 }

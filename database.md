@@ -112,7 +112,48 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-### 2-4. breweries
+### 2-4. countries
+
+国マスタ。
+
+- **Table name:** `countries`
+- **Description:** 国マスタ
+
+#### Columns
+
+| Column      | Type        | Constraints            | Description          |
+|-------------|------------|------------------------|----------------------|
+| id          | bigserial  | PK                     | 国ID                 |
+| name        | text       | NOT NULL, UNIQUE       | 国名                 |
+| is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
+| created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
+| updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
+
+---
+
+### 2-5. regions
+
+地域マスタ（ビールの産地、ブルワリーの所在地）。
+
+- **Table name:** `regions`
+- **Description:** 地域マスタ（ビールの産地＝ブルワリーの所在地）
+
+#### Columns
+
+| Column      | Type        | Constraints            | Description          |
+|-------------|------------|------------------------|----------------------|
+| id          | bigserial  | PK                     | 地域ID               |
+| name        | text       | NOT NULL               | 地域名               |
+| country_id  | bigint     | NOT NULL, FK → countries(id) | 国ID           |
+| is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
+| created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
+| updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
+
+UNIQUE制約: `country_id + name`
+
+---
+
+### 2-6. breweries
 
 醸造所情報。
 
@@ -125,8 +166,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 |-------------|------------|------------------------|----------------------|
 | id          | bigserial  | PK                     | 醸造所ID             |
 | name        | text       | NOT NULL, UNIQUE       | 醸造所名             |
-| country     | text       | NULLABLE               | 国                   |
-| region      | text       | NULLABLE               | 地域/都道府県等      |
+| region_id   | bigint     | NULLABLE, FK → regions(id) | 地域ID           |
 | website_url | text       | NULLABLE               | Webサイト            |
 | is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
@@ -134,7 +174,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-### 2-5. beers
+### 2-7. beers
 
 ビール単体の情報（ブランド）。
 
@@ -149,7 +189,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | name             | text       | NOT NULL                           | ビール名                    |
 | beer_category_id | bigint     | NOT NULL, FK → beer_categories(id) | カテゴリ                     |
 | brewery_id       | bigint     | NULLABLE, FK → breweries(id)       | 醸造所                       |
-| origin           | text       | NULLABLE                           | 産地（国/地域など）          |
+| region_id        | bigint     | NULLABLE, FK → regions(id)         | 地域ID（産地）              |
 | abv              | numeric(4,2)| NULLABLE                          | アルコール度数              |
 | ibu              | integer    | NULLABLE                           | IBU                         |
 | description      | text       | NULLABLE                           | 説明文                      |
@@ -160,7 +200,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-### 2-6. bar_beer_menus
+### 2-8. bar_beer_menus
 
 店舗ごとのビールメニュー。
 
@@ -184,7 +224,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-### 2-7. bar_food_menus
+### 2-9. bar_food_menus
 
 店舗ごとのフードメニュー。
 
