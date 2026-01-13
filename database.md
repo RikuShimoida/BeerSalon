@@ -316,6 +316,26 @@ UNIQUE制約: `country_id + name`
 
 ---
 
+### 3-4. article_likes
+
+記事への「いいね」。
+
+- **Table name:** `article_likes`
+- **Description:** 記事に対するいいね
+
+#### Columns
+
+| Column       | Type        | Constraints                         | Description       |
+|--------------|------------|--------------------------------------|-------------------|
+| id           | bigserial  | PK                                   | ID                |
+| article_id   | bigint     | NOT NULL, FK → articles(id)          | 記事ID            |
+| user_id      | uuid       | NOT NULL, FK → user_profiles(id)     | いいねしたユーザー |
+| created_at   | timestamptz| NOT NULL DEFAULT now()               | いいね日時         |
+
+`article_id + user_id` に UNIQUE 制約を張る想定。
+
+---
+
 ## 4. 投稿・タイムライン・お気に入り
 
 ### 4-1. posts

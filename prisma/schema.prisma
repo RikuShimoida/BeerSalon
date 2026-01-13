@@ -22,6 +22,7 @@ model UserProfile {
   isActive       Boolean              @default(true) @map("is_active")
   createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  articleLikes   ArticleLike[]
   favoriteBars   FavoriteBar[]
   loginHistories LoginHistory[]
   notifications  Notification[]
@@ -225,18 +226,32 @@ model UserCoupon {
 
 /// 店舗記事
 model Article {
-  id          BigInt    @id @default(autoincrement())
-  barId       BigInt    @map("bar_id")
-  title       String
-  body        String
-  imageUrl    String?   @map("image_url")
-  publishedAt DateTime? @map("published_at") @db.Timestamptz(6)
-  isPublished Boolean   @default(false) @map("is_published")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-  bar         Bar       @relation(fields: [barId], references: [id], onDelete: Cascade)
+  id           BigInt        @id @default(autoincrement())
+  barId        BigInt        @map("bar_id")
+  title        String
+  body         String
+  imageUrl     String?       @map("image_url")
+  publishedAt  DateTime?     @map("published_at") @db.Timestamptz(6)
+  isPublished  Boolean       @default(false) @map("is_published")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  articleLikes ArticleLike[]
+  bar          Bar           @relation(fields: [barId], references: [id], onDelete: Cascade)
 
   @@map("articles")
+}
+
+/// 記事いいね
+model ArticleLike {
+  id        BigInt      @id @default(autoincrement())
+  articleId BigInt      @map("article_id")
+  userId    String      @map("user_id") @db.Uuid
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  article   Article     @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      UserProfile @relation(fields: [userId], references: [id])
+
+  @@unique([articleId, userId])
+  @@map("article_likes")
 }
 
 /// ユーザー投稿
