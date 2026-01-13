@@ -17,7 +17,7 @@ export async function getBars(params?: {
 					beerCategory?: {
 						name: string;
 					};
-					origin?: {
+					region?: {
 						country: {
 							name: string;
 						};
@@ -53,7 +53,7 @@ export async function getBars(params?: {
 			const regionName = parts[1]?.trim();
 
 			if (countryName && regionName) {
-				where.beerMenus.some.beer.origin = {
+				where.beerMenus.some.beer.region = {
 					country: {
 						name: countryName,
 					},
@@ -488,8 +488,8 @@ export async function getViewHistories() {
 	}));
 }
 
-export async function getBeerOrigins() {
-	const origins = await prisma.origin.findMany({
+export async function getBeerRegions() {
+	const regions = await prisma.region.findMany({
 		where: {
 			isActive: true,
 		},
@@ -510,14 +510,14 @@ export async function getBeerOrigins() {
 
 	const grouped: Record<string, string[]> = {};
 
-	for (const origin of origins) {
-		const countryName = origin.country.name;
+	for (const region of regions) {
+		const countryName = region.country.name;
 
 		if (!grouped[countryName]) {
 			grouped[countryName] = [];
 		}
 
-		grouped[countryName].push(origin.name);
+		grouped[countryName].push(region.name);
 	}
 
 	return grouped;

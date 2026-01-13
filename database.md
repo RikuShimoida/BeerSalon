@@ -131,19 +131,19 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-### 2-5. origins
+### 2-5. regions
 
-産地マスタ（国に紐づく地域）。
+地域マスタ（ビールの産地、ブルワリーの所在地）。
 
-- **Table name:** `origins`
-- **Description:** ビールの産地マスタ
+- **Table name:** `regions`
+- **Description:** 地域マスタ（ビールの産地＝ブルワリーの所在地）
 
 #### Columns
 
 | Column      | Type        | Constraints            | Description          |
 |-------------|------------|------------------------|----------------------|
-| id          | bigserial  | PK                     | 産地ID               |
-| name        | text       | NOT NULL               | 産地名（地域名）     |
+| id          | bigserial  | PK                     | 地域ID               |
+| name        | text       | NOT NULL               | 地域名               |
 | country_id  | bigint     | NOT NULL, FK → countries(id) | 国ID           |
 | is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
@@ -166,8 +166,7 @@ UNIQUE制約: `country_id + name`
 |-------------|------------|------------------------|----------------------|
 | id          | bigserial  | PK                     | 醸造所ID             |
 | name        | text       | NOT NULL, UNIQUE       | 醸造所名             |
-| country     | text       | NULLABLE               | 国                   |
-| region      | text       | NULLABLE               | 地域/都道府県等      |
+| region_id   | bigint     | NULLABLE, FK → regions(id) | 地域ID           |
 | website_url | text       | NULLABLE               | Webサイト            |
 | is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
@@ -190,7 +189,7 @@ UNIQUE制約: `country_id + name`
 | name             | text       | NOT NULL                           | ビール名                    |
 | beer_category_id | bigint     | NOT NULL, FK → beer_categories(id) | カテゴリ                     |
 | brewery_id       | bigint     | NULLABLE, FK → breweries(id)       | 醸造所                       |
-| origin_id        | bigint     | NULLABLE, FK → origins(id)         | 産地ID                      |
+| region_id        | bigint     | NULLABLE, FK → regions(id)         | 地域ID（産地）              |
 | abv              | numeric(4,2)| NULLABLE                          | アルコール度数              |
 | ibu              | integer    | NULLABLE                           | IBU                         |
 | description      | text       | NULLABLE                           | 説明文                      |

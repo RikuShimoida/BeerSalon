@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getBeerOrigins } from "@/actions/bar";
+import { getBeerRegions } from "@/actions/bar";
 import { SHIZUOKA_CITIES } from "@/lib/constants/cities";
 
 interface SearchFormProps {
@@ -16,11 +16,11 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 	const [origins, setOrigins] = useState<Record<string, string[]>>({});
 
 	useEffect(() => {
-		const fetchOrigins = async () => {
-			const result = await getBeerOrigins();
+		const fetchRegions = async () => {
+			const result = await getBeerRegions();
 			setOrigins(result);
 		};
-		fetchOrigins();
+		fetchRegions();
 	}, []);
 
 	const handleCityChange = (city: string) => {

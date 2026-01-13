@@ -99,37 +99,38 @@ model Country {
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-  origins   Origin[]
+  regions   Region[]
 
   @@map("countries")
 }
 
-/// 産地マスタ
-model Origin {
-  id        BigInt   @id @default(autoincrement())
+/// 地域マスタ
+model Region {
+  id        BigInt    @id @default(autoincrement())
   name      String
-  countryId BigInt   @map("country_id")
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  countryId BigInt    @map("country_id")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   beers     Beer[]
-  country   Country  @relation(fields: [countryId], references: [id])
+  breweries Brewery[]
+  country   Country   @relation(fields: [countryId], references: [id])
 
   @@unique([countryId, name])
-  @@map("origins")
+  @@map("regions")
 }
 
 /// 醸造所マスタ
 model Brewery {
   id         BigInt   @id @default(autoincrement())
   name       String   @unique
-  country    String?
-  region     String?
+  regionId   BigInt?  @map("region_id")
   websiteUrl String?  @map("website_url")
   isActive   Boolean  @default(true) @map("is_active")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
   beers      Beer[]
+  region     Region?  @relation(fields: [regionId], references: [id])
 
   @@map("breweries")
 }
@@ -140,7 +141,7 @@ model Beer {
   name           String
   beerCategoryId BigInt        @map("beer_category_id")
   breweryId      BigInt?       @map("brewery_id")
-  originId       BigInt?       @map("origin_id")
+  regionId       BigInt?       @map("region_id")
   abv            Decimal?      @db.Decimal(4, 2)
   ibu            Int?
   description    String?
@@ -151,7 +152,7 @@ model Beer {
   beerMenus      BarBeerMenu[]
   beerCategory   BeerCategory  @relation(fields: [beerCategoryId], references: [id])
   brewery        Brewery?      @relation(fields: [breweryId], references: [id])
-  origin         Origin?       @relation(fields: [originId], references: [id])
+  region         Region?       @relation(fields: [regionId], references: [id])
 
   @@map("beers")
 }
