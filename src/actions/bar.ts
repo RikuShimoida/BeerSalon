@@ -17,7 +17,12 @@ export async function getBars(params?: {
 					beerCategory?: {
 						name: string;
 					};
-					origin?: string;
+					origin?: {
+						country: {
+							name: string;
+						};
+						name: string;
+					};
 				};
 			};
 		};
@@ -43,7 +48,18 @@ export async function getBars(params?: {
 		}
 
 		if (params?.origin) {
-			where.beerMenus.some.beer.origin = params.origin;
+			const parts = params.origin.split("/");
+			const countryName = parts[0]?.trim();
+			const regionName = parts[1]?.trim();
+
+			if (countryName && regionName) {
+				where.beerMenus.some.beer.origin = {
+					country: {
+						name: countryName,
+					},
+					name: regionName,
+				};
+			}
 		}
 	}
 
@@ -473,40 +489,35 @@ export async function getViewHistories() {
 }
 
 export async function getBeerOrigins() {
-	const beers = await prisma.beer.findMany({
+	const origins = await prisma.origin.findMany({
 		where: {
 			isActive: true,
-			origin: {
-				not: null,
+		},
+		include: {
+			country: true,
+		},
+		orderBy: [
+			{
+				country: {
+					name: "asc",
+				},
 			},
-		},
-		select: {
-			origin: true,
-		},
-		distinct: ["origin"],
-		orderBy: {
-			origin: "asc",
-		},
+			{
+				name: "asc",
+			},
+		],
 	});
-
-	const origins = beers
-		.map((beer) => beer.origin)
-		.filter((origin): origin is string => origin !== null);
 
 	const grouped: Record<string, string[]> = {};
 
 	for (const origin of origins) {
-		const parts = origin.split("/");
-		const country = parts[0]?.trim() || origin;
-		const region = parts[1]?.trim();
+		const countryName = origin.country.name;
 
-		if (!grouped[country]) {
-			grouped[country] = [];
+		if (!grouped[countryName]) {
+			grouped[countryName] = [];
 		}
 
-		if (region) {
-			grouped[country].push(region);
-		}
+		grouped[countryName].push(origin.name);
 	}
 
 	return grouped;
