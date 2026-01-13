@@ -18,6 +18,8 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 	useEffect(() => {
 		const fetchRegions = async () => {
 			const result = await getBeerRegions();
+			console.log("getBeerRegions result:", result);
+			console.log("Number of countries:", Object.keys(result).length);
 			setOrigins(result);
 		};
 		fetchRegions();
@@ -97,7 +99,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 						htmlFor="origin"
 						className="block text-sm font-medium text-card-foreground mb-2 tracking-wide"
 					>
-						ビールの産地
+						ビールの地域
 					</label>
 					<select
 						id="origin"
