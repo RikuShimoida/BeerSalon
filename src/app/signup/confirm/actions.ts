@@ -21,12 +21,21 @@ export async function confirmAndSaveProfile(
 	} = await supabase.auth.getUser();
 
 	if (!user) {
+		console.error("[confirmAndSaveProfile] ユーザー認証失敗");
 		return {
 			error: "認証が必要です",
 		};
 	}
 
 	try {
+		const existingProfile = await prisma.userProfile.findUnique({
+			where: { userAuthId: user.id },
+		});
+
+		if (existingProfile) {
+			redirect("/");
+		}
+
 		let profileImageUrl: string | undefined;
 
 		if (data.profileImageUrl) {
@@ -43,13 +52,31 @@ export async function confirmAndSaveProfile(
 				});
 
 			if (uploadError) {
-				console.error("画像アップロードエラー:", uploadError);
-			} else if (uploadData) {
+				console.error(
+					"[confirmAndSaveProfile] 画像アップロードエラー:",
+					uploadError,
+				);
+				return {
+					error: `画像のアップロードに失敗しました: ${uploadError.message}`,
+				};
+			}
+
+			if (uploadData) {
 				const {
 					data: { publicUrl },
 				} = supabase.storage.from("profile-images").getPublicUrl(fileName);
 				profileImageUrl = publicUrl;
 			}
+		}
+
+		const birthdayDate = new Date(data.birthday);
+		if (Number.isNaN(birthdayDate.getTime())) {
+			console.error(
+				`[confirmAndSaveProfile] 生年月日の形式が不正です: ${data.birthday}`,
+			);
+			return {
+				error: "生年月日の形式が不正です",
+			};
 		}
 
 		await prisma.userProfile.create({
@@ -58,7 +85,7 @@ export async function confirmAndSaveProfile(
 				lastName: data.lastName,
 				firstName: data.firstName,
 				nickname: data.nickname,
-				birthday: new Date(data.birthday),
+				birthday: birthdayDate,
 				gender: data.gender,
 				prefecture: data.prefecture,
 				profileImageUrl: profileImageUrl,
@@ -67,7 +94,19 @@ export async function confirmAndSaveProfile(
 		});
 
 		redirect("/");
-	} catch (_error) {
+	} catch (error) {
+		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+			throw error;
+		}
+
+		console.error("[confirmAndSaveProfile] エラー発生:", error);
+
+		if (error instanceof Error) {
+			return {
+				error: `プロフィールの保存に失敗しました: ${error.message}`,
+			};
+		}
+
 		return {
 			error: "プロフィールの保存に失敗しました",
 		};
