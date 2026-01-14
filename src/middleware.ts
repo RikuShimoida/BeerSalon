@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.redirect(new URL("/login", request.url));
 	}
 
-	if (user && pathname !== "/signup/profile" && !pathname.startsWith("/api")) {
+	if (user && !pathname.startsWith("/signup") && !pathname.startsWith("/api")) {
 		const { data } = await supabase
 			.from("user_profiles")
 			.select("id")
