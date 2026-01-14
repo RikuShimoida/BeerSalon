@@ -37,12 +37,10 @@ export async function confirmAndSaveProfile(
 		});
 
 		if (existingProfile) {
-			console.error(
-				`[confirmAndSaveProfile] プロフィールは既に存在します: userAuthId=${user.id}`,
+			console.log(
+				`[confirmAndSaveProfile] プロフィールは既に存在します。リダイレクトします: userAuthId=${user.id}`,
 			);
-			return {
-				error: "プロフィールは既に登録されています",
-			};
+			redirect("/");
 		}
 
 		let profileImageUrl: string | undefined;
@@ -114,6 +112,10 @@ export async function confirmAndSaveProfile(
 
 		redirect("/");
 	} catch (error) {
+		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+			throw error;
+		}
+
 		console.error("[confirmAndSaveProfile] エラー発生:", error);
 
 		if (error instanceof Error) {

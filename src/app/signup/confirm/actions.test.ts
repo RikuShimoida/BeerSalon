@@ -3,7 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // next/navigationのモック
 const mockRedirect = vi.fn();
 vi.mock("next/navigation", () => ({
-	redirect: (...args: unknown[]) => mockRedirect(...args),
+	redirect: (...args: unknown[]) => {
+		mockRedirect(...args);
+		const error = new Error("NEXT_REDIRECT");
+		error.message = "NEXT_REDIRECT";
+		throw error;
+	},
 }));
 
 // Supabase clientのモック
@@ -71,7 +76,11 @@ describe("confirmAndSaveProfile", () => {
 			const formData = new FormData();
 			formData.append("profileData", JSON.stringify(profileData));
 
-			const result = await confirmAndSaveProfile(undefined, formData);
+			try {
+				await confirmAndSaveProfile(undefined, formData);
+			} catch (_error) {
+				// redirectはthrowする
+			}
 
 			expect(mockPrismaCreate).toHaveBeenCalledWith({
 				data: {
@@ -86,7 +95,6 @@ describe("confirmAndSaveProfile", () => {
 					bio: "",
 				},
 			});
-			expect(result).toBeUndefined();
 		});
 
 		it("成功時にredirect('/')が呼ばれる", async () => {
@@ -243,7 +251,7 @@ describe("confirmAndSaveProfile", () => {
 			});
 		});
 
-		it("プロフィールが既に存在する場合、エラーが返る", async () => {
+		it("プロフィールが既に存在する場合、redirect('/')が呼ばれる", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -269,11 +277,13 @@ describe("confirmAndSaveProfile", () => {
 			const formData = new FormData();
 			formData.append("profileData", JSON.stringify(profileData));
 
-			const result = await confirmAndSaveProfile(undefined, formData);
+			try {
+				await confirmAndSaveProfile(undefined, formData);
+			} catch (_error) {
+				// redirectはthrowする
+			}
 
-			expect(result).toEqual({
-				error: "プロフィールは既に登録されています",
-			});
+			expect(mockRedirect).toHaveBeenCalledWith("/");
 			expect(mockPrismaCreate).not.toHaveBeenCalled();
 		});
 
