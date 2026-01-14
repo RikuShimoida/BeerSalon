@@ -27,26 +27,18 @@ export async function confirmAndSaveProfile(
 		};
 	}
 
-	console.log(
-		`[confirmAndSaveProfile] ユーザー認証成功: userAuthId=${user.id}`,
-	);
-
 	try {
 		const existingProfile = await prisma.userProfile.findUnique({
 			where: { userAuthId: user.id },
 		});
 
 		if (existingProfile) {
-			console.log(
-				`[confirmAndSaveProfile] プロフィールは既に存在します。リダイレクトします: userAuthId=${user.id}`,
-			);
 			redirect("/");
 		}
 
 		let profileImageUrl: string | undefined;
 
 		if (data.profileImageUrl) {
-			console.log("[confirmAndSaveProfile] プロフィール画像のアップロード開始");
 			const base64Data = data.profileImageUrl.split(",")[1];
 			const buffer = Buffer.from(base64Data, "base64");
 			const fileName = `${user.id}-${Date.now()}.png`;
@@ -74,13 +66,8 @@ export async function confirmAndSaveProfile(
 					data: { publicUrl },
 				} = supabase.storage.from("profile-images").getPublicUrl(fileName);
 				profileImageUrl = publicUrl;
-				console.log(
-					`[confirmAndSaveProfile] 画像アップロード成功: ${profileImageUrl}`,
-				);
 			}
 		}
-
-		console.log("[confirmAndSaveProfile] プロフィールのDB保存開始");
 
 		const birthdayDate = new Date(data.birthday);
 		if (Number.isNaN(birthdayDate.getTime())) {
@@ -105,10 +92,6 @@ export async function confirmAndSaveProfile(
 				bio: data.bio,
 			},
 		});
-
-		console.log(
-			`[confirmAndSaveProfile] プロフィールの保存成功: userAuthId=${user.id}`,
-		);
 
 		redirect("/");
 	} catch (error) {
