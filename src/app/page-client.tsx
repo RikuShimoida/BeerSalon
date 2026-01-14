@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { BarList } from "@/components/bar/bar-list";
+import { FooterLinks } from "@/components/home/footer-links";
+import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
+import { PopularArticlesSection } from "@/components/home/popular-articles-section";
+import { PopularRankingSection } from "@/components/home/popular-ranking-section";
 import { GoogleMap } from "@/components/map/google-map";
 import { SearchForm } from "@/components/search/search-form";
 
@@ -24,6 +28,72 @@ export function HomeClient() {
 		setSearchParams(params);
 	};
 
+	const mockPopularArticles = [
+		{
+			id: 1,
+			title: "新しいIPAが入荷しました！ホップの香りが最高です",
+			barName: "クラフトビアバー 静岡",
+			publishedAt: "2025-12-15",
+			likeCount: 42,
+			imageUrl: null,
+		},
+		{
+			id: 2,
+			title: "冬季限定スタウト登場 - 濃厚な味わいをお楽しみください",
+			barName: "ブルワリータップ 浜松",
+			publishedAt: "2025-12-20",
+			likeCount: 38,
+			imageUrl: null,
+		},
+		{
+			id: 3,
+			title: "週末はハッピーアワー実施中！お得にクラフトビールを",
+			barName: "ビアホール 沼津",
+			publishedAt: "2025-12-25",
+			likeCount: 35,
+			imageUrl: null,
+		},
+	];
+
+	const mockPopularBars = [
+		{ id: 1, name: "クラフトビアバー 静岡", rank: 1, href: "/bars/1" },
+		{ id: 2, name: "ブルワリータップ 浜松", rank: 2, href: "/bars/2" },
+		{ id: 3, name: "ビアホール 沼津", rank: 3, href: "/bars/3" },
+	];
+
+	const mockPopularCities = [
+		{ id: "shizuoka", name: "静岡市", rank: 1, href: "/?city=静岡市" },
+		{ id: "hamamatsu", name: "浜松市", rank: 2, href: "/?city=浜松市" },
+		{ id: "numazu", name: "沼津市", rank: 3, href: "/?city=沼津市" },
+	];
+
+	const mockPopularCategories = [
+		{ id: 1, name: "IPA", rank: 1, href: "/?cat=1" },
+		{ id: 2, name: "ペールエール", rank: 2, href: "/?cat=2" },
+		{ id: 3, name: "スタウト", rank: 3, href: "/?cat=3" },
+	];
+
+	const mockPopularRegions = [
+		{
+			id: 1,
+			name: "アメリカ・西海岸",
+			rank: 1,
+			href: "/?region=1",
+		},
+		{
+			id: 2,
+			name: "ベルギー・フランダース",
+			rank: 2,
+			href: "/?region=2",
+		},
+		{
+			id: 3,
+			name: "日本・静岡",
+			rank: 3,
+			href: "/?region=3",
+		},
+	];
+
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
 			<div className="flex flex-col gap-8 md:gap-12">
@@ -39,6 +109,39 @@ export function HomeClient() {
 					category={searchParams.category}
 					origin={searchParams.origin}
 				/>
+
+				{/* クラフトビールについて知る */}
+				<LearnAboutCraftBeerCard />
+
+				{/* 先月いいねの多かった記事 */}
+				<PopularArticlesSection articles={mockPopularArticles} />
+
+				{/* 人気なお店で探す */}
+				<PopularRankingSection
+					title="人気なお店で探す"
+					items={mockPopularBars}
+				/>
+
+				{/* 人気な市町村で探す */}
+				<PopularRankingSection
+					title="人気な市町村で探す"
+					items={mockPopularCities}
+				/>
+
+				{/* 人気なカテゴリのビールで探す */}
+				<PopularRankingSection
+					title="人気なカテゴリのビールで探す"
+					items={mockPopularCategories}
+				/>
+
+				{/* 人気なビールの産地で探す */}
+				<PopularRankingSection
+					title="人気なビールの産地で探す"
+					items={mockPopularRegions}
+				/>
+
+				{/* 利用規約エリア */}
+				<FooterLinks />
 			</div>
 		</div>
 	);
