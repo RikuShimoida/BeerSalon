@@ -26,10 +26,12 @@ vi.mock("@/lib/supabase/server", () => ({
 
 // Prismaのモック
 const mockPrismaCreate = vi.fn();
+const mockPrismaFindUnique = vi.fn();
 vi.mock("@/lib/prisma", () => ({
 	prisma: {
 		userProfile: {
 			create: vi.fn((...args: unknown[]) => mockPrismaCreate(...args)),
+			findUnique: vi.fn((...args: unknown[]) => mockPrismaFindUnique(...args)),
 		},
 	},
 }));
@@ -47,6 +49,8 @@ describe("confirmAndSaveProfile", () => {
 				data: { user: { id: "test-user-id" } },
 				error: null,
 			});
+
+			mockPrismaFindUnique.mockResolvedValue(null);
 
 			mockPrismaCreate.mockResolvedValue({
 				id: "profile-id",
@@ -91,6 +95,8 @@ describe("confirmAndSaveProfile", () => {
 				error: null,
 			});
 
+			mockPrismaFindUnique.mockResolvedValue(null);
+
 			mockPrismaCreate.mockResolvedValue({
 				id: "profile-id",
 			});
@@ -123,6 +129,8 @@ describe("confirmAndSaveProfile", () => {
 				data: { user: { id: "test-user-id" } },
 				error: null,
 			});
+
+			mockPrismaFindUnique.mockResolvedValue(null);
 
 			// base64エンコードされた画像データ（簡易的なもの）
 			const base64Image =
@@ -204,11 +212,13 @@ describe("confirmAndSaveProfile", () => {
 			expect(mockPrismaCreate).not.toHaveBeenCalled();
 		});
 
-		it("DB保存失敗時、エラーメッセージが返る", async () => {
+		it("DB保存失敗時、詳細なエラーメッセージが返る", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
 			});
+
+			mockPrismaFindUnique.mockResolvedValue(null);
 
 			mockPrismaCreate.mockRejectedValue(new Error("Database error"));
 
@@ -229,11 +239,75 @@ describe("confirmAndSaveProfile", () => {
 			const result = await confirmAndSaveProfile(undefined, formData);
 
 			expect(result).toEqual({
-				error: "プロフィールの保存に失敗しました",
+				error: "プロフィールの保存に失敗しました: Database error",
 			});
 		});
 
-		it("画像アップロード失敗時でも、処理が継続する", async () => {
+		it("プロフィールが既に存在する場合、エラーが返る", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+
+			mockPrismaFindUnique.mockResolvedValue({
+				id: "existing-profile-id",
+				userAuthId: "test-user-id",
+				nickname: "既存ユーザー",
+			});
+
+			const profileData = {
+				lastName: "山田",
+				firstName: "太郎",
+				nickname: "やまちゃん",
+				birthday: "1990-01-01",
+				gender: "male",
+				prefecture: "東京都",
+				profileImageUrl: "",
+				bio: "",
+			};
+
+			const formData = new FormData();
+			formData.append("profileData", JSON.stringify(profileData));
+
+			const result = await confirmAndSaveProfile(undefined, formData);
+
+			expect(result).toEqual({
+				error: "プロフィールは既に登録されています",
+			});
+			expect(mockPrismaCreate).not.toHaveBeenCalled();
+		});
+
+		it("生年月日の形式が不正な場合、エラーが返る", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+
+			mockPrismaFindUnique.mockResolvedValue(null);
+
+			const profileData = {
+				lastName: "山田",
+				firstName: "太郎",
+				nickname: "やまちゃん",
+				birthday: "invalid-date",
+				gender: "male",
+				prefecture: "東京都",
+				profileImageUrl: "",
+				bio: "",
+			};
+
+			const formData = new FormData();
+			formData.append("profileData", JSON.stringify(profileData));
+
+			const result = await confirmAndSaveProfile(undefined, formData);
+
+			expect(result).toEqual({
+				error: "生年月日の形式が不正です",
+			});
+			expect(mockPrismaCreate).not.toHaveBeenCalled();
+		});
+
+		it("画像アップロード失敗時、エラーが返る", async () => {
 			const consoleErrorSpy = vi
 				.spyOn(console, "error")
 				.mockImplementation(() => {});
@@ -243,16 +317,14 @@ describe("confirmAndSaveProfile", () => {
 				error: null,
 			});
 
+			mockPrismaFindUnique.mockResolvedValue(null);
+
 			const base64Image =
 				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==";
 
 			mockUpload.mockResolvedValue({
 				data: null,
 				error: { message: "Upload failed" },
-			});
-
-			mockPrismaCreate.mockResolvedValue({
-				id: "profile-id",
 			});
 
 			const profileData = {
@@ -269,17 +341,16 @@ describe("confirmAndSaveProfile", () => {
 			const formData = new FormData();
 			formData.append("profileData", JSON.stringify(profileData));
 
-			try {
-				await confirmAndSaveProfile(undefined, formData);
-			} catch (_error) {
-				// redirectはthrowする
-			}
+			const result = await confirmAndSaveProfile(undefined, formData);
 
 			expect(consoleErrorSpy).toHaveBeenCalledWith(
 				expect.stringContaining("画像アップロードエラー"),
 				expect.anything(),
 			);
-			expect(mockPrismaCreate).toHaveBeenCalled(); // 処理は継続
+			expect(result).toEqual({
+				error: "画像のアップロードに失敗しました: Upload failed",
+			});
+			expect(mockPrismaCreate).not.toHaveBeenCalled();
 
 			consoleErrorSpy.mockRestore();
 		});
