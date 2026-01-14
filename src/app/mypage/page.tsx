@@ -10,14 +10,14 @@ export default async function MyPage() {
 	const user = await getCurrentUser();
 
 	if (!user) {
-		redirect("/login");
+		redirect("/signup/profile");
 	}
 
 	const posts = await getUserPosts(user.id);
 	const coupons = await getUserCoupons();
 
 	if (coupons === null) {
-		redirect("/login");
+		redirect("/signup/profile");
 	}
 
 	return (
