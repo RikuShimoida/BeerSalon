@@ -4,7 +4,12 @@ import { type NextRequest, NextResponse } from "next/server";
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
-	const publicPaths = ["/login", "/signup", "/password/reset"];
+	const publicPaths = [
+		"/login",
+		"/signup",
+		"/password/reset",
+		"/auth/callback",
+	];
 	const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
 	let supabaseResponse = NextResponse.next({
