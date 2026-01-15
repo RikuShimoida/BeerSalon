@@ -2,9 +2,20 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "./profile-form";
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+	searchParams,
+}: {
+	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
 	try {
 		const supabase = await createClient();
+		const params = await searchParams;
+
+		if (params.error) {
+			throw new Error(
+				`認証エラー: ${params.error_description || params.error}`,
+			);
+		}
 
 		const {
 			data: { user },
