@@ -5,6 +5,7 @@ type RankingItem = {
 	name: string;
 	rank: number;
 	href: string;
+	imageUrl?: string | null;
 };
 
 type PopularRankingSectionProps = {
@@ -43,7 +44,15 @@ export function PopularRankingSection({
 						href={item.href}
 						className="group relative block h-32 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow"
 					>
-						<div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-amber-700" />
+						{item.imageUrl ? (
+							<div
+								className="absolute inset-0 bg-cover bg-center"
+								style={{ backgroundImage: `url(${item.imageUrl})` }}
+							/>
+						) : (
+							<div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-amber-700" />
+						)}
+						<div className="absolute inset-0 bg-black/30" />
 						<div className="absolute top-4 left-4">
 							<span
 								className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-lg font-bold ${getRankBadgeColor(item.rank)}`}
