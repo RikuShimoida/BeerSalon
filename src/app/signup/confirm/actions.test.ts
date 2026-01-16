@@ -13,18 +13,10 @@ vi.mock("next/navigation", () => ({
 
 // Supabase clientのモック
 const mockGetUser = vi.fn();
-const mockUpload = vi.fn();
-const mockGetPublicUrl = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
 	createClient: vi.fn(() => ({
 		auth: {
 			getUser: mockGetUser,
-		},
-		storage: {
-			from: vi.fn(() => ({
-				upload: mockUpload,
-				getPublicUrl: mockGetPublicUrl,
-			})),
 		},
 	})),
 }));
@@ -91,7 +83,7 @@ describe("confirmAndSaveProfile", () => {
 					birthday: new Date("1990-01-01"),
 					gender: "male",
 					prefecture: "東京都",
-					profileImageUrl: undefined,
+					profileImageUrl: null,
 					bio: "",
 				},
 			});
@@ -132,7 +124,7 @@ describe("confirmAndSaveProfile", () => {
 			expect(mockRedirect).toHaveBeenCalledWith("/");
 		});
 
-		it("プロフィール画像がある場合、Supabase Storageへアップロードされる", async () => {
+		it("プロフィール画像URLがある場合、そのままDB保存される", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -140,24 +132,12 @@ describe("confirmAndSaveProfile", () => {
 
 			mockPrismaFindUnique.mockResolvedValue(null);
 
-			// base64エンコードされた画像データ（簡易的なもの）
-			const base64Image =
-				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==";
-
-			mockUpload.mockResolvedValue({
-				data: { path: "test-user-id-123456.png" },
-				error: null,
-			});
-
-			mockGetPublicUrl.mockReturnValue({
-				data: {
-					publicUrl: "https://storage.example.com/test-user-id-123456.png",
-				},
-			});
-
 			mockPrismaCreate.mockResolvedValue({
 				id: "profile-id",
 			});
+
+			const profileImageUrl =
+				"https://storage.example.com/test-user-id-123456.png";
 
 			const profileData = {
 				lastName: "山田",
@@ -166,7 +146,7 @@ describe("confirmAndSaveProfile", () => {
 				birthday: "1990-01-01",
 				gender: "male",
 				prefecture: "東京都",
-				profileImageUrl: base64Image,
+				profileImageUrl: profileImageUrl,
 				bio: "",
 			};
 
@@ -179,12 +159,10 @@ describe("confirmAndSaveProfile", () => {
 				// redirectはthrowする
 			}
 
-			expect(mockUpload).toHaveBeenCalled();
 			expect(mockPrismaCreate).toHaveBeenCalledWith(
 				expect.objectContaining({
 					data: expect.objectContaining({
-						profileImageUrl:
-							"https://storage.example.com/test-user-id-123456.png",
+						profileImageUrl: profileImageUrl,
 					}),
 				}),
 			);
@@ -315,54 +293,6 @@ describe("confirmAndSaveProfile", () => {
 				error: "生年月日の形式が不正です",
 			});
 			expect(mockPrismaCreate).not.toHaveBeenCalled();
-		});
-
-		it("画像アップロード失敗時、エラーが返る", async () => {
-			const consoleErrorSpy = vi
-				.spyOn(console, "error")
-				.mockImplementation(() => {});
-
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-
-			mockPrismaFindUnique.mockResolvedValue(null);
-
-			const base64Image =
-				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==";
-
-			mockUpload.mockResolvedValue({
-				data: null,
-				error: { message: "Upload failed" },
-			});
-
-			const profileData = {
-				lastName: "山田",
-				firstName: "太郎",
-				nickname: "やまちゃん",
-				birthday: "1990-01-01",
-				gender: "male",
-				prefecture: "東京都",
-				profileImageUrl: base64Image,
-				bio: "",
-			};
-
-			const formData = new FormData();
-			formData.append("profileData", JSON.stringify(profileData));
-
-			const result = await confirmAndSaveProfile(undefined, formData);
-
-			expect(consoleErrorSpy).toHaveBeenCalledWith(
-				expect.stringContaining("画像アップロードエラー"),
-				expect.anything(),
-			);
-			expect(result).toEqual({
-				error: "画像のアップロードに失敗しました: Upload failed",
-			});
-			expect(mockPrismaCreate).not.toHaveBeenCalled();
-
-			consoleErrorSpy.mockRestore();
 		});
 	});
 });

@@ -13,30 +13,6 @@ export async function saveProfileToSession(
 	formData: FormData,
 ): Promise<FormState | undefined> {
 	try {
-		const data = {
-			lastName: formData.get("lastName") as string,
-			firstName: formData.get("firstName") as string,
-			nickname: formData.get("nickname") as string,
-			birthday: formData.get("birthday") as string,
-			gender: formData.get("gender") as string,
-			prefecture: formData.get("prefecture") as string,
-			profileImageUrl: formData.get("profileImageUrl") as string | undefined,
-			bio: formData.get("bio") as string | undefined,
-		};
-
-		console.log("[saveProfileToSession] Validating profile data:", {
-			...data,
-			profileImageUrl: data.profileImageUrl ? "[REDACTED]" : undefined,
-		});
-
-		const result = profileSchema.safeParse(data);
-		if (!result.success) {
-			console.error("[saveProfileToSession] Validation error:", result.error);
-			return {
-				error: result.error.issues[0].message,
-			};
-		}
-
 		const supabase = await createClient();
 
 		const {
@@ -55,6 +31,66 @@ export async function saveProfileToSession(
 			console.warn("[saveProfileToSession] No user found");
 			return {
 				error: "認証が必要です",
+			};
+		}
+
+		let profileImageUrl: string | undefined;
+		const profileImageBase64 = formData.get("profileImageUrl") as
+			| string
+			| undefined;
+
+		if (profileImageBase64?.startsWith("data:image/")) {
+			const base64Data = profileImageBase64.split(",")[1];
+			const buffer = Buffer.from(base64Data, "base64");
+			const fileName = `${user.id}-${Date.now()}.png`;
+
+			const { data: uploadData, error: uploadError } = await supabase.storage
+				.from("profile-images")
+				.upload(fileName, buffer, {
+					contentType: "image/png",
+					cacheControl: "3600",
+					upsert: false,
+				});
+
+			if (uploadError) {
+				console.error(
+					"[saveProfileToSession] 画像アップロードエラー:",
+					uploadError,
+				);
+				return {
+					error: `画像のアップロードに失敗しました: ${uploadError.message}`,
+				};
+			}
+
+			if (uploadData) {
+				const {
+					data: { publicUrl },
+				} = supabase.storage.from("profile-images").getPublicUrl(fileName);
+				profileImageUrl = publicUrl;
+			}
+		}
+
+		const data = {
+			lastName: formData.get("lastName") as string,
+			firstName: formData.get("firstName") as string,
+			nickname: formData.get("nickname") as string,
+			birthday: formData.get("birthday") as string,
+			gender: formData.get("gender") as string,
+			prefecture: formData.get("prefecture") as string,
+			profileImageUrl: profileImageUrl,
+			bio: formData.get("bio") as string | undefined,
+		};
+
+		console.log("[saveProfileToSession] Validating profile data:", {
+			...data,
+			profileImageUrl: data.profileImageUrl ? "[REDACTED]" : undefined,
+		});
+
+		const result = profileSchema.safeParse(data);
+		if (!result.success) {
+			console.error("[saveProfileToSession] Validation error:", result.error);
+			return {
+				error: result.error.issues[0].message,
 			};
 		}
 

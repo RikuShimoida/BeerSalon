@@ -8,10 +8,18 @@ vi.mock("next/navigation", () => ({
 
 // Supabase clientのモック
 const mockGetUser = vi.fn();
+const mockUpload = vi.fn();
+const mockGetPublicUrl = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
 	createClient: vi.fn(() => ({
 		auth: {
 			getUser: mockGetUser,
+		},
+		storage: {
+			from: vi.fn(() => ({
+				upload: mockUpload,
+				getPublicUrl: mockGetPublicUrl,
+			})),
 		},
 	})),
 }));
@@ -105,9 +113,90 @@ describe("saveProfileToSession", () => {
 				birthday: "1995-05-15",
 				gender: "female",
 				prefecture: "大阪府",
-				profileImageUrl: "",
+				profileImageUrl: undefined,
 				bio: "クラフトビール好きです",
 			});
+		});
+
+		it("画像をアップロードし、公開URLを取得できる", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+
+			mockUpload.mockResolvedValue({
+				data: { path: "test-user-id-12345.png" },
+				error: null,
+			});
+
+			mockGetPublicUrl.mockReturnValue({
+				data: {
+					publicUrl:
+						"https://example.com/storage/v1/object/public/profile-images/test-user-id-12345.png",
+				},
+			});
+
+			const base64Image =
+				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+			const formData = new FormData();
+			formData.append("lastName", "山田");
+			formData.append("firstName", "太郎");
+			formData.append("nickname", "やまちゃん");
+			formData.append("birthday", "1990-01-01");
+			formData.append("gender", "male");
+			formData.append("prefecture", "東京都");
+			formData.append("profileImageUrl", base64Image);
+			formData.append("bio", "");
+
+			try {
+				await saveProfileToSession(undefined, formData);
+			} catch (_error) {
+				// redirectはthrowする
+			}
+
+			expect(mockUpload).toHaveBeenCalled();
+			expect(mockGetPublicUrl).toHaveBeenCalled();
+
+			const callArgs = mockRedirect.mock.calls[0][0] as string;
+			const encodedData = callArgs.split("data=")[1];
+			const decodedData = JSON.parse(decodeURIComponent(encodedData));
+
+			expect(decodedData.profileImageUrl).toBe(
+				"https://example.com/storage/v1/object/public/profile-images/test-user-id-12345.png",
+			);
+		});
+
+		it("画像アップロードに失敗した場合、エラーが返る", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+
+			mockUpload.mockResolvedValue({
+				data: null,
+				error: { message: "Upload failed" },
+			});
+
+			const base64Image =
+				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+			const formData = new FormData();
+			formData.append("lastName", "山田");
+			formData.append("firstName", "太郎");
+			formData.append("nickname", "やまちゃん");
+			formData.append("birthday", "1990-01-01");
+			formData.append("gender", "male");
+			formData.append("prefecture", "東京都");
+			formData.append("profileImageUrl", base64Image);
+			formData.append("bio", "");
+
+			const result = await saveProfileToSession(undefined, formData);
+
+			expect(result).toEqual({
+				error: "画像のアップロードに失敗しました: Upload failed",
+			});
+			expect(mockRedirect).not.toHaveBeenCalled();
 		});
 	});
 

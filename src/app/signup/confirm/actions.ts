@@ -36,39 +36,6 @@ export async function confirmAndSaveProfile(
 			redirect("/");
 		}
 
-		let profileImageUrl: string | undefined;
-
-		if (data.profileImageUrl) {
-			const base64Data = data.profileImageUrl.split(",")[1];
-			const buffer = Buffer.from(base64Data, "base64");
-			const fileName = `${user.id}-${Date.now()}.png`;
-
-			const { data: uploadData, error: uploadError } = await supabase.storage
-				.from("profile-images")
-				.upload(fileName, buffer, {
-					contentType: "image/png",
-					cacheControl: "3600",
-					upsert: false,
-				});
-
-			if (uploadError) {
-				console.error(
-					"[confirmAndSaveProfile] 画像アップロードエラー:",
-					uploadError,
-				);
-				return {
-					error: `画像のアップロードに失敗しました: ${uploadError.message}`,
-				};
-			}
-
-			if (uploadData) {
-				const {
-					data: { publicUrl },
-				} = supabase.storage.from("profile-images").getPublicUrl(fileName);
-				profileImageUrl = publicUrl;
-			}
-		}
-
 		const birthdayDate = new Date(data.birthday);
 		if (Number.isNaN(birthdayDate.getTime())) {
 			console.error(
@@ -88,7 +55,7 @@ export async function confirmAndSaveProfile(
 				birthday: birthdayDate,
 				gender: data.gender,
 				prefecture: data.prefecture,
-				profileImageUrl: profileImageUrl,
+				profileImageUrl: data.profileImageUrl || null,
 				bio: data.bio,
 			},
 		});
