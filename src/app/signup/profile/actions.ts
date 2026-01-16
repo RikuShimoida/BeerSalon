@@ -35,19 +35,17 @@ export async function saveProfileToSession(
 		}
 
 		let profileImageUrl: string | undefined;
-		const profileImageBase64 = formData.get("profileImageUrl") as
-			| string
-			| undefined;
+		const profileImage = formData.get("profileImage") as File | null;
 
-		if (profileImageBase64?.startsWith("data:image/")) {
-			const base64Data = profileImageBase64.split(",")[1];
-			const buffer = Buffer.from(base64Data, "base64");
-			const fileName = `${user.id}-${Date.now()}.png`;
+		if (profileImage && profileImage.size > 0) {
+			const arrayBuffer = await profileImage.arrayBuffer();
+			const buffer = Buffer.from(arrayBuffer);
+			const fileName = `${user.id}-${Date.now()}.${profileImage.type.split("/")[1]}`;
 
 			const { data: uploadData, error: uploadError } = await supabase.storage
 				.from("profile-images")
 				.upload(fileName, buffer, {
-					contentType: "image/png",
+					contentType: profileImage.type,
 					cacheControl: "3600",
 					upsert: false,
 				});

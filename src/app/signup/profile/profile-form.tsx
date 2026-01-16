@@ -210,11 +210,6 @@ export function ProfileForm() {
 						onChange={handleImageChange}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 focus:outline-none transition-all duration-300"
 					/>
-					<input
-						type="hidden"
-						name="profileImageUrl"
-						value={imagePreview || ""}
-					/>
 					<p className="text-xs text-muted-foreground">
 						推奨: 正方形の画像、最大5MB
 					</p>

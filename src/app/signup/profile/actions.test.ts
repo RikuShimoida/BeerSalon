@@ -45,7 +45,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", "");
 
 			const result = await saveProfileToSession(undefined, formData);
@@ -66,7 +65,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", "");
 
 			try {
@@ -93,7 +91,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1995-05-15");
 			formData.append("gender", "female");
 			formData.append("prefecture", "大阪府");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", "クラフトビール好きです");
 
 			try {
@@ -136,8 +133,12 @@ describe("saveProfileToSession", () => {
 				},
 			});
 
-			const base64Image =
-				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+			const imageBuffer = Buffer.from("test image content");
+			const mockFile = {
+				size: imageBuffer.length,
+				type: "image/png",
+				arrayBuffer: async () => imageBuffer.buffer,
+			} as unknown as File;
 
 			const formData = new FormData();
 			formData.append("lastName", "山田");
@@ -146,7 +147,7 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", base64Image);
+			formData.append("profileImage", mockFile);
 			formData.append("bio", "");
 
 			try {
@@ -178,8 +179,12 @@ describe("saveProfileToSession", () => {
 				error: { message: "Upload failed" },
 			});
 
-			const base64Image =
-				"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+			const imageBuffer = Buffer.from("test image content");
+			const mockFile = {
+				size: imageBuffer.length,
+				type: "image/png",
+				arrayBuffer: async () => imageBuffer.buffer,
+			} as unknown as File;
 
 			const formData = new FormData();
 			formData.append("lastName", "山田");
@@ -188,7 +193,7 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", base64Image);
+			formData.append("profileImage", mockFile);
 			formData.append("bio", "");
 
 			const result = await saveProfileToSession(undefined, formData);
@@ -279,7 +284,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", longBio);
 
 			const result = await saveProfileToSession(undefined, formData);
@@ -304,7 +308,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", "");
 
 			const result = await saveProfileToSession(undefined, formData);
