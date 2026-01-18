@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getProfileFromCookie } from "@/app/signup/profile/actions";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "./profile-form";
 
@@ -32,6 +33,8 @@ export default async function ProfilePage({
 			redirect("/signup");
 		}
 
+		const savedProfile = await getProfileFromCookie();
+
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
 				<div className="w-full max-w-md">
@@ -43,7 +46,7 @@ export default async function ProfilePage({
 					</div>
 
 					<div className="bg-white p-8 rounded-lg shadow-md">
-						<ProfileForm />
+						<ProfileForm defaultValues={savedProfile || undefined} />
 					</div>
 				</div>
 			</div>

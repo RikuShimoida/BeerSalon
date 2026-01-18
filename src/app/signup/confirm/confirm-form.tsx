@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { confirmAndSaveProfile } from "./actions";
+import { confirmAndSaveProfile, goBackToProfile } from "./actions";
 
 interface ProfileData {
 	lastName: string;
@@ -16,12 +16,15 @@ interface ProfileData {
 
 interface ConfirmFormProps {
 	profileData: ProfileData;
-	backUrl: string;
 }
 
-export function ConfirmForm({ profileData, backUrl }: ConfirmFormProps) {
+export function ConfirmForm({ profileData }: ConfirmFormProps) {
 	const [state, formAction, isPending] = useActionState(
 		confirmAndSaveProfile,
+		undefined,
+	);
+	const [, backAction, isBackPending] = useActionState(
+		goBackToProfile,
 		undefined,
 	);
 
@@ -48,12 +51,15 @@ export function ConfirmForm({ profileData, backUrl }: ConfirmFormProps) {
 				</button>
 			</form>
 
-			<a
-				href={backUrl}
-				className="w-full px-4 py-3 text-gray-700 bg-gray-100 rounded-lg font-medium hover:bg-gray-200 transition-colors text-center"
-			>
-				修正する
-			</a>
+			<form action={backAction}>
+				<button
+					type="submit"
+					disabled={isBackPending}
+					className="w-full px-4 py-3 text-gray-700 bg-gray-100 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+				>
+					{isBackPending ? "戻っています..." : "修正する"}
+				</button>
+			</form>
 		</div>
 	);
 }

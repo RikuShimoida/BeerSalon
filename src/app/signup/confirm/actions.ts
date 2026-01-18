@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { clearProfileCookie } from "@/app/signup/profile/actions";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
@@ -33,6 +34,7 @@ export async function confirmAndSaveProfile(
 		});
 
 		if (existingProfile) {
+			await clearProfileCookie();
 			redirect("/");
 		}
 
@@ -93,6 +95,7 @@ export async function confirmAndSaveProfile(
 			},
 		});
 
+		await clearProfileCookie();
 		redirect("/");
 	} catch (error) {
 		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
@@ -111,4 +114,8 @@ export async function confirmAndSaveProfile(
 			error: "プロフィールの保存に失敗しました",
 		};
 	}
+}
+
+export async function goBackToProfile() {
+	redirect("/signup/profile");
 }
