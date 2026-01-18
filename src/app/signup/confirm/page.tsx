@@ -1,17 +1,14 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { getProfileFromCookie } from "@/app/signup/profile/actions";
 import { GENDERS } from "@/lib/constants/prefectures";
 import { createClient } from "@/lib/supabase/server";
 import { ConfirmForm } from "./confirm-form";
 
-export default async function ConfirmPage({
-	searchParams,
-}: {
-	searchParams: Promise<{ data?: string }>;
-}) {
-	const params = await searchParams;
+export default async function ConfirmPage() {
+	const profileData = await getProfileFromCookie();
 
-	if (!params.data) {
+	if (!profileData) {
 		redirect("/signup/profile");
 	}
 
@@ -24,8 +21,6 @@ export default async function ConfirmPage({
 	if (!user) {
 		redirect("/signup");
 	}
-
-	const profileData = JSON.parse(decodeURIComponent(params.data));
 
 	const genderLabel =
 		GENDERS.find((g) => g.value === profileData.gender)?.label || "不明";
@@ -102,10 +97,7 @@ export default async function ConfirmPage({
 						)}
 					</div>
 
-					<ConfirmForm
-						profileData={profileData}
-						backUrl={`/signup/profile?data=${encodeURIComponent(params.data)}`}
-					/>
+					<ConfirmForm profileData={profileData} />
 				</div>
 			</div>
 		</div>

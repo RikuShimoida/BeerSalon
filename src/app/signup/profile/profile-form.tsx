@@ -5,13 +5,30 @@ import { useActionState, useState } from "react";
 import { GENDERS, PREFECTURES } from "@/lib/constants/prefectures";
 import { saveProfileToSession } from "./actions";
 
-export function ProfileForm() {
+interface ProfileData {
+	lastName?: string;
+	firstName?: string;
+	nickname?: string;
+	birthday?: string;
+	gender?: string;
+	prefecture?: string;
+	profileImageUrl?: string;
+	bio?: string;
+}
+
+interface ProfileFormProps {
+	defaultValues?: ProfileData;
+}
+
+export function ProfileForm({ defaultValues }: ProfileFormProps) {
 	const [state, formAction, isPending] = useActionState(
 		saveProfileToSession,
 		undefined,
 	);
-	const [imagePreview, setImagePreview] = useState<string | null>(null);
-	const [bioLength, setBioLength] = useState(0);
+	const [imagePreview, setImagePreview] = useState<string | null>(
+		defaultValues?.profileImageUrl || null,
+	);
+	const [bioLength, setBioLength] = useState(defaultValues?.bio?.length || 0);
 
 	const currentYear = new Date().getFullYear();
 	const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
@@ -19,6 +36,13 @@ export function ProfileForm() {
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
 	const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+	const defaultBirthday = defaultValues?.birthday
+		? new Date(defaultValues.birthday)
+		: null;
+	const defaultYear = defaultBirthday?.getFullYear();
+	const defaultMonth = defaultBirthday ? defaultBirthday.getMonth() + 1 : null;
+	const defaultDay = defaultBirthday?.getDate();
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -52,6 +76,7 @@ export function ProfileForm() {
 						id="lastName"
 						name="lastName"
 						placeholder="下井田"
+						defaultValue={defaultValues?.lastName}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 						required
 					/>
@@ -69,6 +94,7 @@ export function ProfileForm() {
 						id="firstName"
 						name="firstName"
 						placeholder="陸"
+						defaultValue={defaultValues?.firstName}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 						required
 					/>
@@ -87,6 +113,7 @@ export function ProfileForm() {
 					id="nickname"
 					name="nickname"
 					placeholder="りく"
+					defaultValue={defaultValues?.nickname}
 					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 					required
 				/>
@@ -102,6 +129,7 @@ export function ProfileForm() {
 				<div className="grid grid-cols-3 gap-2">
 					<select
 						name="year"
+						defaultValue={defaultYear?.toString() || ""}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
@@ -114,6 +142,7 @@ export function ProfileForm() {
 					</select>
 					<select
 						name="month"
+						defaultValue={defaultMonth?.toString() || ""}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
@@ -126,6 +155,7 @@ export function ProfileForm() {
 					</select>
 					<select
 						name="day"
+						defaultValue={defaultDay?.toString() || ""}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
@@ -150,6 +180,7 @@ export function ProfileForm() {
 				<select
 					id="gender"
 					name="gender"
+					defaultValue={defaultValues?.gender || ""}
 					className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 					required
 				>
@@ -172,6 +203,7 @@ export function ProfileForm() {
 				<select
 					id="prefecture"
 					name="prefecture"
+					defaultValue={defaultValues?.prefecture || ""}
 					className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 					required
 				>
@@ -234,6 +266,7 @@ export function ProfileForm() {
 					placeholder="自己紹介やビールの好みを入力してください"
 					maxLength={500}
 					rows={4}
+					defaultValue={defaultValues?.bio}
 					onChange={(e) => setBioLength(e.target.value.length)}
 					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300 resize-none"
 				/>

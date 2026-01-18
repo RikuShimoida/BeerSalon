@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { profileSchema } from "@/lib/validations/auth";
@@ -7,6 +8,9 @@ import { profileSchema } from "@/lib/validations/auth";
 type FormState = {
 	error?: string;
 };
+
+const PROFILE_COOKIE_NAME = "signup_profile_data";
+const PROFILE_COOKIE_MAX_AGE = 60 * 10;
 
 export async function saveProfileToSession(
 	_prevState: FormState | undefined,
@@ -58,10 +62,18 @@ export async function saveProfileToSession(
 			};
 		}
 
-		console.log("[saveProfileToSession] Redirecting to confirm page");
+		console.log("[saveProfileToSession] Saving to cookie and redirecting");
 
-		const profileData = encodeURIComponent(JSON.stringify(data));
-		redirect(`/signup/confirm?data=${profileData}`);
+		const cookieStore = await cookies();
+		cookieStore.set(PROFILE_COOKIE_NAME, JSON.stringify(data), {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "lax",
+			maxAge: PROFILE_COOKIE_MAX_AGE,
+			path: "/signup",
+		});
+
+		redirect("/signup/confirm");
 	} catch (error) {
 		console.error("[saveProfileToSession] Unexpected error:", error);
 
@@ -73,4 +85,25 @@ export async function saveProfileToSession(
 			error: "予期しないエラーが発生しました。もう一度お試しください。",
 		};
 	}
+}
+
+export async function getProfileFromCookie() {
+	const cookieStore = await cookies();
+	const profileCookie = cookieStore.get(PROFILE_COOKIE_NAME);
+
+	if (!profileCookie) {
+		return null;
+	}
+
+	try {
+		return JSON.parse(profileCookie.value);
+	} catch (error) {
+		console.error("[getProfileFromCookie] Failed to parse cookie:", error);
+		return null;
+	}
+}
+
+export async function clearProfileCookie() {
+	const cookieStore = await cookies();
+	cookieStore.delete(PROFILE_COOKIE_NAME);
 }
