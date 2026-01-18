@@ -75,11 +75,11 @@ export async function saveProfileToSession(
 
 		redirect("/signup/confirm");
 	} catch (error) {
-		console.error("[saveProfileToSession] Unexpected error:", error);
-
 		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
 			throw error;
 		}
+
+		console.error("[saveProfileToSession] Unexpected error:", error);
 
 		return {
 			error: "予期しないエラーが発生しました。もう一度お試しください。",
