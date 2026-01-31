@@ -1,17 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// next/navigationのモック
 const mockRedirect = vi.fn();
 vi.mock("next/navigation", () => ({
 	redirect: (...args: unknown[]) => mockRedirect(...args),
 }));
 
-// Supabase clientのモック
+const mockSet = vi.fn();
+vi.mock("next/headers", () => ({
+	cookies: vi.fn(() => ({
+		set: mockSet,
+	})),
+}));
+
 const mockGetUser = vi.fn();
+const mockUpload = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
 	createClient: vi.fn(() => ({
 		auth: {
 			getUser: mockGetUser,
+		},
+		storage: {
+			from: vi.fn(() => ({
+				upload: mockUpload,
+			})),
 		},
 	})),
 }));
@@ -37,7 +48,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", "");
 
 			const result = await saveProfileToSession(undefined, formData);
@@ -45,7 +55,7 @@ describe("saveProfileToSession", () => {
 			expect(result).toBeUndefined();
 		});
 
-		it("成功時に/signup/confirm?data={encodedData}へリダイレクトされる", async () => {
+		it("成功時に/signup/confirmへリダイレクトされる", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -58,7 +68,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", "");
 
 			try {
@@ -67,12 +76,10 @@ describe("saveProfileToSession", () => {
 				// redirectはthrowする
 			}
 
-			expect(mockRedirect).toHaveBeenCalled();
-			const callArgs = mockRedirect.mock.calls[0][0] as string;
-			expect(callArgs).toMatch(/^\/signup\/confirm\?data=/);
+			expect(mockRedirect).toHaveBeenCalledWith("/signup/confirm");
 		});
 
-		it("エンコードされたデータが正しくURLに含まれる", async () => {
+		it("データがCookieに正しく保存される", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -85,7 +92,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1995-05-15");
 			formData.append("gender", "female");
 			formData.append("prefecture", "大阪府");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", "クラフトビール好きです");
 
 			try {
@@ -94,19 +100,151 @@ describe("saveProfileToSession", () => {
 				// redirectはthrowする
 			}
 
-			const callArgs = mockRedirect.mock.calls[0][0] as string;
-			const encodedData = callArgs.split("data=")[1];
-			const decodedData = JSON.parse(decodeURIComponent(encodedData));
+			expect(mockSet).toHaveBeenCalled();
+			const setCalls = mockSet.mock.calls;
+			const profileDataCall = setCalls.find(
+				(call) => call[0] === "profile_data",
+			);
+			expect(profileDataCall).toBeDefined();
 
-			expect(decodedData).toEqual({
+			const savedData = JSON.parse(profileDataCall[1]);
+			expect(savedData).toMatchObject({
 				lastName: "佐藤",
 				firstName: "花子",
 				nickname: "はなちゃん",
 				birthday: "1995-05-15",
 				gender: "female",
 				prefecture: "大阪府",
-				profileImageUrl: "",
 				bio: "クラフトビール好きです",
+			});
+		});
+
+		it("プロフィール画像をアップロードすると、画像パスがCookieに保存される", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+			mockUpload.mockResolvedValue({
+				data: { path: "temp/test-user-id/123456789.png" },
+				error: null,
+			});
+
+			const formData = new FormData();
+			formData.append("lastName", "山田");
+			formData.append("firstName", "太郎");
+			formData.append("nickname", "やまちゃん");
+			formData.append("birthday", "1990-01-01");
+			formData.append("gender", "male");
+			formData.append("prefecture", "東京都");
+
+			formData.append("bio", "");
+
+			const blob = new Blob(["fake image data"], { type: "image/png" });
+			const file = new File([blob], "test.png", { type: "image/png" });
+			formData.append("profileImage", file);
+
+			try {
+				await saveProfileToSession(undefined, formData);
+			} catch (_error) {
+				// redirectはthrowする
+			}
+
+			expect(mockUpload).toHaveBeenCalled();
+			expect(mockSet).toHaveBeenCalled();
+
+			const setCalls = mockSet.mock.calls;
+			const imagePathCall = setCalls.find(
+				(call) => call[0] === "profile_image_path",
+			);
+			expect(imagePathCall).toBeDefined();
+			expect(imagePathCall[1]).toMatch(/^temp\/test-user-id\/\d+\.png$/);
+		});
+	});
+
+	describe("異常系 - 画像バリデーションエラー", () => {
+		it("ファイルサイズが5MBを超える場合、エラーが返る", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+
+			const formData = new FormData();
+			formData.append("lastName", "山田");
+			formData.append("firstName", "太郎");
+			formData.append("nickname", "やまちゃん");
+			formData.append("birthday", "1990-01-01");
+			formData.append("gender", "male");
+			formData.append("prefecture", "東京都");
+
+			const largeBlob = new Blob([new ArrayBuffer(6 * 1024 * 1024)], {
+				type: "image/png",
+			});
+			const largeFile = new File([largeBlob], "large.png", {
+				type: "image/png",
+			});
+			formData.append("profileImage", largeFile);
+
+			const result = await saveProfileToSession(undefined, formData);
+
+			expect(result).toEqual({
+				error: "画像ファイルは5MB以下にしてください",
+			});
+			expect(mockUpload).not.toHaveBeenCalled();
+		});
+
+		it("許可されていない画像形式の場合、エラーが返る", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+
+			const formData = new FormData();
+			formData.append("lastName", "山田");
+			formData.append("firstName", "太郎");
+			formData.append("nickname", "やまちゃん");
+			formData.append("birthday", "1990-01-01");
+			formData.append("gender", "male");
+			formData.append("prefecture", "東京都");
+
+			const blob = new Blob(["fake image data"], { type: "image/gif" });
+			const file = new File([blob], "test.gif", { type: "image/gif" });
+			formData.append("profileImage", file);
+
+			const result = await saveProfileToSession(undefined, formData);
+
+			expect(result).toEqual({
+				error: "画像形式はJPEG、PNG、WebPのみ対応しています",
+			});
+			expect(mockUpload).not.toHaveBeenCalled();
+		});
+
+		it("画像アップロードが失敗した場合、エラーが返る", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+			mockUpload.mockResolvedValue({
+				data: null,
+				error: { message: "Upload failed" },
+			});
+
+			const formData = new FormData();
+			formData.append("lastName", "山田");
+			formData.append("firstName", "太郎");
+			formData.append("nickname", "やまちゃん");
+			formData.append("birthday", "1990-01-01");
+			formData.append("gender", "male");
+			formData.append("prefecture", "東京都");
+			formData.append("bio", "");
+
+			const blob = new Blob(["fake image data"], { type: "image/png" });
+			const file = new File([blob], "test.png", { type: "image/png" });
+			formData.append("profileImage", file);
+
+			const result = await saveProfileToSession(undefined, formData);
+
+			expect(result).toEqual({
+				error: "画像のアップロードに失敗しました。もう一度お試しください。",
 			});
 		});
 	});
@@ -190,7 +328,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", longBio);
 
 			const result = await saveProfileToSession(undefined, formData);
@@ -215,7 +352,6 @@ describe("saveProfileToSession", () => {
 			formData.append("birthday", "1990-01-01");
 			formData.append("gender", "male");
 			formData.append("prefecture", "東京都");
-			formData.append("profileImageUrl", "");
 			formData.append("bio", "");
 
 			const result = await saveProfileToSession(undefined, formData);

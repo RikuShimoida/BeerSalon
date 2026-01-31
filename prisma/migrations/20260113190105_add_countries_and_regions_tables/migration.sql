@@ -4,8 +4,37 @@ ALTER TABLE "beers" DROP CONSTRAINT IF EXISTS "beers_origin_id_fkey";
 -- Drop the origins table (rename to regions)
 DROP TABLE IF EXISTS "origins" CASCADE;
 
--- Regions table already exists from previous attempt, so we don't recreate it
--- Countries table already exists from previous attempt
+-- Create countries table
+CREATE TABLE IF NOT EXISTS "countries" (
+    "id" BIGSERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "countries_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX IF NOT EXISTS "countries_name_key" ON "countries"("name");
+
+-- Create regions table
+CREATE TABLE IF NOT EXISTS "regions" (
+    "id" BIGSERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "country_id" BIGINT NOT NULL,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "regions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX IF NOT EXISTS "regions_country_id_name_key" ON "regions"("country_id", "name");
+
+-- AddForeignKey
+ALTER TABLE "regions" ADD CONSTRAINT "regions_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- Drop region_id column from beers if it exists (from previous failed migration)
 ALTER TABLE "beers" DROP COLUMN IF EXISTS "region_id";

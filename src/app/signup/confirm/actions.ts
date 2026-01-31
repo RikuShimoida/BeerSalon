@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
@@ -10,9 +11,19 @@ type FormState = {
 
 export async function confirmAndSaveProfile(
 	_prevState: FormState | undefined,
-	formData: FormData,
+	_formData: FormData,
 ): Promise<FormState | undefined> {
-	const data = JSON.parse(formData.get("profileData") as string);
+	const cookieStore = await cookies();
+	const profileDataCookie = cookieStore.get("profile_data");
+	const profileImagePathCookie = cookieStore.get("profile_image_path");
+
+	if (!profileDataCookie) {
+		return {
+			error: "プロフィールデータが見つかりません",
+		};
+	}
+
+	const data = JSON.parse(profileDataCookie.value);
 
 	const supabase = await createClient();
 
@@ -33,40 +44,55 @@ export async function confirmAndSaveProfile(
 		});
 
 		if (existingProfile) {
+			cookieStore.delete("profile_data");
+			cookieStore.delete("profile_image_path");
 			redirect("/");
 		}
 
 		let profileImageUrl: string | undefined;
 
-		if (data.profileImageUrl) {
-			const base64Data = data.profileImageUrl.split(",")[1];
-			const buffer = Buffer.from(base64Data, "base64");
-			const fileName = `${user.id}-${Date.now()}.png`;
+		if (profileImagePathCookie) {
+			const tempPath = profileImagePathCookie.value;
+			const fileExt = tempPath.split(".").pop();
+			const permanentPath = `profiles/${user.id}/avatar.${fileExt}`;
 
-			const { data: uploadData, error: uploadError } = await supabase.storage
+			const { data: fileData, error: downloadError } = await supabase.storage
 				.from("profile-images")
-				.upload(fileName, buffer, {
-					contentType: "image/png",
+				.download(tempPath);
+
+			if (downloadError) {
+				console.error(
+					"[confirmAndSaveProfile] ダウンロードエラー:",
+					downloadError,
+				);
+				return {
+					error: "画像の処理に失敗しました",
+				};
+			}
+
+			const { error: uploadError } = await supabase.storage
+				.from("profile-images")
+				.upload(permanentPath, fileData, {
 					cacheControl: "3600",
-					upsert: false,
+					upsert: true,
 				});
 
 			if (uploadError) {
 				console.error(
-					"[confirmAndSaveProfile] 画像アップロードエラー:",
+					"[confirmAndSaveProfile] アップロードエラー:",
 					uploadError,
 				);
 				return {
-					error: `画像のアップロードに失敗しました: ${uploadError.message}`,
+					error: "画像の保存に失敗しました",
 				};
 			}
 
-			if (uploadData) {
-				const {
-					data: { publicUrl },
-				} = supabase.storage.from("profile-images").getPublicUrl(fileName);
-				profileImageUrl = publicUrl;
-			}
+			await supabase.storage.from("profile-images").remove([tempPath]);
+
+			const {
+				data: { publicUrl },
+			} = supabase.storage.from("profile-images").getPublicUrl(permanentPath);
+			profileImageUrl = publicUrl;
 		}
 
 		const birthdayDate = new Date(data.birthday);
@@ -92,6 +118,9 @@ export async function confirmAndSaveProfile(
 				bio: data.bio,
 			},
 		});
+
+		cookieStore.delete("profile_data");
+		cookieStore.delete("profile_image_path");
 
 		redirect("/");
 	} catch (error) {

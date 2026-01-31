@@ -1,17 +1,16 @@
+import { cookies } from "next/headers";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { GENDERS } from "@/lib/constants/prefectures";
 import { createClient } from "@/lib/supabase/server";
 import { ConfirmForm } from "./confirm-form";
 
-export default async function ConfirmPage({
-	searchParams,
-}: {
-	searchParams: Promise<{ data?: string }>;
-}) {
-	const params = await searchParams;
+export default async function ConfirmPage() {
+	const cookieStore = await cookies();
+	const profileDataCookie = cookieStore.get("profile_data");
+	const profileImagePathCookie = cookieStore.get("profile_image_path");
 
-	if (!params.data) {
+	if (!profileDataCookie) {
 		redirect("/signup/profile");
 	}
 
@@ -25,7 +24,15 @@ export default async function ConfirmPage({
 		redirect("/signup");
 	}
 
-	const profileData = JSON.parse(decodeURIComponent(params.data));
+	const profileData = JSON.parse(profileDataCookie.value);
+
+	let profileImageUrl: string | undefined;
+	if (profileImagePathCookie) {
+		const { data } = supabase.storage
+			.from("profile-images")
+			.getPublicUrl(profileImagePathCookie.value);
+		profileImageUrl = data.publicUrl;
+	}
 
 	const genderLabel =
 		GENDERS.find((g) => g.value === profileData.gender)?.label || "不明";
@@ -42,12 +49,12 @@ export default async function ConfirmPage({
 
 				<div className="bg-white p-8 rounded-lg shadow-md">
 					<div className="space-y-4 mb-6">
-						{profileData.profileImageUrl && (
+						{profileImageUrl && (
 							<div className="border-b pb-3 flex flex-col items-center">
 								<p className="text-sm text-gray-500 mb-2">プロフィール画像</p>
 								<div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary relative">
 									<Image
-										src={profileData.profileImageUrl}
+										src={profileImageUrl}
 										alt="プロフィール画像"
 										fill
 										className="object-cover"
@@ -102,10 +109,7 @@ export default async function ConfirmPage({
 						)}
 					</div>
 
-					<ConfirmForm
-						profileData={profileData}
-						backUrl={`/signup/profile?data=${encodeURIComponent(params.data)}`}
-					/>
+					<ConfirmForm profileData={profileData} backUrl="/signup/profile" />
 				</div>
 			</div>
 		</div>
