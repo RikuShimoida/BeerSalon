@@ -26,7 +26,6 @@ export default async function ConfirmPage() {
 
 	const profileData = JSON.parse(profileDataCookie.value);
 
-	// 画像のURLを取得
 	let profileImageUrl: string | undefined;
 	if (profileImagePathCookie) {
 		const { data } = supabase.storage
