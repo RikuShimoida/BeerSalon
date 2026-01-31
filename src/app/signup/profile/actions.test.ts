@@ -1,12 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// next/navigationのモック
 const mockRedirect = vi.fn();
 vi.mock("next/navigation", () => ({
 	redirect: (...args: unknown[]) => mockRedirect(...args),
 }));
 
-// next/headersのモック
 const mockSet = vi.fn();
 vi.mock("next/headers", () => ({
 	cookies: vi.fn(() => ({
@@ -14,7 +12,6 @@ vi.mock("next/headers", () => ({
 	})),
 }));
 
-// Supabase clientのモック
 const mockGetUser = vi.fn();
 const mockUpload = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({

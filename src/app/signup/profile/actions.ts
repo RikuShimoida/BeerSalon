@@ -19,7 +19,6 @@ export async function saveProfileToSession(
 	try {
 		const profileImage = formData.get("profileImage") as File | null;
 
-		// 画像ファイルのバリデーション
 		if (profileImage && profileImage.size > 0) {
 			if (profileImage.size > MAX_FILE_SIZE) {
 				return {
@@ -76,7 +75,6 @@ export async function saveProfileToSession(
 			};
 		}
 
-		// 画像をSupabase Storageにアップロード
 		let imagePath: string | undefined;
 		if (profileImage && profileImage.size > 0) {
 			const fileExt = profileImage.name.split(".").pop();
@@ -101,7 +99,6 @@ export async function saveProfileToSession(
 			console.log("[saveProfileToSession] Image uploaded:", filePath);
 		}
 
-		// Cookieに保存
 		const cookieStore = await cookies();
 
 		if (imagePath) {

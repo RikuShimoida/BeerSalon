@@ -44,7 +44,6 @@ export async function confirmAndSaveProfile(
 		});
 
 		if (existingProfile) {
-			// Cookieをクリア
 			cookieStore.delete("profile_data");
 			cookieStore.delete("profile_image_path");
 			redirect("/");
@@ -52,13 +51,11 @@ export async function confirmAndSaveProfile(
 
 		let profileImageUrl: string | undefined;
 
-		// 一時パスから本番パスに移動
 		if (profileImagePathCookie) {
 			const tempPath = profileImagePathCookie.value;
 			const fileExt = tempPath.split(".").pop();
 			const permanentPath = `profiles/${user.id}/avatar.${fileExt}`;
 
-			// 一時ファイルをダウンロード
 			const { data: fileData, error: downloadError } = await supabase.storage
 				.from("profile-images")
 				.download(tempPath);
@@ -73,7 +70,6 @@ export async function confirmAndSaveProfile(
 				};
 			}
 
-			// 本番パスにアップロード
 			const { error: uploadError } = await supabase.storage
 				.from("profile-images")
 				.upload(permanentPath, fileData, {
@@ -91,7 +87,6 @@ export async function confirmAndSaveProfile(
 				};
 			}
 
-			// 一時ファイルを削除
 			await supabase.storage.from("profile-images").remove([tempPath]);
 
 			const {
@@ -124,7 +119,6 @@ export async function confirmAndSaveProfile(
 			},
 		});
 
-		// Cookieをクリア
 		cookieStore.delete("profile_data");
 		cookieStore.delete("profile_image_path");
 
