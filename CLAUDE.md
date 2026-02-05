@@ -361,3 +361,17 @@ Claude Code は、作業完了時の処理順を **必ず以下の順序で実�
 - UT が追加/更新され、`pnpm test` が通ること
 - E2E が追加/更新され、Playwright MCP で受入条件を検証できること
 - `git status` が clean の状態で PR を作成すること
+
+---
+
+## CLAUDE.md - Pencil運用ルール
+
+### デザイン生成時のルール
+- .penファイルは直接編集しない。必ずPencil MCPツール経由で操作する
+- デザインシステムはshadcn/uiを基本とする
+- カラーはCSS変数（--primary, --secondary等）で定義済みのものを使用
+- 1回の指示で完璧を求めず、「大枠→詳細」の順で調整する
+
+### ファイル命名規則
+- designs/[画面名].pen の形式で保存
+- 画面名は英語小文字、ハイフン区切り（例: user-settings.pen）
