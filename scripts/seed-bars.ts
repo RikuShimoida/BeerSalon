@@ -80,6 +80,38 @@ const breweryPrefixes = [
 	"ブルワリー",
 ];
 
+const exteriorImages = [
+	"https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&h=600&fit=crop",
+];
+
+const interiorImages = [
+	"https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1582037928769-181f2644ecb7?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1541532713592-79a0317b6b77?w=800&h=600&fit=crop",
+];
+
+const beerImages = [
+	"https://images.unsplash.com/photo-1608270586620-248524c67de9?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1618183479302-1e0aa382c36b?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1612528443702-f6741f70a049?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1436076863939-06870fe779c2?w=800&h=600&fit=crop",
+];
+
+const foodImages = [
+	"https://images.unsplash.com/photo-1529042410759-befb1204b468?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800&h=600&fit=crop",
+	"https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&h=600&fit=crop",
+];
+
 async function main() {
 	console.log("Start seeding bars...");
 
@@ -88,7 +120,9 @@ async function main() {
 	});
 
 	if (!japan) {
-		throw new Error("Japan country not found. Please run seed-regions.ts first.");
+		throw new Error(
+			"Japan country not found. Please run seed-regions.ts first.",
+		);
 	}
 
 	const beerCategories: Record<BeerCategoryName, { id: bigint }> = {
@@ -210,7 +244,11 @@ async function main() {
 				? "葵区紺屋町1-1"
 				: `${city.replace("市", "")}中心街${i + 1}-${(i % 10) + 1}`;
 		const addressLine2 =
-			i === 0 ? "ビルディング2F" : i % 3 === 0 ? `ビル${(i % 5) + 1}F` : undefined;
+			i === 0
+				? "ビルディング2F"
+				: i % 3 === 0
+					? `ビル${(i % 5) + 1}F`
+					: undefined;
 
 		const baseLatitude = 34.5 + (cityIndex * 0.5) / cities.length;
 		const baseLongitude = 137.5 + (cityIndex * 1.5) / cities.length;
@@ -242,7 +280,7 @@ async function main() {
 				addressLine2: addressLine2,
 				latitude: latitude,
 				longitude: longitude,
-				phoneNumber: `054-${String(100 + i).padStart(3, "0")}-${String(1000 + (i * 7) % 9000).padStart(4, "0")}`,
+				phoneNumber: `054-${String(100 + i).padStart(3, "0")}-${String(1000 + ((i * 7) % 9000)).padStart(4, "0")}`,
 				openingTime: new Date(`1970-01-01T${16 + (i % 3)}:00:00Z`),
 				endingTime: new Date(`1970-01-01T${23 + (i % 2)}:00:00Z`),
 				regularHoliday:
@@ -312,9 +350,7 @@ async function main() {
 				name: i % 3 === 0 ? "チーズ盛り合わせ" : "生ハム盛り合わせ",
 				price: 1200 + (i % 5) * 100,
 				description:
-					i % 3 === 0
-						? "3種類のチーズの盛り合わせ"
-						: "厳選生ハムの盛り合わせ",
+					i % 3 === 0 ? "3種類のチーズの盛り合わせ" : "厳選生ハムの盛り合わせ",
 			},
 		];
 
@@ -330,25 +366,25 @@ async function main() {
 				{
 					barId: bar.id,
 					imageType: "exterior",
-					imageUrl: `https://placehold.co/600x400/e3f2fd/1976d2?text=Exterior+${i + 1}`,
+					imageUrl: exteriorImages[i % exteriorImages.length],
 					sortOrder: 1,
 				},
 				{
 					barId: bar.id,
 					imageType: "interior",
-					imageUrl: `https://placehold.co/600x400/fff3e0/f57c00?text=Interior+${i + 1}`,
+					imageUrl: interiorImages[i % interiorImages.length],
 					sortOrder: 2,
 				},
 				{
 					barId: bar.id,
 					imageType: "beer",
-					imageUrl: `https://placehold.co/600x400/fff8e1/fbc02d?text=Beer+${i + 1}`,
+					imageUrl: beerImages[i % beerImages.length],
 					sortOrder: 3,
 				},
 				{
 					barId: bar.id,
 					imageType: "food",
-					imageUrl: `https://placehold.co/600x400/f3e5f5/8e24aa?text=Food+${i + 1}`,
+					imageUrl: foodImages[i % foodImages.length],
 					sortOrder: 4,
 				},
 			],
@@ -358,10 +394,7 @@ async function main() {
 			await prisma.coupon.create({
 				data: {
 					barId: bar.id,
-					title:
-						i % 6 === 0
-							? "初回来店クーポン"
-							: "週末限定クーポン",
+					title: i % 6 === 0 ? "初回来店クーポン" : "週末限定クーポン",
 					description:
 						i % 6 === 0
 							? "初回来店時にビール1杯無料"
@@ -371,7 +404,9 @@ async function main() {
 							? "会計時にこのクーポンを提示してください"
 							: "土日祝日のみ有効。会計時に提示してください",
 					validFrom: new Date(),
-					validUntil: new Date(Date.now() + (30 + (i % 30)) * 24 * 60 * 60 * 1000),
+					validUntil: new Date(
+						Date.now() + (30 + (i % 30)) * 24 * 60 * 60 * 1000,
+					),
 				},
 			});
 		}
