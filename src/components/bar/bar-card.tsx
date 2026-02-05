@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react";
+import { Beer } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -20,7 +20,7 @@ export function BarCard({
 	return (
 		<Link
 			href={`/bars/${id}`}
-			className="block glass-card rounded-2xl modern-shadow hover-lift overflow-hidden group"
+			className="block bg-card rounded-2xl border border-border hover:border-secondary hover:bg-accent/5 transition-all duration-200 overflow-hidden group shadow-sm hover:shadow-md"
 		>
 			<div className="aspect-video bg-muted relative overflow-hidden">
 				{imageUrl ? (
@@ -28,20 +28,20 @@ export function BarCard({
 						src={imageUrl}
 						alt={name}
 						fill
-						className="object-cover group-hover:scale-110 transition-transform duration-500"
+						className="object-cover group-hover:scale-105 transition-transform duration-300"
 					/>
 				) : (
-					<div className="w-full h-full flex items-center justify-center text-muted-foreground bg-gradient-to-br from-muted to-muted/50">
-						<MapPin className="w-12 h-12" />
+					<div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted">
+						<Beer className="w-16 h-16" />
 					</div>
 				)}
 			</div>
 
-			<div className="p-6">
-				<h3 className="font-semibold text-lg text-card-foreground mb-2 group-hover:text-primary transition-colors duration-300 tracking-tight">
+			<div className="p-4">
+				<h3 className="font-bold text-base text-card-foreground mb-1.5">
 					{name}
 				</h3>
-				<p className="text-sm text-muted-foreground tracking-wide">
+				<p className="text-sm text-muted-foreground">
 					{prefecture} {city}
 				</p>
 			</div>

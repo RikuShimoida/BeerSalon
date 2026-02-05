@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getBars } from "@/actions/bar";
 import { BarCard } from "./bar-card";
+import { BarCardSkeleton } from "./bar-card-skeleton";
 
 interface BarListProps {
 	city?: string;
@@ -36,11 +37,18 @@ export function BarList({ city, category, origin }: BarListProps) {
 	if (isLoading) {
 		return (
 			<div className="animate-fade-in">
-				<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">
-					店舗一覧
-				</h2>
-				<div className="text-center py-12 text-muted-foreground">
-					<p className="tracking-wide">読み込み中...</p>
+				<div className="flex justify-between items-center mb-6">
+					<h2 className="text-lg font-bold text-foreground">近くのお店</h2>
+					<span className="text-sm font-semibold text-muted-foreground">
+						...件
+					</span>
+				</div>
+
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{Array.from({ length: 6 }).map((_, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: skeleton items have fixed order
+						<BarCardSkeleton key={i} />
+					))}
 				</div>
 			</div>
 		);
@@ -48,11 +56,14 @@ export function BarList({ city, category, origin }: BarListProps) {
 
 	return (
 		<div className="animate-fade-in">
-			<h2 className="text-2xl font-bold text-foreground mb-8 tracking-tight">
-				店舗一覧
-			</h2>
+			<div className="flex justify-between items-center mb-6">
+				<h2 className="text-lg font-bold text-foreground">近くのお店</h2>
+				<span className="text-sm font-semibold text-muted-foreground">
+					{bars.length}件
+				</span>
+			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{bars.map((bar) => (
 					<BarCard key={bar.id} {...bar} />
 				))}
@@ -60,7 +71,7 @@ export function BarList({ city, category, origin }: BarListProps) {
 
 			{bars.length === 0 && (
 				<div className="text-center py-12 text-muted-foreground">
-					<p className="tracking-wide">店舗が見つかりませんでした</p>
+					<p>店舗が見つかりませんでした</p>
 				</div>
 			)}
 		</div>
