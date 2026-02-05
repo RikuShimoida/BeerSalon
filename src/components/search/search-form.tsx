@@ -50,7 +50,10 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 	};
 
 	return (
-		<div className="glass-card p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in">
+		<div
+			className="p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in"
+			style={{ backgroundColor: "#f0e68c" }}
+		>
 			<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 				<div>
 					<label

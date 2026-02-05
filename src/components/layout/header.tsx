@@ -7,7 +7,10 @@ export async function Header() {
 	const unreadCount = await getUnreadNotificationCount();
 
 	return (
-		<header className="fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/20 z-50 modern-shadow">
+		<header
+			className="fixed top-0 left-0 right-0 backdrop-blur-xl border-b border-border/20 z-50 modern-shadow"
+			style={{ backgroundColor: "#f0e68c" }}
+		>
 			<div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 				<Link
 					href="/"

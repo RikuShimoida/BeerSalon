@@ -10,7 +10,10 @@ export function Footer() {
 	const isActive = (path: string) => pathname === path;
 
 	return (
-		<footer className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-t border-border/20 z-50 modern-shadow">
+		<footer
+			className="fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t border-border/20 z-50 modern-shadow"
+			style={{ backgroundColor: "#f0e68c" }}
+		>
 			<div className="max-w-7xl mx-auto px-4">
 				<nav className="flex items-center justify-around h-16">
 					<Link
