@@ -6,6 +6,7 @@ import { FooterLinks } from "@/components/home/footer-links";
 import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
 import { PopularArticlesSection } from "@/components/home/popular-articles-section";
 import { PopularBarsSection } from "@/components/home/popular-bars-section";
+import { PopularCitiesSection } from "@/components/home/popular-cities-section";
 import { PopularRankingSection } from "@/components/home/popular-ranking-section";
 import { GoogleMap } from "@/components/map/google-map";
 import { SearchForm } from "@/components/search/search-form";
@@ -84,9 +85,30 @@ export function HomeClient() {
 	];
 
 	const mockPopularCities = [
-		{ id: "shizuoka", name: "静岡市", rank: 1, href: "/?city=静岡市" },
-		{ id: "hamamatsu", name: "浜松市", rank: 2, href: "/?city=浜松市" },
-		{ id: "numazu", name: "沼津市", rank: 3, href: "/?city=沼津市" },
+		{
+			id: "shizuoka",
+			name: "静岡市",
+			rank: 1,
+			href: "/?city=静岡市",
+			imageUrl:
+				"https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&h=600&fit=crop",
+		},
+		{
+			id: "hamamatsu",
+			name: "浜松市",
+			rank: 2,
+			href: "/?city=浜松市",
+			imageUrl:
+				"https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=800&h=600&fit=crop",
+		},
+		{
+			id: "numazu",
+			name: "沼津市",
+			rank: 3,
+			href: "/?city=沼津市",
+			imageUrl:
+				"https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=800&h=600&fit=crop",
+		},
 	];
 
 	const mockPopularCategories = [
@@ -142,9 +164,9 @@ export function HomeClient() {
 				<PopularBarsSection title="人気なお店で探す" bars={mockPopularBars} />
 
 				{/* 人気な市町村で探す */}
-				<PopularRankingSection
+				<PopularCitiesSection
 					title="人気な市町村で探す"
-					items={mockPopularCities}
+					cities={mockPopularCities}
 				/>
 
 				{/* 人気なカテゴリのビールで探す */}
