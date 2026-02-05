@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
 				hostname: "127.0.0.1",
 				port: "54321",
 			},
+			{
+				protocol: "https",
+				hostname: "images.unsplash.com",
+			},
+			{
+				protocol: "https",
+				hostname: "placehold.co",
+			},
 		],
 		// ローカル開発環境ではプライベートIPへのアクセスを許可
 		dangerouslyAllowSVG: true,
