@@ -5,6 +5,7 @@ import { BarList } from "@/components/bar/bar-list";
 import { FooterLinks } from "@/components/home/footer-links";
 import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
 import { PopularArticlesSection } from "@/components/home/popular-articles-section";
+import { PopularBarsSection } from "@/components/home/popular-bars-section";
 import { PopularRankingSection } from "@/components/home/popular-ranking-section";
 import { GoogleMap } from "@/components/map/google-map";
 import { SearchForm } from "@/components/search/search-form";
@@ -56,9 +57,30 @@ export function HomeClient() {
 	];
 
 	const mockPopularBars = [
-		{ id: 1, name: "クラフトビアバー 静岡", rank: 1, href: "/bars/1" },
-		{ id: 2, name: "ブルワリータップ 浜松", rank: 2, href: "/bars/2" },
-		{ id: 3, name: "ビアホール 沼津", rank: 3, href: "/bars/3" },
+		{
+			id: 1,
+			name: "クラフトビアバー 静岡",
+			rank: 1,
+			href: "/bars/1",
+			imageUrl:
+				"https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop",
+		},
+		{
+			id: 2,
+			name: "ブルワリータップ 浜松",
+			rank: 2,
+			href: "/bars/2",
+			imageUrl:
+				"https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop",
+		},
+		{
+			id: 3,
+			name: "ビアホール 沼津",
+			rank: 3,
+			href: "/bars/3",
+			imageUrl:
+				"https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop",
+		},
 	];
 
 	const mockPopularCities = [
@@ -117,10 +139,7 @@ export function HomeClient() {
 				<PopularArticlesSection articles={mockPopularArticles} />
 
 				{/* 人気なお店で探す */}
-				<PopularRankingSection
-					title="人気なお店で探す"
-					items={mockPopularBars}
-				/>
+				<PopularBarsSection title="人気なお店で探す" bars={mockPopularBars} />
 
 				{/* 人気な市町村で探す */}
 				<PopularRankingSection
