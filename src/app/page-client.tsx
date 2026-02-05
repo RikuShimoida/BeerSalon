@@ -6,6 +6,7 @@ import { FooterLinks } from "@/components/home/footer-links";
 import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
 import { PopularArticlesSection } from "@/components/home/popular-articles-section";
 import { PopularBarsSection } from "@/components/home/popular-bars-section";
+import { PopularCategoriesSection } from "@/components/home/popular-categories-section";
 import { PopularCitiesSection } from "@/components/home/popular-cities-section";
 import { PopularRankingSection } from "@/components/home/popular-ranking-section";
 import { GoogleMap } from "@/components/map/google-map";
@@ -112,9 +113,30 @@ export function HomeClient() {
 	];
 
 	const mockPopularCategories = [
-		{ id: 1, name: "IPA", rank: 1, href: "/?cat=1" },
-		{ id: 2, name: "ペールエール", rank: 2, href: "/?cat=2" },
-		{ id: 3, name: "スタウト", rank: 3, href: "/?cat=3" },
+		{
+			id: 1,
+			name: "IPA",
+			rank: 1,
+			href: "/?cat=1",
+			imageUrl:
+				"https://images.unsplash.com/photo-1608270586620-248524c67de9?w=800&h=600&fit=crop",
+		},
+		{
+			id: 2,
+			name: "ペールエール",
+			rank: 2,
+			href: "/?cat=2",
+			imageUrl:
+				"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=800&h=600&fit=crop",
+		},
+		{
+			id: 3,
+			name: "スタウト",
+			rank: 3,
+			href: "/?cat=3",
+			imageUrl:
+				"https://images.unsplash.com/photo-1618183479302-1e0aa382c36b?w=800&h=600&fit=crop",
+		},
 	];
 
 	const mockPopularRegions = [
@@ -170,9 +192,9 @@ export function HomeClient() {
 				/>
 
 				{/* 人気なカテゴリのビールで探す */}
-				<PopularRankingSection
+				<PopularCategoriesSection
 					title="人気なカテゴリのビールで探す"
-					items={mockPopularCategories}
+					categories={mockPopularCategories}
 				/>
 
 				{/* 人気なビールの産地で探す */}
