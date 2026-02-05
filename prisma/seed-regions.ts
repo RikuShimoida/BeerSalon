@@ -44,6 +44,22 @@ async function main() {
 		},
 	});
 
+	const korea = await prisma.country.upsert({
+		where: { name: "韓国" },
+		update: {},
+		create: {
+			name: "韓国",
+		},
+	});
+
+	const china = await prisma.country.upsert({
+		where: { name: "中国" },
+		update: {},
+		create: {
+			name: "中国",
+		},
+	});
+
 	console.log("Countries created");
 
 	// Create regions for Japan
@@ -218,6 +234,66 @@ async function main() {
 	}
 
 	console.log("UK regions created");
+
+	// Create regions for Korea
+	const koreaRegions = [
+		"ソウル",
+		"釜山",
+		"大邱",
+		"仁川",
+		"光州",
+		"大田",
+		"蔚山",
+		"済州",
+	];
+
+	for (const regionName of koreaRegions) {
+		await prisma.region.upsert({
+			where: {
+				countryId_name: {
+					countryId: korea.id,
+					name: regionName,
+				},
+			},
+			update: {},
+			create: {
+				name: regionName,
+				countryId: korea.id,
+			},
+		});
+	}
+
+	console.log("Korea regions created");
+
+	// Create regions for China
+	const chinaRegions = [
+		"北京",
+		"上海",
+		"広東",
+		"四川",
+		"浙江",
+		"江蘇",
+		"山東",
+		"雲南",
+	];
+
+	for (const regionName of chinaRegions) {
+		await prisma.region.upsert({
+			where: {
+				countryId_name: {
+					countryId: china.id,
+					name: regionName,
+				},
+			},
+			update: {},
+			create: {
+				name: regionName,
+				countryId: china.id,
+			},
+		});
+	}
+
+	console.log("China regions created");
 	console.log("Seeding completed successfully!");
 }
 
