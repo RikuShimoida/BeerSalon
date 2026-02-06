@@ -22,7 +22,7 @@ export async function Header() {
 				<div className="flex items-center gap-2">
 					<Link
 						href="/notifications"
-						className="p-2.5 text-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300 relative"
+						className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300 relative"
 						aria-label="通知"
 						data-testid="notification-icon"
 					>
@@ -39,7 +39,7 @@ export async function Header() {
 
 					<Link
 						href="/mypage"
-						className="p-2.5 text-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300"
+						className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300"
 						aria-label="マイページ"
 					>
 						<User className="w-5 h-5" />
@@ -48,7 +48,7 @@ export async function Header() {
 					<form action={logout}>
 						<button
 							type="submit"
-							className="p-2.5 text-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300"
+							className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300"
 							aria-label="ログアウト"
 						>
 							<LogOut className="w-5 h-5" />
