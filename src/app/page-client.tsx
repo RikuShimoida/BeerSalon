@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { BarLocation } from "@/app/actions";
-import { getFilteredBarsWithLocation } from "@/app/actions";
+import { useState } from "react";
 import { BarList } from "@/components/bar/bar-list";
 import { FooterLinks } from "@/components/home/footer-links";
 import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
@@ -24,31 +22,6 @@ export function HomeClient() {
 		category: "",
 		origin: "",
 	});
-	const [bars, setBars] = useState<BarLocation[]>([]);
-	const [_isLoadingBars, setIsLoadingBars] = useState(true);
-
-	useEffect(() => {
-		const fetchBars = async () => {
-			setIsLoadingBars(true);
-			try {
-				const categoryId = searchParams.category
-					? Number(searchParams.category)
-					: undefined;
-				const data = await getFilteredBarsWithLocation({
-					city: searchParams.city || undefined,
-					categoryId,
-				});
-				setBars(data);
-			} catch (error) {
-				console.error("店舗データの取得に失敗しました:", error);
-				setBars([]);
-			} finally {
-				setIsLoadingBars(false);
-			}
-		};
-
-		fetchBars();
-	}, [searchParams.city, searchParams.category]);
 
 	const handleSearch = (params: {
 		city: string;
@@ -203,7 +176,7 @@ export function HomeClient() {
 				<SearchForm onSearch={handleSearch} />
 
 				{/* 地図エリア */}
-				<GoogleMap city={searchParams.city} bars={bars} />
+				<GoogleMap city={searchParams.city} />
 
 				{/* 店舗一覧 */}
 				<BarList
