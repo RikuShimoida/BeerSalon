@@ -50,7 +50,10 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 	};
 
 	return (
-		<div className="glass-card p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in">
+		<div
+			className="p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in"
+			style={{ backgroundColor: "#f0e68c" }}
+		>
 			<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 				<div>
 					<label
@@ -63,6 +66,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 						id="city"
 						onChange={(e) => handleCityChange(e.target.value)}
 						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
+						style={{ backgroundColor: "#ffffff" }}
 					>
 						<option value="">全て</option>
 						{SHIZUOKA_CITIES.map((city) => (
@@ -84,6 +88,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 						id="category"
 						onChange={(e) => handleCategoryChange(e.target.value)}
 						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
+						style={{ backgroundColor: "#ffffff" }}
 					>
 						<option value="">全て</option>
 						<option value="IPA">IPA</option>
@@ -105,6 +110,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 						id="origin"
 						onChange={(e) => handleOriginChange(e.target.value)}
 						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
+						style={{ backgroundColor: "#ffffff" }}
 					>
 						<option value="">全て</option>
 						{Object.entries(origins).map(([country, regions]) => (

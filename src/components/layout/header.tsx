@@ -1,4 +1,5 @@
 import { Bell, LogOut, User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { getUnreadNotificationCount } from "@/actions/notification";
 import { logout } from "./actions";
@@ -7,19 +8,29 @@ export async function Header() {
 	const unreadCount = await getUnreadNotificationCount();
 
 	return (
-		<header className="fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/20 z-50 modern-shadow">
+		<header
+			className="fixed top-0 left-0 right-0 backdrop-blur-xl border-b border-border/20 z-50 modern-shadow"
+			style={{ backgroundColor: "#f0e68c" }}
+		>
 			<div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 				<Link
 					href="/"
-					className="text-xl font-bold text-primary hover:text-primary/80 transition-all duration-300 tracking-tight"
+					className="hover:opacity-80 transition-all duration-300"
+					aria-label="Beer Salon ホーム"
 				>
-					Beer Salon
+					<Image
+						src="/beer-salon-logo.svg"
+						alt="Beer Salon"
+						width={240}
+						height={48}
+						priority
+					/>
 				</Link>
 
 				<div className="flex items-center gap-2">
 					<Link
 						href="/notifications"
-						className="p-2.5 text-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300 relative"
+						className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300 relative"
 						aria-label="通知"
 						data-testid="notification-icon"
 					>
@@ -36,7 +47,7 @@ export async function Header() {
 
 					<Link
 						href="/mypage"
-						className="p-2.5 text-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300"
+						className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300"
 						aria-label="マイページ"
 					>
 						<User className="w-5 h-5" />
@@ -45,7 +56,7 @@ export async function Header() {
 					<form action={logout}>
 						<button
 							type="submit"
-							className="p-2.5 text-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300"
+							className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300"
 							aria-label="ログアウト"
 						>
 							<LogOut className="w-5 h-5" />

@@ -44,38 +44,38 @@
 }
 
 :root {
-	--radius: 0.625rem;
-	--background: oklch(0.12 0.015 260);
-	--foreground: oklch(0.95 0.01 60);
-	--card: oklch(0.98 0.01 60);
-	--card-foreground: oklch(0.25 0.02 40);
-	--popover: oklch(0.98 0.01 60);
-	--popover-foreground: oklch(0.25 0.02 40);
-	--primary: oklch(0.68 0.15 60);
-	--primary-foreground: oklch(0.12 0.015 260);
-	--secondary: oklch(0.3 0.02 260);
-	--secondary-foreground: oklch(0.95 0.01 60);
-	--muted: oklch(0.2 0.015 260);
-	--muted-foreground: oklch(0.65 0.01 60);
-	--accent: oklch(0.72 0.18 55);
-	--accent-foreground: oklch(0.12 0.015 260);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.3 0.02 260);
-	--input: oklch(0.2 0.015 260);
-	--ring: oklch(0.68 0.15 60);
-	--chart-1: oklch(0.68 0.15 60);
-	--chart-2: oklch(0.6 0.12 50);
-	--chart-3: oklch(0.72 0.18 55);
-	--chart-4: oklch(0.55 0.15 45);
-	--chart-5: oklch(0.75 0.15 65);
-	--sidebar: oklch(0.15 0.015 260);
-	--sidebar-foreground: oklch(0.95 0.01 60);
-	--sidebar-primary: oklch(0.68 0.15 60);
-	--sidebar-primary-foreground: oklch(0.12 0.015 260);
-	--sidebar-accent: oklch(0.2 0.015 260);
-	--sidebar-accent-foreground: oklch(0.95 0.01 60);
-	--sidebar-border: oklch(0.3 0.02 260);
-	--sidebar-ring: oklch(0.68 0.15 60);
+	--radius: 1rem;
+	--background: 35 25% 92%;
+	--foreground: 30 15% 20%;
+	--card: 35 20% 96%;
+	--card-foreground: 30 15% 25%;
+	--popover: 35 20% 96%;
+	--popover-foreground: 30 15% 25%;
+	--primary: 30 75% 45%;
+	--primary-foreground: 0 0% 100%;
+	--secondary: 35 60% 55%;
+	--secondary-foreground: 30 15% 20%;
+	--muted: 35 20% 85%;
+	--muted-foreground: 30 10% 45%;
+	--accent: 30 50% 88%;
+	--accent-foreground: 30 75% 40%;
+	--destructive: 0 84% 60%;
+	--border: 35 15% 82%;
+	--input: 35 15% 82%;
+	--ring: 30 75% 45%;
+	--chart-1: 30 75% 45%;
+	--chart-2: 35 60% 55%;
+	--chart-3: 40 65% 50%;
+	--chart-4: 25 70% 50%;
+	--chart-5: 35 55% 60%;
+	--sidebar: 35 20% 96%;
+	--sidebar-foreground: 30 15% 20%;
+	--sidebar-primary: 30 75% 45%;
+	--sidebar-primary-foreground: 0 0% 100%;
+	--sidebar-accent: 35 20% 90%;
+	--sidebar-accent-foreground: 30 15% 20%;
+	--sidebar-border: 35 15% 82%;
+	--sidebar-ring: 30 75% 45%;
 }
 
 .dark {
