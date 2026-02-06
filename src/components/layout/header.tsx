@@ -1,4 +1,5 @@
 import { Bell, LogOut, User } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { getUnreadNotificationCount } from "@/actions/notification";
 import { logout } from "./actions";
@@ -14,9 +15,16 @@ export async function Header() {
 			<div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 				<Link
 					href="/"
-					className="text-xl font-bold text-primary hover:text-primary/80 transition-all duration-300 tracking-tight"
+					className="hover:opacity-80 transition-all duration-300"
+					aria-label="Beer Salon ホーム"
 				>
-					Beer Salon
+					<Image
+						src="/beer-salon-logo.svg"
+						alt="Beer Salon"
+						width={240}
+						height={48}
+						priority
+					/>
 				</Link>
 
 				<div className="flex items-center gap-2">
