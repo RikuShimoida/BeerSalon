@@ -38,7 +38,8 @@ export function HomeClient() {
 			barName: "クラフトビアバー 静岡",
 			publishedAt: "2025-12-15",
 			likeCount: 42,
-			imageUrl: null,
+			imageUrl:
+				"https://images.unsplash.com/photo-1608270586620-248524c67de9?w=800&h=600&fit=crop",
 		},
 		{
 			id: 2,
@@ -46,7 +47,8 @@ export function HomeClient() {
 			barName: "ブルワリータップ 浜松",
 			publishedAt: "2025-12-20",
 			likeCount: 38,
-			imageUrl: null,
+			imageUrl:
+				"https://images.unsplash.com/photo-1618183479302-1e0aa382c36b?w=800&h=600&fit=crop",
 		},
 		{
 			id: 3,
@@ -54,7 +56,8 @@ export function HomeClient() {
 			barName: "ビアホール 沼津",
 			publishedAt: "2025-12-25",
 			likeCount: 35,
-			imageUrl: null,
+			imageUrl:
+				"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=800&h=600&fit=crop",
 		},
 	];
 
