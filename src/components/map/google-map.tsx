@@ -4,7 +4,9 @@ import {
 	AdvancedMarker,
 	APIProvider,
 	Map as GoogleMapComponent,
+	InfoWindow,
 } from "@vis.gl/react-google-maps";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CITY_COORDINATES } from "@/lib/constants/city-coordinates";
 
@@ -13,6 +15,10 @@ interface BarLocation {
 	name: string;
 	latitude: number;
 	longitude: number;
+	prefecture: string;
+	city: string;
+	addressLine1: string;
+	addressLine2: string | null;
 }
 
 interface GoogleMapProps {
@@ -34,6 +40,7 @@ export function GoogleMap({
 		lat: number;
 		lng: number;
 	} | null>(null);
+	const [selectedBar, setSelectedBar] = useState<BarLocation | null>(null);
 	const hasSetUserLocation = useRef(false);
 
 	useEffect(() => {
@@ -102,8 +109,35 @@ export function GoogleMap({
 							key={bar.id}
 							position={{ lat: bar.latitude, lng: bar.longitude }}
 							title={bar.name}
+							onClick={() => setSelectedBar(bar)}
 						/>
 					))}
+					{selectedBar && (
+						<InfoWindow
+							position={{
+								lat: selectedBar.latitude,
+								lng: selectedBar.longitude,
+							}}
+							onCloseClick={() => setSelectedBar(null)}
+						>
+							<div className="p-2">
+								<h3 className="font-bold text-base mb-1">{selectedBar.name}</h3>
+								<p className="text-sm text-gray-600 mb-2">
+									{selectedBar.prefecture} {selectedBar.city}
+								</p>
+								<p className="text-xs text-gray-600 mb-2">
+									{selectedBar.addressLine1}
+									{selectedBar.addressLine2 && ` ${selectedBar.addressLine2}`}
+								</p>
+								<Link
+									href={`/bars/${selectedBar.id}`}
+									className="text-sm text-blue-600 hover:text-blue-800 underline"
+								>
+									店舗詳細を見る
+								</Link>
+							</div>
+						</InfoWindow>
+					)}
 				</GoogleMapComponent>
 			</APIProvider>
 		</div>
