@@ -8,7 +8,7 @@ import { PopularArticlesSection } from "@/components/home/popular-articles-secti
 import { PopularBarsSection } from "@/components/home/popular-bars-section";
 import { PopularCategoriesSection } from "@/components/home/popular-categories-section";
 import { PopularCitiesSection } from "@/components/home/popular-cities-section";
-import { PopularRankingSection } from "@/components/home/popular-ranking-section";
+import { PopularRegionsSection } from "@/components/home/popular-regions-section";
 import { GoogleMap } from "@/components/map/google-map";
 import { SearchForm } from "@/components/search/search-form";
 
@@ -145,18 +145,24 @@ export function HomeClient() {
 			name: "アメリカ・西海岸",
 			rank: 1,
 			href: "/?region=1",
+			imageUrl:
+				"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&h=600&fit=crop",
 		},
 		{
 			id: 2,
 			name: "ベルギー・フランダース",
 			rank: 2,
 			href: "/?region=2",
+			imageUrl:
+				"https://images.unsplash.com/photo-1551801841-ecad875a5142?w=800&h=600&fit=crop",
 		},
 		{
 			id: 3,
 			name: "日本・静岡",
 			rank: 3,
 			href: "/?region=3",
+			imageUrl:
+				"https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=600&fit=crop",
 		},
 	];
 
@@ -198,9 +204,9 @@ export function HomeClient() {
 				/>
 
 				{/* 人気なビールの産地で探す */}
-				<PopularRankingSection
+				<PopularRegionsSection
 					title="人気なビールの産地で探す"
-					items={mockPopularRegions}
+					regions={mockPopularRegions}
 				/>
 
 				{/* 利用規約エリア */}
