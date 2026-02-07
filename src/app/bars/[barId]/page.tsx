@@ -28,12 +28,12 @@ export default async function BarDetailPage({
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+			<div className="max-w-7xl mx-auto">
 				<div className="bg-card rounded-lg shadow-md overflow-hidden">
-					<div className="p-6 border-b border-border/50">
+					<div className="px-6 pt-6 pb-4">
 						<div className="flex items-start justify-between">
 							<div className="flex-1">
-								<h1 className="text-3xl font-semibold text-foreground mb-2">
+								<h1 className="text-3xl font-semibold text-foreground">
 									{bar.name}
 								</h1>
 							</div>
@@ -46,18 +46,27 @@ export default async function BarDetailPage({
 
 					<MediaSlideshow media={bar.barImages.slice(0, 5)} />
 
-					<BarTabs>
-						{{
-							top: <TopTab bar={bar} />,
-							menu: (
-								<MenuTab beerMenus={bar.beerMenus} foodMenus={bar.foodMenus} />
-							),
-							posts: (
-								<PostsTab posts={bar.posts} barId={barId} barName={bar.name} />
-							),
-							coupons: <CouponsTab coupons={bar.coupons} />,
-						}}
-					</BarTabs>
+					<div className="mt-6">
+						<BarTabs>
+							{{
+								top: <TopTab bar={bar} />,
+								menu: (
+									<MenuTab
+										beerMenus={bar.beerMenus}
+										foodMenus={bar.foodMenus}
+									/>
+								),
+								posts: (
+									<PostsTab
+										posts={bar.posts}
+										barId={barId}
+										barName={bar.name}
+									/>
+								),
+								coupons: <CouponsTab coupons={bar.coupons} />,
+							}}
+						</BarTabs>
+					</div>
 				</div>
 			</div>
 		</AuthenticatedLayout>
