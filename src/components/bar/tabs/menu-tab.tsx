@@ -29,6 +29,16 @@ interface MenuTabProps {
 	foodMenus: FoodMenu[];
 }
 
+const getBeerFallbackImage = (index: number) => {
+	const seed = index % 10;
+	return `https://images.unsplash.com/photo-1608270586620-248524c67de9?w=800&h=600&fit=crop&crop=center&auto=format&q=80&seed=${seed}`;
+};
+
+const getFoodFallbackImage = (index: number) => {
+	const seed = index % 10;
+	return `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop&crop=center&auto=format&q=80&seed=${seed}`;
+};
+
 export function MenuTab({ beerMenus, foodMenus }: MenuTabProps) {
 	return (
 		<div className="space-y-8">
@@ -40,21 +50,19 @@ export function MenuTab({ beerMenus, foodMenus }: MenuTabProps) {
 					</p>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						{beerMenus.map((menu) => (
+						{beerMenus.map((menu, index) => (
 							<div
 								key={menu.id}
 								className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
 							>
-								{menu.imageUrl && (
-									<div className="relative w-full h-48 mb-3 rounded-md overflow-hidden bg-gray-100">
-										<Image
-											src={menu.imageUrl}
-											alt={menu.beer.name}
-											fill
-											className="object-cover"
-										/>
-									</div>
-								)}
+								<div className="relative w-full h-48 mb-3 rounded-md overflow-hidden bg-gray-100">
+									<Image
+										src={menu.imageUrl || getBeerFallbackImage(index)}
+										alt={menu.beer.name}
+										fill
+										className="object-cover"
+									/>
+								</div>
 								<h3 className="font-bold text-lg text-gray-900 mb-1">
 									{menu.beer.name}
 								</h3>
@@ -97,21 +105,19 @@ export function MenuTab({ beerMenus, foodMenus }: MenuTabProps) {
 					</p>
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						{foodMenus.map((menu) => (
+						{foodMenus.map((menu, index) => (
 							<div
 								key={menu.id}
 								className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
 							>
-								{menu.imageUrl && (
-									<div className="relative w-full h-48 mb-3 rounded-md overflow-hidden bg-gray-100">
-										<Image
-											src={menu.imageUrl}
-											alt={menu.name}
-											fill
-											className="object-cover"
-										/>
-									</div>
-								)}
+								<div className="relative w-full h-48 mb-3 rounded-md overflow-hidden bg-gray-100">
+									<Image
+										src={menu.imageUrl || getFoodFallbackImage(index)}
+										alt={menu.name}
+										fill
+										className="object-cover"
+									/>
+								</div>
 								<h3 className="font-bold text-lg text-gray-900 mb-1">
 									{menu.name}
 								</h3>
