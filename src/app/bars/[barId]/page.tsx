@@ -46,27 +46,18 @@ export default async function BarDetailPage({
 
 					<MediaSlideshow media={bar.barImages.slice(0, 5)} />
 
-					<div className="mt-6">
-						<BarTabs>
-							{{
-								top: <TopTab bar={bar} />,
-								menu: (
-									<MenuTab
-										beerMenus={bar.beerMenus}
-										foodMenus={bar.foodMenus}
-									/>
-								),
-								posts: (
-									<PostsTab
-										posts={bar.posts}
-										barId={barId}
-										barName={bar.name}
-									/>
-								),
-								coupons: <CouponsTab coupons={bar.coupons} />,
-							}}
-						</BarTabs>
-					</div>
+					<BarTabs>
+						{{
+							top: <TopTab bar={bar} />,
+							menu: (
+								<MenuTab beerMenus={bar.beerMenus} foodMenus={bar.foodMenus} />
+							),
+							posts: (
+								<PostsTab posts={bar.posts} barId={barId} barName={bar.name} />
+							),
+							coupons: <CouponsTab coupons={bar.coupons} />,
+						}}
+					</BarTabs>
 				</div>
 			</div>
 		</AuthenticatedLayout>
