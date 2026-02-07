@@ -75,10 +75,10 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ### 2-2. bar_images
 
-店舗の写真（外観・店内・ビール・料理）。
+店舗の写真・動画（外観・店内・ビール・料理）。
 
 - **Table name:** `bar_images`
-- **Description:** 店舗ごとの画像（外観/店内/ビール/料理など）
+- **Description:** 店舗ごとの画像・動画（外観/店内/ビール/料理など）
 
 #### Columns
 
@@ -86,8 +86,9 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 |--------------|------------|--------------------------------------|----------------------------------------------|
 | id           | bigserial  | PK                                   | 画像ID                                       |
 | bar_id       | bigint     | NOT NULL, FK → bars(id)             | 紐づく店舗                                   |
+| media_type   | text       | NOT NULL DEFAULT 'image'             | 'image' / 'video'（画像または動画）          |
 | image_type   | text       | NOT NULL                             | 'exterior' / 'interior' / 'beer' / 'food' など |
-| image_url    | text       | NOT NULL                             | 画像URL（Supabase Storage へのパス等）       |
+| image_url    | text       | NOT NULL                             | 画像・動画URL（Supabase Storage へのパス等） |
 | sort_order   | integer    | NOT NULL DEFAULT 0                   | 表示順                                       |
 | created_at   | timestamptz| NOT NULL DEFAULT now()               | 作成日時                                     |
 

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getBarDetail, isFavoriteBar, recordViewHistory } from "@/actions/bar";
 import { BarTabs } from "@/components/bar/bar-tabs";
 import { FavoriteButton } from "@/components/bar/favorite-button";
-import { ArticlesTab } from "@/components/bar/tabs/articles-tab";
+import { MediaSlideshow } from "@/components/bar/media-slideshow";
 import { CouponsTab } from "@/components/bar/tabs/coupons-tab";
 import { MenuTab } from "@/components/bar/tabs/menu-tab";
 import { PostsTab } from "@/components/bar/tabs/posts-tab";
@@ -28,17 +28,14 @@ export default async function BarDetailPage({
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+			<div className="max-w-7xl mx-auto">
 				<div className="bg-card rounded-lg shadow-md overflow-hidden">
-					<div className="p-6 border-b border-border/50">
+					<div className="px-6 pt-6 pb-4">
 						<div className="flex items-start justify-between">
 							<div className="flex-1">
-								<h1 className="text-3xl font-semibold text-foreground mb-2">
+								<h1 className="text-3xl font-semibold text-foreground">
 									{bar.name}
 								</h1>
-								<p className="text-muted-foreground">
-									{bar.prefecture} {bar.city}
-								</p>
 							</div>
 							<FavoriteButton
 								barId={barId}
@@ -46,6 +43,8 @@ export default async function BarDetailPage({
 							/>
 						</div>
 					</div>
+
+					<MediaSlideshow media={bar.barImages.slice(0, 5)} />
 
 					<BarTabs>
 						{{
@@ -56,7 +55,6 @@ export default async function BarDetailPage({
 							posts: (
 								<PostsTab posts={bar.posts} barId={barId} barName={bar.name} />
 							),
-							articles: <ArticlesTab articles={bar.articles} />,
 							coupons: <CouponsTab coupons={bar.coupons} />,
 						}}
 					</BarTabs>
