@@ -167,11 +167,14 @@ UNIQUE制約: `country_id + name`
 |-------------|------------|------------------------|----------------------|
 | id          | bigserial  | PK                     | 醸造所ID             |
 | name        | text       | NOT NULL, UNIQUE       | 醸造所名             |
+| country_id  | bigint     | NOT NULL, FK → countries(id) | 国ID           |
 | region_id   | bigint     | NULLABLE, FK → regions(id) | 地域ID           |
 | website_url | text       | NULLABLE               | Webサイト            |
 | is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
+
+**管理画面での変更**: 国IDを必須化し、管理画面でのフィルタリングを容易にする。
 
 ---
 
@@ -259,18 +262,34 @@ UNIQUE制約: `country_id + name`
 
 #### Columns
 
-| Column          | Type        | Constraints                  | Description             |
-|-----------------|------------|------------------------------|-------------------------|
-| id              | bigserial  | PK                           | クーポンID              |
-| bar_id          | bigint     | NOT NULL, FK → bars(id)      | 店舗ID                  |
-| title           | text       | NOT NULL                     | 見出し                  |
-| description     | text       | NOT NULL                     | 内容文                  |
-| conditions      | text       | NULLABLE                     | 取得/利用条件           |
-| valid_from      | timestamptz| NULLABLE                     | 有効期間開始            |
-| valid_until     | timestamptz| NULLABLE                     | 有効期間終了            |
-| is_active       | boolean    | NOT NULL DEFAULT true        | 掲載中フラグ            |
-| created_at      | timestamptz| NOT NULL DEFAULT now()       | 作成日時                |
-| updated_at      | timestamptz| NOT NULL DEFAULT now()       | 更新日時                |
+| Column          | Type           | Constraints                  | Description             |
+|-----------------|----------------|------------------------------|-------------------------|
+| id              | bigserial      | PK                           | クーポンID              |
+| bar_id          | bigint         | NOT NULL, FK → bars(id)      | 店舗ID                  |
+| code            | text           | NOT NULL, UNIQUE             | クーポンコード          |
+| title           | text           | NOT NULL                     | 見出し                  |
+| description     | text           | NOT NULL                     | 内容文                  |
+| discount_type   | text           | NOT NULL                     | 割引タイプ（'percentage', 'fixed'） |
+| discount_value  | numeric(10,2)  | NOT NULL                     | 割引値（%または金額）   |
+| conditions      | text           | NULLABLE                     | 取得/利用条件           |
+| max_uses        | integer        | NULLABLE                     | 最大利用回数（NULLで無制限） |
+| used_count      | integer        | NOT NULL DEFAULT 0           | 利用回数                |
+| valid_from      | timestamptz    | NULLABLE                     | 有効期間開始            |
+| valid_until     | timestamptz    | NULLABLE                     | 有効期間終了            |
+| is_active       | boolean        | NOT NULL DEFAULT true        | 掲載中フラグ            |
+| deleted_at      | timestamptz    | NULLABLE                     | 削除日時（論理削除）    |
+| created_at      | timestamptz    | NOT NULL DEFAULT now()       | 作成日時                |
+| updated_at      | timestamptz    | NOT NULL DEFAULT now()       | 更新日時                |
+
+**管理画面での拡張**:
+- `code`: 実際に使えるクーポンコード（UNIQUE制約）
+- `discount_type`, `discount_value`: 割引率または固定額の割引
+- `max_uses`, `used_count`: 利用回数制限と実際の利用回数
+- `deleted_at`: 論理削除
+
+**インデックス**:
+- `code` (UNIQUE)
+- `bar_id`, `is_active`
 
 ---
 
@@ -310,10 +329,15 @@ UNIQUE制約: `country_id + name`
 | title        | text       | NOT NULL                        | 記事タイトル    |
 | body         | text       | NOT NULL                        | 記事本文        |
 | image_url    | text       | NULLABLE                        | サムネイル画像   |
+| status       | text       | NOT NULL DEFAULT 'draft'        | ステータス（'draft', 'published', 'scheduled'） |
 | published_at | timestamptz| NULLABLE                        | 公開日時        |
-| is_published | boolean    | NOT NULL DEFAULT false          | 公開フラグ      |
+| deleted_at   | timestamptz| NULLABLE                        | 削除日時（論理削除） |
 | created_at   | timestamptz| NOT NULL DEFAULT now()          | 作成日時        |
 | updated_at   | timestamptz| NOT NULL DEFAULT now()          | 更新日時        |
+
+**管理画面での変更**:
+- `is_published` を `status` に変更（draft/published/scheduledを管理）
+- `deleted_at` を追加（論理削除により誤削除からの復旧が可能）
 
 ---
 
@@ -502,7 +526,100 @@ UNIQUE制約: `country_id + name`
 
 ---
 
-## 7. 今回の Prisma/Supabase への渡し方イメージ
+## 7. 管理画面専用テーブル
+
+BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプリでは使用しない。
+
+### 7-1. admin_users
+
+管理画面のログインユーザー（バーオーナー、プロダクト管理者）。
+
+**※重要**: `user_profiles`（ユーザー向けアプリのユーザー）とは完全に別のテーブル。
+
+- **Table name:** `admin_users`
+- **Description:** 管理画面のバーオーナー・プロダクト管理者アカウント
+
+#### Columns
+
+| Column          | Type        | Constraints                     | Description                 |
+|-----------------|------------|----------------------------------|-----------------------------|
+| id              | uuid       | PK, default gen_random_uuid()   | 管理ユーザーID              |
+| email           | text       | NOT NULL, UNIQUE                | メールアドレス              |
+| password_hash   | text       | NOT NULL                         | パスワードハッシュ          |
+| name            | text       | NOT NULL                         | 氏名                        |
+| role            | text       | NOT NULL DEFAULT 'bar_owner'    | 権限（`bar_owner`, `admin`）|
+| is_active       | boolean    | NOT NULL DEFAULT true            | アカウント有効フラグ        |
+| created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
+| updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
+
+**インデックス**:
+- `email` (UNIQUE)
+
+**権限**:
+- `bar_owner`: 自身が紐づくバーのみ編集可能
+- `admin`: 全バー閲覧可能、マスタデータ編集可能
+
+---
+
+### 7-2. bar_owners
+
+バーと管理ユーザー（バーオーナー）の紐付け（中間テーブル）。
+
+- **Table name:** `bar_owners`
+- **Description:** バーと管理ユーザーの紐付け
+
+#### Columns
+
+| Column          | Type        | Constraints                     | Description                 |
+|-----------------|------------|----------------------------------|-----------------------------|
+| id              | uuid       | PK, default gen_random_uuid()   | 紐付けID                    |
+| bar_id          | bigint     | NOT NULL, FK → bars(id)         | バーID                      |
+| admin_user_id   | uuid       | NOT NULL, FK → admin_users(id)  | 管理ユーザーID              |
+| created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
+
+**インデックス**:
+- `bar_id`, `admin_user_id` (UNIQUE複合キー)
+
+**権限**:
+- バーオーナー: 自分のレコードのみ参照可能
+- プロダクト管理者: 全レコード参照・作成・削除可能
+
+---
+
+### 7-3. subscriptions
+
+サブスクリプション情報（Stripe連携）。
+
+- **Table name:** `subscriptions`
+- **Description:** バーごとのサブスクリプション情報
+
+#### Columns
+
+| Column                  | Type        | Constraints                  | Description                        |
+|-------------------------|------------|-------------------------------|------------------------------------|
+| id                      | uuid       | PK, default gen_random_uuid() | サブスクリプションID               |
+| bar_id                  | bigint     | NOT NULL, UNIQUE, FK → bars(id) | バーID                          |
+| stripe_customer_id      | text       | NULLABLE                      | Stripe顧客ID                       |
+| stripe_subscription_id  | text       | NULLABLE                      | StripeサブスクリプションID         |
+| plan_name               | text       | NOT NULL                      | プラン名                           |
+| status                  | text       | NOT NULL DEFAULT 'active'     | ステータス（`active`, `canceled`, `past_due`） |
+| current_period_start    | timestamptz| NULLABLE                      | 現在の課金期間開始日               |
+| current_period_end      | timestamptz| NULLABLE                      | 現在の課金期間終了日               |
+| created_at              | timestamptz| NOT NULL DEFAULT now()        | 作成日時                           |
+| updated_at              | timestamptz| NOT NULL DEFAULT now()        | 更新日時                           |
+
+**インデックス**:
+- `bar_id` (UNIQUE)
+- `stripe_customer_id`
+- `stripe_subscription_id`
+
+**権限**:
+- バーオーナー: 自バーのサブスクリプション参照のみ
+- プロダクト管理者: 全サブスクリプション参照可能
+
+---
+
+## 8. 今回の Prisma/Supabase への渡し方イメージ
 
 - この `database.md` を Claude Code に渡し、
   - 「この設計に基づいて Prisma schema を作成してください」
