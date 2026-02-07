@@ -68,10 +68,11 @@ model Bar {
   @@map("bars")
 }
 
-/// 店舗画像
+/// 店舗画像・動画
 model BarImage {
   id        BigInt   @id @default(autoincrement())
   barId     BigInt   @map("bar_id")
+  mediaType String   @default("image") @map("media_type")
   imageType String   @map("image_type")
   imageUrl  String   @map("image_url")
   sortOrder Int      @default(0) @map("sort_order")
