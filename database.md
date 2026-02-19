@@ -94,6 +94,39 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
+### 2-2-2. bar_opening_hours
+
+店舗の曜日別・複数時間帯の営業時間。
+
+- **Table name:** `bar_opening_hours`
+- **Description:** 店舗の曜日別営業時間（複数時間帯対応）
+
+#### Columns
+
+| Column      | Type        | Constraints                     | Description                             |
+|-------------|------------|----------------------------------|-----------------------------------------|
+| id          | bigserial  | PK                               | ID                                      |
+| bar_id      | bigint     | NOT NULL, FK → bars(id)         | 店舗ID                                  |
+| day_of_week | integer    | NOT NULL CHECK (0-6)             | 曜日（0=月, 1=火, ..., 6=日）           |
+| open_time   | time       | NOT NULL                         | 開始時刻                                |
+| close_time  | time       | NOT NULL                         | 終了時刻                                |
+| sort_order  | integer    | NOT NULL DEFAULT 0               | 表示順                                  |
+| is_closed   | boolean    | NOT NULL DEFAULT false           | 定休日フラグ                            |
+| created_at  | timestamptz| NOT NULL DEFAULT now()           | 作成日時                                |
+| updated_at  | timestamptz| NOT NULL DEFAULT now()           | 更新日時                                |
+
+**インデックス**: `bar_id + day_of_week`
+
+**CASCADE削除**: 店舗削除時に関連する営業時間レコードも削除
+
+**使用例**:
+- 複数時間帯: 昼営業（11:00-14:00）+ 夜営業（17:00-23:00）を2レコードで表現
+- 定休日: `is_closed=true` のレコードで表現
+- 24時間営業: `open_time=00:00, close_time=23:59` で表現
+- 翌日にまたがる営業: `open_time=17:00, close_time=02:00` など
+
+---
+
 ### 2-3. beer_categories
 
 ビールのカテゴリ（IPA / ピルスナー など）。

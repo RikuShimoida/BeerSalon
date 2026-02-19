@@ -26,12 +26,17 @@ async function main() {
 		orderBy: { displayOrder: "asc" },
 	});
 
-	console.log(`Found ${bars.length} bars and ${paymentMethods.length} payment methods.`);
+	console.log(
+		`Found ${bars.length} bars and ${paymentMethods.length} payment methods.`,
+	);
 
 	for (const bar of bars) {
 		console.log(`\nAdding payment methods to bar: ${bar.name} (ID: ${bar.id})`);
 
-		const methodsToAdd = paymentMethods.slice(0, 2 + Math.floor(Math.random() * 3));
+		const methodsToAdd = paymentMethods.slice(
+			0,
+			2 + Math.floor(Math.random() * 3),
+		);
 
 		for (const pm of methodsToAdd) {
 			const existing = await prisma.barPaymentMethod.findUnique({
