@@ -138,6 +138,16 @@ export async function getBarDetail(barId: string) {
 					id: "asc",
 				},
 			},
+			barPaymentMethods: {
+				include: {
+					paymentMethod: true,
+				},
+				orderBy: {
+					paymentMethod: {
+						displayOrder: "asc",
+					},
+				},
+			},
 			posts: {
 				include: {
 					user: true,
@@ -195,6 +205,11 @@ export async function getBarDetail(barId: string) {
 			...img,
 			id: img.id.toString(),
 			barId: img.barId.toString(),
+		})),
+		paymentMethods: bar.barPaymentMethods.map((bpm) => ({
+			id: bpm.paymentMethod.id.toString(),
+			name: bpm.paymentMethod.name,
+			displayOrder: bpm.paymentMethod.displayOrder,
 		})),
 		beerMenus: bar.beerMenus.map((menu) => ({
 			...menu,

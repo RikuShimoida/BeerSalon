@@ -38,32 +38,33 @@ model UserProfile {
 
 /// ビアバー基本情報
 model Bar {
-  id             BigInt        @id @default(autoincrement())
-  name           String
-  prefecture     String
-  city           String
-  addressLine1   String        @map("address_line1")
-  addressLine2   String?       @map("address_line2")
-  latitude       Decimal?      @db.Decimal(10, 7)
-  longitude      Decimal?      @db.Decimal(10, 7)
-  phoneNumber    String?       @map("phone_number")
-  openingTime    DateTime?     @map("opening_time") @db.Time(6)
-  endingTime     DateTime?     @map("ending_time") @db.Time(6)
-  regularHoliday String?       @map("regular_holiday")
-  access         String?
-  websiteUrl     String?       @map("website_url")
-  description    String?
-  isActive       Boolean       @default(true) @map("is_active")
-  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
-  articles       Article[]
-  beerMenus      BarBeerMenu[]
-  foodMenus      BarFoodMenu[]
-  barImages      BarImage[]
-  coupons        Coupon[]
-  favoriteBars   FavoriteBar[]
-  posts          Post[]
-  viewHistories  ViewHistory[]
+  id                BigInt              @id @default(autoincrement())
+  name              String
+  prefecture        String
+  city              String
+  addressLine1      String              @map("address_line1")
+  addressLine2      String?             @map("address_line2")
+  latitude          Decimal?            @db.Decimal(10, 7)
+  longitude         Decimal?            @db.Decimal(10, 7)
+  phoneNumber       String?             @map("phone_number")
+  openingTime       DateTime?           @map("opening_time") @db.Time(6)
+  endingTime        DateTime?           @map("ending_time") @db.Time(6)
+  regularHoliday    String?             @map("regular_holiday")
+  access            String?
+  websiteUrl        String?             @map("website_url")
+  description       String?
+  isActive          Boolean             @default(true) @map("is_active")
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  articles          Article[]
+  beerMenus         BarBeerMenu[]
+  foodMenus         BarFoodMenu[]
+  barImages         BarImage[]
+  coupons           Coupon[]
+  favoriteBars      FavoriteBar[]
+  posts             Post[]
+  viewHistories     ViewHistory[]
+  barPaymentMethods BarPaymentMethod[]
 
   @@map("bars")
 }
@@ -363,4 +364,30 @@ model LoginHistory {
   user         UserProfile @relation(fields: [userId], references: [id])
 
   @@map("login_histories")
+}
+
+/// 決済手段マスタ
+model PaymentMethod {
+  id                BigInt              @id @default(autoincrement())
+  name              String              @unique
+  displayOrder      Int                 @default(0) @map("display_order")
+  isActive          Boolean             @default(true) @map("is_active")
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  barPaymentMethods BarPaymentMethod[]
+
+  @@map("payment_methods")
+}
+
+/// 店舗×決済手段 中間テーブル
+model BarPaymentMethod {
+  id              BigInt        @id @default(autoincrement())
+  barId           BigInt        @map("bar_id")
+  paymentMethodId BigInt        @map("payment_method_id")
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  bar             Bar           @relation(fields: [barId], references: [id], onDelete: Cascade)
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@unique([barId, paymentMethodId])
+  @@map("bar_payment_methods")
 }

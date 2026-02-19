@@ -461,9 +461,59 @@ UNIQUE制約: `country_id + name`
 
 ---
 
-## 5. 閲覧履歴・通知
+## 5. 支払い方法
 
-### 5-1. view_histories
+### 5-1. payment_methods
+
+決済手段マスタ。
+
+- **Table name:** `payment_methods`
+- **Description:** 決済手段マスタ
+
+#### Columns
+
+| Column        | Type        | Constraints              | Description          |
+|---------------|------------|--------------------------|----------------------|
+| id            | bigserial  | PK                       | 決済手段ID           |
+| name          | text       | NOT NULL, UNIQUE         | 決済手段名           |
+| display_order | integer    | NOT NULL DEFAULT 0       | 表示順               |
+| is_active     | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
+| created_at    | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
+| updated_at    | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+
+**初期マスタデータ**:
+1. 現金
+2. クレジットカード
+3. 電子マネー
+4. QRコード決済
+
+---
+
+### 5-2. bar_payment_methods
+
+店舗と決済手段の中間テーブル。
+
+- **Table name:** `bar_payment_methods`
+- **Description:** 店舗×決済手段の中間テーブル
+
+#### Columns
+
+| Column            | Type        | Constraints                            | Description       |
+|-------------------|-------------|----------------------------------------|-------------------|
+| id                | bigserial   | PK                                     | ID                |
+| bar_id            | bigint      | NOT NULL, FK → bars(id)               | 店舗ID            |
+| payment_method_id | bigint      | NOT NULL, FK → payment_methods(id)    | 決済手段ID        |
+| created_at        | timestamptz | NOT NULL DEFAULT now()                 | 作成日時          |
+
+**UNIQUE制約**: `bar_id + payment_method_id`
+
+**CASCADE削除**: 店舗削除時に関連する `bar_payment_methods` も削除される
+
+---
+
+## 6. 閲覧履歴・通知
+
+### 6-1. view_histories
 
 店舗の閲覧履歴（閲覧履歴ページ用）。
 
@@ -481,7 +531,7 @@ UNIQUE制約: `country_id + name`
 
 ---
 
-### 5-2. notifications
+### 6-2. notifications
 
 通知（いいね／フォロー／お気に入り店舗の新記事など）。
 
@@ -503,9 +553,9 @@ UNIQUE制約: `country_id + name`
 
 ---
 
-## 6. ログ関連（任意で実装）
+## 7. ログ関連（任意で実装）
 
-### 6-1. login_histories
+### 7-1. login_histories
 
 ログイン履歴（セキュリティ・分析用）。MVPでは必須ではないが、将来用に設計。
 
@@ -526,11 +576,11 @@ UNIQUE制約: `country_id + name`
 
 ---
 
-## 7. 管理画面専用テーブル
+## 8. 管理画面専用テーブル
 
 BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプリでは使用しない。
 
-### 7-1. admin_users
+### 8-1. admin_users
 
 管理画面のログインユーザー（バーオーナー、プロダクト管理者）。
 
@@ -561,7 +611,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-### 7-2. bar_owners
+### 8-2. bar_owners
 
 バーと管理ユーザー（バーオーナー）の紐付け（中間テーブル）。
 
@@ -586,7 +636,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-### 7-3. subscriptions
+### 8-3. subscriptions
 
 サブスクリプション情報（Stripe連携）。
 
@@ -619,7 +669,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-## 8. 今回の Prisma/Supabase への渡し方イメージ
+## 9. 今回の Prisma/Supabase への渡し方イメージ
 
 - この `database.md` を Claude Code に渡し、
   - 「この設計に基づいて Prisma schema を作成してください」
