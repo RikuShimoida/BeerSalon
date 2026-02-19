@@ -1,3 +1,9 @@
+interface PaymentMethod {
+	id: string;
+	name: string;
+	displayOrder: number;
+}
+
 interface BarInfo {
 	name: string;
 	description: string | null;
@@ -11,6 +17,7 @@ interface BarInfo {
 	addressLine1: string;
 	addressLine2: string | null;
 	websiteUrl: string | null;
+	paymentMethods: PaymentMethod[];
 }
 
 interface TopTabProps {
@@ -78,6 +85,19 @@ export function TopTab({ bar }: TopTabProps) {
 						{bar.addressLine1}
 						{bar.addressLine2 && ` ${bar.addressLine2}`}
 					</p>
+				</div>
+
+				<div>
+					<h3 className="text-sm font-semibold text-gray-700 mb-1">
+						支払い方法
+					</h3>
+					{bar.paymentMethods.length > 0 ? (
+						<p className="text-gray-900">
+							{bar.paymentMethods.map((pm) => pm.name).join("、")}
+						</p>
+					) : (
+						<p className="text-gray-900">-</p>
+					)}
 				</div>
 
 				<div>
