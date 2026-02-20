@@ -114,6 +114,16 @@ export async function getBarDetail(barId: string) {
 					sortOrder: "asc",
 				},
 			},
+			openingHours: {
+				orderBy: [
+					{
+						dayOfWeek: "asc",
+					},
+					{
+						sortOrder: "asc",
+					},
+				],
+			},
 			beerMenus: {
 				where: {
 					isActive: true,
@@ -205,6 +215,11 @@ export async function getBarDetail(barId: string) {
 			...img,
 			id: img.id.toString(),
 			barId: img.barId.toString(),
+		})),
+		openingHours: bar.openingHours.map((oh) => ({
+			...oh,
+			id: oh.id.toString(),
+			barId: oh.barId.toString(),
 		})),
 		paymentMethods: bar.barPaymentMethods.map((bpm) => ({
 			id: bpm.paymentMethod.id.toString(),

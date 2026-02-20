@@ -4,6 +4,16 @@ interface PaymentMethod {
 	displayOrder: number;
 }
 
+interface OpeningHour {
+	id: string;
+	barId: string;
+	dayOfWeek: number;
+	openTime: Date;
+	closeTime: Date;
+	sortOrder: number;
+	isClosed: boolean;
+}
+
 interface BarInfo {
 	name: string;
 	description: string | null;
@@ -18,6 +28,7 @@ interface BarInfo {
 	addressLine2: string | null;
 	websiteUrl: string | null;
 	paymentMethods: PaymentMethod[];
+	openingHours: OpeningHour[];
 }
 
 interface TopTabProps {
@@ -33,6 +44,63 @@ function formatTime(date: Date | null): string {
 	});
 }
 
+const DAY_NAMES = [
+	"月曜日",
+	"火曜日",
+	"水曜日",
+	"木曜日",
+	"金曜日",
+	"土曜日",
+	"日曜日",
+];
+
+function formatOpeningHours(openingHours: OpeningHour[]): string {
+	const grouped = new Map<number, OpeningHour[]>();
+
+	for (const hour of openingHours) {
+		const existing = grouped.get(hour.dayOfWeek) || [];
+		existing.push(hour);
+		grouped.set(hour.dayOfWeek, existing);
+	}
+
+	const lines: string[] = [];
+
+	for (let day = 0; day <= 6; day++) {
+		const dayHours = grouped.get(day) || [];
+		const dayName = DAY_NAMES[day];
+
+		if (dayHours.length === 0) {
+			lines.push(`${dayName}: -`);
+		} else if (dayHours.some((h) => h.isClosed)) {
+			lines.push(`${dayName}: 定休日`);
+		} else {
+			const timeRanges = dayHours
+				.map((h) => {
+					const open = formatTime(h.openTime);
+					const close = formatTime(h.closeTime);
+
+					if (open === "00:00" && close === "23:59") {
+						return "24時間営業";
+					}
+
+					const openHour = new Date(h.openTime).getHours();
+					const closeHour = new Date(h.closeTime).getHours();
+
+					if (closeHour < openHour || (closeHour === 0 && close !== "00:00")) {
+						return `${open}～翌${close}`;
+					}
+
+					return `${open}～${close}`;
+				})
+				.join("、");
+
+			lines.push(`${dayName}: ${timeRanges}`);
+		}
+	}
+
+	return lines.join("\n");
+}
+
 export function TopTab({ bar }: TopTabProps) {
 	return (
 		<div className="space-y-6">
@@ -44,16 +112,23 @@ export function TopTab({ bar }: TopTabProps) {
 			</section>
 
 			<section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<div>
+				<div className="md:col-span-2">
 					<h3 className="text-sm font-semibold text-gray-700 mb-1">営業時間</h3>
-					<p className="text-gray-900">
-						{formatTime(bar.openingTime)} - {formatTime(bar.endingTime)}
-					</p>
-				</div>
-
-				<div>
-					<h3 className="text-sm font-semibold text-gray-700 mb-1">定休日</h3>
-					<p className="text-gray-900">{bar.regularHoliday || "-"}</p>
+					{bar.openingHours.length > 0 ? (
+						<p className="text-gray-900 whitespace-pre-line">
+							{formatOpeningHours(bar.openingHours)}
+						</p>
+					) : (
+						<p className="text-gray-900">
+							{formatTime(bar.openingTime)} - {formatTime(bar.endingTime)}
+							{bar.regularHoliday && (
+								<>
+									<br />
+									定休日: {bar.regularHoliday}
+								</>
+							)}
+						</p>
+					)}
 				</div>
 
 				<div>

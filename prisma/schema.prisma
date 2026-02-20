@@ -65,6 +65,7 @@ model Bar {
   posts             Post[]
   viewHistories     ViewHistory[]
   barPaymentMethods BarPaymentMethod[]
+  openingHours      BarOpeningHour[]
 
   @@map("bars")
 }
@@ -81,6 +82,23 @@ model BarImage {
   bar       Bar      @relation(fields: [barId], references: [id], onDelete: Cascade)
 
   @@map("bar_images")
+}
+
+/// 店舗営業時間
+model BarOpeningHour {
+  id         BigInt   @id @default(autoincrement())
+  barId      BigInt   @map("bar_id")
+  dayOfWeek  Int      @map("day_of_week")
+  openTime   DateTime @map("open_time") @db.Time(6)
+  closeTime  DateTime @map("close_time") @db.Time(6)
+  sortOrder  Int      @default(0) @map("sort_order")
+  isClosed   Boolean  @default(false) @map("is_closed")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bar        Bar      @relation(fields: [barId], references: [id], onDelete: Cascade)
+
+  @@index([barId, dayOfWeek])
+  @@map("bar_opening_hours")
 }
 
 /// ビールカテゴリマスタ
