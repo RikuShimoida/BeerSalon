@@ -79,6 +79,26 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
   - プッシュ
   - PR 作成（intoはdevelopとすること）
 
+### PR と Issue のクローズルール（重要）
+
+- **PRをクローズ（マージまたはClose）した場合、関連付けられているIssueも必ずクローズすること**
+- PRとIssueの紐付けは、PR作成時に本文に `Closes #issue番号` を記載することで自動化される
+- 手動でPRをCloseした場合は、必ず関連Issueも手動でCloseすること
+- Issue番号の確認方法:
+  - PR作成時に紐付けたIssue番号を確認
+  - `gh pr view <PR番号>` で関連Issueを確認
+
+### 実行コマンド例
+
+```bash
+# PRをマージ後、関連Issueを自動クローズ（"Closes #123"が本文にある場合）
+gh pr merge <PR番号> --merge
+
+# 手動でPRをクローズした場合は、Issueも手動でクローズ
+gh pr close <PR番号>
+gh issue close <Issue番号>
+```
+
 ---
 
 ## コーディングルール（厳守）

@@ -27,6 +27,7 @@ interface BarInfo {
 	addressLine1: string;
 	addressLine2: string | null;
 	websiteUrl: string | null;
+	instagramUrl: string | null;
 	paymentMethods: PaymentMethod[];
 	openingHours: OpeningHour[];
 }
@@ -192,6 +193,22 @@ export function TopTab({ bar }: TopTabProps) {
 						<p className="text-gray-900">-</p>
 					)}
 				</div>
+
+				{bar.instagramUrl && (
+					<div>
+						<h3 className="text-sm font-semibold text-gray-700 mb-1">
+							Instagram
+						</h3>
+						<a
+							href={bar.instagramUrl}
+							target="_blank"
+							rel="nofollow noopener"
+							className="text-blue-600 hover:underline break-all"
+						>
+							{bar.instagramUrl}
+						</a>
+					</div>
+				)}
 			</section>
 		</div>
 	);
