@@ -1,3 +1,5 @@
+import { Instagram } from "lucide-react";
+
 interface PaymentMethod {
 	id: string;
 	name: string;
@@ -203,9 +205,13 @@ export function TopTab({ bar }: TopTabProps) {
 							href={bar.instagramUrl}
 							target="_blank"
 							rel="nofollow noopener"
-							className="text-blue-600 hover:underline break-all"
+							className="inline-flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors"
+							aria-label="Instagramで見る"
 						>
-							{bar.instagramUrl}
+							<Instagram className="w-6 h-6" />
+							<span className="text-sm">
+								@{bar.instagramUrl.split("/").filter(Boolean).pop()}
+							</span>
 						</a>
 					</div>
 				)}
