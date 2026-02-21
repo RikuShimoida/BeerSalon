@@ -9,53 +9,54 @@ datasource db {
 
 /// ユーザープロフィール（Supabase Auth の auth.users に紐づく）
 model UserProfile {
-  id             String               @id @default(uuid()) @db.Uuid
-  userAuthId     String               @unique @map("user_auth_id") @db.Uuid
-  lastName       String               @map("last_name")
-  firstName      String               @map("first_name")
-  nickname       String
-  birthday       DateTime             @db.Date
-  gender         String
-  prefecture     String
-  profileImageUrl String?             @map("profile_image_url")
-  bio            String?
-  isActive       Boolean              @default(true) @map("is_active")
-  createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
-  articleLikes   ArticleLike[]
-  favoriteBars   FavoriteBar[]
-  loginHistories LoginHistory[]
-  notifications  Notification[]
-  postLikes      PostLike[]
-  posts          Post[]
-  userCoupons    UserCoupon[]
-  following      UserFollowRelation[] @relation("Followee")
-  followedBy     UserFollowRelation[] @relation("Follower")
-  viewHistories  ViewHistory[]
+  id              String               @id @default(uuid()) @db.Uuid
+  userAuthId      String               @unique @map("user_auth_id") @db.Uuid
+  lastName        String               @map("last_name")
+  firstName       String               @map("first_name")
+  nickname        String
+  birthday        DateTime             @db.Date
+  gender          String
+  prefecture      String
+  profileImageUrl String?              @map("profile_image_url")
+  bio             String?
+  isActive        Boolean              @default(true) @map("is_active")
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  articleLikes    ArticleLike[]
+  favoriteBars    FavoriteBar[]
+  loginHistories  LoginHistory[]
+  notifications   Notification[]
+  postLikes       PostLike[]
+  posts           Post[]
+  userCoupons     UserCoupon[]
+  following       UserFollowRelation[] @relation("Followee")
+  followedBy      UserFollowRelation[] @relation("Follower")
+  viewHistories   ViewHistory[]
 
   @@map("user_profiles")
 }
 
 /// ビアバー基本情報
 model Bar {
-  id                BigInt              @id @default(autoincrement())
+  id                BigInt             @id @default(autoincrement())
   name              String
   prefecture        String
   city              String
-  addressLine1      String              @map("address_line1")
-  addressLine2      String?             @map("address_line2")
-  latitude          Decimal?            @db.Decimal(10, 7)
-  longitude         Decimal?            @db.Decimal(10, 7)
-  phoneNumber       String?             @map("phone_number")
-  openingTime       DateTime?           @map("opening_time") @db.Time(6)
-  endingTime        DateTime?           @map("ending_time") @db.Time(6)
-  regularHoliday    String?             @map("regular_holiday")
+  addressLine1      String             @map("address_line1")
+  addressLine2      String?            @map("address_line2")
+  latitude          Decimal?           @db.Decimal(10, 7)
+  longitude         Decimal?           @db.Decimal(10, 7)
+  phoneNumber       String?            @map("phone_number")
+  openingTime       DateTime?          @map("opening_time") @db.Time(6)
+  endingTime        DateTime?          @map("ending_time") @db.Time(6)
+  regularHoliday    String?            @map("regular_holiday")
   access            String?
-  websiteUrl        String?             @map("website_url")
+  websiteUrl        String?            @map("website_url")
+  instagramUrl      String?            @map("instagram_url")
   description       String?
-  isActive          Boolean             @default(true) @map("is_active")
-  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
   articles          Article[]
   beerMenus         BarBeerMenu[]
   foodMenus         BarFoodMenu[]
@@ -86,16 +87,16 @@ model BarImage {
 
 /// 店舗営業時間
 model BarOpeningHour {
-  id         BigInt   @id @default(autoincrement())
-  barId      BigInt   @map("bar_id")
-  dayOfWeek  Int      @map("day_of_week")
-  openTime   DateTime @map("open_time") @db.Time(6)
-  closeTime  DateTime @map("close_time") @db.Time(6)
-  sortOrder  Int      @default(0) @map("sort_order")
-  isClosed   Boolean  @default(false) @map("is_closed")
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-  bar        Bar      @relation(fields: [barId], references: [id], onDelete: Cascade)
+  id        BigInt   @id @default(autoincrement())
+  barId     BigInt   @map("bar_id")
+  dayOfWeek Int      @map("day_of_week")
+  openTime  DateTime @map("open_time") @db.Time(6)
+  closeTime DateTime @map("close_time") @db.Time(6)
+  sortOrder Int      @default(0) @map("sort_order")
+  isClosed  Boolean  @default(false) @map("is_closed")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bar       Bar      @relation(fields: [barId], references: [id], onDelete: Cascade)
 
   @@index([barId, dayOfWeek])
   @@map("bar_opening_hours")
@@ -386,12 +387,12 @@ model LoginHistory {
 
 /// 決済手段マスタ
 model PaymentMethod {
-  id                BigInt              @id @default(autoincrement())
-  name              String              @unique
-  displayOrder      Int                 @default(0) @map("display_order")
-  isActive          Boolean             @default(true) @map("is_active")
-  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                BigInt             @id @default(autoincrement())
+  name              String             @unique
+  displayOrder      Int                @default(0) @map("display_order")
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
   barPaymentMethods BarPaymentMethod[]
 
   @@map("payment_methods")

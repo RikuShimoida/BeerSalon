@@ -1,3 +1,5 @@
+import { Instagram } from "lucide-react";
+
 interface PaymentMethod {
 	id: string;
 	name: string;
@@ -27,6 +29,7 @@ interface BarInfo {
 	addressLine1: string;
 	addressLine2: string | null;
 	websiteUrl: string | null;
+	instagramUrl: string | null;
 	paymentMethods: PaymentMethod[];
 	openingHours: OpeningHour[];
 }
@@ -192,6 +195,26 @@ export function TopTab({ bar }: TopTabProps) {
 						<p className="text-gray-900">-</p>
 					)}
 				</div>
+
+				{bar.instagramUrl && (
+					<div>
+						<h3 className="text-sm font-semibold text-gray-700 mb-1">
+							Instagram
+						</h3>
+						<a
+							href={bar.instagramUrl}
+							target="_blank"
+							rel="nofollow noopener"
+							className="inline-flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors"
+							aria-label="Instagramで見る"
+						>
+							<Instagram className="w-6 h-6" />
+							<span className="text-sm">
+								@{bar.instagramUrl.split("/").filter(Boolean).pop()}
+							</span>
+						</a>
+					</div>
+				)}
 			</section>
 		</div>
 	);
