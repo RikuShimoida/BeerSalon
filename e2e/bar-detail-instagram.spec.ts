@@ -42,13 +42,6 @@ test.describe("店舗詳細ページ - Instagram URL", () => {
 
 		await page.waitForTimeout(1000);
 
-		const pageContent = await page.content();
-		console.log("Page has Instagram text:", pageContent.includes("Instagram"));
-		console.log(
-			"Page has instagram.com link:",
-			pageContent.includes("instagram.com"),
-		);
-
 		const instagramSection = page.locator("text=/Instagram/i");
 		const instagramLink = page.locator('a[href*="instagram.com"]');
 
