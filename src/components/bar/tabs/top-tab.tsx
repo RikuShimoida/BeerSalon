@@ -1,4 +1,5 @@
 import { Instagram } from "lucide-react";
+import { XIcon } from "@/components/icons/x-icon";
 
 interface PaymentMethod {
 	id: string;
@@ -30,6 +31,7 @@ interface BarInfo {
 	addressLine2: string | null;
 	websiteUrl: string | null;
 	instagramUrl: string | null;
+	xUrl: string | null;
 	paymentMethods: PaymentMethod[];
 	openingHours: OpeningHour[];
 }
@@ -211,6 +213,26 @@ export function TopTab({ bar }: TopTabProps) {
 							<Instagram className="w-6 h-6" />
 							<span className="text-sm">
 								@{bar.instagramUrl.split("/").filter(Boolean).pop()}
+							</span>
+						</a>
+					</div>
+				)}
+
+				{bar.xUrl && (
+					<div>
+						<h3 className="text-sm font-semibold text-gray-700 mb-1">
+							X（Twitter）
+						</h3>
+						<a
+							href={bar.xUrl}
+							target="_blank"
+							rel="nofollow noopener"
+							className="inline-flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
+							aria-label="Xで見る"
+						>
+							<XIcon className="w-6 h-6" />
+							<span className="text-sm">
+								@{bar.xUrl.split("/").filter(Boolean).pop()}
 							</span>
 						</a>
 					</div>
