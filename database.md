@@ -67,6 +67,8 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | access          | text       | NULLABLE                         | 交通手段・最寄駅など                    |
 | website_url     | text       | NULLABLE                         | 店舗公式サイト URL                      |
 | instagram_url   | text       | NULLABLE                         | Instagram URL                           |
+| x_url           | text       | NULLABLE                         | X (Twitter) URL                         |
+| facebook_url    | text       | NULLABLE                         | Facebook URL                            |
 | description     | text       | NULLABLE                         | PR文                                    |
 | is_active       | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ                            |
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                                |

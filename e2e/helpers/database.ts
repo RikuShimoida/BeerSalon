@@ -88,6 +88,50 @@ export async function ensureBarWithoutXUrl(): Promise<bigint> {
 	return barId;
 }
 
+export async function ensureBarWithFacebookUrl(): Promise<bigint> {
+	const bars = await prisma.bar.findMany({
+		select: { id: true, name: true, facebookUrl: true },
+		take: 5,
+	});
+
+	if (bars.length === 0) {
+		throw new Error("No bars found in database");
+	}
+
+	const barId = bars[0].id;
+
+	await prisma.bar.updateMany({
+		where: { id: barId },
+		data: { facebookUrl: "https://www.facebook.com/beersalon.test" },
+	});
+
+	return barId;
+}
+
+export async function ensureBarWithoutFacebookUrl(): Promise<bigint> {
+	const bars = await prisma.bar.findMany({
+		select: { id: true, name: true, facebookUrl: true },
+		skip: 1,
+		take: 1,
+	});
+
+	if (bars.length === 0) {
+		const firstBar = await prisma.bar.findFirst({
+			select: { id: true },
+		});
+		return firstBar?.id ?? 1n;
+	}
+
+	const barId = bars[0].id;
+
+	await prisma.bar.updateMany({
+		where: { id: barId },
+		data: { facebookUrl: null },
+	});
+
+	return barId;
+}
+
 export async function cleanup() {
 	await prisma.$disconnect();
 }
