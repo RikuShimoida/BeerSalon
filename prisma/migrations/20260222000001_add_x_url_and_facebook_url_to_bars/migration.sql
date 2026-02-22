@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "bars" ADD COLUMN IF NOT EXISTS "x_url" TEXT;
+ALTER TABLE "bars" ADD COLUMN IF NOT EXISTS "facebook_url" TEXT;

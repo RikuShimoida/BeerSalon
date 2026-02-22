@@ -1,4 +1,5 @@
 import { Instagram } from "lucide-react";
+import { FacebookIcon } from "@/components/icons/facebook-icon";
 import { XIcon } from "@/components/icons/x-icon";
 
 interface PaymentMethod {
@@ -32,6 +33,7 @@ interface BarInfo {
 	websiteUrl: string | null;
 	instagramUrl: string | null;
 	xUrl: string | null;
+	facebookUrl: string | null;
 	paymentMethods: PaymentMethod[];
 	openingHours: OpeningHour[];
 }
@@ -233,6 +235,26 @@ export function TopTab({ bar }: TopTabProps) {
 							<XIcon className="w-6 h-6" />
 							<span className="text-sm">
 								@{bar.xUrl.split("/").filter(Boolean).pop()}
+							</span>
+						</a>
+					</div>
+				)}
+
+				{bar.facebookUrl && (
+					<div>
+						<h3 className="text-sm font-semibold text-gray-700 mb-1">
+							Facebook
+						</h3>
+						<a
+							href={bar.facebookUrl}
+							target="_blank"
+							rel="nofollow noopener"
+							className="inline-flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors"
+							aria-label="Facebookで見る"
+						>
+							<FacebookIcon className="w-6 h-6" />
+							<span className="text-sm">
+								@{bar.facebookUrl.split("/").filter(Boolean).pop()}
 							</span>
 						</a>
 					</div>

@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { createAuthenticatedUser } from "./helpers/auth";
-import { cleanup, ensureBarWithXUrl, ensureBarWithoutXUrl } from "./helpers/database";
+import {
+	cleanup,
+	ensureBarWithoutXUrl,
+	ensureBarWithXUrl,
+} from "./helpers/database";
 
 let barIdWithXUrl: bigint;
 let barIdWithoutXUrl: bigint;
