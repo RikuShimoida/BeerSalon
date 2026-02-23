@@ -44,11 +44,10 @@ interface TopTabProps {
 
 function formatTime(date: Date | null): string {
 	if (!date) return "-";
-	return new Date(date).toLocaleTimeString("ja-JP", {
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false,
-	});
+	const d = new Date(date);
+	const hours = d.getUTCHours();
+	const minutes = d.getUTCMinutes();
+	return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
 const DAY_NAMES = [
