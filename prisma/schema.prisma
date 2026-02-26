@@ -56,6 +56,7 @@ model Bar {
   xUrl              String?            @map("x_url")
   facebookUrl       String?            @map("facebook_url")
   description       String?
+  previewImageUrl   String?            @map("preview_image_url")
   isActive          Boolean            @default(true) @map("is_active")
   createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)

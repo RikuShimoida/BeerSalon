@@ -67,6 +67,9 @@ export async function getBars(params?: {
 		where,
 		include: {
 			barImages: {
+				where: {
+					imageType: "exterior",
+				},
 				orderBy: {
 					sortOrder: "asc",
 				},
@@ -83,7 +86,7 @@ export async function getBars(params?: {
 		name: bar.name,
 		prefecture: bar.prefecture,
 		city: bar.city,
-		imageUrl: bar.barImages[0]?.imageUrl,
+		imageUrl: bar.previewImageUrl || bar.barImages[0]?.imageUrl,
 	}));
 }
 
