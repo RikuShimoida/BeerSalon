@@ -141,7 +141,7 @@ export function TopTab({ bar }: TopTabProps) {
 					<h3 className="text-sm font-semibold text-gray-700 mb-1">
 						交通手段・アクセス
 					</h3>
-					<p className="text-gray-900">{bar.access || "-"}</p>
+					<p className="text-gray-900 whitespace-pre-line">{bar.access || "-"}</p>
 				</div>
 
 				<div>
