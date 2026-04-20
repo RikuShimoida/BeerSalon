@@ -1,10 +1,7 @@
 ---
 name: pencil
 description: Pencil MCP運用ルール。デザイン生成時の.penファイル操作とファイル命名規則。
-user_invocable: true
-auto_trigger:
-  - デザイン生成時
-  - 「Pencil」「デザイン」「ワイヤーフレーム作成」などの発言時
+when_to_use: デザイン生成時、「Pencil」「デザイン」「ワイヤーフレーム作成」などの発言時
 ---
 
 ## Pencil 運用ルール

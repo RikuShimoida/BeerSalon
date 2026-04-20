@@ -1,10 +1,7 @@
 ---
 name: create-test-user
 description: テストユーザーの作成・管理ルール。email-pass.txtへの記録とGit管理除外。
-user_invocable: true
-auto_trigger:
-  - テストユーザー作成時
-  - 「テストユーザー」「テスト用アカウント」などの発言時
+when_to_use: テストユーザー作成時、「テストユーザー」「テスト用アカウント」などの発言時
 ---
 
 ## テストユーザー管理ルール

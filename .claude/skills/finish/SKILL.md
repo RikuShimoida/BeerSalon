@@ -1,11 +1,7 @@
 ---
 name: finish
 description: 作業完了フロー。format → lint → Playwright検証 → commit → push → PR作成を順序通り実行する。
-user_invocable: true
-auto_trigger:
-  - 作業完了時
-  - コミット時
-  - 「完了」「仕上げ」「pushして」「PRお願い」などの発言時
+when_to_use: 作業完了時、コミット時、「完了」「仕上げ」「pushして」「PRお願い」などの発言時
 ---
 
 ## コミット順序ルール（順序厳守）

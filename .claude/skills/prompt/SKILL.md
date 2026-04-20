@@ -1,9 +1,7 @@
 ---
 name: prompt
 description: prompt_to_claude.txtの使い方。create_prompt.shでプロンプトを対話形式で作成する手順。
-user_invocable: true
-auto_trigger:
-  - 「プロンプト作成」「prompt_to_claude」などの発言時
+when_to_use: 「プロンプト作成」「prompt_to_claude」などの発言時
 ---
 
 ## prompt_to_claude.txt の使い方

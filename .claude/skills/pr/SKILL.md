@@ -1,11 +1,7 @@
 ---
 name: pr
 description: ブランチ・Git運用ルール。feature ブランチ作成、コミット、プッシュ、PR作成の手順。
-user_invocable: true
-auto_trigger:
-  - PR作成時
-  - ブランチ作成時
-  - 「PR作って」「プルリク」などの発言時
+when_to_use: PR作成時、ブランチ作成時、「PR作って」「プルリク」などの発言時
 ---
 
 ## ブランチ・Git 運用ルール

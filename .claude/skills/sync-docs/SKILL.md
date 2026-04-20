@@ -1,11 +1,7 @@
 ---
 name: sync-docs
 description: 設計ドキュメント同期チェック。ソースコード変更時にrouting.md/wireframe.md/database.md/README.mdを更新する。
-user_invocable: true
-auto_trigger:
-  - src/ 配下のファイルを編集した時
-  - コミット・PR作成のタイミング
-  - 「ドキュメント更新」「設計同期」などの発言時
+when_to_use: src/配下のファイルを編集した時、コミット・PR作成のタイミング、「ドキュメント更新」「設計同期」などの発言時
 ---
 
 ## 設計ドキュメント同期ルール

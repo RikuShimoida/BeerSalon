@@ -1,10 +1,7 @@
 ---
 name: test
 description: テストコード作成・追加ルール。UT(Vitest)とE2E(Playwright)の品質基準と実装原則。
-user_invocable: true
-auto_trigger:
-  - テストコード作成時
-  - 「テスト書いて」「テスト追加」などの発言時
+when_to_use: テストコード作成時、「テスト書いて」「テスト追加」などの発言時
 ---
 
 ## テストコード作成時の厳守事項

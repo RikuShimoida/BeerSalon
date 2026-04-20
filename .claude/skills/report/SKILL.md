@@ -1,10 +1,7 @@
 ---
 name: report
 description: 作業完了時の報告義務。修正内容・理由・変更ファイル・受入条件の充足を報告する。
-user_invocable: true
-auto_trigger:
-  - 作業完了時
-  - 「報告して」「まとめて」などの発言時
+when_to_use: 作業完了時、「報告して」「まとめて」などの発言時
 ---
 
 ## 作業完了時の報告義務
