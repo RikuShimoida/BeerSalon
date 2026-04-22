@@ -8,7 +8,7 @@ skills:
     - pr
     - prompt
     - report
-    - sync-doc
+    - sync-docs
     - pencil
     - dev-server
     - create-test-user
