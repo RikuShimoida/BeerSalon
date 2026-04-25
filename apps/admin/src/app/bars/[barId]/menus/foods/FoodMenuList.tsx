@@ -1,0 +1,295 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { BarFoodMenu } from "@/types/database";
+import Link from "next/link";
+
+interface FoodMenuListProps {
+	barId: string;
+}
+
+export default function FoodMenuList({ barId }: FoodMenuListProps) {
+	const router = useRouter();
+	const [menus, setMenus] = useState<BarFoodMenu[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
+	const [searchQuery, setSearchQuery] = useState("");
+	const [categoryFilter, setCategoryFilter] = useState("");
+
+	useEffect(() => {
+		fetchMenus();
+	}, [barId]);
+
+	const fetchMenus = async () => {
+		try {
+			const response = await fetch(`/api/bars/${barId}/menus/foods`);
+
+			if (!response.ok) {
+				if (response.status === 403) {
+					setError("アクセス権限がありません");
+				} else {
+					setError("フードメニューの取得に失敗しました");
+				}
+				return;
+			}
+
+			const data = await response.json();
+			setMenus(data.menus || []);
+		} catch (error) {
+			console.error("Failed to fetch food menus:", error);
+			setError("フードメニューの取得に失敗しました");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleDelete = async (menuId: number) => {
+		if (!confirm("このフードメニューを削除してもよろしいですか?")) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/bars/${barId}/menus/foods/${menuId}`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				alert("削除に失敗しました");
+				return;
+			}
+
+			fetchMenus();
+		} catch (error) {
+			console.error("Failed to delete food menu:", error);
+			alert("削除に失敗しました");
+		}
+	};
+
+	// フィルタリング
+	const filteredMenus = menus.filter((menu) => {
+		const matchesSearch =
+			!searchQuery ||
+			menu.name.toLowerCase().includes(searchQuery.toLowerCase());
+		const matchesCategory = !categoryFilter || menu.category === categoryFilter;
+		return matchesSearch && matchesCategory;
+	});
+
+	// ユニークなカテゴリの取得
+	const categories = Array.from(
+		new Set(menus.map((menu) => menu.category).filter((c) => c)),
+	);
+
+	if (loading) {
+		return (
+			<div className="p-6">
+				<div className="animate-pulse space-y-4">
+					<div className="h-8 bg-gray-200 rounded w-1/4"></div>
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{[1, 2, 3].map((i) => (
+							<div key={i} className="h-64 bg-gray-200 rounded"></div>
+						))}
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="p-6">
+				<div className="rounded-md bg-red-50 p-4">
+					<p className="text-sm text-red-800">{error}</p>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="p-6">
+			<div className="mb-6">
+				<div className="flex justify-between items-center mb-4">
+					<div>
+						<h1 className="text-2xl font-bold text-gray-900">
+							フードメニュー管理
+						</h1>
+						<p className="mt-1 text-sm text-gray-600">
+							フードメニューの追加・編集・削除ができます
+						</p>
+					</div>
+					<Link
+						href={`/bars/${barId}/menus/foods/new`}
+						className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					>
+						メニューを追加
+					</Link>
+				</div>
+
+				{/* 検索・フィルタ */}
+				<div className="bg-white p-4 rounded-lg shadow mb-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label
+								htmlFor="search"
+								className="block text-sm font-medium text-gray-700 mb-1"
+							>
+								メニュー名で検索
+							</label>
+							<input
+								type="text"
+								id="search"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								placeholder="メニュー名を入力..."
+								className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							/>
+						</div>
+						<div>
+							<label
+								htmlFor="category"
+								className="block text-sm font-medium text-gray-700 mb-1"
+							>
+								カテゴリでフィルタ
+							</label>
+							<select
+								id="category"
+								value={categoryFilter}
+								onChange={(e) => setCategoryFilter(e.target.value)}
+								className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							>
+								<option value="">全てのカテゴリ</option>
+								{categories.map((category) => (
+									<option key={category} value={category || ""}>
+										{category}
+									</option>
+								))}
+							</select>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{filteredMenus.length === 0 ? (
+				<div className="text-center py-12 bg-white rounded-lg shadow">
+					<svg
+						className="mx-auto h-12 w-12 text-gray-400"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeWidth={2}
+							d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+						/>
+					</svg>
+					<h3 className="mt-2 text-sm font-medium text-gray-900">
+						フードメニューがありません
+					</h3>
+					<p className="mt-1 text-sm text-gray-500">
+						{searchQuery || categoryFilter
+							? "検索条件に一致するフードメニューがありません"
+							: "フードメニューを追加してください"}
+					</p>
+					{!searchQuery && !categoryFilter && (
+						<div className="mt-6">
+							<Link
+								href={`/bars/${barId}/menus/foods/new`}
+								className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+							>
+								メニューを追加
+							</Link>
+						</div>
+					)}
+				</div>
+			) : (
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{filteredMenus.map((menu) => (
+						<div
+							key={menu.id}
+							className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
+						>
+							{menu.image_url ? (
+								<img
+									src={menu.image_url}
+									alt={menu.name}
+									className="w-full h-48 object-cover"
+								/>
+							) : (
+								<div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+									<svg
+										className="h-12 w-12 text-gray-400"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth={2}
+											d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+										/>
+									</svg>
+								</div>
+							)}
+
+							<div className="p-4">
+								<div className="flex items-start justify-between mb-2">
+									<div className="flex-1">
+										<h3 className="text-lg font-semibold text-gray-900 mb-1">
+											{menu.name}
+										</h3>
+										{menu.category && (
+											<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+												{menu.category}
+											</span>
+										)}
+									</div>
+									<span
+										className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+											menu.is_active
+												? "bg-green-100 text-green-800"
+												: "bg-red-100 text-red-800"
+										}`}
+									>
+										{menu.is_active ? "提供中" : "品切れ"}
+									</span>
+								</div>
+
+								{menu.price && (
+									<div className="mb-3">
+										<span className="text-lg font-bold text-gray-900">
+											¥{menu.price.toLocaleString()}
+										</span>
+									</div>
+								)}
+
+								{menu.description && (
+									<p className="text-sm text-gray-600 mb-4 line-clamp-2">
+										{menu.description}
+									</p>
+								)}
+
+								<div className="flex space-x-2">
+									<Link
+										href={`/bars/${barId}/menus/foods/${menu.id}/edit`}
+										className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-center"
+									>
+										編集
+									</Link>
+									<button
+										onClick={() => handleDelete(menu.id)}
+										className="flex-1 px-3 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+									>
+										削除
+									</button>
+								</div>
+							</div>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}

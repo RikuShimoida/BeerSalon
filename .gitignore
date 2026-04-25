@@ -11,14 +11,17 @@ node_modules
 !.yarn/versions
 
 # testing
-/coverage
+coverage/
 
 # next.js
 .next/
-/out/
+out/
 
 # production
-/build
+build/
+
+# turborepo
+.turbo
 
 # misc
 .DS_Store
@@ -45,16 +48,15 @@ email-pass.txt
 next-env.d.ts
 
 # prisma
-/src/generated/prisma
+**/generated/prisma
 
 # playwright
-/test-results/
-/playwright-report/
-/playwright/.cache/
-/.playwright-mcp/
+test-results/
+playwright-report/
+playwright/.cache/
+.playwright-mcp/
 
-# vitest
-/coverage/
+# vitest (duplicate coverage already above)
 
 # images (design reference)
 /images/
