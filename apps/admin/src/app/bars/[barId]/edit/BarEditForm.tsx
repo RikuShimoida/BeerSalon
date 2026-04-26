@@ -31,7 +31,6 @@ export default function BarEditForm({ barId }: { barId: string }) {
 			const data = await response.json();
 			setBar(data);
 		} catch (error) {
-			console.error("Failed to fetch bar:", error);
 			setError("バー情報の取得に失敗しました");
 		} finally {
 			setLoading(false);

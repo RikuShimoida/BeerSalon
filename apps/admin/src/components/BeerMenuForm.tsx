@@ -61,9 +61,7 @@ export default function BeerMenuForm({
 				const data = await response.json();
 				setCategories(data);
 			}
-		} catch (error) {
-			console.error("Failed to fetch categories:", error);
-		}
+		} catch (_error) {}
 	};
 
 	const fetchBeers = async () => {
@@ -77,9 +75,7 @@ export default function BeerMenuForm({
 				const data = await response.json();
 				setBeers(data);
 			}
-		} catch (error) {
-			console.error("Failed to fetch beers:", error);
-		}
+		} catch (_error) {}
 	};
 
 	const handleChange = (

@@ -20,9 +20,7 @@ export default function Header({ userName, userRole }: HeaderProps) {
 				router.push("/login");
 				router.refresh();
 			}
-		} catch (error) {
-			console.error("Logout failed:", error);
-		}
+		} catch (_error) {}
 	};
 
 	return (

@@ -37,7 +37,6 @@ export default function BeerMenuEditForm({
 			const data = await response.json();
 			setMenu(data);
 		} catch (error) {
-			console.error("Failed to fetch beer menu:", error);
 			setError("ビールメニュー情報の取得に失敗しました");
 		} finally {
 			setLoading(false);

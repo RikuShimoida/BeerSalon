@@ -55,7 +55,6 @@ export async function GET(
 
 		return NextResponse.json(menu);
 	} catch (error) {
-		console.error("Failed to fetch beer menu:", error);
 		return NextResponse.json(
 			{ error: "Failed to fetch beer menu" },
 			{ status: 500 },
@@ -111,7 +110,6 @@ export async function PUT(
 			.single();
 
 		if (error || !menu) {
-			console.error("Failed to update beer menu:", error);
 			return NextResponse.json(
 				{ error: "Failed to update beer menu" },
 				{ status: 500 },
@@ -120,7 +118,6 @@ export async function PUT(
 
 		return NextResponse.json(menu);
 	} catch (error) {
-		console.error("Failed to update beer menu:", error);
 		return NextResponse.json(
 			{ error: "Failed to update beer menu" },
 			{ status: 500 },
@@ -164,7 +161,6 @@ export async function DELETE(
 			.eq("bar_id", barId);
 
 		if (error) {
-			console.error("Failed to delete beer menu:", error);
 			return NextResponse.json(
 				{ error: "Failed to delete beer menu" },
 				{ status: 500 },
@@ -173,7 +169,6 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Failed to delete beer menu:", error);
 		return NextResponse.json(
 			{ error: "Failed to delete beer menu" },
 			{ status: 500 },

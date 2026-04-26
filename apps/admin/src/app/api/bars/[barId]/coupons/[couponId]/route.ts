@@ -43,7 +43,6 @@ export async function GET(
 					{ status: 404 },
 				);
 			}
-			console.error("Error fetching coupon:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch coupon" },
 				{ status: 500 },
@@ -52,7 +51,6 @@ export async function GET(
 
 		return NextResponse.json({ coupon });
 	} catch (error) {
-		console.error("Error in GET /api/bars/[barId]/coupons/[couponId]:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -134,7 +132,6 @@ export async function PUT(
 					{ status: 404 },
 				);
 			}
-			console.error("Error updating coupon:", error);
 			return NextResponse.json(
 				{ error: "Failed to update coupon" },
 				{ status: 500 },
@@ -143,7 +140,6 @@ export async function PUT(
 
 		return NextResponse.json({ coupon: data });
 	} catch (error) {
-		console.error("Error in PUT /api/bars/[barId]/coupons/[couponId]:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -184,7 +180,6 @@ export async function DELETE(
 			.eq("bar_id", barId);
 
 		if (error) {
-			console.error("Error deleting coupon:", error);
 			return NextResponse.json(
 				{ error: "Failed to delete coupon" },
 				{ status: 500 },
@@ -193,10 +188,6 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error(
-			"Error in DELETE /api/bars/[barId]/coupons/[couponId]:",
-			error,
-		);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

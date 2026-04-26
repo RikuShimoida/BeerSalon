@@ -24,7 +24,7 @@ export default function NewUserPage() {
 				body: JSON.stringify(formData),
 			});
 			router.push("/admin/users");
-		} catch (error) {
+		} catch (_error) {
 			alert("Failed to create user");
 			setLoading(false);
 		}

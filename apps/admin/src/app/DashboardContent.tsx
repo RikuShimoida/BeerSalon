@@ -45,8 +45,7 @@ export default function DashboardContent() {
 					const activitiesData = await activitiesRes.json();
 					setActivities(activitiesData);
 				}
-			} catch (error) {
-				console.error("Failed to fetch dashboard data:", error);
+			} catch (_error) {
 			} finally {
 				setLoading(false);
 			}

@@ -37,7 +37,6 @@ export default function FoodMenuList({ barId }: FoodMenuListProps) {
 			const data = await response.json();
 			setMenus(data.menus || []);
 		} catch (error) {
-			console.error("Failed to fetch food menus:", error);
 			setError("フードメニューの取得に失敗しました");
 		} finally {
 			setLoading(false);
@@ -61,7 +60,6 @@ export default function FoodMenuList({ barId }: FoodMenuListProps) {
 
 			fetchMenus();
 		} catch (error) {
-			console.error("Failed to delete food menu:", error);
 			alert("削除に失敗しました");
 		}
 	};

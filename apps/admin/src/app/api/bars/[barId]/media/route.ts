@@ -50,7 +50,6 @@ export async function GET(
 			.order("sort_order", { ascending: true });
 
 		if (error) {
-			console.error("Media fetch error:", error);
 			return NextResponse.json(
 				{ error: "メディアの取得に失敗しました" },
 				{ status: 500 },
@@ -62,7 +61,6 @@ export async function GET(
 			total: media?.length || 0,
 		});
 	} catch (error) {
-		console.error("Media get error:", error);
 		return NextResponse.json(
 			{ error: "メディアの取得に失敗しました" },
 			{ status: 500 },
@@ -164,7 +162,6 @@ export async function POST(
 			});
 
 		if (uploadError) {
-			console.error("Upload error:", uploadError);
 			return NextResponse.json(
 				{ error: "ファイルのアップロードに失敗しました" },
 				{ status: 500 },
@@ -192,7 +189,6 @@ export async function POST(
 			.single();
 
 		if (insertError) {
-			console.error("DB insert error:", insertError);
 			await supabaseAdmin.storage.from(BUCKET_NAME).remove([fileName]);
 			return NextResponse.json(
 				{ error: "データベースの登録に失敗しました" },
@@ -202,7 +198,6 @@ export async function POST(
 
 		return NextResponse.json(newMedia);
 	} catch (error) {
-		console.error("Media upload error:", error);
 		return NextResponse.json(
 			{ error: "ファイルのアップロードに失敗しました" },
 			{ status: 500 },

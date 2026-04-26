@@ -50,7 +50,6 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 				is_active: menu.is_active,
 			});
 		} catch (error) {
-			console.error("Failed to fetch food menu:", error);
 			setError("フードメニューの取得に失敗しました");
 		}
 	};
@@ -90,7 +89,6 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 
 			router.push(`/bars/${barId}/menus/foods`);
 		} catch (error) {
-			console.error("Failed to save food menu:", error);
 			setError("保存に失敗しました");
 		} finally {
 			setLoading(false);

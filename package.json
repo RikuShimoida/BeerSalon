@@ -11,11 +11,9 @@
 		"dev:admin": "pnpm --filter @beersalon/admin dev"
 	},
 	"devDependencies": {
+		"@prisma/client": "^7.1.0",
 		"prisma": "^7.1.0",
 		"turbo": "^2"
-	},
-	"dependencies": {
-		"@prisma/client": "^7.1.0"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [

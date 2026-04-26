@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
 			.single<AdminUser>();
 
 		if (error) {
-			console.error("User fetch error:", error);
 		}
 
 		if (error || !user) {
@@ -55,7 +54,6 @@ export async function POST(request: NextRequest) {
 			},
 		});
 	} catch (error) {
-		console.error("Login error:", error);
 		return NextResponse.json(
 			{ error: "ログインに失敗しました" },
 			{ status: 500 },

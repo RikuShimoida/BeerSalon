@@ -55,7 +55,6 @@ export async function PUT(
 				.eq("image_type", "slider");
 
 			if (error) {
-				console.error(`Sort order update error for media ${mediaId}:`, error);
 				return NextResponse.json(
 					{ error: "順序の更新に失敗しました" },
 					{ status: 500 },
@@ -65,7 +64,6 @@ export async function PUT(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Media reorder error:", error);
 		return NextResponse.json(
 			{ error: "順序の更新に失敗しました" },
 			{ status: 500 },

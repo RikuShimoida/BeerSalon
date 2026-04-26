@@ -61,7 +61,6 @@ export async function DELETE(
 			.remove([fileName]);
 
 		if (deleteError) {
-			console.error("Storage delete error:", deleteError);
 		}
 
 		const { error: dbDeleteError } = await supabaseAdmin
@@ -72,7 +71,6 @@ export async function DELETE(
 			.eq("image_type", "slider");
 
 		if (dbDeleteError) {
-			console.error("DB delete error:", dbDeleteError);
 			return NextResponse.json(
 				{ error: "データベースの削除に失敗しました" },
 				{ status: 500 },
@@ -81,7 +79,6 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Media delete error:", error);
 		return NextResponse.json(
 			{ error: "メディアの削除に失敗しました" },
 			{ status: 500 },

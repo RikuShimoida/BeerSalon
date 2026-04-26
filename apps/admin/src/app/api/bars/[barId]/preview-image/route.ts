@@ -101,7 +101,6 @@ export async function POST(
 			});
 
 		if (uploadError) {
-			console.error("Upload error:", uploadError);
 			return NextResponse.json(
 				{ error: "画像のアップロードに失敗しました" },
 				{ status: 500 },
@@ -122,7 +121,6 @@ export async function POST(
 			.eq("id", barId);
 
 		if (updateError) {
-			console.error("DB update error:", updateError);
 			return NextResponse.json(
 				{ error: "データベースの更新に失敗しました" },
 				{ status: 500 },
@@ -133,7 +131,6 @@ export async function POST(
 			preview_image_url: previewImageUrl,
 		});
 	} catch (error) {
-		console.error("Preview image upload error:", error);
 		return NextResponse.json(
 			{ error: "画像のアップロードに失敗しました" },
 			{ status: 500 },
@@ -200,7 +197,6 @@ export async function DELETE(
 			.remove([fileName]);
 
 		if (deleteError) {
-			console.error("Storage delete error:", deleteError);
 		}
 
 		// DBのpreview_image_urlをNULLに更新
@@ -210,18 +206,16 @@ export async function DELETE(
 			.eq("id", barId);
 
 		if (updateError) {
-			console.error("DB update error:", updateError);
 			return NextResponse.json(
-				{ error: "データベースの更新に失敗しました" },
+				{ error: "データベ��スの更新に失敗しま���た" },
 				{ status: 500 },
 			);
 		}
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Preview image delete error:", error);
 		return NextResponse.json(
-			{ error: "画像の削除に失敗しました" },
+			{ error: "画像の削除��失敗しました" },
 			{ status: 500 },
 		);
 	}

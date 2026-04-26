@@ -36,7 +36,6 @@ export async function GET(
 			.order("start_date", { ascending: false });
 
 		if (error) {
-			console.error("Error fetching events:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch events" },
 				{ status: 500 },
@@ -45,7 +44,6 @@ export async function GET(
 
 		return NextResponse.json({ events });
 	} catch (error) {
-		console.error("Error in GET /api/bars/[barId]/events:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -108,7 +106,6 @@ export async function POST(
 			.single();
 
 		if (error) {
-			console.error("Error creating event:", error);
 			return NextResponse.json(
 				{ error: "Failed to create event" },
 				{ status: 500 },
@@ -117,7 +114,6 @@ export async function POST(
 
 		return NextResponse.json({ event: data }, { status: 201 });
 	} catch (error) {
-		console.error("Error in POST /api/bars/[barId]/events:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

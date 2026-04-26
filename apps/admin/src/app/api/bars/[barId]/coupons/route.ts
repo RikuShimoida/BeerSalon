@@ -36,7 +36,6 @@ export async function GET(
 			.order("created_at", { ascending: false });
 
 		if (error) {
-			console.error("Error fetching coupons:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch coupons" },
 				{ status: 500 },
@@ -45,7 +44,6 @@ export async function GET(
 
 		return NextResponse.json({ coupons });
 	} catch (error) {
-		console.error("Error in GET /api/bars/[barId]/coupons:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -121,7 +119,6 @@ export async function POST(
 			.single();
 
 		if (error) {
-			console.error("Error creating coupon:", error);
 			return NextResponse.json(
 				{ error: "Failed to create coupon" },
 				{ status: 500 },
@@ -130,7 +127,6 @@ export async function POST(
 
 		return NextResponse.json({ coupon: data }, { status: 201 });
 	} catch (error) {
-		console.error("Error in POST /api/bars/[barId]/coupons:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

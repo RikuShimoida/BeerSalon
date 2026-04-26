@@ -23,7 +23,6 @@ export async function GET(
 			.order("name", { ascending: true });
 
 		if (error) {
-			console.error("Error fetching food menus:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch food menus" },
 				{ status: 500 },
@@ -32,7 +31,6 @@ export async function GET(
 
 		return NextResponse.json({ menus });
 	} catch (error) {
-		console.error("Error in GET /api/bars/[barId]/menus/foods:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -76,7 +74,6 @@ export async function POST(
 			.single();
 
 		if (error) {
-			console.error("Error creating food menu:", error);
 			return NextResponse.json(
 				{ error: "Failed to create food menu" },
 				{ status: 500 },
@@ -85,7 +82,6 @@ export async function POST(
 
 		return NextResponse.json({ menu: data }, { status: 201 });
 	} catch (error) {
-		console.error("Error in POST /api/bars/[barId]/menus/foods:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

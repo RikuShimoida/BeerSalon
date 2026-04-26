@@ -46,7 +46,6 @@ export async function GET(
 			.order("created_at", { ascending: false });
 
 		if (error) {
-			console.error("Failed to fetch beer menus:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch beer menus" },
 				{ status: 500 },
@@ -55,7 +54,6 @@ export async function GET(
 
 		return NextResponse.json(menus);
 	} catch (error) {
-		console.error("Failed to fetch beer menus:", error);
 		return NextResponse.json(
 			{ error: "Failed to fetch beer menus" },
 			{ status: 500 },
@@ -118,8 +116,6 @@ export async function POST(
 			.single();
 
 		if (error) {
-			console.error("Failed to create beer menu:", error);
-
 			// 重複エラーのハンドリング
 			if (error.code === "23505") {
 				return NextResponse.json(
@@ -136,7 +132,6 @@ export async function POST(
 
 		return NextResponse.json(menu, { status: 201 });
 	} catch (error) {
-		console.error("Failed to create beer menu:", error);
 		return NextResponse.json(
 			{ error: "Failed to create beer menu" },
 			{ status: 500 },

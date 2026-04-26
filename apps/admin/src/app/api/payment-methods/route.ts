@@ -10,7 +10,6 @@ export async function GET() {
 			.order("display_order", { ascending: true });
 
 		if (error) {
-			console.error("Payment methods fetch error:", error);
 			return NextResponse.json(
 				{ error: "支払い方法の取得に失敗しました" },
 				{ status: 500 },
@@ -19,7 +18,6 @@ export async function GET() {
 
 		return NextResponse.json(paymentMethods || []);
 	} catch (error) {
-		console.error("Payment methods API error:", error);
 		return NextResponse.json(
 			{ error: "支払い方法の取得に失敗しました" },
 			{ status: 500 },

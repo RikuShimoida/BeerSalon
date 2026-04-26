@@ -18,7 +18,6 @@ export async function GET(request: NextRequest) {
 			.order("name", { ascending: true });
 
 		if (error) {
-			console.error("Failed to fetch beer categories:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch beer categories" },
 				{ status: 500 },
@@ -27,7 +26,6 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(categories);
 	} catch (error) {
-		console.error("Failed to fetch beer categories:", error);
 		return NextResponse.json(
 			{ error: "Failed to fetch beer categories" },
 			{ status: 500 },

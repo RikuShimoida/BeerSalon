@@ -34,24 +34,19 @@ export interface BarOpeningHour {
 export interface Bar {
 	id: number;
 	name: string;
-	postal_code: string | null;
 	prefecture: string | null;
 	city: string | null;
-	address_line: string | null;
-	address_line1?: string | null;
-	address_line2?: string | null;
-	phone: string | null;
-	phone_number?: string | null;
-	access?: string | null;
-	website_url?: string | null;
-	instagram_url?: string | null;
-	x_url?: string | null;
-	facebook_url?: string | null;
+	address_line1: string | null;
+	address_line2: string | null;
+	phone_number: string | null;
+	access: string | null;
+	website_url: string | null;
+	instagram_url: string | null;
+	x_url: string | null;
+	facebook_url: string | null;
 	description: string | null;
-	image_url: string | null;
-	preview_image_url?: string | null;
+	preview_image_url: string | null;
 	is_active: boolean;
-	deleted_at: string | null;
 	created_at: string;
 	updated_at: string;
 	payment_method_ids?: string[];
@@ -76,7 +71,6 @@ export interface BeerCategory {
 export interface Country {
 	id: number;
 	name: string;
-	code: string;
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;

@@ -98,9 +98,7 @@ export default function BarForm({ bar, isEdit = false }: BarFormProps) {
 				const data = await response.json();
 				setPaymentMethods(data);
 			}
-		} catch (error) {
-			console.error("Failed to fetch payment methods:", error);
-		}
+		} catch (_error) {}
 	};
 
 	const handleChange = (
@@ -166,7 +164,6 @@ export default function BarForm({ bar, isEdit = false }: BarFormProps) {
 				const data = await response.json();
 				setPreviewImageUrl(data.preview_image_url);
 			} catch (error) {
-				console.error("Image upload error:", error);
 				setImageError("画像のアップロードに失敗しました");
 			} finally {
 				setUploadingImage(false);
@@ -203,7 +200,6 @@ export default function BarForm({ bar, isEdit = false }: BarFormProps) {
 
 				setPreviewImageUrl(null);
 			} catch (error) {
-				console.error("Image delete error:", error);
 				setImageError("画像の削除に失敗しました");
 			} finally {
 				setUploadingImage(false);
@@ -336,11 +332,9 @@ export default function BarForm({ bar, isEdit = false }: BarFormProps) {
 						);
 
 						if (!imageResponse.ok) {
-							console.error("Preview image upload failed after bar creation");
 							uploadErrors.push("プレビュー画像");
 						}
 					} catch (imageError) {
-						console.error("Image upload error:", imageError);
 						uploadErrors.push("プレビュー画像");
 					}
 				}
@@ -361,11 +355,9 @@ export default function BarForm({ bar, isEdit = false }: BarFormProps) {
 							);
 
 							if (!mediaResponse.ok) {
-								console.error("Slider media upload failed:", file.name);
 								uploadErrors.push(`スライダーメディア (${file.name})`);
 							}
 						} catch (mediaError) {
-							console.error("Media upload error:", mediaError);
 							uploadErrors.push(`スライダーメディア (${file.name})`);
 						}
 					}
@@ -387,7 +379,6 @@ export default function BarForm({ bar, isEdit = false }: BarFormProps) {
 			router.push("/bars");
 			router.refresh();
 		} catch (err) {
-			console.error("❌ 予期しないエラー:", err);
 			setError("保存に失敗しました");
 		} finally {
 			setLoading(false);

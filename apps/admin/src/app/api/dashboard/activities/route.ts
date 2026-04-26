@@ -38,7 +38,6 @@ export async function GET() {
 
 		return NextResponse.json(activities);
 	} catch (error) {
-		console.error("Activities error:", error);
 		return NextResponse.json(
 			{ error: "活動履歴の取得に失敗しました" },
 			{ status: 500 },

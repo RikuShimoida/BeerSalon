@@ -37,7 +37,6 @@ export default function BeerMenuList({ barId }: BeerMenuListProps) {
 			const data = await response.json();
 			setMenus(data);
 		} catch (error) {
-			console.error("Failed to fetch beer menus:", error);
 			setError("ビールメニューの取得に失敗しました");
 		} finally {
 			setLoading(false);
@@ -61,7 +60,6 @@ export default function BeerMenuList({ barId }: BeerMenuListProps) {
 
 			fetchMenus();
 		} catch (error) {
-			console.error("Failed to delete beer menu:", error);
 			alert("削除に失敗しました");
 		}
 	};

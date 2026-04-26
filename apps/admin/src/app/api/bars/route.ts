@@ -42,7 +42,6 @@ export async function GET() {
 		const { data: bars, error } = await query;
 
 		if (error) {
-			console.error("Bars fetch error:", error);
 			return NextResponse.json(
 				{ error: "バー一覧の取得に失敗しました" },
 				{ status: 500 },
@@ -51,7 +50,6 @@ export async function GET() {
 
 		return NextResponse.json(bars);
 	} catch (error) {
-		console.error("Bars API error:", error);
 		return NextResponse.json(
 			{ error: "バー一覧の取得に失敗しました" },
 			{ status: 500 },
@@ -163,7 +161,6 @@ export async function POST(request: NextRequest) {
 			.single<Bar>();
 
 		if (barError || !bar) {
-			console.error("Bar creation error:", barError);
 			return NextResponse.json(
 				{ error: "バーの登録に失敗しました" },
 				{ status: 500 },
@@ -179,8 +176,6 @@ export async function POST(request: NextRequest) {
 			});
 
 		if (ownerError) {
-			console.error("Bar owner relation error:", ownerError);
-			// バー作成は成功したがエラーログを残す
 		}
 
 		// 支払い方法を登録
@@ -195,8 +190,6 @@ export async function POST(request: NextRequest) {
 				.insert(paymentMethodsData);
 
 			if (insertError) {
-				console.error("Payment methods insert error:", insertError);
-				// バー作成は成功したがエラーログを残す
 			}
 		}
 
@@ -221,15 +214,12 @@ export async function POST(request: NextRequest) {
 					.insert(openingHoursData);
 
 				if (insertError) {
-					console.error("Opening hours insert error:", insertError);
-					// バー作成は成功したがエラーログを残す
 				}
 			}
 		}
 
 		return NextResponse.json(bar, { status: 201 });
 	} catch (error) {
-		console.error("Bar creation API error:", error);
 		return NextResponse.json(
 			{ error: "バーの登録に失敗しました" },
 			{ status: 500 },

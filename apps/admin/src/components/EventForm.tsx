@@ -54,7 +54,6 @@ export default function EventForm({ barId, eventId }: EventFormProps) {
 				is_active: event.is_active,
 			});
 		} catch (error) {
-			console.error("Failed to fetch event:", error);
 			setError("イベントの取得に失敗しました");
 		}
 	};
@@ -98,7 +97,6 @@ export default function EventForm({ barId, eventId }: EventFormProps) {
 
 			router.push(`/bars/${barId}/events`);
 		} catch (error) {
-			console.error("Failed to save event:", error);
 			setError("保存に失敗しました");
 		} finally {
 			setLoading(false);

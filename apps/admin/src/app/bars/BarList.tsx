@@ -21,8 +21,7 @@ export default function BarList() {
 				const data = await response.json();
 				setBars(data);
 			}
-		} catch (error) {
-			console.error("Failed to fetch bars:", error);
+		} catch (_error) {
 		} finally {
 			setLoading(false);
 		}
@@ -45,7 +44,6 @@ export default function BarList() {
 				alert("削除できませんでした");
 			}
 		} catch (error) {
-			console.error("Delete error:", error);
 			alert("削除できませんでした");
 		}
 	};

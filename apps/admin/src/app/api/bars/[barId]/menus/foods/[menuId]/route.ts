@@ -29,7 +29,6 @@ export async function GET(
 					{ status: 404 },
 				);
 			}
-			console.error("Error fetching food menu:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch food menu" },
 				{ status: 500 },
@@ -38,10 +37,6 @@ export async function GET(
 
 		return NextResponse.json({ menu });
 	} catch (error) {
-		console.error(
-			"Error in GET /api/bars/[barId]/menus/foods/[menuId]:",
-			error,
-		);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -92,7 +87,6 @@ export async function PUT(
 					{ status: 404 },
 				);
 			}
-			console.error("Error updating food menu:", error);
 			return NextResponse.json(
 				{ error: "Failed to update food menu" },
 				{ status: 500 },
@@ -101,10 +95,6 @@ export async function PUT(
 
 		return NextResponse.json({ menu: data });
 	} catch (error) {
-		console.error(
-			"Error in PUT /api/bars/[barId]/menus/foods/[menuId]:",
-			error,
-		);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -131,7 +121,6 @@ export async function DELETE(
 			.eq("bar_id", barId);
 
 		if (error) {
-			console.error("Error deleting food menu:", error);
 			return NextResponse.json(
 				{ error: "Failed to delete food menu" },
 				{ status: 500 },
@@ -140,10 +129,6 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error(
-			"Error in DELETE /api/bars/[barId]/menus/foods/[menuId]:",
-			error,
-		);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

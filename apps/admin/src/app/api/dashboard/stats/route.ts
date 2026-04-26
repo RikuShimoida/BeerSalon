@@ -36,7 +36,6 @@ export async function GET() {
 
 		return NextResponse.json(stats);
 	} catch (error) {
-		console.error("Stats error:", error);
 		return NextResponse.json(
 			{ error: "統計情報の取得に失敗しました" },
 			{ status: 500 },

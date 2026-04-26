@@ -47,7 +47,6 @@ export async function GET(request: NextRequest) {
 		});
 
 		if (error) {
-			console.error("Failed to fetch beers:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch beers" },
 				{ status: 500 },
@@ -56,7 +55,6 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(beers);
 	} catch (error) {
-		console.error("Failed to fetch beers:", error);
 		return NextResponse.json(
 			{ error: "Failed to fetch beers" },
 			{ status: 500 },

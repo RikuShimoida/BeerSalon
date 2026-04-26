@@ -37,7 +37,7 @@ export default function AdminUsersPage() {
 			}
 			const data = await response.json();
 			setUsers(data.users || []);
-		} catch (error) {
+		} catch (_error) {
 			setError("Failed to fetch users");
 		} finally {
 			setLoading(false);
@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
 		try {
 			await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
 			fetchUsers();
-		} catch (error) {
+		} catch (_error) {
 			alert("Failed to delete");
 		}
 	};

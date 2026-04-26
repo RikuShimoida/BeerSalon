@@ -40,7 +40,6 @@ export async function GET(
 			if (error.code === "PGRST116") {
 				return NextResponse.json({ error: "Event not found" }, { status: 404 });
 			}
-			console.error("Error fetching event:", error);
 			return NextResponse.json(
 				{ error: "Failed to fetch event" },
 				{ status: 500 },
@@ -49,7 +48,6 @@ export async function GET(
 
 		return NextResponse.json({ event });
 	} catch (error) {
-		console.error("Error in GET /api/bars/[barId]/events/[eventId]:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -116,7 +114,6 @@ export async function PUT(
 			if (error.code === "PGRST116") {
 				return NextResponse.json({ error: "Event not found" }, { status: 404 });
 			}
-			console.error("Error updating event:", error);
 			return NextResponse.json(
 				{ error: "Failed to update event" },
 				{ status: 500 },
@@ -125,7 +122,6 @@ export async function PUT(
 
 		return NextResponse.json({ event: data });
 	} catch (error) {
-		console.error("Error in PUT /api/bars/[barId]/events/[eventId]:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -166,7 +162,6 @@ export async function DELETE(
 			.eq("bar_id", barId);
 
 		if (error) {
-			console.error("Error deleting event:", error);
 			return NextResponse.json(
 				{ error: "Failed to delete event" },
 				{ status: 500 },
@@ -175,7 +170,6 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Error in DELETE /api/bars/[barId]/events/[eventId]:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

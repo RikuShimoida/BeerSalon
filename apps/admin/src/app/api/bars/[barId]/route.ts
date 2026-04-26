@@ -91,7 +91,6 @@ export async function GET(
 
 		return NextResponse.json(response);
 	} catch (error) {
-		console.error("Bar get error:", error);
 		return NextResponse.json(
 			{ error: "バー情報の取得に失敗しました" },
 			{ status: 500 },
@@ -223,7 +222,6 @@ export async function PUT(
 			.single<Bar>();
 
 		if (error || !bar) {
-			console.error("Bar update error:", error);
 			return NextResponse.json(
 				{ error: "バーの更新に失敗しました" },
 				{ status: 500 },
@@ -237,7 +235,6 @@ export async function PUT(
 				.eq("bar_id", barId);
 
 			if (deleteError) {
-				console.error("Payment methods delete error:", deleteError);
 			}
 
 			if (Array.isArray(payment_method_ids) && payment_method_ids.length > 0) {
@@ -251,7 +248,6 @@ export async function PUT(
 					.insert(paymentMethodsData);
 
 				if (insertError) {
-					console.error("Payment methods insert error:", insertError);
 					return NextResponse.json(
 						{ error: "支払い方法の更新に失敗しました" },
 						{ status: 500 },
@@ -267,7 +263,6 @@ export async function PUT(
 				.eq("bar_id", barId);
 
 			if (deleteError) {
-				console.error("Opening hours delete error:", deleteError);
 			}
 
 			if (Array.isArray(opening_hours) && opening_hours.length > 0) {
@@ -291,7 +286,6 @@ export async function PUT(
 						.insert(openingHoursData);
 
 					if (insertError) {
-						console.error("Opening hours insert error:", insertError);
 						return NextResponse.json(
 							{ error: "営業時間の更新に失敗しました" },
 							{ status: 500 },
@@ -303,7 +297,6 @@ export async function PUT(
 
 		return NextResponse.json(bar);
 	} catch (error) {
-		console.error("Bar update API error:", error);
 		return NextResponse.json(
 			{ error: "バーの更新に失敗しました" },
 			{ status: 500 },
@@ -352,7 +345,6 @@ export async function DELETE(
 			.eq("id", barId);
 
 		if (error) {
-			console.error("Bar delete error:", error);
 			return NextResponse.json(
 				{ error: "バーの削除に失敗しました" },
 				{ status: 500 },
@@ -361,7 +353,6 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Bar delete API error:", error);
 		return NextResponse.json(
 			{ error: "バーの削除に失敗しました" },
 			{ status: 500 },
