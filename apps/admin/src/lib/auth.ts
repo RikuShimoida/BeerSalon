@@ -3,9 +3,11 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { AdminUser } from "@/types/database";
 
-const JWT_SECRET = new TextEncoder().encode(
-	process.env.JWT_SECRET || "default-secret-key",
-);
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) {
+	throw new Error("JWT_SECRET environment variable is not set");
+}
+const JWT_SECRET = new TextEncoder().encode(jwtSecret);
 
 const TOKEN_NAME = "admin-token";
 const TOKEN_MAX_AGE = 60 * 60 * 24 * 7; // 7 days

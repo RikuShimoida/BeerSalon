@@ -22,6 +22,10 @@ export async function middleware(request: NextRequest) {
 		if (pathname === "/api/payment-methods") {
 			return NextResponse.next();
 		}
+		// /api/webhooks/* は認証不要（外部サービスからのコールバック）
+		if (pathname.startsWith("/api/webhooks/")) {
+			return NextResponse.next();
+		}
 		// その他のAPIは認証チェック
 		// （将来的に実装）
 	}

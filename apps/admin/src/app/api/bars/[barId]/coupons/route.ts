@@ -15,6 +15,20 @@ export async function GET(
 
 		const { barId } = await params;
 
+		// 権限チェック: バーオーナーの場合は自分のバーのみ
+		if (user.role === "bar_owner") {
+			const { data: barOwner } = await supabaseAdmin
+				.from("bar_owners")
+				.select("bar_id")
+				.eq("admin_user_id", user.id)
+				.eq("bar_id", barId)
+				.single();
+
+			if (!barOwner) {
+				return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+			}
+		}
+
 		const { data: coupons, error } = await supabaseAdmin
 			.from("bar_coupons")
 			.select("*")
@@ -50,6 +64,21 @@ export async function POST(
 		}
 
 		const { barId } = await params;
+
+		// 権限チェック: バーオーナーの場合は自分のバーのみ
+		if (user.role === "bar_owner") {
+			const { data: barOwner } = await supabaseAdmin
+				.from("bar_owners")
+				.select("bar_id")
+				.eq("admin_user_id", user.id)
+				.eq("bar_id", barId)
+				.single();
+
+			if (!barOwner) {
+				return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+			}
+		}
+
 		const body = await request.json();
 
 		const {

@@ -15,6 +15,20 @@ export async function GET(
 
 		const { barId, eventId } = await params;
 
+		// 権限チェック: バーオーナーの場合は自分のバーのみ
+		if (user.role === "bar_owner") {
+			const { data: barOwner } = await supabaseAdmin
+				.from("bar_owners")
+				.select("bar_id")
+				.eq("admin_user_id", user.id)
+				.eq("bar_id", barId)
+				.single();
+
+			if (!barOwner) {
+				return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+			}
+		}
+
 		const { data: event, error } = await supabaseAdmin
 			.from("bar_events")
 			.select("*")
@@ -54,6 +68,21 @@ export async function PUT(
 		}
 
 		const { barId, eventId } = await params;
+
+		// 権限チェック: バーオーナーの場合は自分のバーのみ
+		if (user.role === "bar_owner") {
+			const { data: barOwner } = await supabaseAdmin
+				.from("bar_owners")
+				.select("bar_id")
+				.eq("admin_user_id", user.id)
+				.eq("bar_id", barId)
+				.single();
+
+			if (!barOwner) {
+				return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+			}
+		}
+
 		const body = await request.json();
 
 		const { title, description, start_date, end_date, image_url, is_active } =
@@ -115,6 +144,20 @@ export async function DELETE(
 		}
 
 		const { barId, eventId } = await params;
+
+		// 権限チェック: バーオーナーの場合は自分のバーのみ
+		if (user.role === "bar_owner") {
+			const { data: barOwner } = await supabaseAdmin
+				.from("bar_owners")
+				.select("bar_id")
+				.eq("admin_user_id", user.id)
+				.eq("bar_id", barId)
+				.single();
+
+			if (!barOwner) {
+				return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+			}
+		}
 
 		const { error } = await supabaseAdmin
 			.from("bar_events")
