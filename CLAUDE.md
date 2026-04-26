@@ -27,9 +27,30 @@
 
 明確なバグ修正、typo修正、lint/format 等の定型タスクにはこのルールを適用しない。
 
+## モノレポ構成
+
+```
+/
+├── apps/
+│   ├── web/          # BeerSalon（ユーザー画面）- ポート3000
+│   └── admin/        # BeerSalonAdmin（管理画面）- ポート3001
+├── packages/
+│   └── shared/       # 共通型定義・ユーティリティ（将来拡張用）
+├── prisma/           # Prismaスキーマ・マイグレーション（一元管理）
+├── supabase/         # Supabase設定・マイグレーション（一元管理）
+└── 設計ドキュメント   # CLAUDE.md, README.md, database.md, routing.md, wireframe.md
+```
+
+## 管理画面（BeerSalonAdmin）固有ルール
+
+- **ユーザーテーブル**: `admin_users`（`user_profiles` とは完全に別）
+- **認証方式**: カスタムJWT認証（jose + bcryptjs）※ Supabase Auth は不使用
+- **権限**: `bar_owner`（自分のバーのみ編集）、`admin`（全データ閲覧・編集）
+- **Stripe連携**: サブスクリプション管理あり
+
 ## 禁止事項（違反厳禁）
 
 - `pnpm dev` / `pnpm run dev` / `npm run dev` の実行（ユーザーが起動済みのサーバーを利用すること）
 - `run_in_background: true` の使用
 - ポート54321の使用（正しいポート: 54421）
-- BeerSalonAdminでの `supabase init` 実行
+- `supabase init` の実行（既存のsupabase/設定を使用すること）
