@@ -70,6 +70,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | x_url           | text       | NULLABLE                         | X (Twitter) URL                         |
 | facebook_url    | text       | NULLABLE                         | Facebook URL                            |
 | description     | text       | NULLABLE                         | PR文                                    |
+| preview_image_url | text     | NULLABLE                         | 一覧表示用プレビュー画像URL             |
 | is_active       | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ                            |
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                                |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                                |
@@ -289,11 +290,11 @@ UNIQUE制約: `country_id + name`
 
 ## 3. クーポン・記事
 
-### 3-1. coupons
+### 3-1. bar_coupons
 
 店舗が発行するクーポン。
 
-- **Table name:** `coupons`
+- **Table name:** `bar_coupons`
 - **Description:** 店舗ごとのクーポン定義
 
 #### Columns
@@ -302,29 +303,20 @@ UNIQUE制約: `country_id + name`
 |-----------------|----------------|------------------------------|-------------------------|
 | id              | bigserial      | PK                           | クーポンID              |
 | bar_id          | bigint         | NOT NULL, FK → bars(id)      | 店舗ID                  |
-| code            | text           | NOT NULL, UNIQUE             | クーポンコード          |
 | title           | text           | NOT NULL                     | 見出し                  |
-| description     | text           | NOT NULL                     | 内容文                  |
-| discount_type   | text           | NOT NULL                     | 割引タイプ（'percentage', 'fixed'） |
+| description     | text           | NULLABLE                     | 内容文                  |
+| discount_type   | text           | NOT NULL                     | 割引タイプ（'percentage', 'fixed_amount'） |
 | discount_value  | numeric(10,2)  | NOT NULL                     | 割引値（%または金額）   |
-| conditions      | text           | NULLABLE                     | 取得/利用条件           |
-| max_uses        | integer        | NULLABLE                     | 最大利用回数（NULLで無制限） |
+| code            | text           | NULLABLE                     | クーポンコード（任意）  |
+| usage_limit     | integer        | NULLABLE                     | 利用回数上限（NULLで無制限） |
 | used_count      | integer        | NOT NULL DEFAULT 0           | 利用回数                |
 | valid_from      | timestamptz    | NULLABLE                     | 有効期間開始            |
 | valid_until     | timestamptz    | NULLABLE                     | 有効期間終了            |
 | is_active       | boolean        | NOT NULL DEFAULT true        | 掲載中フラグ            |
-| deleted_at      | timestamptz    | NULLABLE                     | 削除日時（論理削除）    |
 | created_at      | timestamptz    | NOT NULL DEFAULT now()       | 作成日時                |
 | updated_at      | timestamptz    | NOT NULL DEFAULT now()       | 更新日時                |
 
-**管理画面での拡張**:
-- `code`: 実際に使えるクーポンコード（UNIQUE制約）
-- `discount_type`, `discount_value`: 割引率または固定額の割引
-- `max_uses`, `used_count`: 利用回数制限と実際の利用回数
-- `deleted_at`: 論理削除
-
 **インデックス**:
-- `code` (UNIQUE)
 - `bar_id`, `is_active`
 
 ---
@@ -342,7 +334,7 @@ UNIQUE制約: `country_id + name`
 |---------------|------------|------------------------------------|----------------------|
 | id            | bigserial  | PK                                 | ID                   |
 | user_id       | uuid       | NOT NULL, FK → user_profiles(user_id) | ユーザーID       |
-| coupon_id     | bigint     | NOT NULL, FK → coupons(id)         | クーポンID          |
+| coupon_id     | bigint     | NOT NULL, FK → bar_coupons(id)     | クーポンID          |
 | obtained_at   | timestamptz| NOT NULL DEFAULT now()             | 取得日時            |
 | used_at       | timestamptz| NULLABLE                           | 使用日時            |
 | is_used       | boolean    | NOT NULL DEFAULT false             | 使用済みフラグ      |
@@ -672,36 +664,201 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-### 8-3. subscriptions
+### 8-3. subscription_plans
 
-サブスクリプション情報（Stripe連携）。
+サブスクリプションプラン定義。
 
-- **Table name:** `subscriptions`
-- **Description:** バーごとのサブスクリプション情報
+- **Table name:** `subscription_plans`
+- **Description:** サブスクリプションのプラン定義マスタ
 
 #### Columns
 
-| Column                  | Type        | Constraints                  | Description                        |
-|-------------------------|------------|-------------------------------|------------------------------------|
-| id                      | uuid       | PK, default gen_random_uuid() | サブスクリプションID               |
-| bar_id                  | bigint     | NOT NULL, UNIQUE, FK → bars(id) | バーID                          |
-| stripe_customer_id      | text       | NULLABLE                      | Stripe顧客ID                       |
-| stripe_subscription_id  | text       | NULLABLE                      | StripeサブスクリプションID         |
-| plan_name               | text       | NOT NULL                      | プラン名                           |
-| status                  | text       | NOT NULL DEFAULT 'active'     | ステータス（`active`, `canceled`, `past_due`） |
-| current_period_start    | timestamptz| NULLABLE                      | 現在の課金期間開始日               |
-| current_period_end      | timestamptz| NULLABLE                      | 現在の課金期間終了日               |
-| created_at              | timestamptz| NOT NULL DEFAULT now()        | 作成日時                           |
-| updated_at              | timestamptz| NOT NULL DEFAULT now()        | 更新日時                           |
+| Column          | Type        | Constraints                     | Description                 |
+|-----------------|------------|----------------------------------|-----------------------------|
+| id              | bigserial  | PK                               | プランID                    |
+| name            | text       | NOT NULL                         | プラン名                    |
+| stripe_price_id | text       | NOT NULL                         | Stripe Price ID             |
+| price           | integer    | NOT NULL                         | 価格                        |
+| currency        | text       | NOT NULL                         | 通貨コード（'jpy' 等）     |
+| interval        | text       | NOT NULL                         | 課金間隔（'month', 'year'） |
+| features        | jsonb      | NULLABLE                         | プラン機能一覧              |
+| is_active       | boolean    | NOT NULL DEFAULT true            | 有効フラグ                  |
+| created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
+| updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
+
+---
+
+### 8-4. bar_subscriptions
+
+バーごとのサブスクリプション情報（Stripe連携）。
+
+- **Table name:** `bar_subscriptions`
+- **Description:** バーごとのサブスクリプション状態
+
+#### Columns
+
+| Column                  | Type        | Constraints                              | Description                        |
+|-------------------------|------------|-------------------------------------------|------------------------------------|
+| id                      | bigserial  | PK                                        | サブスクリプションID               |
+| bar_id                  | bigint     | NOT NULL, FK → bars(id)                   | バーID                             |
+| subscription_plan_id    | bigint     | NOT NULL, FK → subscription_plans(id)     | プランID                           |
+| stripe_customer_id      | text       | NOT NULL                                  | Stripe顧客ID                      |
+| stripe_subscription_id  | text       | NOT NULL                                  | StripeサブスクリプションID         |
+| status                  | text       | NOT NULL DEFAULT 'active'                 | ステータス（'active', 'canceled', 'past_due', 'trialing', 'incomplete'） |
+| current_period_start    | timestamptz| NOT NULL                                  | 現在の課金期間開始日               |
+| current_period_end      | timestamptz| NOT NULL                                  | 現在の課金期間終了日               |
+| cancel_at_period_end    | boolean    | NOT NULL DEFAULT false                    | 期間終了時にキャンセルするか       |
+| canceled_at             | timestamptz| NULLABLE                                  | キャンセル日時                     |
+| created_at              | timestamptz| NOT NULL DEFAULT now()                    | 作成日時                           |
+| updated_at              | timestamptz| NOT NULL DEFAULT now()                    | 更新日時                           |
 
 **インデックス**:
-- `bar_id` (UNIQUE)
+- `bar_id`
 - `stripe_customer_id`
 - `stripe_subscription_id`
 
 **権限**:
 - バーオーナー: 自バーのサブスクリプション参照のみ
 - プロダクト管理者: 全サブスクリプション参照可能
+
+---
+
+### 8-5. invoices
+
+請求書情報（Stripe連携）。
+
+- **Table name:** `invoices`
+- **Description:** バーごとの請求書
+
+#### Columns
+
+| Column              | Type        | Constraints                                | Description                 |
+|---------------------|------------|---------------------------------------------|-----------------------------|
+| id                  | bigserial  | PK                                          | 請求書ID                    |
+| bar_id              | bigint     | NOT NULL, FK → bars(id)                     | バーID                      |
+| bar_subscription_id | bigint     | NULLABLE, FK → bar_subscriptions(id)        | サブスクリプションID        |
+| stripe_invoice_id   | text       | NOT NULL                                    | Stripe Invoice ID           |
+| amount_paid         | integer    | NOT NULL                                    | 支払済み金額                |
+| amount_due          | integer    | NOT NULL                                    | 請求金額                    |
+| currency            | text       | NOT NULL                                    | 通貨コード                  |
+| status              | text       | NOT NULL                                    | ステータス（'paid', 'open', 'void', 'uncollectible'） |
+| invoice_pdf         | text       | NULLABLE                                    | PDF URL                     |
+| paid_at             | timestamptz| NULLABLE                                    | 支払日時                    |
+| created_at          | timestamptz| NOT NULL DEFAULT now()                      | 作成日時                    |
+
+**権限**:
+- バーオーナー: 自バーの請求書参照のみ
+- プロダクト管理者: 全請求書参照可能
+
+---
+
+### 8-6. bar_events
+
+店舗のイベント情報。
+
+- **Table name:** `bar_events`
+- **Description:** 店舗が開催するイベント
+
+#### Columns
+
+| Column       | Type        | Constraints                     | Description            |
+|--------------|------------|----------------------------------|------------------------|
+| id           | bigserial  | PK                               | イベントID             |
+| bar_id       | bigint     | NOT NULL, FK → bars(id)         | 店舗ID                 |
+| title        | text       | NOT NULL                         | イベントタイトル       |
+| description  | text       | NULLABLE                         | イベント説明文         |
+| start_date   | timestamptz| NOT NULL                         | 開始日時               |
+| end_date     | timestamptz| NULLABLE                         | 終了日時               |
+| image_url    | text       | NULLABLE                         | イベント画像URL        |
+| is_active    | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ           |
+| created_at   | timestamptz| NOT NULL DEFAULT now()           | 作成日時               |
+| updated_at   | timestamptz| NOT NULL DEFAULT now()           | 更新日時               |
+
+**インデックス**:
+- `bar_id`
+
+---
+
+### 8-7. master_beer_styles
+
+ビアスタイルマスタ（管理画面用）。
+
+- **Table name:** `master_beer_styles`
+- **Description:** 管理画面用ビアスタイルマスタ
+
+#### Columns
+
+| Column       | Type        | Constraints              | Description          |
+|--------------|------------|--------------------------|----------------------|
+| id           | bigserial  | PK                       | ビアスタイルID       |
+| name         | text       | NOT NULL                 | スタイル名           |
+| description  | text       | NULLABLE                 | 説明文               |
+| is_active    | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
+| created_at   | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
+| updated_at   | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+
+---
+
+### 8-8. master_breweries
+
+醸造所マスタ（管理画面用）。
+
+**※注意**: Web側の `breweries` テーブル（country_id FK, region_id FK を持つ）とは別テーブル。管理画面では国名を文字列で保持する簡易構造。
+
+- **Table name:** `master_breweries`
+- **Description:** 管理画面用醸造所マスタ
+
+#### Columns
+
+| Column       | Type        | Constraints              | Description          |
+|--------------|------------|--------------------------|----------------------|
+| id           | bigserial  | PK                       | 醸造所ID             |
+| name         | text       | NOT NULL                 | 醸造所名             |
+| country      | text       | NULLABLE                 | 国名（文字列）       |
+| description  | text       | NULLABLE                 | 説明文               |
+| is_active    | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
+| created_at   | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
+| updated_at   | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+
+---
+
+### 8-9. master_food_categories
+
+フードカテゴリマスタ（管理画面用）。
+
+- **Table name:** `master_food_categories`
+- **Description:** 管理画面用フードカテゴリマスタ
+
+#### Columns
+
+| Column       | Type        | Constraints              | Description          |
+|--------------|------------|--------------------------|----------------------|
+| id           | bigserial  | PK                       | カテゴリID           |
+| name         | text       | NOT NULL                 | カテゴリ名           |
+| description  | text       | NULLABLE                 | 説明文               |
+| is_active    | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
+| created_at   | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
+| updated_at   | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+
+---
+
+### 8-10. master_event_categories
+
+イベントカテゴリマスタ（管理画面用）。
+
+- **Table name:** `master_event_categories`
+- **Description:** 管理画面用イベントカテゴリマスタ
+
+#### Columns
+
+| Column       | Type        | Constraints              | Description          |
+|--------------|------------|--------------------------|----------------------|
+| id           | bigserial  | PK                       | カテゴリID           |
+| name         | text       | NOT NULL                 | カテゴリ名           |
+| description  | text       | NULLABLE                 | 説明文               |
+| is_active    | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
+| created_at   | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
+| updated_at   | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
 
 ---
 
