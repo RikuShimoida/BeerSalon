@@ -6,7 +6,6 @@ model: opus
 color: cyan
 memory: project
 skills: 
-    - test
     - report
     - sync-docs
 ---
