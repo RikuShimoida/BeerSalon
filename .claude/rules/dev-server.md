@@ -1,9 +1,3 @@
----
-name: dev-server
-description: ローカル開発サーバーの利用ルール。pnpm dev実行禁止、既存ポート利用の詳細。
-when_to_use: 開発サーバー関連の作業時、E2Eテスト実行時、localhost接続時
----
-
 ## ローカル開発サーバーの利用ルール
 
 ### 原則

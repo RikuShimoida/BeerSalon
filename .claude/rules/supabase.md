@@ -1,7 +1,5 @@
 ---
-name: supabase-setup
-description: BeerSalonとBeerSalonAdminの共有DB構成、ローカルSupabase設定、ポート番号、開発フロー。
-when_to_use: Supabase関連の作業時、DB接続設定時、「supabase」「データベース」「.env」などの発言時
+globs: prisma/**, supabase/**, **/.env*, **/route.ts, **/route.tsx
 ---
 
 ## データベース構成
