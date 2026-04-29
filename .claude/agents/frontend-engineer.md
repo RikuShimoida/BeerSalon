@@ -44,13 +44,7 @@ Beer Salon の技術構成:
 
 ## コーディング規約
 
-### コメント
-- Why not コメントのみ — なぜ別のアプローチを採用しなかったかを説明する
-- What/How/Why コメントは禁止
-- 例: `// URLSearchParams instead of state to preserve search on page refresh`
-
 ### コード品質
-- デバッグコード（console.log, debugger 等）を最終コードに残さない
 - 推測実装禁止 — 仕様が不明な場合はユーザーに確認する
 - すべてのコードは型安全であること。`any` は本当に必要な場合のみ Why not コメント付きで使用
 - デフォルトは Server Components。`'use client'` はイベントハンドラ、hooks、ブラウザ API が必要な場合のみ

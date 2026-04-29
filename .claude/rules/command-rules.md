@@ -1,37 +1,18 @@
 ## コマンド実行に関する権限委譲ルール
 
-### 原則
+### Bashツール実行時の説明（description）
 
-- **安全で可逆なコマンド**については、ユーザーへの確認なしで実行してよい
-- **不可逆・破壊的・外部影響が大きいコマンド**のみ、事前に確認を行うこと
+- Bashツールの `description` パラメータは**必ず日本語で記述**すること
+- コマンドの目的・意図が日本語話者に即座に伝わる説明を書くこと
 
-### 確認不要なコマンド例（即時実行してよい）
+**例**:
+- OK: `コードフォーマットを実行`
+- OK: `developブランチの最新をpull`
+- OK: `Prismaクライアントを再生成`
+- NG: `Run code formatting`
+- NG: `Pull latest changes`
+- NG: `Generate Prisma client`
 
-- `pnpm install` / `pnpm add` / `pnpm build`
-- `pnpm lint` / `pnpm lint:fix` / `pnpm format`
-- `pnpm test` / `pnpm e2e`
-- `npx prisma generate` / `npx prisma migrate dev`
-- `supabase start` / `supabase stop` / `supabase status`
-- `git status` / `git diff` / `git log` / `git branch`
-- `git checkout -b <branch>` / `git commit` / `git push`
-- `gh issue create` / `gh pr create`
-
-### 事前確認が必要なコマンド例
-
-- `rm -rf`
-- `git reset --hard` / `git rebase` / `git push --force` / `git branch -D`
-- `prisma migrate reset` / `supabase db reset`
-- `.env` や設定ファイルの削除・上書き
-- 外部サービスへの課金・公開設定変更を伴う操作
-- 本番環境への直接デプロイ操作
-
-### 不明な場合の判断基準
-
-- **「ローカルで試して失敗してもやり直せるか？」**
-  - YES → 確認不要
-  - NO → 必ず確認
-
-このルールに従い、不要な確認は行わず、作業を中断させないこと。
 
 ## 確認時の説明義務
 
