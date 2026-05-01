@@ -1,6 +1,6 @@
 ---
 name: create-issue
-description: issue_note.txtの課題Noをもとに、GitHub Issueを作成する。対応種別に応じてfeature/bugfixテンプレートを使い分ける。
+description: @issue_note.txt の課題Noをもとに、GitHub Issueを作成する。対応種別に応じてfeature/bugfixテンプレートを使い分ける。
 when_to_use: 「Issue作成」「create-issue」などの発言時、課題Noを指定してIssue作成を依頼された時
 context: fork
 agent: beersalon-domain-expert
@@ -12,7 +12,7 @@ agent: beersalon-domain-expert
 
 ### Phase 1: 課題情報の取得
 
-1. `issue_note.txt` を読み込む
+1. `@issue_note.txt` を読み込む
 2. 引数で受け取った課題No（`$ARGUMENTS`）に一致するセクションを探す
 3. 該当する課題が見つからない場合はエラーメッセージを表示して終了する
 
@@ -70,6 +70,6 @@ EOF
 ### 禁止事項
 
 - ユーザー承認なしでIssueを作成すること
-- issue_note.txt に存在しない課題Noで作成を試みること
+- @issue_note.txt に存在しない課題Noで作成を試みること
 - テンプレートの構造を無視してIssue本文を作成すること
 - 課題情報を推測で補完すること（不明点は「未確定事項」に記載する）
