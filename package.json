@@ -4,6 +4,7 @@
 	"packageManager": "pnpm@10.24.0",
 	"scripts": {
 		"build": "turbo run build",
+		"typecheck": "turbo run typecheck",
 		"lint": "turbo run lint",
 		"format": "turbo run format",
 		"test": "turbo run test",

@@ -136,6 +136,7 @@ export async function getBarDetail(barId: string) {
 						include: {
 							brewery: true,
 							beerCategory: true,
+							region: true,
 						},
 					},
 				},
@@ -240,6 +241,7 @@ export async function getBarDetail(barId: string) {
 				beerCategoryId: menu.beer.beerCategoryId.toString(),
 				breweryId: menu.beer.breweryId?.toString(),
 				abv: menu.beer.abv?.toString(),
+				origin: menu.beer.region?.name ?? null,
 				brewery: menu.beer.brewery
 					? {
 							...menu.beer.brewery,
