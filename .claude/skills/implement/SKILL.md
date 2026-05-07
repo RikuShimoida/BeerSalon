@@ -79,6 +79,15 @@ agent: frontend-engineer
 6. 設計ドキュメント更新の有無と内容
 7. PR URL
 
+### エージェント一貫性の強制ルール
+
+このスキルは `agent: frontend-engineer` で実行される。以下を厳守すること。
+
+- **frontend-engineer が Phase 1（計画）から Phase 3（完了）まで一貫して全フェーズを担当すること**
+- Phase 間でエージェントを切り替えたり、汎用エージェントに委譲してはならない
+- サブエージェントを起動する場合も、必ず `subagent_type: "frontend-engineer"` を指定すること
+- `subagent_type` 未指定（汎用 Agent）でのサブエージェント起動は禁止
+
 ### 禁止事項
 
 - Playwright確認完了前にコミット・プッシュ・PR作成すること
