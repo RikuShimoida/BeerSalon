@@ -3,26 +3,26 @@ import Link from "next/link";
 export default function MasterDataPage() {
 	const masterDataCategories = [
 		{
-			title: "Beer Styles",
-			description: "Manage beer style categories (IPA, Lager, etc.)",
+			title: "ビアスタイル",
+			description: "ビアスタイル（IPA、ラガーなど）の管理",
 			href: "/admin/master/beer-styles",
 			icon: "🍺",
 		},
 		{
-			title: "Breweries",
-			description: "Manage brewery information",
+			title: "醸造所",
+			description: "醸造所情報の管理",
 			href: "/admin/master/breweries",
 			icon: "🏭",
 		},
 		{
-			title: "Food Categories",
-			description: "Manage food menu categories",
+			title: "フードカテゴリ",
+			description: "フードメニューカテゴリの管理",
 			href: "/admin/master/food-categories",
 			icon: "🍽️",
 		},
 		{
-			title: "Event Categories",
-			description: "Manage event categories",
+			title: "イベントカテゴリ",
+			description: "イベントカテゴリの管理",
 			href: "/admin/master/event-categories",
 			icon: "🎉",
 		},
@@ -30,7 +30,12 @@ export default function MasterDataPage() {
 
 	return (
 		<div className="p-6">
-			<h1 className="text-2xl font-bold mb-6">Master Data Management</h1>
+			<div className="mb-6">
+				<h1 className="text-2xl font-bold">マスタデータ管理</h1>
+				<p className="mt-1 text-sm text-gray-600">
+					各種マスタデータの追加・編集ができます
+				</p>
+			</div>
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 				{masterDataCategories.map((category) => (
 					<Link

@@ -39,11 +39,11 @@ export default function Sidebar({ userRole }: SidebarProps) {
 						key={item.name}
 						href={item.href}
 						className={`
-              flex items-center px-4 py-3 text-sm font-medium rounded-md
+              flex items-center py-3 text-sm font-medium rounded-md
               ${
 								isActive(item.href)
-									? "bg-gray-900 text-white"
-									: "text-gray-300 hover:bg-gray-700 hover:text-white"
+									? "bg-gray-700 text-white border-l-4 border-blue-500 pl-3"
+									: "text-gray-300 hover:bg-gray-700 hover:text-white pl-4"
 							}
             `}
 					>
@@ -64,11 +64,11 @@ export default function Sidebar({ userRole }: SidebarProps) {
 								key={item.name}
 								href={item.href}
 								className={`
-                  flex items-center px-4 py-3 text-sm font-medium rounded-md
+                  flex items-center py-3 text-sm font-medium rounded-md
                   ${
 										isActive(item.href)
-											? "bg-gray-900 text-white"
-											: "text-gray-300 hover:bg-gray-700 hover:text-white"
+											? "bg-gray-700 text-white border-l-4 border-blue-500 pl-3"
+											: "text-gray-300 hover:bg-gray-700 hover:text-white pl-4"
 									}
                 `}
 							>

@@ -25,7 +25,7 @@ export default function NewUserPage() {
 			});
 			router.push("/admin/users");
 		} catch (_error) {
-			alert("Failed to create user");
+			alert("ユーザーの作成に失敗しました");
 			setLoading(false);
 		}
 	};
@@ -41,78 +41,105 @@ export default function NewUserPage() {
 
 	return (
 		<div className="p-6">
-			<h1 className="text-2xl font-bold mb-6">Add Admin User</h1>
+			<h1 className="text-2xl font-bold mb-6">管理ユーザーを追加</h1>
 			<div className="bg-white rounded-lg shadow p-6 max-w-2xl">
 				<form onSubmit={handleSubmit} className="space-y-6">
 					<div>
-						<label className="block text-sm font-medium">Name *</label>
+						<label
+							htmlFor="name"
+							className="block text-sm font-medium text-gray-700"
+						>
+							氏名 <span className="text-red-500">*</span>
+						</label>
 						<input
 							type="text"
+							id="name"
 							name="name"
 							required
 							value={formData.name}
 							onChange={handleChange}
-							className="mt-1 block w-full px-3 py-2 border rounded"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium">Email *</label>
+						<label
+							htmlFor="email"
+							className="block text-sm font-medium text-gray-700"
+						>
+							メールアドレス <span className="text-red-500">*</span>
+						</label>
 						<input
 							type="email"
+							id="email"
 							name="email"
 							required
 							value={formData.email}
 							onChange={handleChange}
-							className="mt-1 block w-full px-3 py-2 border rounded"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium">Password *</label>
+						<label
+							htmlFor="password"
+							className="block text-sm font-medium text-gray-700"
+						>
+							パスワード <span className="text-red-500">*</span>
+						</label>
 						<input
 							type="password"
+							id="password"
 							name="password"
 							required
 							value={formData.password}
 							onChange={handleChange}
-							className="mt-1 block w-full px-3 py-2 border rounded"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium">Role *</label>
+						<label
+							htmlFor="role"
+							className="block text-sm font-medium text-gray-700"
+						>
+							権限 <span className="text-red-500">*</span>
+						</label>
 						<select
+							id="role"
 							name="role"
 							value={formData.role}
 							onChange={handleChange}
-							className="mt-1 block w-full px-3 py-2 border rounded"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 						>
-							<option value="bar_owner">Bar Owner</option>
-							<option value="admin">Admin</option>
+							<option value="bar_owner">バーオーナー</option>
+							<option value="admin">管理者</option>
 						</select>
 					</div>
 					<div className="flex items-center">
 						<input
 							type="checkbox"
+							id="is_active"
 							name="is_active"
 							checked={formData.is_active}
 							onChange={handleChange}
-							className="h-4 w-4"
+							className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 						/>
-						<label className="ml-2 text-sm">Active</label>
+						<label htmlFor="is_active" className="ml-2 text-sm text-gray-900">
+							有効
+						</label>
 					</div>
 					<div className="flex justify-end gap-3">
 						<button
 							type="button"
 							onClick={() => router.back()}
-							className="px-4 py-2 border rounded"
+							className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 						>
-							Cancel
+							キャンセル
 						</button>
 						<button
 							type="submit"
 							disabled={loading}
-							className="px-4 py-2 bg-blue-600 text-white rounded"
+							className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							{loading ? "Creating..." : "Create User"}
+							{loading ? "作成中..." : "作成"}
 						</button>
 					</div>
 				</form>

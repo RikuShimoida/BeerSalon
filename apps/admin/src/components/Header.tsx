@@ -24,7 +24,7 @@ export default function Header({ userName, userRole }: HeaderProps) {
 	};
 
 	return (
-		<header className="bg-white shadow">
+		<header className="bg-white shadow-sm">
 			<div className="flex items-center justify-between h-16 px-6">
 				<div className="flex items-center">
 					<h1 className="text-xl font-semibold text-gray-900">
@@ -33,15 +33,21 @@ export default function Header({ userName, userRole }: HeaderProps) {
 				</div>
 
 				<div className="flex items-center space-x-4">
-					<div className="text-sm">
+					<div className="flex items-center space-x-2 text-sm">
 						<p className="font-medium text-gray-900">{userName}</p>
-						<p className="text-gray-500">
+						<span
+							className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+								userRole === "admin"
+									? "bg-purple-100 text-purple-800"
+									: "bg-blue-100 text-blue-800"
+							}`}
+						>
 							{userRole === "admin" ? "管理者" : "バーオーナー"}
-						</p>
+						</span>
 					</div>
 					<button
 						onClick={handleLogout}
-						className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+						className="px-4 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
 					>
 						ログアウト
 					</button>

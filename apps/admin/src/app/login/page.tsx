@@ -50,9 +50,9 @@ export default function LoginPage() {
 
 	return (
 		<div className="min-h-screen flex items-center justify-center bg-gray-50">
-			<div className="max-w-md w-full space-y-8 p-8">
+			<div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 space-y-6">
 				<div>
-					<h1 className="text-center text-3xl font-bold text-gray-900">
+					<h1 className="text-center text-2xl font-bold text-gray-900">
 						BeerSalonAdmin
 					</h1>
 					<p className="mt-2 text-center text-sm text-gray-600">
