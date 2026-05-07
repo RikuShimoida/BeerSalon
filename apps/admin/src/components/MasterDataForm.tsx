@@ -75,11 +75,12 @@ export default function MasterDataForm({
 		<form onSubmit={handleSubmit} className="space-y-6">
 			{fields.map((field) => (
 				<div key={field.name}>
-					<label className="block text-sm font-medium">
+					<label htmlFor={field.name} className="block text-sm font-medium">
 						{field.label} {field.required && "*"}
 					</label>
 					{field.type === "textarea" ? (
 						<textarea
+							id={field.name}
 							name={field.name}
 							required={field.required}
 							value={formData[field.name] as string}
@@ -90,6 +91,7 @@ export default function MasterDataForm({
 					) : field.type === "checkbox" ? (
 						<input
 							type="checkbox"
+							id={field.name}
 							name={field.name}
 							checked={formData[field.name] as boolean}
 							onChange={handleChange}
@@ -98,6 +100,7 @@ export default function MasterDataForm({
 					) : (
 						<input
 							type="text"
+							id={field.name}
 							name={field.name}
 							required={field.required}
 							value={formData[field.name] as string}
@@ -110,12 +113,13 @@ export default function MasterDataForm({
 			<div className="flex items-center">
 				<input
 					type="checkbox"
+					id="is_active"
 					name="is_active"
 					checked={formData.is_active as boolean}
 					onChange={handleChange}
 					className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 				/>
-				<label className="ml-2 text-sm">有効</label>
+				<label htmlFor="is_active" className="ml-2 text-sm">有効</label>
 			</div>
 			<div className="flex justify-end gap-3">
 				<button

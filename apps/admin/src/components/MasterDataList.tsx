@@ -43,7 +43,7 @@ export default function MasterDataList({
 			}
 			const data = await response.json();
 			setItems(data[dataKey] || []);
-		} catch (error) {
+		} catch (_error) {
 			setError("データの取得に失敗しました");
 		} finally {
 			setLoading(false);
@@ -55,7 +55,7 @@ export default function MasterDataList({
 		try {
 			await fetch(`${endpoint}/${itemId}`, { method: "DELETE" });
 			fetchItems();
-		} catch (error) {
+		} catch (_error) {
 			alert("削除に失敗しました");
 		}
 	};

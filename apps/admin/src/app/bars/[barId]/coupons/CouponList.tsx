@@ -26,7 +26,7 @@ export default function CouponList({ barId }: CouponListProps) {
 			}
 			const data = await response.json();
 			setCoupons(data.coupons || []);
-		} catch (error) {
+		} catch (_error) {
 			setError("クーポンの取得に失敗しました");
 		} finally {
 			setLoading(false);
@@ -40,7 +40,7 @@ export default function CouponList({ barId }: CouponListProps) {
 				method: "DELETE",
 			});
 			fetchCoupons();
-		} catch (error) {
+		} catch (_error) {
 			alert("削除に失敗しました");
 		}
 	};

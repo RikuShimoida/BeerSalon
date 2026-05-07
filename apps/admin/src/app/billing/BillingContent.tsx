@@ -11,6 +11,21 @@ interface BillingContentProps {
 	barId: number | null;
 }
 
+const subscriptionStatusLabels: Record<string, string> = {
+	active: "有効",
+	canceled: "キャンセル済み",
+	past_due: "支払い遅延",
+	trialing: "トライアル中",
+	incomplete: "未完了",
+};
+
+const invoiceStatusLabels: Record<string, string> = {
+	paid: "支払い済み",
+	open: "未払い",
+	void: "無効",
+	uncollectible: "回収不能",
+};
+
 export default function BillingContent({ barId }: BillingContentProps) {
 	const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
 	const [subscription, setSubscription] = useState<
@@ -18,32 +33,49 @@ export default function BillingContent({ barId }: BillingContentProps) {
 	>(null);
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState("");
 
 	useEffect(() => {
 		fetchData();
 	}, [barId]);
 
 	const fetchData = async () => {
-		const [plansRes, subRes, invoicesRes] = await Promise.all([
-			fetch("/api/subscriptions/plans"),
-			barId ? fetch(`/api/bars/${barId}/subscription`) : Promise.resolve(null),
-			barId ? fetch(`/api/bars/${barId}/invoices`) : Promise.resolve(null),
-		]);
+		try {
+			const [plansRes, subRes, invoicesRes] = await Promise.all([
+				fetch("/api/subscriptions/plans"),
+				barId ? fetch(`/api/bars/${barId}/subscription`) : Promise.resolve(null),
+				barId ? fetch(`/api/bars/${barId}/invoices`) : Promise.resolve(null),
+			]);
 
-		const plansData = await plansRes.json();
-		setPlans(plansData.plans || []);
+			if (!plansRes.ok) {
+				setError("プラン情報の取得に失敗しました");
+				return;
+			}
+			const plansData = await plansRes.json();
+			setPlans(plansData.plans || []);
 
-		if (subRes) {
-			const subData = await subRes.json();
-			setSubscription(subData.subscription);
+			if (subRes) {
+				if (!subRes.ok) {
+					setError("サブスクリプション情報の取得に失敗しました");
+					return;
+				}
+				const subData = await subRes.json();
+				setSubscription(subData.subscription);
+			}
+
+			if (invoicesRes) {
+				if (!invoicesRes.ok) {
+					setError("請求情報の取得に失敗しました");
+					return;
+				}
+				const invoicesData = await invoicesRes.json();
+				setInvoices(invoicesData.invoices || []);
+			}
+		} catch (_error) {
+			setError("データの取得に失敗しました");
+		} finally {
+			setLoading(false);
 		}
-
-		if (invoicesRes) {
-			const invoicesData = await invoicesRes.json();
-			setInvoices(invoicesData.invoices || []);
-		}
-
-		setLoading(false);
 	};
 
 	const handleSubscribe = async (priceId: string) => {
@@ -71,6 +103,16 @@ export default function BillingContent({ barId }: BillingContentProps) {
 					<div className="h-8 bg-gray-200 rounded w-1/3"></div>
 					<div className="h-4 bg-gray-200 rounded w-1/2"></div>
 					<div className="h-48 bg-gray-200 rounded"></div>
+				</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="p-6">
+				<div className="rounded-md bg-red-50 p-4">
+					<p className="text-sm text-red-800">{error}</p>
 				</div>
 			</div>
 		);
@@ -119,7 +161,7 @@ export default function BillingContent({ barId }: BillingContentProps) {
 							<span
 								className={`px-2 py-1 text-xs rounded ${subscription.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
 							>
-								{subscription.status}
+								{subscriptionStatusLabels[subscription.status] || subscription.status}
 							</span>
 						</div>
 						<div className="flex items-center">
@@ -228,7 +270,7 @@ export default function BillingContent({ barId }: BillingContentProps) {
 											<span
 												className={`px-2 py-1 text-xs rounded ${invoice.status === "paid" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
 											>
-												{invoice.status}
+												{invoiceStatusLabels[invoice.status] || invoice.status}
 											</span>
 										</td>
 										<td className="px-6 py-4 whitespace-nowrap">

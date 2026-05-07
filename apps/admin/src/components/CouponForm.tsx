@@ -77,11 +77,12 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<div>
-				<label className="block text-sm font-medium text-gray-700">
+				<label htmlFor="title" className="block text-sm font-medium text-gray-700">
 					タイトル <span className="text-red-500">*</span>
 				</label>
 				<input
 					type="text"
+					id="title"
 					name="title"
 					required
 					value={formData.title}
@@ -91,10 +92,11 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 			</div>
 			<div className="grid grid-cols-2 gap-4">
 				<div>
-					<label className="block text-sm font-medium text-gray-700">
+					<label htmlFor="discount_type" className="block text-sm font-medium text-gray-700">
 						割引タイプ <span className="text-red-500">*</span>
 					</label>
 					<select
+						id="discount_type"
 						name="discount_type"
 						value={formData.discount_type}
 						onChange={handleChange}
@@ -105,11 +107,12 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					</select>
 				</div>
 				<div>
-					<label className="block text-sm font-medium text-gray-700">
+					<label htmlFor="discount_value" className="block text-sm font-medium text-gray-700">
 						割引値 <span className="text-red-500">*</span>
 					</label>
 					<input
 						type="number"
+						id="discount_value"
 						name="discount_value"
 						required
 						value={formData.discount_value}
@@ -119,11 +122,12 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 				</div>
 			</div>
 			<div>
-				<label className="block text-sm font-medium text-gray-700">
+				<label htmlFor="code" className="block text-sm font-medium text-gray-700">
 					クーポンコード
 				</label>
 				<input
 					type="text"
+					id="code"
 					name="code"
 					value={formData.code}
 					onChange={handleChange}
@@ -131,11 +135,12 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 				/>
 			</div>
 			<div>
-				<label className="block text-sm font-medium text-gray-700">
+				<label htmlFor="usage_limit" className="block text-sm font-medium text-gray-700">
 					利用回数上限
 				</label>
 				<input
 					type="number"
+					id="usage_limit"
 					name="usage_limit"
 					value={formData.usage_limit}
 					onChange={handleChange}
@@ -144,11 +149,12 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 			</div>
 			<div className="grid grid-cols-2 gap-4">
 				<div>
-					<label className="block text-sm font-medium text-gray-700">
+					<label htmlFor="valid_from" className="block text-sm font-medium text-gray-700">
 						有効期間開始
 					</label>
 					<input
 						type="date"
+						id="valid_from"
 						name="valid_from"
 						value={formData.valid_from}
 						onChange={handleChange}
@@ -156,11 +162,12 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					/>
 				</div>
 				<div>
-					<label className="block text-sm font-medium text-gray-700">
+					<label htmlFor="valid_until" className="block text-sm font-medium text-gray-700">
 						有効期間終了
 					</label>
 					<input
 						type="date"
+						id="valid_until"
 						name="valid_until"
 						value={formData.valid_until}
 						onChange={handleChange}
@@ -169,8 +176,9 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 				</div>
 			</div>
 			<div>
-				<label className="block text-sm font-medium text-gray-700">説明</label>
+				<label htmlFor="description" className="block text-sm font-medium text-gray-700">説明</label>
 				<textarea
+					id="description"
 					name="description"
 					rows={4}
 					value={formData.description}
@@ -181,12 +189,13 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 			<div className="flex items-center">
 				<input
 					type="checkbox"
+					id="is_active"
 					name="is_active"
 					checked={formData.is_active}
 					onChange={handleChange}
 					className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 				/>
-				<label className="ml-2 text-sm text-gray-900">有効</label>
+				<label htmlFor="is_active" className="ml-2 text-sm text-gray-900">有効</label>
 			</div>
 			<div className="flex justify-end gap-3">
 				<button
