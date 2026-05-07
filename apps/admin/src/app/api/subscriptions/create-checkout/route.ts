@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { stripe } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {

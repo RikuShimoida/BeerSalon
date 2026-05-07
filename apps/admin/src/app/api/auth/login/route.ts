@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import { createToken, setAuthCookie, verifyPassword } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
-import { verifyPassword, createToken, setAuthCookie } from "@/lib/auth";
-import { AdminUser } from "@/types/database";
+import type { AdminUser } from "@/types/database";
 
 export async function POST(request: NextRequest) {
 	try {

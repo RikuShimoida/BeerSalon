@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bar } from "@/types/database";
+import { useEffect, useState } from "react";
+import type { Bar } from "@/types/database";
 
 export default function BarList() {
 	const [bars, setBars] = useState<Bar[]>([]);

@@ -1,8 +1,8 @@
-import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import BillingContent from "./BillingContent";
+import { getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import BillingContent from "./BillingContent";
 
 export default async function BillingPage() {
 	const user = await getCurrentUser();

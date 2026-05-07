@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { BarEvent } from "@/types/database";
+import { useEffect, useState } from "react";
+import type { BarEvent } from "@/types/database";
 
 interface EventFormProps {
 	barId: string;

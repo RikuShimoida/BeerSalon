@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function GET() {
 	const user = await getCurrentUser();

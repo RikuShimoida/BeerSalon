@@ -1,6 +1,6 @@
-import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
+import { getCurrentUser } from "@/lib/auth";
 import EventList from "./EventList";
 
 export default async function EventsPage({

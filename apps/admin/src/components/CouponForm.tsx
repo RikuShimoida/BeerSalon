@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { BarCoupon } from "@/types/database";
+import { useEffect, useState } from "react";
+import type { BarCoupon } from "@/types/database";
 
 interface CouponFormProps {
 	barId: string;

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BarCoupon } from "@/types/database";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import type { BarCoupon } from "@/types/database";
 
 interface CouponListProps {
 	barId: string;
