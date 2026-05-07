@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 
 export interface AlertProps {
 	variant?: "success" | "error" | "warning" | "info";

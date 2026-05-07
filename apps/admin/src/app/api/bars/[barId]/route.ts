@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
-import { Bar } from "@/types/database";
-import {
-	validateInstagramUrl,
-	validateXUrl,
-	validateFacebookUrl,
-	validateWebsiteUrl,
-} from "@/lib/validators";
 import { SHIZUOKA_PREFECTURE } from "@/lib/shizuoka-cities";
+import { supabaseAdmin } from "@/lib/supabase";
+import {
+	validateFacebookUrl,
+	validateInstagramUrl,
+	validateWebsiteUrl,
+	validateXUrl,
+} from "@/lib/validators";
+import type { Bar } from "@/types/database";
 
 // GET /api/bars/:barId - バー詳細取得
 export async function GET(

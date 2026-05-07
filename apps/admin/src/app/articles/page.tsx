@@ -1,6 +1,6 @@
-import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function ArticlesPage() {
 	const user = await getCurrentUser();

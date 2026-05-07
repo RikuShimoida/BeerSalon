@@ -1,7 +1,7 @@
-import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
-import { AdminUser } from "@/types/database";
+import { jwtVerify, SignJWT } from "jose";
+import { cookies } from "next/headers";
+import type { AdminUser } from "@/types/database";
 
 const jwtSecret = process.env.JWT_SECRET;
 if (!jwtSecret) {

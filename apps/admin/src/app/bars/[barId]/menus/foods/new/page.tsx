@@ -1,7 +1,7 @@
-import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import FoodMenuForm from "@/components/FoodMenuForm";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function NewFoodMenuPage({
 	params,

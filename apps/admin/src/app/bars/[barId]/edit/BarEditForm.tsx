@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bar } from "@/types/database";
 import BarForm from "@/components/BarForm";
+import type { Bar } from "@/types/database";
 
 export default function BarEditForm({ barId }: { barId: string }) {
 	const [bar, setBar] = useState<Bar | null>(null);

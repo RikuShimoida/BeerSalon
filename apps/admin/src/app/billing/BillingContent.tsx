@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SubscriptionPlan, BarSubscription, Invoice } from "@/types/database";
+import type {
+	BarSubscription,
+	Invoice,
+	SubscriptionPlan,
+} from "@/types/database";
 
 interface BillingContentProps {
 	barId: number | null;

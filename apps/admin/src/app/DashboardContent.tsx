@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import StatsCard from "@/components/StatsCard";
 import ActivityTimeline from "@/components/ActivityTimeline";
+import StatsCard from "@/components/StatsCard";
 
 interface Stats {
 	barsCount: number;

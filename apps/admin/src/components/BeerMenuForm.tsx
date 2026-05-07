@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { BarBeerMenu, Beer, BeerCategory } from "@/types/database";
+import { type FormEvent, useEffect, useState } from "react";
+import type { BarBeerMenu, Beer, BeerCategory } from "@/types/database";
 
 interface BeerMenuFormProps {
 	barId: string;

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarBeerMenu } from "@/types/database";
 import BeerMenuForm from "@/components/BeerMenuForm";
+import type { BarBeerMenu } from "@/types/database";
 
 export default function BeerMenuEditForm({
 	barId,

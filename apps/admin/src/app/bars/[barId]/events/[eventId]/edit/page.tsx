@@ -1,7 +1,7 @@
-import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import EventForm from "@/components/EventForm";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function EditEventPage({
 	params,

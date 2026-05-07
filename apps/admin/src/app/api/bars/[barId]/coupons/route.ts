@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
-import { BarCoupon } from "@/types/database";
+import type { BarCoupon } from "@/types/database";
 
 export async function GET(
 	request: NextRequest,

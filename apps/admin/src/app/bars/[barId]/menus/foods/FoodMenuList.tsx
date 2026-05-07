@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { BarFoodMenu } from "@/types/database";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { BarFoodMenu } from "@/types/database";
 
 interface FoodMenuListProps {
 	barId: string;

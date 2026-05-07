@@ -1,7 +1,7 @@
-import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import DashboardLayout from "@/components/DashboardLayout";
 import BarForm from "@/components/BarForm";
+import DashboardLayout from "@/components/DashboardLayout";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function NewBarPage() {
 	const user = await getCurrentUser();
