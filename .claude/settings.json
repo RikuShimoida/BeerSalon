@@ -38,6 +38,14 @@
           {
             "type": "command",
             "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -qE '(prisma migrate reset|supabase db reset)'; then echo 'BLOCKED: DBリセットコマンドです。全データが削除されます。ユーザーに確認してください。' >&2; exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -qE 'git\\s+commit'; then LAST_TEST=$(find /tmp -name '.beersalon_last_test_run' -mmin -30 2>/dev/null); if [ -z \"$LAST_TEST\" ]; then echo 'BLOCKED: コミット前にテストを実行してください。pnpm test が直近30分以内に実行されていません。' >&2; exit 2; fi; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -qE 'pnpm\\s+test'; then touch /tmp/.beersalon_last_test_run; fi"
           }
         ]
       },
