@@ -75,34 +75,37 @@ export default function MasterDataForm({
 		<form onSubmit={handleSubmit} className="space-y-6">
 			{fields.map((field) => (
 				<div key={field.name}>
-					<label className="block text-sm font-medium">
+					<label htmlFor={field.name} className="block text-sm font-medium">
 						{field.label} {field.required && "*"}
 					</label>
 					{field.type === "textarea" ? (
 						<textarea
+							id={field.name}
 							name={field.name}
 							required={field.required}
 							value={formData[field.name] as string}
 							onChange={handleChange}
 							rows={4}
-							className="mt-1 block w-full px-3 py-2 border rounded"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 						/>
 					) : field.type === "checkbox" ? (
 						<input
 							type="checkbox"
+							id={field.name}
 							name={field.name}
 							checked={formData[field.name] as boolean}
 							onChange={handleChange}
-							className="mt-1 h-4 w-4"
+							className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 						/>
 					) : (
 						<input
 							type="text"
+							id={field.name}
 							name={field.name}
 							required={field.required}
 							value={formData[field.name] as string}
 							onChange={handleChange}
-							className="mt-1 block w-full px-3 py-2 border rounded"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 						/>
 					)}
 				</div>
@@ -110,27 +113,28 @@ export default function MasterDataForm({
 			<div className="flex items-center">
 				<input
 					type="checkbox"
+					id="is_active"
 					name="is_active"
 					checked={formData.is_active as boolean}
 					onChange={handleChange}
-					className="h-4 w-4"
+					className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 				/>
-				<label className="ml-2 text-sm">Active</label>
+				<label htmlFor="is_active" className="ml-2 text-sm">有効</label>
 			</div>
 			<div className="flex justify-end gap-3">
 				<button
 					type="button"
 					onClick={() => router.back()}
-					className="px-4 py-2 border rounded"
+					className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 shadow-sm text-sm font-medium"
 				>
-					Cancel
+					キャンセル
 				</button>
 				<button
 					type="submit"
 					disabled={loading}
-					className="px-4 py-2 bg-blue-600 text-white rounded"
+					className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-sm text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					{loading ? "Saving..." : itemId ? "Update" : "Create"}
+					{loading ? "保存中..." : itemId ? "更新" : "作成"}
 				</button>
 			</div>
 		</form>
