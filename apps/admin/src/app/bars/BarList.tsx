@@ -127,6 +127,14 @@ export default function BarList() {
 								</div>
 								<div className="flex items-start space-x-2 ml-4">
 									<button
+										onClick={() =>
+											router.push(`/bars/${bar.id}/menus/beers`)
+										}
+										className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+									>
+										メニュー管理
+									</button>
+									<button
 										onClick={() => router.push(`/bars/${bar.id}/edit`)}
 										className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 									>
