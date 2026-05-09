@@ -20,6 +20,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@beersalon/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@stripe/stripe-js':
         specifier: ^8.7.0
         version: 8.11.0
@@ -81,6 +84,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@beersalon/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@prisma/adapter-pg':
         specifier: ^7.1.0
         version: 7.4.0

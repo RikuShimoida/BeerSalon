@@ -17,6 +17,7 @@
 		"reset:modules": "rm -rf .next node_modules && pnpm install"
 	},
 	"dependencies": {
+		"@beersalon/shared": "workspace:*",
 		"@prisma/adapter-pg": "^7.1.0",
 		"@prisma/client": "^7.1.0",
 		"@prisma/client-runtime-utils": "^7.1.0",
