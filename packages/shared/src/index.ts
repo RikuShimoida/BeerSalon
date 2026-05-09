@@ -1,1 +1,1 @@
-export {};
+export { logRequest } from "./middleware-logger";
