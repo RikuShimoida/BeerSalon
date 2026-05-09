@@ -13,6 +13,16 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/check-dev-servers.sh",
+            "if": "Skill(implement *)"
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
