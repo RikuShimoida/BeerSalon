@@ -19,6 +19,11 @@
             "type": "command",
             "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/check-dev-servers.sh",
             "if": "Skill(implement *)"
+          },
+          {
+            "type": "command",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/check-playwright-mcp.sh",
+            "if": "Skill(implement *)"
           }
         ]
       },
