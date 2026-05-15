@@ -100,8 +100,9 @@ Beer Salon は以下を1つの場所に集約します。
 詳細設計は以下に分離して管理する。
 
 - `database.md`：テーブル設計
-- `routing.md`：画面遷移・URL設計
-- `wireframe.md`：ワイヤーフレーム（UI構造）
+- `routing.md`：画面遷移・URL設計（ユーザー画面 + 管理画面）
+- `wireframe.md`：ワイヤーフレーム（ユーザー画面 UI構造）
+- `wireframe-admin.md`：ワイヤーフレーム（管理画面 UI構造）
 
 ---
 
