@@ -255,13 +255,36 @@ UNIQUE制約: `country_id + name`
 | id           | bigserial  | PK                               | メニューID                          |
 | bar_id       | bigint     | NOT NULL, FK → bars(id)         | 店舗ID                              |
 | beer_id      | bigint     | NOT NULL, FK → beers(id)        | ビールID                            |
-| price        | integer    | NULLABLE                         | 価格（税抜/税込はUI側で定義）      |
-| size         | text       | NULLABLE                         | "Mサイズ", "パイント" 等            |
 | description  | text       | NULLABLE                         | メニュー用説明                      |
 | image_url    | text       | NULLABLE                         | 写真                                |
 | is_active    | boolean    | NOT NULL DEFAULT true            | 提供中フラグ                        |
 | created_at   | timestamptz| NOT NULL DEFAULT now()           | 作成日時                            |
 | updated_at   | timestamptz| NOT NULL DEFAULT now()           | 更新日時                            |
+
+**変更履歴**: `size` カラムと `price` カラムを削除。サイズ/価格は `bar_beer_menu_sizes` テーブルに移行（1メニューに複数サイズ/価格を設定可能に）。
+
+---
+
+### 2-8-2. bar_beer_menu_sizes
+
+ビールメニューのサイズ・価格バリエーション。
+
+- **Table name:** `bar_beer_menu_sizes`
+- **Description:** ビールメニューごとのサイズ/価格（1メニューに複数設定可能）
+
+#### Columns
+
+| Column            | Type        | Constraints                              | Description                 |
+|-------------------|------------|-------------------------------------------|-----------------------------|
+| id                | bigserial  | PK                                        | ID                          |
+| bar_beer_menu_id  | bigint     | NOT NULL, FK → bar_beer_menus(id)         | ビールメニューID            |
+| size_name         | text       | NOT NULL                                  | サイズ名（例: "パイント", "ハーフ", "Sサイズ"）|
+| price             | integer    | NULLABLE                                  | 価格（オプション）          |
+| sort_order        | integer    | NOT NULL DEFAULT 0                        | 表示順                      |
+| created_at        | timestamptz| NOT NULL DEFAULT now()                    | 作成日時                    |
+| updated_at        | timestamptz| NOT NULL DEFAULT now()                    | 更新日時                    |
+
+**CASCADE削除**: ビールメニュー削除時に関連するサイズ/価格レコードも削除
 
 ---
 
@@ -356,7 +379,9 @@ UNIQUE制約: `country_id + name`
 | bar_id       | bigint     | NOT NULL, FK → bars(id)         | 店舗ID          |
 | title        | text       | NOT NULL                        | 記事タイトル    |
 | body         | text       | NOT NULL                        | 記事本文        |
-| image_url    | text       | NULLABLE                        | サムネイル画像   |
+| image_url    | text       | NULLABLE                        | 画像1（サムネイル兼用）|
+| image_url_2  | text       | NULLABLE                        | 画像2           |
+| image_url_3  | text       | NULLABLE                        | 画像3           |
 | status       | text       | NOT NULL DEFAULT 'draft'        | ステータス（'draft', 'published', 'scheduled'） |
 | published_at | timestamptz| NULLABLE                        | 公開日時        |
 | deleted_at   | timestamptz| NULLABLE                        | 削除日時（論理削除） |
@@ -610,57 +635,46 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ### 8-1. admin_users
 
-管理画面のログインユーザー（バーオーナー、プロダクト管理者）。
+管理画面のログインユーザー（バーオーナー、システム管理者）。
 
 **※重要**: `user_profiles`（ユーザー向けアプリのユーザー）とは完全に別のテーブル。
 
 - **Table name:** `admin_users`
-- **Description:** 管理画面のバーオーナー・プロダクト管理者アカウント
+- **Description:** 管理画面のバーオーナー・システム管理者アカウント
 
 #### Columns
 
 | Column          | Type        | Constraints                     | Description                 |
 |-----------------|------------|----------------------------------|-----------------------------|
 | id              | uuid       | PK, default gen_random_uuid()   | 管理ユーザーID              |
-| email           | text       | NOT NULL, UNIQUE                | メールアドレス              |
+| bar_manage_id   | text       | NOT NULL, UNIQUE                | 店舗管理ID（スラッグ形式のログインID。例: `fuji-beer-bar`）|
 | password_hash   | text       | NOT NULL                         | パスワードハッシュ          |
 | name            | text       | NOT NULL                         | 氏名                        |
 | role            | text       | NOT NULL DEFAULT 'bar_owner'    | 権限（`bar_owner`, `admin`）|
+| bar_id          | bigint     | NULLABLE, FK → bars(id)         | 紐づく店舗ID（bar_ownerは必須、adminはNULL）|
+| contact_email   | text       | NULLABLE                         | 店舗管理者メールアドレス（請求書送付用）|
+| contact_phone   | text       | NULLABLE                         | 店舗管理者電話番号（トラブル時連絡用）|
 | is_active       | boolean    | NOT NULL DEFAULT true            | アカウント有効フラグ        |
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
 
 **インデックス**:
-- `email` (UNIQUE)
+- `bar_manage_id` (UNIQUE)
+- `bar_id`
+
+**運用ルール**:
+- 1店舗 = 1アカウント（店舗スタッフ全員で `bar_manage_id` とパスワードを共有してログイン）
+- 店舗登録時に `admin_users` レコードも自動作成される
 
 **権限**:
-- `bar_owner`: 自身が紐づくバーのみ編集可能
-- `admin`: 全バー閲覧可能、マスタデータ編集可能
+- `bar_owner`: 自店舗（`bar_id` で紐づく店舗）の全データを編集可能
+- `admin`: 全店舗の店舗情報（`bars`）を閲覧・編集可能。ただし店舗配下データ（メニュー・記事・クーポン・イベント）は参照のみで編集不可
 
 ---
 
-### 8-2. bar_owners
+### ~~8-2. bar_owners~~（廃止）
 
-バーと管理ユーザー（バーオーナー）の紐付け（中間テーブル）。
-
-- **Table name:** `bar_owners`
-- **Description:** バーと管理ユーザーの紐付け
-
-#### Columns
-
-| Column          | Type        | Constraints                     | Description                 |
-|-----------------|------------|----------------------------------|-----------------------------|
-| id              | uuid       | PK, default gen_random_uuid()   | 紐付けID                    |
-| bar_id          | bigint     | NOT NULL, FK → bars(id)         | バーID                      |
-| admin_user_id   | uuid       | NOT NULL, FK → admin_users(id)  | 管理ユーザーID              |
-| created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
-
-**インデックス**:
-- `bar_id`, `admin_user_id` (UNIQUE複合キー)
-
-**権限**:
-- バーオーナー: 自分のレコードのみ参照可能
-- プロダクト管理者: 全レコード参照・作成・削除可能
+**このテーブルは廃止されました。** `admin_users` テーブルに `bar_id` カラムを追加し、1対1の紐付けに変更。中間テーブルは不要になりました。
 
 ---
 
@@ -779,86 +793,27 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-### 8-7. master_beer_styles
+### ~~8-7. master_beer_styles~~（廃止）
 
-ビアスタイルマスタ（管理画面用）。
-
-- **Table name:** `master_beer_styles`
-- **Description:** 管理画面用ビアスタイルマスタ
-
-#### Columns
-
-| Column       | Type        | Constraints              | Description          |
-|--------------|------------|--------------------------|----------------------|
-| id           | bigserial  | PK                       | ビアスタイルID       |
-| name         | text       | NOT NULL                 | スタイル名           |
-| description  | text       | NULLABLE                 | 説明文               |
-| is_active    | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
-| created_at   | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
-| updated_at   | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
 
 ---
 
-### 8-8. master_breweries
+### ~~8-8. master_breweries~~（廃止）
 
-醸造所マスタ（管理画面用）。
-
-**※注意**: Web側の `breweries` テーブル（country_id FK, region_id FK を持つ）とは別テーブル。管理画面では国名を文字列で保持する簡易構造。
-
-- **Table name:** `master_breweries`
-- **Description:** 管理画面用醸造所マスタ
-
-#### Columns
-
-| Column       | Type        | Constraints              | Description          |
-|--------------|------------|--------------------------|----------------------|
-| id           | bigserial  | PK                       | 醸造所ID             |
-| name         | text       | NOT NULL                 | 醸造所名             |
-| country      | text       | NULLABLE                 | 国名（文字列）       |
-| description  | text       | NULLABLE                 | 説明文               |
-| is_active    | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
-| created_at   | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
-| updated_at   | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。醸造所情報は Web 側の `breweries` テーブルに一本化。
 
 ---
 
-### 8-9. master_food_categories
+### ~~8-9. master_food_categories~~（廃止）
 
-フードカテゴリマスタ（管理画面用）。
-
-- **Table name:** `master_food_categories`
-- **Description:** 管理画面用フードカテゴリマスタ
-
-#### Columns
-
-| Column       | Type        | Constraints              | Description          |
-|--------------|------------|--------------------------|----------------------|
-| id           | bigserial  | PK                       | カテゴリID           |
-| name         | text       | NOT NULL                 | カテゴリ名           |
-| description  | text       | NULLABLE                 | 説明文               |
-| is_active    | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
-| created_at   | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
-| updated_at   | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
 
 ---
 
-### 8-10. master_event_categories
+### ~~8-10. master_event_categories~~（廃止）
 
-イベントカテゴリマスタ（管理画面用）。
-
-- **Table name:** `master_event_categories`
-- **Description:** 管理画面用イベントカテゴリマスタ
-
-#### Columns
-
-| Column       | Type        | Constraints              | Description          |
-|--------------|------------|--------------------------|----------------------|
-| id           | bigserial  | PK                       | カテゴリID           |
-| name         | text       | NOT NULL                 | カテゴリ名           |
-| description  | text       | NULLABLE                 | 説明文               |
-| is_active    | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
-| created_at   | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
-| updated_at   | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
 
 ---
 

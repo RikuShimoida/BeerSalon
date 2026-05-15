@@ -1,1 +1,2 @@
-- [Monorepo DB divergence](project_monorepo_db_divergence.md) — Prisma schema missing admin tables + column drift from database.md
+- [Monorepo DB divergence](project_monorepo_db_divergence.md) — Prisma schema missing admin tables + column drift from database.md; updated with 2026-05-15 changes
+- [Admin panel redesign May 2026](project_admin_redesign_2026_05.md) — Abolished bar_owners/master tables, 1-shop-1-account model, new wireframe-admin.md
