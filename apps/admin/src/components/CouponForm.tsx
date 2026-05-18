@@ -77,7 +77,10 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<div>
-				<label htmlFor="title" className="block text-sm font-medium text-gray-700">
+				<label
+					htmlFor="title"
+					className="block text-sm font-medium text-gray-700"
+				>
 					タイトル <span className="text-red-500">*</span>
 				</label>
 				<input
@@ -92,7 +95,10 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 			</div>
 			<div className="grid grid-cols-2 gap-4">
 				<div>
-					<label htmlFor="discount_type" className="block text-sm font-medium text-gray-700">
+					<label
+						htmlFor="discount_type"
+						className="block text-sm font-medium text-gray-700"
+					>
 						割引タイプ <span className="text-red-500">*</span>
 					</label>
 					<select
@@ -107,7 +113,10 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					</select>
 				</div>
 				<div>
-					<label htmlFor="discount_value" className="block text-sm font-medium text-gray-700">
+					<label
+						htmlFor="discount_value"
+						className="block text-sm font-medium text-gray-700"
+					>
 						割引値 <span className="text-red-500">*</span>
 					</label>
 					<input
@@ -122,7 +131,10 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 				</div>
 			</div>
 			<div>
-				<label htmlFor="code" className="block text-sm font-medium text-gray-700">
+				<label
+					htmlFor="code"
+					className="block text-sm font-medium text-gray-700"
+				>
 					クーポンコード
 				</label>
 				<input
@@ -135,7 +147,10 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 				/>
 			</div>
 			<div>
-				<label htmlFor="usage_limit" className="block text-sm font-medium text-gray-700">
+				<label
+					htmlFor="usage_limit"
+					className="block text-sm font-medium text-gray-700"
+				>
 					利用回数上限
 				</label>
 				<input
@@ -149,7 +164,10 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 			</div>
 			<div className="grid grid-cols-2 gap-4">
 				<div>
-					<label htmlFor="valid_from" className="block text-sm font-medium text-gray-700">
+					<label
+						htmlFor="valid_from"
+						className="block text-sm font-medium text-gray-700"
+					>
 						有効期間開始
 					</label>
 					<input
@@ -162,7 +180,10 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					/>
 				</div>
 				<div>
-					<label htmlFor="valid_until" className="block text-sm font-medium text-gray-700">
+					<label
+						htmlFor="valid_until"
+						className="block text-sm font-medium text-gray-700"
+					>
 						有効期間終了
 					</label>
 					<input
@@ -176,7 +197,12 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 				</div>
 			</div>
 			<div>
-				<label htmlFor="description" className="block text-sm font-medium text-gray-700">説明</label>
+				<label
+					htmlFor="description"
+					className="block text-sm font-medium text-gray-700"
+				>
+					説明
+				</label>
 				<textarea
 					id="description"
 					name="description"
@@ -195,7 +221,9 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					onChange={handleChange}
 					className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 				/>
-				<label htmlFor="is_active" className="ml-2 text-sm text-gray-900">有効</label>
+				<label htmlFor="is_active" className="ml-2 text-sm text-gray-900">
+					有効
+				</label>
 			</div>
 			<div className="flex justify-end gap-3">
 				<button

@@ -1,8 +1,7 @@
 interface Coupon {
 	id: string;
 	title: string;
-	description: string;
-	conditions: string | null;
+	description: string | null;
 	validFrom: Date | null;
 	validUntil: Date | null;
 }
@@ -30,15 +29,8 @@ export function CouponsTab({ coupons }: CouponsTabProps) {
 					<h3 className="font-bold text-lg text-gray-900 mb-2">
 						{coupon.title}
 					</h3>
-					<p className="text-gray-700 mb-3">{coupon.description}</p>
-
-					{coupon.conditions && (
-						<div className="mb-3">
-							<h4 className="text-sm font-semibold text-gray-700 mb-1">
-								取得条件
-							</h4>
-							<p className="text-sm text-gray-600">{coupon.conditions}</p>
-						</div>
+					{coupon.description && (
+						<p className="text-gray-700 mb-3">{coupon.description}</p>
 					)}
 
 					{(coupon.validFrom || coupon.validUntil) && (

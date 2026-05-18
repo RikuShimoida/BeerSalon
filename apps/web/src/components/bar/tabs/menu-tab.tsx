@@ -1,9 +1,15 @@
 import Image from "next/image";
 
+interface BeerMenuSize {
+	id: string;
+	sizeName: string;
+	price: number | null;
+	sortOrder: number;
+}
+
 interface BeerMenu {
 	id: string;
-	price: number | null;
-	size: string | null;
+	sizes: BeerMenuSize[];
 	description: string | null;
 	imageUrl: string | null;
 	beer: {
@@ -76,15 +82,19 @@ export function MenuTab({ beerMenus, foodMenus }: MenuTabProps) {
 										産地: {menu.beer.origin}
 									</p>
 								)}
-								{menu.size && (
-									<p className="text-sm text-gray-600 mb-1">
-										サイズ: {menu.size}
-									</p>
-								)}
-								{menu.price !== null && (
-									<p className="text-sm font-semibold text-gray-900 mb-2">
-										¥{menu.price.toLocaleString()}
-									</p>
+								{menu.sizes.length > 0 && (
+									<div className="mb-2">
+										{menu.sizes.map((size) => (
+											<p key={size.id} className="text-sm text-gray-600">
+												{size.sizeName}
+												{size.price !== null && (
+													<span className="font-semibold text-gray-900 ml-2">
+														¥{size.price.toLocaleString()}
+													</span>
+												)}
+											</p>
+										))}
+									</div>
 								)}
 								{(menu.description || menu.beer.description) && (
 									<p className="text-sm text-gray-700">

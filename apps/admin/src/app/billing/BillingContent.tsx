@@ -43,7 +43,9 @@ export default function BillingContent({ barId }: BillingContentProps) {
 		try {
 			const [plansRes, subRes, invoicesRes] = await Promise.all([
 				fetch("/api/subscriptions/plans"),
-				barId ? fetch(`/api/bars/${barId}/subscription`) : Promise.resolve(null),
+				barId
+					? fetch(`/api/bars/${barId}/subscription`)
+					: Promise.resolve(null),
 				barId ? fetch(`/api/bars/${barId}/invoices`) : Promise.resolve(null),
 			]);
 
@@ -161,7 +163,8 @@ export default function BillingContent({ barId }: BillingContentProps) {
 							<span
 								className={`px-2 py-1 text-xs rounded ${subscription.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
 							>
-								{subscriptionStatusLabels[subscription.status] || subscription.status}
+								{subscriptionStatusLabels[subscription.status] ||
+									subscription.status}
 							</span>
 						</div>
 						<div className="flex items-center">

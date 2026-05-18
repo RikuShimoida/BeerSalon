@@ -119,7 +119,9 @@ export default function MasterDataForm({
 					onChange={handleChange}
 					className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 				/>
-				<label htmlFor="is_active" className="ml-2 text-sm">有効</label>
+				<label htmlFor="is_active" className="ml-2 text-sm">
+					有効
+				</label>
 			</div>
 			<div className="flex justify-end gap-3">
 				<button

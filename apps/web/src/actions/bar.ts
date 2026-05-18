@@ -139,6 +139,11 @@ export async function getBarDetail(barId: string) {
 							region: true,
 						},
 					},
+					sizes: {
+						orderBy: {
+							sortOrder: "asc",
+						},
+					},
 				},
 				orderBy: {
 					id: "asc",
@@ -189,7 +194,8 @@ export async function getBarDetail(barId: string) {
 			},
 			articles: {
 				where: {
-					isPublished: true,
+					status: "published",
+					deletedAt: null,
 				},
 				orderBy: {
 					publishedAt: "desc",
@@ -235,6 +241,12 @@ export async function getBarDetail(barId: string) {
 			id: menu.id.toString(),
 			barId: menu.barId.toString(),
 			beerId: menu.beerId.toString(),
+			sizes: menu.sizes.map((size) => ({
+				id: size.id.toString(),
+				sizeName: size.sizeName,
+				price: size.price,
+				sortOrder: size.sortOrder,
+			})),
 			beer: {
 				...menu.beer,
 				id: menu.beer.id.toString(),
