@@ -11,7 +11,11 @@ export default async function NewBarPage() {
 	}
 
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
 			<div className="p-6">
 				<div className="mb-6">
 					<h1 className="text-2xl font-bold text-gray-900">バー新規登録</h1>

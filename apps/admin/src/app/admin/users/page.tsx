@@ -5,18 +5,12 @@ import { useEffect, useState } from "react";
 
 interface User {
 	id: string;
-	email: string;
+	bar_manage_id: string;
 	name: string;
 	role: "bar_owner" | "admin";
+	bar_id: number | null;
 	is_active: boolean;
 	created_at: string;
-	bar_owners: Array<{
-		bar_id: number;
-		bars: {
-			id: number;
-			name: string;
-		};
-	}>;
 }
 
 export default function AdminUsersPage() {
@@ -96,7 +90,7 @@ export default function AdminUsersPage() {
 								氏名
 							</th>
 							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
-								メール
+								店舗ID
 							</th>
 							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
 								権限
@@ -121,7 +115,9 @@ export default function AdminUsersPage() {
 								<td className="px-6 py-4 whitespace-nowrap font-medium">
 									{user.name}
 								</td>
-								<td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
+								<td className="px-6 py-4 whitespace-nowrap">
+									{user.bar_manage_id}
+								</td>
 								<td className="px-6 py-4 whitespace-nowrap">
 									<span
 										className={`px-2 py-1 text-xs rounded ${user.role === "admin" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"}`}
@@ -130,9 +126,7 @@ export default function AdminUsersPage() {
 									</span>
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap">
-									{user.bar_owners.length > 0
-										? user.bar_owners[0].bars.name
-										: "-"}
+									{user.bar_id ?? "-"}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap">
 									<span

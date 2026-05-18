@@ -23,10 +23,8 @@ export async function GET() {
 			monthlyViews: 0,
 		};
 
-		// バーオーナーの場合は自分のバーの統計のみ
-		if (user.role === "bar_owner") {
-			// TODO: bar_ownersテーブルから自分のバーIDを取得
-			// TODO: 各テーブルから統計情報を集計
+		if (user.role === "bar_owner" && user.barId) {
+			// TODO: user.barId を使って各テーブルから統計情報を集計
 		}
 
 		// 管理者の場合は全体の統計

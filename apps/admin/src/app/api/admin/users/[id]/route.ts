@@ -17,19 +17,15 @@ export async function GET(
 		.from("admin_users")
 		.select(`
       id,
-      email,
+      bar_manage_id,
       name,
       role,
+      bar_id,
+      contact_email,
+      contact_phone,
       is_active,
       created_at,
-      updated_at,
-      bar_owners (
-        bar_id,
-        bars (
-          id,
-          name
-        )
-      )
+      updated_at
     `)
 		.eq("id", id)
 		.single();
@@ -52,10 +48,10 @@ export async function PUT(
 
 	const { id } = await params;
 	const body = await request.json();
-	const { email, password, name, role, is_active } = body;
+	const { barManageId, password, name, role, is_active } = body;
 
 	const updateData: Record<string, string | boolean> = {
-		email,
+		bar_manage_id: barManageId,
 		name,
 		role,
 		is_active,
@@ -69,7 +65,9 @@ export async function PUT(
 		.from("admin_users")
 		.update(updateData)
 		.eq("id", id)
-		.select("id, email, name, role, is_active, created_at, updated_at")
+		.select(
+			"id, bar_manage_id, name, role, bar_id, is_active, created_at, updated_at",
+		)
 		.single();
 
 	if (error) {

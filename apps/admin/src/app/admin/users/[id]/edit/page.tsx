@@ -12,7 +12,7 @@ export default function EditUserPage({
 	const [userId, setUserId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [formData, setFormData] = useState({
-		email: "",
+		barManageId: "",
 		password: "",
 		name: "",
 		role: "bar_owner" as "bar_owner" | "admin",
@@ -31,7 +31,7 @@ export default function EditUserPage({
 		const data = await res.json();
 		const user = data.user;
 		setFormData({
-			email: user.email,
+			barManageId: user.bar_manage_id,
 			password: "",
 			name: user.name,
 			role: user.role,
@@ -89,17 +89,17 @@ export default function EditUserPage({
 					</div>
 					<div>
 						<label
-							htmlFor="email"
+							htmlFor="barManageId"
 							className="block text-sm font-medium text-gray-700"
 						>
-							メールアドレス <span className="text-red-500">*</span>
+							店舗ID <span className="text-red-500">*</span>
 						</label>
 						<input
-							type="email"
-							id="email"
-							name="email"
+							type="text"
+							id="barManageId"
+							name="barManageId"
 							required
-							value={formData.email}
+							value={formData.barManageId}
 							onChange={handleChange}
 							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 						/>

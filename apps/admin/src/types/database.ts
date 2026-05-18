@@ -1,9 +1,12 @@
 export interface AdminUser {
 	id: string;
-	email: string;
+	bar_manage_id: string;
 	password_hash: string;
 	name: string;
 	role: "bar_owner" | "admin";
+	bar_id: number | null;
+	contact_email: string | null;
+	contact_phone: string | null;
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;
@@ -12,9 +15,10 @@ export interface AdminUser {
 export interface Session {
 	user: {
 		id: string;
-		email: string;
+		barManageId: string;
 		name: string;
 		role: "bar_owner" | "admin";
+		barId: number | null;
 	};
 	expires: string;
 }
@@ -51,13 +55,6 @@ export interface Bar {
 	updated_at: string;
 	payment_method_ids?: string[];
 	opening_hours?: BarOpeningHour[];
-}
-
-export interface BarOwner {
-	id: string;
-	bar_id: number;
-	admin_user_id: string;
-	created_at: string;
 }
 
 export interface BeerCategory {

@@ -26,9 +26,10 @@ export async function verifyPassword(
 export async function createToken(user: AdminUser): Promise<string> {
 	const token = await new SignJWT({
 		id: user.id,
-		email: user.email,
+		barManageId: user.bar_manage_id,
 		name: user.name,
 		role: user.role,
+		barId: user.bar_id,
 	})
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
@@ -42,7 +43,7 @@ export async function verifyToken(token: string) {
 	try {
 		const { payload } = await jwtVerify(token, JWT_SECRET);
 		return payload;
-	} catch (error) {
+	} catch (_error) {
 		return null;
 	}
 }
@@ -68,7 +69,15 @@ export async function removeAuthCookie() {
 	cookieStore.delete(TOKEN_NAME);
 }
 
-export async function getCurrentUser() {
+export type CurrentUser = {
+	id: string;
+	barManageId: string;
+	name: string;
+	role: "bar_owner" | "admin";
+	barId: number | null;
+};
+
+export async function getCurrentUser(): Promise<CurrentUser | null> {
 	const token = await getAuthCookie();
 	if (!token) return null;
 
@@ -77,8 +86,17 @@ export async function getCurrentUser() {
 
 	return {
 		id: payload.id as string,
-		email: payload.email as string,
+		barManageId: payload.barManageId as string,
 		name: payload.name as string,
 		role: payload.role as "bar_owner" | "admin",
+		barId: (payload.barId as number | null) ?? null,
 	};
+}
+
+export function canAccessBar(
+	user: CurrentUser,
+	barId: string | number,
+): boolean {
+	if (user.role === "admin") return true;
+	return user.barId === Number(barId);
 }

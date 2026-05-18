@@ -11,7 +11,11 @@ export default async function Home() {
 	}
 
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
 			<DashboardContent />
 		</DashboardLayout>
 	);

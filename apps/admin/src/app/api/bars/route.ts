@@ -28,15 +28,12 @@ export async function GET() {
 			.eq("is_active", true)
 			.order("created_at", { ascending: false });
 
-		// バーオーナーの場合は自分のバーのみ
 		if (user.role === "bar_owner") {
-			const { data: barOwners } = await supabaseAdmin
-				.from("bar_owners")
-				.select("bar_id")
-				.eq("admin_user_id", user.id);
-
-			const barIds = barOwners?.map((bo) => bo.bar_id) || [];
-			query = query.in("id", barIds.length > 0 ? barIds : [-1]); // barIdsが空の場合は結果なし
+			if (user.barId) {
+				query = query.eq("id", user.barId);
+			} else {
+				return NextResponse.json([]);
+			}
 		}
 
 		const { data: bars, error } = await query;
@@ -165,17 +162,6 @@ export async function POST(request: NextRequest) {
 				{ error: "バーの登録に失敗しました" },
 				{ status: 500 },
 			);
-		}
-
-		// バーオーナーとの紐付けを作成
-		const { error: ownerError } = await supabaseAdmin
-			.from("bar_owners")
-			.insert({
-				bar_id: bar.id,
-				admin_user_id: user.id,
-			});
-
-		if (ownerError) {
 		}
 
 		// 支払い方法を登録

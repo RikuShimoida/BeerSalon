@@ -17,7 +17,11 @@ export default async function EditBarPage({
 	const { barId } = await params;
 
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
 			<BarEditForm barId={barId} />
 		</DashboardLayout>
 	);

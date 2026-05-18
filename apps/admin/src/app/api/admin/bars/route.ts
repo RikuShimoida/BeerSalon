@@ -10,17 +10,7 @@ export async function GET() {
 
 	const { data: bars, error } = await supabaseAdmin
 		.from("bars")
-		.select(`
-      *,
-      bar_owners (
-        admin_user_id,
-        admin_users (
-          id,
-          email,
-          name
-        )
-      )
-    `)
+		.select("*")
 		.order("created_at", { ascending: false });
 
 	if (error) {

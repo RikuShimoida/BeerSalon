@@ -1,49 +1,41 @@
+import { logRequest } from "@beersalon/shared";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
-import { logRequest } from "@beersalon/shared";
 
 const publicPaths = ["/login"];
+
+const MUTATION_METHODS = ["POST", "PUT", "DELETE", "PATCH"];
 
 export async function middleware(request: NextRequest) {
 	logRequest(request);
 
 	const { pathname } = request.nextUrl;
 
-	// 公開パスはスキップ
 	if (publicPaths.some((path) => pathname.startsWith(path))) {
 		return NextResponse.next();
 	}
 
-	// APIルートは別途チェック
 	if (pathname.startsWith("/api/")) {
-		// /api/auth/* は認証不要
 		if (pathname.startsWith("/api/auth/")) {
 			return NextResponse.next();
 		}
-		// /api/payment-methods は認証不要（マスタデータ）
 		if (pathname === "/api/payment-methods") {
 			return NextResponse.next();
 		}
-		// /api/webhooks/* は認証不要（外部サービスからのコールバック）
 		if (pathname.startsWith("/api/webhooks/")) {
 			return NextResponse.next();
 		}
-		// その他のAPIは認証チェック
-		// （将来的に実装）
 	}
 
-	// トークン取得
 	const token = request.cookies.get("admin-token")?.value;
 
-	// トークンがない場合はログインページへリダイレクト
 	if (!token) {
 		const url = request.nextUrl.clone();
 		url.pathname = "/login";
 		return NextResponse.redirect(url);
 	}
 
-	// トークン検証
 	const payload = await verifyToken(token);
 	if (!payload) {
 		const url = request.nextUrl.clone();
@@ -51,11 +43,33 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.redirect(url);
 	}
 
-	// 管理者専用ページのチェック
-	if (pathname.startsWith("/admin/")) {
-		if (payload.role !== "admin") {
+	const role = payload.role as "bar_owner" | "admin";
+	const userBarId = payload.barId as number | null;
+
+	if (role === "bar_owner") {
+		const barPathMatch = pathname.match(/^\/bars\/(\d+)/);
+		const apiBarPathMatch = pathname.match(/^\/api\/bars\/(\d+)/);
+		const pathBarId = barPathMatch?.[1] || apiBarPathMatch?.[1];
+
+		if (pathname === "/bars" || pathname === "/bars/new") {
+			const url = request.nextUrl.clone();
+			url.pathname = userBarId ? `/bars/${userBarId}` : "/login";
+			return NextResponse.redirect(url);
+		}
+
+		if (pathBarId && userBarId && Number(pathBarId) !== userBarId) {
+			const url = request.nextUrl.clone();
+			url.pathname = `/bars/${userBarId}`;
+			return NextResponse.redirect(url);
+		}
+	}
+
+	if (role === "admin" && MUTATION_METHODS.includes(request.method)) {
+		const barSubResourcePattern =
+			/^\/api\/bars\/\d+\/(menus|articles|coupons|events)/;
+		if (barSubResourcePattern.test(pathname)) {
 			return NextResponse.json(
-				{ error: "アクセス権限がありません" },
+				{ error: "管理者は店舗配下データの変更権限がありません" },
 				{ status: 403 },
 			);
 		}
@@ -65,13 +79,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: [
-		/*
-		 * Match all request paths except for the ones starting with:
-		 * - _next/static (static files)
-		 * - _next/image (image optimization files)
-		 * - favicon.ico (favicon file)
-		 */
-		"/((?!_next/static|_next/image|favicon.ico).*)",
-	],
+	matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

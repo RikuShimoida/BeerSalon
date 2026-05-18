@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // GET /api/bars/:barId/menus/beers - ビールメニュー一覧取得
@@ -16,18 +16,8 @@ export async function GET(
 
 		const { barId } = await context.params;
 
-		// 権限チェック: バーオーナーの場合は自分のバーのみ
-		if (user.role === "bar_owner") {
-			const { data: barOwner } = await supabaseAdmin
-				.from("bar_owners")
-				.select("bar_id")
-				.eq("admin_user_id", user.id)
-				.eq("bar_id", barId)
-				.single();
-
-			if (!barOwner) {
-				return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-			}
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 		}
 
 		// ビールメニュー一覧取得（ビール情報、カテゴリ、ブルワリーをJOIN）
@@ -75,18 +65,8 @@ export async function POST(
 
 		const { barId } = await context.params;
 
-		// 権限チェック: バーオーナーの場合は自分のバーのみ
-		if (user.role === "bar_owner") {
-			const { data: barOwner } = await supabaseAdmin
-				.from("bar_owners")
-				.select("bar_id")
-				.eq("admin_user_id", user.id)
-				.eq("bar_id", barId)
-				.single();
-
-			if (!barOwner) {
-				return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-			}
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 		}
 
 		const body = await request.json();

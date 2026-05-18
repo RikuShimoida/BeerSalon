@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // PUT /api/bars/:barId/media/reorder - メディア順序変更
@@ -19,20 +19,11 @@ export async function PUT(
 
 		const { barId } = await params;
 
-		if (user.role === "bar_owner") {
-			const { data: barOwner } = await supabaseAdmin
-				.from("bar_owners")
-				.select("*")
-				.eq("bar_id", barId)
-				.eq("admin_user_id", user.id)
-				.single();
-
-			if (!barOwner) {
-				return NextResponse.json(
-					{ error: "アクセス権限がありません" },
-					{ status: 403 },
-				);
-			}
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json(
+				{ error: "アクセス権限がありません" },
+				{ status: 403 },
+			);
 		}
 
 		const body = await request.json();

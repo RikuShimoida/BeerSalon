@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { type ReactNode, useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
@@ -6,21 +8,31 @@ interface DashboardLayoutProps {
 	children: ReactNode;
 	userName: string;
 	userRole: "bar_owner" | "admin";
+	barId: number | null;
 }
 
 export default function DashboardLayout({
 	children,
 	userName,
 	userRole,
+	barId,
 }: DashboardLayoutProps) {
+	const [sidebarOpen, setSidebarOpen] = useState(false);
+
 	return (
-		<div className="flex h-screen bg-gray-100">
-			<Sidebar userRole={userRole} />
-			<div className="flex-1 flex flex-col overflow-hidden">
-				<Header userName={userName} userRole={userRole} />
-				<main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-					{children}
-				</main>
+		<div className="flex h-screen bg-gray-50">
+			<Sidebar
+				userRole={userRole}
+				barId={barId}
+				isOpen={sidebarOpen}
+				onClose={() => setSidebarOpen(false)}
+			/>
+			<div className="flex-1 flex flex-col min-w-0">
+				<Header
+					userName={userName}
+					onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+				/>
+				<main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
 			</div>
 		</div>
 	);

@@ -10,7 +10,11 @@ export default async function CouponsPage() {
 	}
 
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
 			<div className="p-6">
 				<h1 className="text-2xl font-bold text-gray-900 mb-4">クーポン管理</h1>
 				<p className="text-gray-600">クーポン管理機能は実装予定です</p>

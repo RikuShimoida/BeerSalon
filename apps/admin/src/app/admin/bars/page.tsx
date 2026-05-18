@@ -10,14 +10,6 @@ interface Bar {
 	city: string | null;
 	is_active: boolean;
 	created_at: string;
-	bar_owners: Array<{
-		admin_user_id: string;
-		admin_users: {
-			id: string;
-			email: string;
-			name: string;
-		};
-	}>;
 }
 
 export default function AllBarsPage() {
@@ -84,9 +76,6 @@ export default function AllBarsPage() {
 								所在地
 							</th>
 							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
-								オーナー
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
 								ステータス
 							</th>
 							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
@@ -106,11 +95,6 @@ export default function AllBarsPage() {
 								<td className="px-6 py-4 whitespace-nowrap">
 									{bar.prefecture && bar.city
 										? `${bar.prefecture} ${bar.city}`
-										: "-"}
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap">
-									{bar.bar_owners.length > 0
-										? bar.bar_owners[0].admin_users.name
 										: "-"}
 								</td>
 								<td className="px-6 py-4 whitespace-nowrap">

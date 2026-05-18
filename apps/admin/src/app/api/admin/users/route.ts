@@ -13,19 +13,15 @@ export async function GET() {
 		.from("admin_users")
 		.select(`
       id,
-      email,
+      bar_manage_id,
       name,
       role,
+      bar_id,
+      contact_email,
+      contact_phone,
       is_active,
       created_at,
-      updated_at,
-      bar_owners (
-        bar_id,
-        bars (
-          id,
-          name
-        )
-      )
+      updated_at
     `)
 		.order("created_at", { ascending: false });
 
@@ -43,20 +39,34 @@ export async function POST(request: NextRequest) {
 	}
 
 	const body = await request.json();
-	const { email, password, name, role, is_active } = body;
+	const {
+		barManageId,
+		password,
+		name,
+		role,
+		is_active,
+		bar_id,
+		contact_email,
+		contact_phone,
+	} = body;
 
 	const passwordHash = await bcrypt.hash(password, 10);
 
 	const { data: newUser, error } = await supabaseAdmin
 		.from("admin_users")
 		.insert({
-			email,
+			bar_manage_id: barManageId,
 			password_hash: passwordHash,
 			name,
 			role,
 			is_active,
+			bar_id,
+			contact_email,
+			contact_phone,
 		})
-		.select("id, email, name, role, is_active, created_at, updated_at")
+		.select(
+			"id, bar_manage_id, name, role, bar_id, is_active, created_at, updated_at",
+		)
 		.single();
 
 	if (error) {
