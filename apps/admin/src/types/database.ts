@@ -108,26 +108,35 @@ export interface Beer {
 	updated_at: string;
 }
 
+export interface BarBeerMenuSize {
+	id: number;
+	bar_beer_menu_id: number;
+	size_name: string;
+	price: number | null;
+	sort_order: number;
+	created_at: string;
+	updated_at: string;
+}
+
 export interface BarBeerMenu {
 	id: number;
 	bar_id: number;
 	beer_id: number;
-	price: number | null;
-	size: string | null;
 	description: string | null;
 	image_url: string | null;
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;
+	sizes?: BarBeerMenuSize[];
 }
 
-// ビールメニュー詳細表示用（JOIN結果）
 export interface BarBeerMenuDetail extends BarBeerMenu {
 	beer: Beer & {
 		category: BeerCategory;
 		brewery: Brewery | null;
 		region: Region | null;
 	};
+	sizes: BarBeerMenuSize[];
 }
 
 export interface BarFoodMenu {

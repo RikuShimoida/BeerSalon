@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
-import BeerMenuEditForm from "./BeerMenuEditForm";
+import MenuNewForm from "./MenuNewForm";
 
-export default async function EditBeerMenuPage({
+export default async function NewMenuPage({
 	params,
 }: {
-	params: Promise<{ barId: string; menuId: string }>;
+	params: Promise<{ barId: string }>;
 }) {
 	const user = await getCurrentUser();
 
@@ -18,7 +18,7 @@ export default async function EditBeerMenuPage({
 		redirect("/bars");
 	}
 
-	const { barId, menuId } = await params;
+	const { barId } = await params;
 
 	if (!canAccessBar(user, barId)) {
 		redirect("/bars");
@@ -30,7 +30,7 @@ export default async function EditBeerMenuPage({
 			userRole={user.role}
 			barId={user.barId}
 		>
-			<BeerMenuEditForm barId={barId} menuId={menuId} />
+			<MenuNewForm barId={barId} />
 		</DashboardLayout>
 	);
 }

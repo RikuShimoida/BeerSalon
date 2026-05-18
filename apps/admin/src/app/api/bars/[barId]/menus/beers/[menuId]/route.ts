@@ -2,9 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
-// GET /api/bars/:barId/menus/beers/:menuId - ビールメニュー詳細取得
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	context: { params: Promise<{ barId: string; menuId: string }> },
 ) {
 	try {
@@ -20,18 +19,18 @@ export async function GET(
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 		}
 
-		// ビールメニュー詳細取得
 		const { data: menu, error } = await supabaseAdmin
 			.from("bar_beer_menus")
 			.select(`
-        *,
-        beer:beers (
-          *,
-          category:beer_categories (*),
-          brewery:breweries (*),
-          region:regions (*)
-        )
-      `)
+				*,
+				beer:beers (
+					*,
+					category:beer_categories (*),
+					brewery:breweries (*),
+					region:regions (*)
+				),
+				sizes:bar_beer_menu_sizes (*)
+			`)
 			.eq("id", menuId)
 			.eq("bar_id", barId)
 			.single();
@@ -44,7 +43,7 @@ export async function GET(
 		}
 
 		return NextResponse.json(menu);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Failed to fetch beer menu" },
 			{ status: 500 },
@@ -52,7 +51,6 @@ export async function GET(
 	}
 }
 
-// PUT /api/bars/:barId/menus/beers/:menuId - ビールメニュー更新
 export async function PUT(
 	request: NextRequest,
 	context: { params: Promise<{ barId: string; menuId: string }> },
@@ -64,6 +62,10 @@ export async function PUT(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
+		if (user.role !== "bar_owner") {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
 		const { barId, menuId } = await context.params;
 
 		if (!canAccessBar(user, barId)) {
@@ -71,14 +73,11 @@ export async function PUT(
 		}
 
 		const body = await request.json();
-		const { price, size, description, image_url, is_active } = body;
+		const { description, image_url, is_active } = body;
 
-		// ビールメニュー更新
 		const { data: menu, error } = await supabaseAdmin
 			.from("bar_beer_menus")
 			.update({
-				price,
-				size,
 				description,
 				image_url,
 				is_active,
@@ -97,7 +96,7 @@ export async function PUT(
 		}
 
 		return NextResponse.json(menu);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Failed to update beer menu" },
 			{ status: 500 },
@@ -105,9 +104,8 @@ export async function PUT(
 	}
 }
 
-// DELETE /api/bars/:barId/menus/beers/:menuId - ビールメニュー削除
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	context: { params: Promise<{ barId: string; menuId: string }> },
 ) {
 	try {
@@ -117,13 +115,16 @@ export async function DELETE(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
+		if (user.role !== "bar_owner") {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
 		const { barId, menuId } = await context.params;
 
 		if (!canAccessBar(user, barId)) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 		}
 
-		// ビールメニュー削除（物理削除）
 		const { error } = await supabaseAdmin
 			.from("bar_beer_menus")
 			.delete()
@@ -138,7 +139,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Failed to delete beer menu" },
 			{ status: 500 },

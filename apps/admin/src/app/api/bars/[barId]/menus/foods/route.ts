@@ -1,10 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
-import type { BarFoodMenu } from "@/types/database";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -15,11 +14,14 @@ export async function GET(
 
 		const { barId } = await params;
 
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
 		const { data: menus, error } = await supabaseAdmin
 			.from("bar_food_menus")
 			.select("*")
 			.eq("bar_id", barId)
-			.order("category", { ascending: true })
 			.order("name", { ascending: true });
 
 		if (error) {
@@ -30,7 +32,7 @@ export async function GET(
 		}
 
 		return NextResponse.json({ menus });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -48,28 +50,34 @@ export async function POST(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
-		const { barId } = await params;
-		const body = await request.json();
-
-		const { name, price, description, image_url, category, is_active } = body;
-
-		if (!name) {
-			return NextResponse.json({ error: "Name is required" }, { status: 400 });
+		if (user.role !== "bar_owner") {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 		}
 
-		const newMenu: Partial<BarFoodMenu> = {
-			bar_id: parseInt(barId),
-			name,
-			price: price || null,
-			description: description || null,
-			image_url: image_url || null,
-			category: category || null,
-			is_active: is_active !== undefined ? is_active : true,
-		};
+		const { barId } = await params;
+
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
+		const body = await request.json();
+		const { name, description, image_url } = body;
+
+		if (!name) {
+			return NextResponse.json(
+				{ error: "メニュー名を入力してください" },
+				{ status: 400 },
+			);
+		}
 
 		const { data, error } = await supabaseAdmin
 			.from("bar_food_menus")
-			.insert(newMenu)
+			.insert({
+				bar_id: Number(barId),
+				name,
+				description: description || null,
+				image_url: image_url || null,
+			})
 			.select()
 			.single();
 
@@ -81,7 +89,7 @@ export async function POST(
 		}
 
 		return NextResponse.json({ menu: data }, { status: 201 });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

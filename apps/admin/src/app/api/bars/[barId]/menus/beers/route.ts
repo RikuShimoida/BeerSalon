@@ -2,9 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
-// GET /api/bars/:barId/menus/beers - ビールメニュー一覧取得
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	context: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -20,18 +19,18 @@ export async function GET(
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 		}
 
-		// ビールメニュー一覧取得（ビール情報、カテゴリ、ブルワリーをJOIN）
 		const { data: menus, error } = await supabaseAdmin
 			.from("bar_beer_menus")
 			.select(`
-        *,
-        beer:beers (
-          *,
-          category:beer_categories (*),
-          brewery:breweries (*),
-          region:regions (*)
-        )
-      `)
+				*,
+				beer:beers (
+					*,
+					category:beer_categories (*),
+					brewery:breweries (*),
+					region:regions (*)
+				),
+				sizes:bar_beer_menu_sizes (*)
+			`)
 			.eq("bar_id", barId)
 			.order("created_at", { ascending: false });
 
@@ -43,7 +42,7 @@ export async function GET(
 		}
 
 		return NextResponse.json(menus);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Failed to fetch beer menus" },
 			{ status: 500 },
@@ -51,7 +50,6 @@ export async function GET(
 	}
 }
 
-// POST /api/bars/:barId/menus/beers - ビールメニュー追加
 export async function POST(
 	request: NextRequest,
 	context: { params: Promise<{ barId: string }> },
@@ -63,6 +61,10 @@ export async function POST(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
+		if (user.role !== "bar_owner") {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
 		const { barId } = await context.params;
 
 		if (!canAccessBar(user, barId)) {
@@ -70,48 +72,112 @@ export async function POST(
 		}
 
 		const body = await request.json();
-		const { beer_id, price, size, description, image_url, is_active } = body;
+		const { name, region_id, brewery_name, sizes, description, image_url } =
+			body;
 
-		// バリデーション
-		if (!beer_id) {
+		if (!name) {
 			return NextResponse.json(
-				{ error: "ビールを選択してください" },
+				{ error: "メニュー名を入力してください" },
 				{ status: 400 },
 			);
 		}
 
-		// ビールメニュー作成
-		const { data: menu, error } = await supabaseAdmin
-			.from("bar_beer_menus")
+		let breweryId: number | null = null;
+		if (brewery_name) {
+			const { data: existingBrewery } = await supabaseAdmin
+				.from("breweries")
+				.select("id")
+				.eq("name", brewery_name)
+				.single();
+
+			if (existingBrewery) {
+				breweryId = existingBrewery.id;
+			} else {
+				const { data: newBrewery, error: breweryError } = await supabaseAdmin
+					.from("breweries")
+					.insert({
+						name: brewery_name,
+						region_id: region_id || null,
+					})
+					.select("id")
+					.single();
+
+				if (breweryError) {
+					return NextResponse.json(
+						{ error: "醸造所の登録に失敗しました" },
+						{ status: 500 },
+					);
+				}
+				breweryId = newBrewery.id;
+			}
+		}
+
+		const { data: beer, error: beerError } = await supabaseAdmin
+			.from("beers")
 			.insert({
-				bar_id: Number(barId),
-				beer_id,
-				price,
-				size,
+				name,
+				beer_category_id: 1,
+				brewery_id: breweryId,
+				region_id: region_id || null,
 				description,
 				image_url,
-				is_active: is_active ?? true,
 			})
-			.select()
+			.select("id")
 			.single();
 
-		if (error) {
-			// 重複エラーのハンドリング
-			if (error.code === "23505") {
-				return NextResponse.json(
-					{ error: "このビールは既にメニューに登録されています" },
-					{ status: 400 },
-				);
-			}
-
+		if (beerError) {
 			return NextResponse.json(
-				{ error: "Failed to create beer menu" },
+				{ error: "ビールの登録に失敗しました" },
 				{ status: 500 },
 			);
 		}
 
-		return NextResponse.json(menu, { status: 201 });
-	} catch (error) {
+		const { data: menu, error: menuError } = await supabaseAdmin
+			.from("bar_beer_menus")
+			.insert({
+				bar_id: Number(barId),
+				beer_id: beer.id,
+				description,
+				image_url,
+			})
+			.select("id")
+			.single();
+
+		if (menuError) {
+			return NextResponse.json(
+				{ error: "ビールメニューの登録に失敗しました" },
+				{ status: 500 },
+			);
+		}
+
+		if (sizes && Array.isArray(sizes) && sizes.length > 0) {
+			const sizeRecords = sizes.map(
+				(s: {
+					size_name: string;
+					price: number | null;
+					sort_order: number;
+				}) => ({
+					bar_beer_menu_id: menu.id,
+					size_name: s.size_name,
+					price: s.price,
+					sort_order: s.sort_order,
+				}),
+			);
+
+			const { error: sizeError } = await supabaseAdmin
+				.from("bar_beer_menu_sizes")
+				.insert(sizeRecords);
+
+			if (sizeError) {
+				return NextResponse.json(
+					{ error: "サイズ/価格の登録に失敗しました" },
+					{ status: 500 },
+				);
+			}
+		}
+
+		return NextResponse.json({ id: menu.id }, { status: 201 });
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Failed to create beer menu" },
 			{ status: 500 },
