@@ -1,16 +1,22 @@
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { getCurrentUser } from "@/lib/auth";
-import BarNewForm from "./BarNewForm";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
+import BarDetail from "./BarDetail";
 
-export default async function NewBarPage() {
+export default async function BarDetailPage({
+	params,
+}: {
+	params: Promise<{ barId: string }>;
+}) {
 	const user = await getCurrentUser();
 
 	if (!user) {
 		redirect("/login");
 	}
 
-	if (user.role !== "admin") {
+	const { barId } = await params;
+
+	if (!canAccessBar(user, barId)) {
 		redirect("/bars");
 	}
 
@@ -20,7 +26,7 @@ export default async function NewBarPage() {
 			userRole={user.role}
 			barId={user.barId}
 		>
-			<BarNewForm />
+			<BarDetail barId={barId} userRole={user.role} />
 		</DashboardLayout>
 	);
 }
