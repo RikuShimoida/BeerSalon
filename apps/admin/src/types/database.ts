@@ -182,6 +182,21 @@ export interface BarCoupon {
 	updated_at: string;
 }
 
+export interface Article {
+	id: number;
+	bar_id: number;
+	title: string;
+	body: string;
+	image_url: string | null;
+	image_url_2: string | null;
+	image_url_3: string | null;
+	status: "draft" | "published" | "scheduled";
+	published_at: string | null;
+	deleted_at: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
 export interface MasterBeerStyle {
 	id: number;
 	name: string;

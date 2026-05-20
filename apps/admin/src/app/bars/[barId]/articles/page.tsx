@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { getCurrentUser } from "@/lib/auth";
-import EventList from "./EventList";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
+import ArticleList from "./ArticleList";
 
-export default async function EventsPage({
+export default async function ArticlesPage({
 	params,
 }: {
 	params: Promise<{ barId: string }>;
@@ -16,13 +16,17 @@ export default async function EventsPage({
 
 	const { barId } = await params;
 
+	if (!canAccessBar(user, barId)) {
+		redirect("/bars");
+	}
+
 	return (
 		<DashboardLayout
 			userName={user.name}
 			userRole={user.role}
 			barId={user.barId}
 		>
-			<EventList barId={barId} userRole={user.role} />
+			<ArticleList barId={barId} userRole={user.role} />
 		</DashboardLayout>
 	);
 }

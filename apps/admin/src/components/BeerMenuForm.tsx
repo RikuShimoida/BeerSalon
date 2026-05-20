@@ -29,10 +29,11 @@ export default function BeerMenuForm({
 	const [categoryFilter, setCategoryFilter] = useState("");
 
 	// フォームデータ
+	const firstSize = menu?.sizes?.[0];
 	const [formData, setFormData] = useState({
 		beer_id: menu?.beer_id || 0,
-		price: menu?.price || "",
-		size: menu?.size || "",
+		price: firstSize?.price ?? "",
+		size: firstSize?.size_name ?? "",
 		description: menu?.description || "",
 		image_url: menu?.image_url || "",
 		is_active: menu?.is_active ?? true,

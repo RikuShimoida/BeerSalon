@@ -8,6 +8,12 @@ INSERT INTO admin_users (bar_manage_id, password_hash, name, role, bar_id, is_ac
 VALUES ('admin', '$2b$10$wzjVvOFTvvCdDshrCpiICu/6LCLmrZWNZ8r10UgiO58LFvzivMgBu', 'システム管理者', 'admin', NULL, true)
 ON CONFLICT (bar_manage_id) DO NOTHING;
 
+-- Bar Owner テストアカウント（ビアバー御殿場）
+-- password: admin1234
+INSERT INTO admin_users (bar_manage_id, password_hash, name, role, bar_id, is_active)
+VALUES ('fuji-beer-bar', '$2b$10$wzjVvOFTvvCdDshrCpiICu/6LCLmrZWNZ8r10UgiO58LFvzivMgBu', 'ビアバー御殿場オーナー', 'bar_owner', 5, true)
+ON CONFLICT (bar_manage_id) DO NOTHING;
+
 -- ============================================================
 -- Countries (主要ビール産地国)
 -- ============================================================

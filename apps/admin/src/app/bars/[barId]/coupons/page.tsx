@@ -22,7 +22,7 @@ export default async function CouponsPage({
 			userRole={user.role}
 			barId={user.barId}
 		>
-			<CouponList barId={barId} />
+			<CouponList barId={barId} userRole={user.role} />
 		</DashboardLayout>
 	);
 }
