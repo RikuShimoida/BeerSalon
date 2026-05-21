@@ -8,7 +8,7 @@ import {
 	useRef,
 	useState,
 } from "react";
-import type { Country, Region } from "@/types/database";
+import type { BeerCategory, Country, Region } from "@/types/database";
 
 interface SizeRow {
 	id: number;
@@ -27,8 +27,10 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 
 	const [countries, setCountries] = useState<Country[]>([]);
 	const [regions, setRegions] = useState<Region[]>([]);
+	const [beerCategories, setBeerCategories] = useState<BeerCategory[]>([]);
 
 	const [name, setName] = useState("");
+	const [beerCategoryId, setBeerCategoryId] = useState("");
 	const [countryId, setCountryId] = useState("");
 	const [regionId, setRegionId] = useState("");
 	const [breweryName, setBreweryName] = useState("");
@@ -39,6 +41,18 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 	const [description, setDescription] = useState("");
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [imagePreview, setImagePreview] = useState("");
+
+	const fetchBeerCategories = useCallback(async () => {
+		try {
+			const res = await fetch("/api/master/beer-categories");
+			if (res.ok) {
+				const data = await res.json();
+				setBeerCategories(data);
+			}
+		} catch (_error) {
+			// noop
+		}
+	}, []);
 
 	const fetchCountries = useCallback(async () => {
 		try {
@@ -71,7 +85,8 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 
 	useEffect(() => {
 		fetchCountries();
-	}, [fetchCountries]);
+		fetchBeerCategories();
+	}, [fetchCountries, fetchBeerCategories]);
 
 	useEffect(() => {
 		if (countryId) {
@@ -118,6 +133,7 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 
 	const resetForm = () => {
 		setName("");
+		setBeerCategoryId("");
 		setCountryId("");
 		setRegionId("");
 		setBreweryName("");
@@ -170,6 +186,7 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					name: name.trim(),
+					beer_category_id: beerCategoryId ? Number(beerCategoryId) : null,
 					country_id: countryId ? Number(countryId) : null,
 					region_id: regionId ? Number(regionId) : null,
 					brewery_name: breweryName.trim() || null,
@@ -229,6 +246,28 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 					placeholder="IPA Revolution"
 					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-sm"
 				/>
+			</div>
+
+			<div>
+				<label
+					htmlFor="beer-category"
+					className="block text-sm font-medium text-gray-700"
+				>
+					ビールカテゴリ
+				</label>
+				<select
+					id="beer-category"
+					value={beerCategoryId}
+					onChange={(e) => setBeerCategoryId(e.target.value)}
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-sm"
+				>
+					<option value="">選択してください</option>
+					{beerCategories.map((cat) => (
+						<option key={cat.id} value={cat.id}>
+							{cat.name}
+						</option>
+					))}
+				</select>
 			</div>
 
 			<div>

@@ -51,8 +51,9 @@ export async function POST(
 		}
 
 		const timestamp = Date.now();
+		const uuid = crypto.randomUUID();
 		const extension = file.name.split(".").pop();
-		const fileName = `bars/${barId}/articles/${timestamp}.${extension}`;
+		const fileName = `bars/${barId}/articles/${timestamp}-${uuid}.${extension}`;
 
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);

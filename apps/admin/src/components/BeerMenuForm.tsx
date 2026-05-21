@@ -1,12 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
-import type { BarBeerMenu, Beer, BeerCategory } from "@/types/database";
+import { type FormEvent, useRef, useState } from "react";
+import type { BarBeerMenuDetail } from "@/types/database";
+
+interface SizeRow {
+	id: number;
+	sizeName: string;
+	price: string;
+}
 
 interface BeerMenuFormProps {
 	barId: string;
-	menu?: BarBeerMenu;
+	menu?: BarBeerMenuDetail;
 	isEdit?: boolean;
 }
 
@@ -19,120 +25,71 @@ export default function BeerMenuForm({
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 
-	// マスタデータ
-	const [beers, setBeers] = useState<Beer[]>([]);
-	const [categories, setCategories] = useState<BeerCategory[]>([]);
-	const [selectedBeer, setSelectedBeer] = useState<Beer | null>(null);
-
-	// 検索・フィルタ
-	const [searchQuery, setSearchQuery] = useState("");
-	const [categoryFilter, setCategoryFilter] = useState("");
-
-	// フォームデータ
-	const firstSize = menu?.sizes?.[0];
-	const [formData, setFormData] = useState({
-		beer_id: menu?.beer_id || 0,
-		price: firstSize?.price ?? "",
-		size: firstSize?.size_name ?? "",
-		description: menu?.description || "",
-		image_url: menu?.image_url || "",
-		is_active: menu?.is_active ?? true,
+	const sizeIdCounter = useRef(menu?.sizes?.length ?? 1);
+	const [sizes, setSizes] = useState<SizeRow[]>(() => {
+		if (menu?.sizes && menu.sizes.length > 0) {
+			return menu.sizes.map((s, i) => ({
+				id: i,
+				sizeName: s.size_name,
+				price: s.price?.toString() ?? "",
+			}));
+		}
+		return [{ id: 0, sizeName: "", price: "" }];
 	});
 
-	useEffect(() => {
-		fetchCategories();
-		fetchBeers();
-	}, []);
+	const [description, setDescription] = useState(menu?.description ?? "");
+	const [imageUrl, setImageUrl] = useState(menu?.image_url ?? "");
+	const [isActive, setIsActive] = useState(menu?.is_active ?? true);
 
-	useEffect(() => {
-		fetchBeers();
-	}, [searchQuery, categoryFilter]);
-
-	useEffect(() => {
-		if (formData.beer_id) {
-			const beer = beers.find((b) => b.id === formData.beer_id);
-			setSelectedBeer(beer || null);
-		}
-	}, [formData.beer_id, beers]);
-
-	const fetchCategories = async () => {
-		try {
-			const response = await fetch("/api/master/beer-categories");
-			if (response.ok) {
-				const data = await response.json();
-				setCategories(data);
-			}
-		} catch (_error) {}
+	const addSizeRow = () => {
+		const newId = sizeIdCounter.current;
+		sizeIdCounter.current += 1;
+		setSizes([...sizes, { id: newId, sizeName: "", price: "" }]);
 	};
 
-	const fetchBeers = async () => {
-		try {
-			const params = new URLSearchParams();
-			if (searchQuery) params.append("search", searchQuery);
-			if (categoryFilter) params.append("category_id", categoryFilter);
-
-			const response = await fetch(`/api/master/beers?${params.toString()}`);
-			if (response.ok) {
-				const data = await response.json();
-				setBeers(data);
-			}
-		} catch (_error) {}
+	const removeSizeRow = (index: number) => {
+		if (sizes.length <= 1) return;
+		setSizes(sizes.filter((_, i) => i !== index));
 	};
 
-	const handleChange = (
-		e: React.ChangeEvent<
-			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-		>,
+	const updateSizeRow = (
+		index: number,
+		field: keyof SizeRow,
+		value: string,
 	) => {
-		const { name, value, type } = e.target;
-
-		if (type === "checkbox") {
-			const checked = (e.target as HTMLInputElement).checked;
-			setFormData({
-				...formData,
-				[name]: checked,
-			});
-		} else if (name === "beer_id") {
-			setFormData({
-				...formData,
-				[name]: Number(value),
-			});
-		} else if (name === "price") {
-			setFormData({
-				...formData,
-				[name]: value === "" ? "" : Number(value),
-			});
-		} else {
-			setFormData({
-				...formData,
-				[name]: value,
-			});
-		}
+		const updated = [...sizes];
+		updated[index] = { ...updated[index], [field]: value };
+		setSizes(updated);
 	};
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		setError("");
 
-		if (!formData.beer_id) {
-			setError("ビールを選択してください");
+		const validSizes = sizes.filter((s) => s.sizeName.trim());
+		if (validSizes.length === 0) {
+			setError("サイズを1つ以上入力してください");
 			return;
 		}
 
 		setLoading(true);
 
 		try {
-			const url = isEdit
-				? `/api/bars/${barId}/menus/beers/${menu?.id}`
-				: `/api/bars/${barId}/menus/beers`;
-			const method = isEdit ? "PUT" : "POST";
+			const url = `/api/bars/${barId}/menus/beers/${menu?.id}`;
 
 			const response = await fetch(url, {
-				method,
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(formData),
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					description: description.trim() || null,
+					image_url: imageUrl.trim() || null,
+					is_active: isActive,
+					sizes: validSizes.map((s, i) => ({
+						size_name: s.sizeName.trim(),
+						price: s.price ? Number(s.price) : null,
+						sort_order: i,
+					})),
+				}),
 			});
 
 			if (!response.ok) {
@@ -141,9 +98,9 @@ export default function BeerMenuForm({
 				return;
 			}
 
-			router.push(`/bars/${barId}/menus/beers`);
+			router.push(`/bars/${barId}/menus`);
 			router.refresh();
-		} catch (err) {
+		} catch (_err) {
 			setError("保存に失敗しました");
 		} finally {
 			setLoading(false);
@@ -158,162 +115,85 @@ export default function BeerMenuForm({
 				</div>
 			)}
 
-			{/* ビール選択 */}
-			<div>
-				<label
-					htmlFor="beer_id"
-					className="block text-sm font-medium text-gray-700 mb-2"
-				>
-					ビール <span className="text-red-500">*</span>
-				</label>
-
-				{!isEdit && (
-					<>
-						{/* 検索・フィルタ */}
-						<div className="bg-gray-50 p-4 rounded-md mb-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<label
-										htmlFor="search"
-										className="block text-xs font-medium text-gray-700 mb-1"
-									>
-										ビール名で検索
-									</label>
-									<input
-										type="text"
-										id="search"
-										value={searchQuery}
-										onChange={(e) => setSearchQuery(e.target.value)}
-										placeholder="ビール名を入力..."
-										className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-									/>
-								</div>
-								<div>
-									<label
-										htmlFor="category_filter"
-										className="block text-xs font-medium text-gray-700 mb-1"
-									>
-										カテゴリでフィルタ
-									</label>
-									<select
-										id="category_filter"
-										value={categoryFilter}
-										onChange={(e) => setCategoryFilter(e.target.value)}
-										className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-									>
-										<option value="">全てのカテゴリ</option>
-										{categories.map((category) => (
-											<option key={category.id} value={category.id}>
-												{category.name}
-											</option>
-										))}
-									</select>
-								</div>
-							</div>
+			{menu?.beer && (
+				<div className="bg-blue-50 p-4 rounded-md">
+					<h4 className="text-sm font-medium text-gray-900 mb-2">
+						ビール情報
+					</h4>
+					<dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+						<div>
+							<dt className="font-medium text-gray-700">ビール名:</dt>
+							<dd className="text-gray-900">{menu.beer.name}</dd>
 						</div>
-
-						<select
-							id="beer_id"
-							name="beer_id"
-							required
-							value={formData.beer_id}
-							onChange={handleChange}
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-						>
-							<option value="">ビールを選択してください</option>
-							{beers.map((beer) => (
-								<option key={beer.id} value={beer.id}>
-									{beer.name} - {beer.brewery_id ? "醸造所あり" : "醸造所不明"}
-								</option>
-							))}
-						</select>
-					</>
-				)}
-
-				{/* 選択されたビールの情報表示 */}
-				{selectedBeer && (
-					<div className="mt-4 bg-blue-50 p-4 rounded-md">
-						<h4 className="text-sm font-medium text-gray-900 mb-2">
-							選択中のビール情報
-						</h4>
-						<dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-							<div>
-								<dt className="font-medium text-gray-700">ビール名:</dt>
-								<dd className="text-gray-900">{selectedBeer.name}</dd>
-							</div>
+						{menu.beer.category && (
 							<div>
 								<dt className="font-medium text-gray-700">カテゴリ:</dt>
-								<dd className="text-gray-900">
-									{
-										categories.find(
-											(c) => c.id === selectedBeer.beer_category_id,
-										)?.name
-									}
-								</dd>
+								<dd className="text-gray-900">{menu.beer.category.name}</dd>
 							</div>
-							{selectedBeer.abv && (
-								<div>
-									<dt className="font-medium text-gray-700">アルコール度数:</dt>
-									<dd className="text-gray-900">{selectedBeer.abv}%</dd>
-								</div>
-							)}
-							{selectedBeer.ibu && (
-								<div>
-									<dt className="font-medium text-gray-700">IBU:</dt>
-									<dd className="text-gray-900">{selectedBeer.ibu}</dd>
-								</div>
-							)}
-							{selectedBeer.description && (
-								<div className="md:col-span-2">
-									<dt className="font-medium text-gray-700">説明:</dt>
-									<dd className="text-gray-900">{selectedBeer.description}</dd>
-								</div>
-							)}
-						</dl>
-					</div>
-				)}
-			</div>
-
-			{/* 価格 */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div>
-					<label
-						htmlFor="price"
-						className="block text-sm font-medium text-gray-700"
-					>
-						価格（円）
-					</label>
-					<input
-						type="number"
-						id="price"
-						name="price"
-						min="0"
-						value={formData.price}
-						onChange={handleChange}
-						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-					/>
+						)}
+						{menu.beer.brewery && (
+							<div>
+								<dt className="font-medium text-gray-700">醸造所:</dt>
+								<dd className="text-gray-900">{menu.beer.brewery.name}</dd>
+							</div>
+						)}
+						{menu.beer.region && (
+							<div>
+								<dt className="font-medium text-gray-700">産地:</dt>
+								<dd className="text-gray-900">{menu.beer.region.name}</dd>
+							</div>
+						)}
+					</dl>
 				</div>
+			)}
 
-				<div>
-					<label
-						htmlFor="size"
-						className="block text-sm font-medium text-gray-700"
-					>
-						サイズ
-					</label>
-					<input
-						type="text"
-						id="size"
-						name="size"
-						placeholder="例: Mサイズ、パイント"
-						value={formData.size}
-						onChange={handleChange}
-						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-					/>
+			<fieldset>
+				<legend className="block text-sm font-medium text-gray-700 mb-2">
+					サイズ / 価格
+				</legend>
+				<div className="space-y-3">
+					{sizes.map((size, index) => (
+						<div key={size.id} className="flex items-center gap-2">
+							<input
+								type="text"
+								value={size.sizeName}
+								onChange={(e) =>
+									updateSizeRow(index, "sizeName", e.target.value)
+								}
+								placeholder="パイント"
+								className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+							/>
+							<input
+								type="number"
+								value={size.price}
+								onChange={(e) => updateSizeRow(index, "price", e.target.value)}
+								placeholder="900"
+								min="0"
+								className="w-28 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+							/>
+							<span className="text-sm text-gray-500">円</span>
+							{sizes.length > 1 && (
+								<button
+									type="button"
+									onClick={() => removeSizeRow(index)}
+									className="p-2 text-red-500 hover:text-red-700 transition-colors text-lg leading-none"
+									aria-label="この行を削除"
+								>
+									&times;
+								</button>
+							)}
+						</div>
+					))}
 				</div>
-			</div>
+				<button
+					type="button"
+					onClick={addSizeRow}
+					className="mt-3 text-sm text-gray-600 hover:text-black transition-colors underline"
+				>
+					サイズ/価格を追加
+				</button>
+			</fieldset>
 
-			{/* 画像URL */}
 			<div>
 				<label
 					htmlFor="image_url"
@@ -324,10 +204,9 @@ export default function BeerMenuForm({
 				<input
 					type="url"
 					id="image_url"
-					name="image_url"
+					value={imageUrl}
+					onChange={(e) => setImageUrl(e.target.value)}
 					placeholder="https://example.com/image.jpg"
-					value={formData.image_url}
-					onChange={handleChange}
 					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 				/>
 				<p className="mt-1 text-sm text-gray-500">
@@ -335,7 +214,6 @@ export default function BeerMenuForm({
 				</p>
 			</div>
 
-			{/* 説明 */}
 			<div>
 				<label
 					htmlFor="description"
@@ -345,23 +223,20 @@ export default function BeerMenuForm({
 				</label>
 				<textarea
 					id="description"
-					name="description"
 					rows={4}
 					placeholder="例: 当店おすすめの一杯です"
-					value={formData.description}
-					onChange={handleChange}
+					value={description}
+					onChange={(e) => setDescription(e.target.value)}
 					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 				/>
 			</div>
 
-			{/* 提供状況 */}
 			<div className="flex items-center">
 				<input
 					type="checkbox"
 					id="is_active"
-					name="is_active"
-					checked={formData.is_active}
-					onChange={handleChange}
+					checked={isActive}
+					onChange={(e) => setIsActive(e.target.checked)}
 					className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 				/>
 				<label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
@@ -369,7 +244,6 @@ export default function BeerMenuForm({
 				</label>
 			</div>
 
-			{/* ボタン */}
 			<div className="flex justify-end space-x-3">
 				<button
 					type="button"

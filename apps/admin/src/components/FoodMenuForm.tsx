@@ -19,7 +19,6 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 		price: "",
 		description: "",
 		image_url: "",
-		category: "",
 		is_active: true,
 	});
 
@@ -46,7 +45,6 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 				price: menu.price?.toString() || "",
 				description: menu.description || "",
 				image_url: menu.image_url || "",
-				category: menu.category || "",
 				is_active: menu.is_active,
 			});
 		} catch (error) {
@@ -76,7 +74,6 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 					price: formData.price ? parseInt(formData.price) : null,
 					description: formData.description || null,
 					image_url: formData.image_url || null,
-					category: formData.category || null,
 					is_active: formData.is_active,
 				}),
 			});
@@ -134,24 +131,6 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 					onChange={handleChange}
 					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
 					placeholder="唐揚げ"
-				/>
-			</div>
-
-			<div>
-				<label
-					htmlFor="category"
-					className="block text-sm font-medium text-gray-700"
-				>
-					カテゴリ
-				</label>
-				<input
-					type="text"
-					id="category"
-					name="category"
-					value={formData.category}
-					onChange={handleChange}
-					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-					placeholder="揚げ物、おつまみ、など"
 				/>
 			</div>
 

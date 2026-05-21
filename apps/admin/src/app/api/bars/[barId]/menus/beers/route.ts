@@ -72,7 +72,7 @@ export async function POST(
 		}
 
 		const body = await request.json();
-		const { name, region_id, brewery_name, sizes, description, image_url } =
+		const { name, beer_category_id, region_id, brewery_name, sizes, description, image_url } =
 			body;
 
 		if (!name) {
@@ -116,7 +116,7 @@ export async function POST(
 			.from("beers")
 			.insert({
 				name,
-				beer_category_id: 1,
+				beer_category_id: beer_category_id || 1,
 				brewery_id: breweryId,
 				region_id: region_id || null,
 				description,

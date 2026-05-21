@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BeerMenuForm from "@/components/BeerMenuForm";
-import type { BarBeerMenu } from "@/types/database";
+import type { BarBeerMenuDetail } from "@/types/database";
 
 export default function BeerMenuEditForm({
 	barId,
@@ -11,7 +11,7 @@ export default function BeerMenuEditForm({
 	barId: string;
 	menuId: string;
 }) {
-	const [menu, setMenu] = useState<BarBeerMenu | null>(null);
+	const [menu, setMenu] = useState<BarBeerMenuDetail | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 

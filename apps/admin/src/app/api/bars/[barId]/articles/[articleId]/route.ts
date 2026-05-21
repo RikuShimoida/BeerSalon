@@ -86,6 +86,7 @@ export async function PUT(
 				image_url: image_url || null,
 				image_url_2: image_url_2 || null,
 				image_url_3: image_url_3 || null,
+				updated_at: new Date().toISOString(),
 			})
 			.eq("id", articleId)
 			.eq("bar_id", barId)

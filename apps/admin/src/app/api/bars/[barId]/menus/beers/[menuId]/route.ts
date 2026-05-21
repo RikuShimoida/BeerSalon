@@ -73,7 +73,7 @@ export async function PUT(
 		}
 
 		const body = await request.json();
-		const { description, image_url, is_active } = body;
+		const { description, image_url, is_active, sizes } = body;
 
 		const { data: menu, error } = await supabaseAdmin
 			.from("bar_beer_menus")
@@ -93,6 +93,42 @@ export async function PUT(
 				{ error: "Failed to update beer menu" },
 				{ status: 500 },
 			);
+		}
+
+		if (sizes && Array.isArray(sizes)) {
+			const { error: deleteError } = await supabaseAdmin
+				.from("bar_beer_menu_sizes")
+				.delete()
+				.eq("bar_beer_menu_id", menuId);
+
+			if (deleteError) {
+				return NextResponse.json(
+					{ error: "サイズ/価格の更新に失敗しました" },
+					{ status: 500 },
+				);
+			}
+
+			if (sizes.length > 0) {
+				const sizeRecords = sizes.map(
+					(s: { size_name: string; price: number | null; sort_order: number }) => ({
+						bar_beer_menu_id: Number(menuId),
+						size_name: s.size_name,
+						price: s.price,
+						sort_order: s.sort_order,
+					}),
+				);
+
+				const { error: insertError } = await supabaseAdmin
+					.from("bar_beer_menu_sizes")
+					.insert(sizeRecords);
+
+				if (insertError) {
+					return NextResponse.json(
+						{ error: "サイズ/価格の更新に失敗しました" },
+						{ status: 500 },
+					);
+				}
+			}
 		}
 
 		return NextResponse.json(menu);

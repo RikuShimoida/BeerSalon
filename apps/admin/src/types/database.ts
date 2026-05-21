@@ -146,7 +146,6 @@ export interface BarFoodMenu {
 	price: number | null;
 	description: string | null;
 	image_url: string | null;
-	category: string | null;
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;
@@ -193,43 +192,6 @@ export interface Article {
 	status: "draft" | "published" | "scheduled";
 	published_at: string | null;
 	deleted_at: string | null;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface MasterBeerStyle {
-	id: number;
-	name: string;
-	description: string | null;
-	is_active: boolean;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface MasterBrewery {
-	id: number;
-	name: string;
-	country: string | null;
-	description: string | null;
-	is_active: boolean;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface MasterFoodCategory {
-	id: number;
-	name: string;
-	description: string | null;
-	is_active: boolean;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface MasterEventCategory {
-	id: number;
-	name: string;
-	description: string | null;
-	is_active: boolean;
 	created_at: string;
 	updated_at: string;
 }
