@@ -117,9 +117,7 @@ export default function BeerMenuForm({
 
 			{menu?.beer && (
 				<div className="bg-blue-50 p-4 rounded-md">
-					<h4 className="text-sm font-medium text-gray-900 mb-2">
-						ビール情報
-					</h4>
+					<h4 className="text-sm font-medium text-gray-900 mb-2">ビール情報</h4>
 					<dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
 						<div>
 							<dt className="font-medium text-gray-700">ビール名:</dt>

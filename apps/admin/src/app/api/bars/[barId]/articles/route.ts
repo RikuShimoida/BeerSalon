@@ -62,7 +62,13 @@ export async function POST(
 		}
 
 		const body = await request.json();
-		const { title, body: articleBody, image_url, image_url_2, image_url_3 } = body;
+		const {
+			title,
+			body: articleBody,
+			image_url,
+			image_url_2,
+			image_url_3,
+		} = body;
 
 		if (!title || !articleBody) {
 			return NextResponse.json(

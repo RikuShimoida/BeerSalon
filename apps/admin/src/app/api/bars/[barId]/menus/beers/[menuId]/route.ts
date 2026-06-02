@@ -110,7 +110,11 @@ export async function PUT(
 
 			if (sizes.length > 0) {
 				const sizeRecords = sizes.map(
-					(s: { size_name: string; price: number | null; sort_order: number }) => ({
+					(s: {
+						size_name: string;
+						price: number | null;
+						sort_order: number;
+					}) => ({
 						bar_beer_menu_id: Number(menuId),
 						size_name: s.size_name,
 						price: s.price,

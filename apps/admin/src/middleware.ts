@@ -13,6 +13,26 @@ export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
 	if (publicPaths.some((path) => pathname.startsWith(path))) {
+		if (pathname.startsWith("/login")) {
+			const token = request.cookies.get("admin-token")?.value;
+			if (token) {
+				const payload = await verifyToken(token);
+				if (payload) {
+					const role = payload.role as "bar_owner" | "admin";
+					const userBarId = payload.barId as number | null;
+					const url = request.nextUrl.clone();
+
+					if (role === "admin") {
+						url.pathname = "/bars";
+						return NextResponse.redirect(url);
+					}
+					if (role === "bar_owner" && userBarId) {
+						url.pathname = `/bars/${userBarId}`;
+						return NextResponse.redirect(url);
+					}
+				}
+			}
+		}
 		return NextResponse.next();
 	}
 

@@ -79,9 +79,7 @@ export default function ArticleList({ barId, userRole }: ArticleListProps) {
 
 			{articles.length === 0 ? (
 				<div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-					<p className="text-sm text-gray-500">
-						記事がまだ投稿されていません
-					</p>
+					<p className="text-sm text-gray-500">記事がまだ投稿されていません</p>
 					{isBarOwner && (
 						<Link
 							href={`/bars/${barId}/articles/new`}
