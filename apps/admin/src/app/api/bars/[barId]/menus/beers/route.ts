@@ -72,8 +72,15 @@ export async function POST(
 		}
 
 		const body = await request.json();
-		const { name, beer_category_id, region_id, brewery_name, sizes, description, image_url } =
-			body;
+		const {
+			name,
+			beer_category_id,
+			region_id,
+			brewery_name,
+			sizes,
+			description,
+			image_url,
+		} = body;
 
 		if (!name) {
 			return NextResponse.json(

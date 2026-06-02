@@ -123,7 +123,9 @@ export default function EventDetail({
 			<div className="border border-gray-200 rounded-lg p-6 space-y-4">
 				<div>
 					<h3 className="text-sm font-medium text-gray-500 mb-1">開始日時</h3>
-					<p className="text-sm text-gray-900">{formatDate(event.start_date)}</p>
+					<p className="text-sm text-gray-900">
+						{formatDate(event.start_date)}
+					</p>
 				</div>
 
 				{event.end_date && (
