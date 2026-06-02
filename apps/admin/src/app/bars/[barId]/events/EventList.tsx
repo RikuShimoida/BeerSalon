@@ -1,66 +1,41 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { BarEvent } from "@/types/database";
 
 interface EventListProps {
 	barId: string;
+	userRole: "bar_owner" | "admin";
 }
 
-export default function EventList({ barId }: EventListProps) {
+export default function EventList({ barId, userRole }: EventListProps) {
 	const [events, setEvents] = useState<BarEvent[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
-	const [searchQuery, setSearchQuery] = useState("");
-	const [statusFilter, setStatusFilter] = useState("");
 
-	useEffect(() => {
-		fetchEvents();
-	}, [barId]);
+	const isBarOwner = userRole === "bar_owner";
 
-	const fetchEvents = async () => {
+	const fetchEvents = useCallback(async () => {
 		try {
-			const response = await fetch(`/api/bars/${barId}/events`);
-
-			if (!response.ok) {
-				if (response.status === 403) {
-					setError("アクセス権限がありません");
-				} else {
-					setError("イベントの取得に失敗しました");
-				}
+			const res = await fetch(`/api/bars/${barId}/events`);
+			if (!res.ok) {
+				setError("イベントの取得に失敗しました");
 				return;
 			}
-
-			const data = await response.json();
+			const data = await res.json();
 			setEvents(data.events || []);
-		} catch (error) {
+		} catch (_error) {
 			setError("イベントの取得に失敗しました");
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [barId]);
 
-	const handleDelete = async (eventId: number) => {
-		if (!confirm("このイベントを削除してもよろしいですか？")) {
-			return;
-		}
-
-		try {
-			const response = await fetch(`/api/bars/${barId}/events/${eventId}`, {
-				method: "DELETE",
-			});
-
-			if (!response.ok) {
-				alert("削除に失敗しました");
-				return;
-			}
-
-			fetchEvents();
-		} catch (error) {
-			alert("削除に失敗しました");
-		}
-	};
+	useEffect(() => {
+		fetchEvents();
+	}, [fetchEvents]);
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
@@ -73,41 +48,14 @@ export default function EventList({ barId }: EventListProps) {
 		});
 	};
 
-	const isUpcoming = (startDate: string) => {
-		return new Date(startDate) > new Date();
-	};
-
-	const isPast = (endDate: string | null) => {
-		if (!endDate) return false;
-		return new Date(endDate) < new Date();
-	};
-
-	const filteredEvents = events.filter((event) => {
-		const matchesSearch =
-			!searchQuery ||
-			event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			event.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-		const matchesStatus =
-			!statusFilter ||
-			(statusFilter === "upcoming" && isUpcoming(event.start_date)) ||
-			(statusFilter === "past" && isPast(event.end_date)) ||
-			(statusFilter === "active" && event.is_active) ||
-			(statusFilter === "inactive" && !event.is_active);
-
-		return matchesSearch && matchesStatus;
-	});
-
 	if (loading) {
 		return (
-			<div className="p-6">
-				<div className="animate-pulse space-y-4">
-					<div className="h-8 bg-gray-200 rounded w-1/4"></div>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						{[1, 2, 3, 4].map((i) => (
-							<div key={i} className="h-48 bg-gray-200 rounded"></div>
-						))}
-					</div>
+			<div className="animate-pulse space-y-6">
+				<div className="h-8 bg-gray-200 rounded w-1/4" />
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{[1, 2, 3].map((i) => (
+						<div key={i} className="h-48 bg-gray-200 rounded" />
+					))}
 				</div>
 			</div>
 		);
@@ -115,153 +63,76 @@ export default function EventList({ barId }: EventListProps) {
 
 	if (error) {
 		return (
-			<div className="p-6">
-				<div className="rounded-md bg-red-50 p-4">
-					<p className="text-sm text-red-800">{error}</p>
-				</div>
+			<div className="rounded-md bg-red-50 p-4">
+				<p className="text-sm text-red-800">{error}</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="p-6">
-			<div className="mb-6">
-				<div className="flex justify-between items-center mb-4">
-					<div>
-						<h1 className="text-2xl font-bold text-gray-900">イベント管理</h1>
-						<p className="mt-1 text-sm text-gray-600">
-							イベントの追加・編集・削除ができます
-						</p>
-					</div>
+		<div className="space-y-8">
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<h1 className="text-2xl font-bold text-gray-900">イベント管理</h1>
+				{isBarOwner && (
 					<Link
 						href={`/bars/${barId}/events/new`}
-						className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+						className="inline-flex items-center px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors"
 					>
-						イベントを追加
+						イベントを追加する
 					</Link>
-				</div>
-
-				<div className="bg-white p-4 rounded-lg shadow mb-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div>
-							<label
-								htmlFor="search"
-								className="block text-sm font-medium text-gray-700 mb-1"
-							>
-								イベント名で検索
-							</label>
-							<input
-								type="text"
-								id="search"
-								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-								placeholder="イベント名を入力..."
-								className="block w-full px-3 py-2 border border-gray-300 rounded-md"
-							/>
-						</div>
-						<div>
-							<label
-								htmlFor="status"
-								className="block text-sm font-medium text-gray-700 mb-1"
-							>
-								ステータスでフィルタ
-							</label>
-							<select
-								id="status"
-								value={statusFilter}
-								onChange={(e) => setStatusFilter(e.target.value)}
-								className="block w-full px-3 py-2 border border-gray-300 rounded-md"
-							>
-								<option value="">すべてのステータス</option>
-								<option value="upcoming">開催予定</option>
-								<option value="past">終了</option>
-								<option value="active">公開中</option>
-								<option value="inactive">非公開</option>
-							</select>
-						</div>
-					</div>
-				</div>
+				)}
 			</div>
 
-			{filteredEvents.length === 0 ? (
-				<div className="text-center py-12 bg-white rounded-lg shadow">
-					<h3 className="mt-2 text-sm font-medium text-gray-900">
-						イベントがありません
-					</h3>
-					<p className="mt-1 text-sm text-gray-500">
-						{searchQuery || statusFilter
-							? "条件に一致するイベントがありません"
-							: "新しいイベントを追加してください"}
+			{events.length === 0 ? (
+				<div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
+					<p className="text-sm text-gray-500">
+						イベントがまだ登録されていません
 					</p>
+					{isBarOwner && (
+						<Link
+							href={`/bars/${barId}/events/new`}
+							className="mt-4 inline-flex items-center px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors"
+						>
+							イベントを追加する
+						</Link>
+					)}
 				</div>
 			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					{filteredEvents.map((event) => (
-						<div
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{events.map((event) => (
+						<Link
 							key={event.id}
-							className="bg-white rounded-lg shadow overflow-hidden"
+							href={`/bars/${barId}/events/${event.id}`}
+							className="block border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
 						>
 							{event.image_url ? (
-								<img
-									src={event.image_url}
-									alt={event.title}
-									className="w-full h-48 object-cover"
-								/>
+								<div className="relative w-full h-40">
+									<Image
+										src={event.image_url}
+										alt={event.title}
+										fill
+										className="object-cover"
+									/>
+								</div>
 							) : (
-								<div className="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500" />
+								<div className="w-full h-40 bg-gray-100 flex items-center justify-center">
+									<span className="text-gray-400 text-sm">画像なし</span>
+								</div>
 							)}
-
 							<div className="p-4">
-								<div className="flex items-start justify-between mb-2">
-									<h3 className="text-lg font-semibold text-gray-900">
-										{event.title}
-									</h3>
-									<span
-										className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-											event.is_active
-												? "bg-green-100 text-green-800"
-												: "bg-red-100 text-red-800"
-										}`}
-									>
-										{event.is_active ? "公開中" : "非公開"}
-									</span>
-								</div>
-
-								<div className="space-y-2 mb-4">
-									<div className="text-sm text-gray-600">
-										<span className="font-medium">開始:</span>{" "}
-										{formatDate(event.start_date)}
-									</div>
-									{event.end_date && (
-										<div className="text-sm text-gray-600">
-											<span className="font-medium">終了:</span>{" "}
-											{formatDate(event.end_date)}
-										</div>
-									)}
-								</div>
-
-								{event.description && (
-									<p className="text-sm text-gray-600 mb-4 line-clamp-3">
-										{event.description}
+								<h3 className="font-bold text-gray-900 truncate">
+									{event.title}
+								</h3>
+								<p className="text-sm text-gray-600 mt-1">
+									{formatDate(event.start_date)}
+								</p>
+								{event.end_date && (
+									<p className="text-xs text-gray-500">
+										〜 {formatDate(event.end_date)}
 									</p>
 								)}
-
-								<div className="flex space-x-2">
-									<Link
-										href={`/bars/${barId}/events/${event.id}/edit`}
-										className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm text-center"
-									>
-										編集
-									</Link>
-									<button
-										onClick={() => handleDelete(event.id)}
-										className="flex-1 px-3 py-2 border border-red-300 rounded-md text-sm text-red-700"
-									>
-										削除
-									</button>
-								</div>
 							</div>
-						</div>
+						</Link>
 					))}
 				</div>
 			)}

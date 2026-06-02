@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import BarEditForm from "./BarEditForm";
 
 export default async function EditBarPage({
@@ -16,8 +16,16 @@ export default async function EditBarPage({
 
 	const { barId } = await params;
 
+	if (!canAccessBar(user, barId)) {
+		redirect("/bars");
+	}
+
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
 			<BarEditForm barId={barId} />
 		</DashboardLayout>
 	);

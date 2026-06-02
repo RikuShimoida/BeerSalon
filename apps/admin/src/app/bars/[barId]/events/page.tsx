@@ -17,8 +17,12 @@ export default async function EventsPage({
 	const { barId } = await params;
 
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
-			<EventList barId={barId} />
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
+			<EventList barId={barId} userRole={user.role} />
 		</DashboardLayout>
 	);
 }

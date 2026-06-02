@@ -1,9 +1,12 @@
 export interface AdminUser {
 	id: string;
-	email: string;
+	bar_manage_id: string;
 	password_hash: string;
 	name: string;
 	role: "bar_owner" | "admin";
+	bar_id: number | null;
+	contact_email: string | null;
+	contact_phone: string | null;
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;
@@ -12,9 +15,10 @@ export interface AdminUser {
 export interface Session {
 	user: {
 		id: string;
-		email: string;
+		barManageId: string;
 		name: string;
 		role: "bar_owner" | "admin";
+		barId: number | null;
 	};
 	expires: string;
 }
@@ -51,13 +55,6 @@ export interface Bar {
 	updated_at: string;
 	payment_method_ids?: string[];
 	opening_hours?: BarOpeningHour[];
-}
-
-export interface BarOwner {
-	id: string;
-	bar_id: number;
-	admin_user_id: string;
-	created_at: string;
 }
 
 export interface BeerCategory {
@@ -111,26 +108,35 @@ export interface Beer {
 	updated_at: string;
 }
 
+export interface BarBeerMenuSize {
+	id: number;
+	bar_beer_menu_id: number;
+	size_name: string;
+	price: number | null;
+	sort_order: number;
+	created_at: string;
+	updated_at: string;
+}
+
 export interface BarBeerMenu {
 	id: number;
 	bar_id: number;
 	beer_id: number;
-	price: number | null;
-	size: string | null;
 	description: string | null;
 	image_url: string | null;
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;
+	sizes?: BarBeerMenuSize[];
 }
 
-// ビールメニュー詳細表示用（JOIN結果）
 export interface BarBeerMenuDetail extends BarBeerMenu {
 	beer: Beer & {
 		category: BeerCategory;
 		brewery: Brewery | null;
 		region: Region | null;
 	};
+	sizes: BarBeerMenuSize[];
 }
 
 export interface BarFoodMenu {
@@ -140,7 +146,6 @@ export interface BarFoodMenu {
 	price: number | null;
 	description: string | null;
 	image_url: string | null;
-	category: string | null;
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;
@@ -176,39 +181,17 @@ export interface BarCoupon {
 	updated_at: string;
 }
 
-export interface MasterBeerStyle {
+export interface Article {
 	id: number;
-	name: string;
-	description: string | null;
-	is_active: boolean;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface MasterBrewery {
-	id: number;
-	name: string;
-	country: string | null;
-	description: string | null;
-	is_active: boolean;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface MasterFoodCategory {
-	id: number;
-	name: string;
-	description: string | null;
-	is_active: boolean;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface MasterEventCategory {
-	id: number;
-	name: string;
-	description: string | null;
-	is_active: boolean;
+	bar_id: number;
+	title: string;
+	body: string;
+	image_url: string | null;
+	image_url_2: string | null;
+	image_url_3: string | null;
+	status: "draft" | "published" | "scheduled";
+	published_at: string | null;
+	deleted_at: string | null;
 	created_at: string;
 	updated_at: string;
 }

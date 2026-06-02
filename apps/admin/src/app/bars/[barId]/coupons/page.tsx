@@ -17,8 +17,12 @@ export default async function CouponsPage({
 	const { barId } = await params;
 
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
-			<CouponList barId={barId} />
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
+			<CouponList barId={barId} userRole={user.role} />
 		</DashboardLayout>
 	);
 }

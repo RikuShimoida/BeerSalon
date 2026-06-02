@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -23,21 +23,11 @@ export async function POST(
 
 		const { barId } = await params;
 
-		// バーオーナーの場合は自分のバーかチェック
-		if (user.role === "bar_owner") {
-			const { data: barOwner } = await supabaseAdmin
-				.from("bar_owners")
-				.select("*")
-				.eq("bar_id", barId)
-				.eq("admin_user_id", user.id)
-				.single();
-
-			if (!barOwner) {
-				return NextResponse.json(
-					{ error: "アクセス権限がありません" },
-					{ status: 403 },
-				);
-			}
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json(
+				{ error: "アクセス権限がありません" },
+				{ status: 403 },
+			);
 		}
 
 		// FormDataから画像ファイルを取得
@@ -155,21 +145,11 @@ export async function DELETE(
 
 		const { barId } = await params;
 
-		// バーオーナーの場合は自分のバーかチェック
-		if (user.role === "bar_owner") {
-			const { data: barOwner } = await supabaseAdmin
-				.from("bar_owners")
-				.select("*")
-				.eq("bar_id", barId)
-				.eq("admin_user_id", user.id)
-				.single();
-
-			if (!barOwner) {
-				return NextResponse.json(
-					{ error: "アクセス権限がありません" },
-					{ status: 403 },
-				);
-			}
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json(
+				{ error: "アクセス権限がありません" },
+				{ status: 403 },
+			);
 		}
 
 		// 既存の画像URLを取得

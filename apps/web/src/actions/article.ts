@@ -6,7 +6,8 @@ export async function getArticleDetail(articleId: string) {
 	const article = await prisma.article.findUnique({
 		where: {
 			id: BigInt(articleId),
-			isPublished: true,
+			status: "published",
+			deletedAt: null,
 		},
 		include: {
 			bar: {

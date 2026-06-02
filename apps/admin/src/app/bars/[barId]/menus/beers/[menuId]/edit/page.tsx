@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import BeerMenuEditForm from "./BeerMenuEditForm";
 
 export default async function EditBeerMenuPage({
@@ -14,10 +14,22 @@ export default async function EditBeerMenuPage({
 		redirect("/login");
 	}
 
+	if (user.role !== "bar_owner") {
+		redirect("/bars");
+	}
+
 	const { barId, menuId } = await params;
 
+	if (!canAccessBar(user, barId)) {
+		redirect("/bars");
+	}
+
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
 			<BeerMenuEditForm barId={barId} menuId={menuId} />
 		</DashboardLayout>
 	);

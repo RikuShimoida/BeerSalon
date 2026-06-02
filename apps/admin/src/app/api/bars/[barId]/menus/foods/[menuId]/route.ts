@@ -1,10 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
-import type { BarFoodMenu } from "@/types/database";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string; menuId: string }> },
 ) {
 	try {
@@ -14,6 +13,10 @@ export async function GET(
 		}
 
 		const { barId, menuId } = await params;
+
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
 
 		const { data: menu, error } = await supabaseAdmin
 			.from("bar_food_menus")
@@ -36,7 +39,7 @@ export async function GET(
 		}
 
 		return NextResponse.json({ menu });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -54,27 +57,33 @@ export async function PUT(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
-		const { barId, menuId } = await params;
-		const body = await request.json();
-
-		const { name, price, description, image_url, category, is_active } = body;
-
-		if (!name) {
-			return NextResponse.json({ error: "Name is required" }, { status: 400 });
+		if (user.role !== "bar_owner") {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 		}
 
-		const updatedMenu: Partial<BarFoodMenu> = {
-			name,
-			price: price || null,
-			description: description || null,
-			image_url: image_url || null,
-			category: category || null,
-			is_active: is_active !== undefined ? is_active : true,
-		};
+		const { barId, menuId } = await params;
+
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
+		const body = await request.json();
+		const { name, description, image_url } = body;
+
+		if (!name) {
+			return NextResponse.json(
+				{ error: "メニュー名を入力してください" },
+				{ status: 400 },
+			);
+		}
 
 		const { data, error } = await supabaseAdmin
 			.from("bar_food_menus")
-			.update(updatedMenu)
+			.update({
+				name,
+				description: description || null,
+				image_url: image_url || null,
+			})
 			.eq("id", menuId)
 			.eq("bar_id", barId)
 			.select()
@@ -94,7 +103,7 @@ export async function PUT(
 		}
 
 		return NextResponse.json({ menu: data });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -103,7 +112,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string; menuId: string }> },
 ) {
 	try {
@@ -112,7 +121,15 @@ export async function DELETE(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
+		if (user.role !== "bar_owner") {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
 		const { barId, menuId } = await params;
+
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
 
 		const { error } = await supabaseAdmin
 			.from("bar_food_menus")
@@ -128,7 +145,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

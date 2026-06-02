@@ -164,8 +164,7 @@ export async function getUserCoupons() {
 	return userCoupons.map((userCoupon) => ({
 		id: userCoupon.id,
 		title: userCoupon.coupon.title,
-		description: userCoupon.coupon.description,
-		conditions: userCoupon.coupon.conditions,
+		description: userCoupon.coupon.description ?? "",
 		barName: userCoupon.coupon.bar.name,
 		validUntil: userCoupon.coupon.validUntil,
 		isUsed: userCoupon.isUsed,

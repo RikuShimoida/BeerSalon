@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { SHIZUOKA_PREFECTURE } from "@/lib/shizuoka-cities";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
@@ -10,7 +10,6 @@ import {
 } from "@/lib/validators";
 import type { Bar } from "@/types/database";
 
-// GET /api/bars/:barId - バー詳細取得
 export async function GET(
 	request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
@@ -27,21 +26,11 @@ export async function GET(
 
 		const { barId } = await params;
 
-		// バーオーナーの場合は自分のバーかチェック
-		if (user.role === "bar_owner") {
-			const { data: barOwner } = await supabaseAdmin
-				.from("bar_owners")
-				.select("*")
-				.eq("bar_id", barId)
-				.eq("admin_user_id", user.id)
-				.single();
-
-			if (!barOwner) {
-				return NextResponse.json(
-					{ error: "アクセス権限がありません" },
-					{ status: 403 },
-				);
-			}
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json(
+				{ error: "アクセス権限がありません" },
+				{ status: 403 },
+			);
 		}
 
 		const { data: bar, error } = await supabaseAdmin
@@ -98,7 +87,6 @@ export async function GET(
 	}
 }
 
-// PUT /api/bars/:barId - バー更新
 export async function PUT(
 	request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
@@ -115,21 +103,11 @@ export async function PUT(
 
 		const { barId } = await params;
 
-		// バーオーナーの場合は自分のバーかチェック
-		if (user.role === "bar_owner") {
-			const { data: barOwner } = await supabaseAdmin
-				.from("bar_owners")
-				.select("*")
-				.eq("bar_id", barId)
-				.eq("admin_user_id", user.id)
-				.single();
-
-			if (!barOwner) {
-				return NextResponse.json(
-					{ error: "アクセス権限がありません" },
-					{ status: 403 },
-				);
-			}
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json(
+				{ error: "アクセス権限がありません" },
+				{ status: 403 },
+			);
 		}
 
 		const body = await request.json();
@@ -149,7 +127,6 @@ export async function PUT(
 			opening_hours,
 		} = body;
 
-		// バリデーション
 		if (!name) {
 			return NextResponse.json(
 				{ error: "バー名を入力してください" },
@@ -304,7 +281,6 @@ export async function PUT(
 	}
 }
 
-// DELETE /api/bars/:barId - バー削除（論理削除）
 export async function DELETE(
 	request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
@@ -321,24 +297,13 @@ export async function DELETE(
 
 		const { barId } = await params;
 
-		// バーオーナーの場合は自分のバーかチェック
-		if (user.role === "bar_owner") {
-			const { data: barOwner } = await supabaseAdmin
-				.from("bar_owners")
-				.select("*")
-				.eq("bar_id", barId)
-				.eq("admin_user_id", user.id)
-				.single();
-
-			if (!barOwner) {
-				return NextResponse.json(
-					{ error: "アクセス権限がありません" },
-					{ status: 403 },
-				);
-			}
+		if (!canAccessBar(user, barId)) {
+			return NextResponse.json(
+				{ error: "アクセス権限がありません" },
+				{ status: 403 },
+			);
 		}
 
-		// 論理削除（is_activeをfalseに設定）
 		const { error } = await supabaseAdmin
 			.from("bars")
 			.update({ is_active: false })

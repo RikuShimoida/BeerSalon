@@ -10,8 +10,16 @@ export default async function BarsPage() {
 		redirect("/login");
 	}
 
+	if (user.role === "bar_owner" && user.barId) {
+		redirect(`/bars/${user.barId}`);
+	}
+
 	return (
-		<DashboardLayout userName={user.name} userRole={user.role}>
+		<DashboardLayout
+			userName={user.name}
+			userRole={user.role}
+			barId={user.barId}
+		>
 			<BarList />
 		</DashboardLayout>
 	);

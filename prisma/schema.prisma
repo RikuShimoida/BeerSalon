@@ -64,7 +64,7 @@ model Bar {
   beerMenus         BarBeerMenu[]
   foodMenus         BarFoodMenu[]
   barImages         BarImage[]
-  coupons           Coupon[]
+  coupons           BarCoupon[]
   favoriteBars      FavoriteBar[]
   posts             Post[]
   viewHistories     ViewHistory[]
@@ -184,20 +184,33 @@ model Beer {
 
 /// 店舗ビールメニュー
 model BarBeerMenu {
-  id          BigInt   @id @default(autoincrement())
-  barId       BigInt   @map("bar_id")
-  beerId      BigInt   @map("beer_id")
-  price       Int?
-  size        String?
+  id          BigInt            @id @default(autoincrement())
+  barId       BigInt            @map("bar_id")
+  beerId      BigInt            @map("beer_id")
   description String?
-  imageUrl    String?  @map("image_url")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-  bar         Bar      @relation(fields: [barId], references: [id], onDelete: Cascade)
-  beer        Beer     @relation(fields: [beerId], references: [id])
+  imageUrl    String?           @map("image_url")
+  isActive    Boolean           @default(true) @map("is_active")
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bar         Bar               @relation(fields: [barId], references: [id], onDelete: Cascade)
+  beer        Beer              @relation(fields: [beerId], references: [id])
+  sizes       BarBeerMenuSize[]
 
   @@map("bar_beer_menus")
+}
+
+/// 店舗ビールメニューサイズ（サイズ別価格）
+model BarBeerMenuSize {
+  id             BigInt      @id @default(autoincrement())
+  barBeerMenuId  BigInt      @map("bar_beer_menu_id")
+  sizeName       String      @map("size_name")
+  price          Int?
+  sortOrder      Int         @default(0) @map("sort_order")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  barBeerMenu    BarBeerMenu @relation(fields: [barBeerMenuId], references: [id], onDelete: Cascade)
+
+  @@map("bar_beer_menu_sizes")
 }
 
 /// 店舗フードメニュー
@@ -216,22 +229,26 @@ model BarFoodMenu {
   @@map("bar_food_menus")
 }
 
-/// クーポン
-model Coupon {
-  id          BigInt       @id @default(autoincrement())
-  barId       BigInt       @map("bar_id")
-  title       String
-  description String
-  conditions  String?
-  validFrom   DateTime?    @map("valid_from") @db.Timestamptz(6)
-  validUntil  DateTime?    @map("valid_until") @db.Timestamptz(6)
-  isActive    Boolean      @default(true) @map("is_active")
-  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
-  bar         Bar          @relation(fields: [barId], references: [id], onDelete: Cascade)
-  userCoupons UserCoupon[]
+/// バークーポン
+model BarCoupon {
+  id            BigInt       @id @default(autoincrement())
+  barId         BigInt       @map("bar_id")
+  title         String
+  description   String?
+  discountType  String       @default("percentage") @map("discount_type")
+  discountValue Decimal      @default(0) @map("discount_value") @db.Decimal(10, 2)
+  code          String?
+  usageLimit    Int?         @map("usage_limit")
+  usedCount     Int          @default(0) @map("used_count")
+  validFrom     DateTime?    @map("valid_from") @db.Timestamptz(6)
+  validUntil    DateTime?    @map("valid_until") @db.Timestamptz(6)
+  isActive      Boolean      @default(true) @map("is_active")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bar           Bar          @relation(fields: [barId], references: [id], onDelete: Cascade)
+  userCoupons   UserCoupon[]
 
-  @@map("coupons")
+  @@map("bar_coupons")
 }
 
 /// ユーザー取得済みクーポン
@@ -242,7 +259,7 @@ model UserCoupon {
   obtainedAt DateTime    @default(now()) @map("obtained_at") @db.Timestamptz(6)
   usedAt     DateTime?   @map("used_at") @db.Timestamptz(6)
   isUsed     Boolean     @default(false) @map("is_used")
-  coupon     Coupon      @relation(fields: [couponId], references: [id])
+  coupon     BarCoupon   @relation(fields: [couponId], references: [id])
   user       UserProfile @relation(fields: [userId], references: [id])
 
   @@map("user_coupons")
@@ -255,8 +272,11 @@ model Article {
   title        String
   body         String
   imageUrl     String?       @map("image_url")
+  imageUrl2    String?       @map("image_url_2")
+  imageUrl3    String?       @map("image_url_3")
+  status       String        @default("draft")
   publishedAt  DateTime?     @map("published_at") @db.Timestamptz(6)
-  isPublished  Boolean       @default(false) @map("is_published")
+  deletedAt    DateTime?     @map("deleted_at") @db.Timestamptz(6)
   createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
   articleLikes ArticleLike[]

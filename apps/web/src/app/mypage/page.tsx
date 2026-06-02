@@ -182,13 +182,6 @@ export default async function MyPage() {
 													{coupon.description}
 												</p>
 
-												{coupon.conditions && (
-													<div className="text-sm text-muted-foreground tracking-wide">
-														<span className="font-medium">取得条件：</span>
-														{coupon.conditions}
-													</div>
-												)}
-
 												<div className="text-sm text-muted-foreground tracking-wide">
 													<span className="font-medium">対象店舗：</span>
 													{coupon.barName}

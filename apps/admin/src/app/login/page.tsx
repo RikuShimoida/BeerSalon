@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
 export default function LoginPage() {
-	const [email, setEmail] = useState("");
+	const [barManageId, setBarManageId] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -14,8 +14,7 @@ export default function LoginPage() {
 		e.preventDefault();
 		setError("");
 
-		// バリデーション
-		if (!email || !password) {
+		if (!barManageId || !password) {
 			setError("入力してください");
 			return;
 		}
@@ -28,7 +27,7 @@ export default function LoginPage() {
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ email, password }),
+				body: JSON.stringify({ barManageId, password }),
 			});
 
 			const data = await response.json();
@@ -38,10 +37,13 @@ export default function LoginPage() {
 				return;
 			}
 
-			// ログイン成功 → ダッシュボードへリダイレクト
-			router.push("/");
+			if (data.user.role === "admin") {
+				router.push("/bars");
+			} else {
+				router.push(`/bars/${data.user.barId}`);
+			}
 			router.refresh();
-		} catch (err) {
+		} catch (_err) {
 			setError("ログインに失敗しました");
 		} finally {
 			setLoading(false);
@@ -53,7 +55,7 @@ export default function LoginPage() {
 			<div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 space-y-6">
 				<div>
 					<h1 className="text-center text-2xl font-bold text-gray-900">
-						BeerSalonAdmin
+						Beer Salon Admin
 					</h1>
 					<p className="mt-2 text-center text-sm text-gray-600">
 						管理画面にログイン
@@ -64,21 +66,21 @@ export default function LoginPage() {
 					<div className="rounded-md shadow-sm space-y-4">
 						<div>
 							<label
-								htmlFor="email"
+								htmlFor="barManageId"
 								className="block text-sm font-medium text-gray-700"
 							>
-								メールアドレス
+								店舗ID
 							</label>
 							<input
-								id="email"
-								name="email"
-								type="email"
-								autoComplete="email"
+								id="barManageId"
+								name="barManageId"
+								type="text"
+								autoComplete="username"
 								required
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-								placeholder="email@example.com"
+								value={barManageId}
+								onChange={(e) => setBarManageId(e.target.value)}
+								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 focus:z-10 sm:text-sm"
+								placeholder="fuji-beer-bar"
 							/>
 						</div>
 
@@ -97,7 +99,7 @@ export default function LoginPage() {
 								required
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
-								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+								className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-gray-500 focus:border-gray-500 focus:z-10 sm:text-sm"
 								placeholder="パスワード"
 							/>
 						</div>
@@ -113,19 +115,10 @@ export default function LoginPage() {
 						<button
 							type="submit"
 							disabled={loading}
-							className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+							className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{loading ? "ログイン中..." : "ログイン"}
 						</button>
-					</div>
-
-					<div className="text-sm text-center">
-						<a
-							href="#"
-							className="font-medium text-blue-600 hover:text-blue-500"
-						>
-							パスワードを忘れた方
-						</a>
 					</div>
 				</form>
 			</div>

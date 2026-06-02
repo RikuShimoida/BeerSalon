@@ -265,17 +265,19 @@ export default function BeerMenuList({ barId }: BeerMenuListProps) {
 										</span>
 									</div>
 
-									{menu.price && (
-										<div className="flex items-center text-sm text-gray-600">
+									{menu.sizes && menu.sizes.length > 0 && (
+										<div className="text-sm text-gray-600">
 											<span className="font-medium mr-2">価格:</span>
-											<span className="text-lg font-bold text-gray-900">
-												¥{menu.price.toLocaleString()}
-											</span>
-											{menu.size && (
-												<span className="ml-2 text-gray-500">
-													({menu.size})
+											{menu.sizes.map((s) => (
+												<span key={s.id} className="mr-3">
+													{s.size_name}
+													{s.price != null && (
+														<span className="ml-1 font-bold text-gray-900">
+															¥{s.price.toLocaleString()}
+														</span>
+													)}
 												</span>
-											)}
+											))}
 										</div>
 									)}
 
