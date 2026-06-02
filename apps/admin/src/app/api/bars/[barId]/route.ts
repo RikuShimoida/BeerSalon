@@ -54,6 +54,15 @@ export async function GET(
           is_closed,
           created_at,
           updated_at
+        ),
+        bar_images (
+          id,
+          bar_id,
+          media_type,
+          image_type,
+          image_url,
+          sort_order,
+          created_at
         )
       `)
 			.eq("id", barId)
@@ -72,10 +81,15 @@ export async function GET(
 				?.map((bpm: any) => bpm.payment_method?.id)
 				.filter((id: any) => id !== undefined) || [];
 
+		const barImages = (bar.bar_images || [])
+			.filter((img: any) => img.image_type === "slider")
+			.sort((a: any, b: any) => a.sort_order - b.sort_order);
+
 		const response = {
 			...bar,
 			payment_method_ids: paymentMethods,
 			opening_hours: bar.bar_opening_hours || [],
+			bar_images: barImages,
 		};
 
 		return NextResponse.json(response);

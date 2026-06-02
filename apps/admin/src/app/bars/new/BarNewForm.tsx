@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import OpeningHoursEditor from "@/components/OpeningHoursEditor";
+import SliderMediaManager from "@/components/SliderMediaManager";
 import {
 	SHIZUOKA_MUNICIPALITIES,
 	SHIZUOKA_PREFECTURE,
@@ -54,6 +56,12 @@ export default function BarNewForm() {
 		x_url: "",
 		facebook_url: "",
 	});
+
+	// Images
+	const [previewImageFile, setPreviewImageFile] = useState<File | null>(null);
+	const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+	const [imageError, setImageError] = useState("");
+	const [sliderMediaFiles, setSliderMediaFiles] = useState<File[]>([]);
 
 	const [openingHours, setOpeningHours] = useState<OpeningHourInput[]>(
 		Array.from({ length: 7 }, (_, day) => ({
@@ -113,6 +121,38 @@ export default function BarNewForm() {
 	const handleBack = () => {
 		setError("");
 		setStep(1);
+	};
+
+	const handlePreviewImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		setImageError("");
+
+		const MAX_SIZE = 5 * 1024 * 1024;
+		const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+		if (file.size > MAX_SIZE) {
+			setImageError("画像サイズは5MB以下にしてください");
+			return;
+		}
+
+		if (!ALLOWED_TYPES.includes(file.type)) {
+			setImageError("画像形式はJPEG、PNG、WebPのみ対応しています");
+			return;
+		}
+
+		setPreviewImageFile(file);
+		setPreviewImageUrl(URL.createObjectURL(file));
+	};
+
+	const handlePreviewImageDelete = () => {
+		if (previewImageUrl?.startsWith("blob:")) {
+			URL.revokeObjectURL(previewImageUrl);
+		}
+		setPreviewImageFile(null);
+		setPreviewImageUrl(null);
+		setImageError("");
 	};
 
 	const validateOpeningHours = (): boolean => {
@@ -197,6 +237,55 @@ export default function BarNewForm() {
 				const data = await response.json();
 				setError(data.error || "登録に失敗しました");
 				return;
+			}
+
+			const responseData = await response.json();
+
+			if (responseData.id) {
+				const uploadErrors: string[] = [];
+
+				if (previewImageFile) {
+					try {
+						const imageFormData = new FormData();
+						imageFormData.append("file", previewImageFile);
+						const imageResponse = await fetch(
+							`/api/bars/${responseData.id}/preview-image`,
+							{ method: "POST", body: imageFormData },
+						);
+						if (!imageResponse.ok) {
+							uploadErrors.push("プレビュー画像");
+						}
+					} catch {
+						uploadErrors.push("プレビュー画像");
+					}
+				}
+
+				for (const file of sliderMediaFiles) {
+					try {
+						const mediaFormData = new FormData();
+						mediaFormData.append("file", file);
+						const mediaResponse = await fetch(
+							`/api/bars/${responseData.id}/media`,
+							{ method: "POST", body: mediaFormData },
+						);
+						if (!mediaResponse.ok) {
+							uploadErrors.push(`スライダーメディア (${file.name})`);
+						}
+					} catch {
+						uploadErrors.push(`スライダーメディア (${file.name})`);
+					}
+				}
+
+				if (uploadErrors.length > 0) {
+					setError(
+						`店舗は登録されましたが、以下のアップロードに失敗しました: ${uploadErrors.join(", ")}。編集画面から再度アップロードしてください。`,
+					);
+					setTimeout(() => {
+						router.push("/bars");
+						router.refresh();
+					}, 3000);
+					return;
+				}
 			}
 
 			router.push("/bars");
@@ -576,6 +665,78 @@ export default function BarNewForm() {
 							onChange={handlePhase2Change}
 							placeholder="https://www.facebook.com/yourpage"
 							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
+						/>
+					</div>
+
+					{/* Preview image section */}
+					<div>
+						<div className="block text-sm font-medium text-gray-700 mb-2">
+							プレビュー画像
+						</div>
+						<p className="text-sm text-gray-500 mb-3">
+							店舗一覧ページに表示されるサムネイル画像です（最大5MB、JPEG/PNG/WebP）
+						</p>
+
+						{imageError && (
+							<div className="mb-3 rounded-md bg-red-50 p-3">
+								<p className="text-sm text-red-800">{imageError}</p>
+							</div>
+						)}
+
+						{previewImageUrl ? (
+							<div className="space-y-3">
+								<div className="relative w-full max-w-md">
+									<Image
+										src={previewImageUrl}
+										alt="プレビュー画像"
+										width={400}
+										height={300}
+										unoptimized
+										className="w-full h-auto rounded-lg border border-gray-300"
+									/>
+								</div>
+								<div className="flex space-x-2">
+									<label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+										<input
+											type="file"
+											accept="image/jpeg,image/png,image/webp"
+											onChange={handlePreviewImageSelect}
+											className="hidden"
+										/>
+										画像を変更
+									</label>
+									<button
+										type="button"
+										onClick={handlePreviewImageDelete}
+										className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50"
+									>
+										削除
+									</button>
+								</div>
+							</div>
+						) : (
+							<div>
+								<label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+									<input
+										type="file"
+										accept="image/jpeg,image/png,image/webp"
+										onChange={handlePreviewImageSelect}
+										className="hidden"
+									/>
+									画像を選択
+								</label>
+								<p className="mt-2 text-sm text-gray-500">
+									画像が設定されていません
+								</p>
+							</div>
+						)}
+					</div>
+
+					{/* Slider media section */}
+					<div className="border-t border-gray-200 pt-6">
+						<SliderMediaManager
+							barId={null}
+							onFilesChange={setSliderMediaFiles}
 						/>
 					</div>
 
