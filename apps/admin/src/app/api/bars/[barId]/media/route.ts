@@ -164,9 +164,12 @@ export async function POST(
 
 		const mediaUrl = publicUrlData.publicUrl;
 
-		const nextSortOrder = existingMedia && existingMedia.length > 0
-			? Math.max(...existingMedia.map((m: { sort_order: number }) => m.sort_order)) + 1
-			: 0;
+		const nextSortOrder =
+			existingMedia && existingMedia.length > 0
+				? Math.max(
+						...existingMedia.map((m: { sort_order: number }) => m.sort_order),
+					) + 1
+				: 0;
 
 		const { data: newMedia, error: insertError } = await supabaseAdmin
 			.from("bar_images")

@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { BarEvent } from "@/types/database";
 
 interface EventFormProps {
@@ -9,53 +10,90 @@ interface EventFormProps {
 	eventId?: string;
 }
 
+interface ImageState {
+	file: File | null;
+	preview: string;
+}
+
 export default function EventForm({ barId, eventId }: EventFormProps) {
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const [formData, setFormData] = useState({
 		title: "",
 		description: "",
 		start_date: "",
 		end_date: "",
-		image_url: "",
 		is_active: true,
 	});
 
+	const [image, setImage] = useState<ImageState | null>(null);
+	const [existingImageUrl, setExistingImageUrl] = useState("");
+
 	useEffect(() => {
-		if (eventId) {
-			fetchEvent();
-		}
-	}, [eventId]);
+		const loadEvent = async () => {
+			try {
+				const response = await fetch(`/api/bars/${barId}/events/${eventId}`);
 
-	const fetchEvent = async () => {
-		try {
-			const response = await fetch(`/api/bars/${barId}/events/${eventId}`);
+				if (!response.ok) {
+					setError("イベントの取得に失敗しました");
+					return;
+				}
 
-			if (!response.ok) {
+				const data = await response.json();
+				const event: BarEvent = data.event;
+
+				setFormData({
+					title: event.title,
+					description: event.description || "",
+					start_date: event.start_date
+						? new Date(event.start_date).toISOString().slice(0, 16)
+						: "",
+					end_date: event.end_date
+						? new Date(event.end_date).toISOString().slice(0, 16)
+						: "",
+					is_active: event.is_active,
+				});
+
+				if (event.image_url) {
+					setExistingImageUrl(event.image_url);
+				}
+			} catch (_error) {
 				setError("イベントの取得に失敗しました");
-				return;
 			}
+		};
 
-			const data = await response.json();
-			const event: BarEvent = data.event;
-
-			setFormData({
-				title: event.title,
-				description: event.description || "",
-				start_date: event.start_date
-					? new Date(event.start_date).toISOString().slice(0, 16)
-					: "",
-				end_date: event.end_date
-					? new Date(event.end_date).toISOString().slice(0, 16)
-					: "",
-				image_url: event.image_url || "",
-				is_active: event.is_active,
-			});
-		} catch (error) {
-			setError("イベントの取得に失敗しました");
+		if (eventId) {
+			loadEvent();
 		}
+	}, [eventId, barId]);
+
+	useEffect(() => {
+		return () => {
+			if (image?.file) {
+				URL.revokeObjectURL(image.preview);
+			}
+		};
+	}, [image]);
+
+	const uploadImage = async (file: File): Promise<string> => {
+		const uploadFormData = new FormData();
+		uploadFormData.append("file", file);
+
+		const res = await fetch(`/api/bars/${barId}/events/upload`, {
+			method: "POST",
+			body: uploadFormData,
+		});
+
+		if (!res.ok) {
+			const data = await res.json();
+			throw new Error(data.error || "画像のアップロードに失敗しました");
+		}
+
+		const data = await res.json();
+		return data.url;
 	};
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -64,6 +102,12 @@ export default function EventForm({ barId, eventId }: EventFormProps) {
 		setError("");
 
 		try {
+			let imageUrl: string | null = existingImageUrl || null;
+
+			if (image?.file) {
+				imageUrl = await uploadImage(image.file);
+			}
+
 			const url = eventId
 				? `/api/bars/${barId}/events/${eventId}`
 				: `/api/bars/${barId}/events`;
@@ -84,7 +128,7 @@ export default function EventForm({ barId, eventId }: EventFormProps) {
 					end_date: formData.end_date
 						? new Date(formData.end_date).toISOString()
 						: null,
-					image_url: formData.image_url || null,
+					image_url: imageUrl,
 					is_active: formData.is_active,
 				}),
 			});
@@ -96,7 +140,7 @@ export default function EventForm({ barId, eventId }: EventFormProps) {
 			}
 
 			router.push(`/bars/${barId}/events`);
-		} catch (error) {
+		} catch (_error) {
 			setError("保存に失敗しました");
 		} finally {
 			setLoading(false);
@@ -115,6 +159,44 @@ export default function EventForm({ barId, eventId }: EventFormProps) {
 			setFormData((prev) => ({ ...prev, [name]: value }));
 		}
 	};
+
+	const handleImageAdd = useCallback(() => {
+		fileInputRef.current?.click();
+	}, []);
+
+	const handleFileChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const files = e.target.files;
+			if (!files || files.length === 0) return;
+
+			const file = files[0];
+
+			if (image?.file) {
+				URL.revokeObjectURL(image.preview);
+			}
+
+			setImage({
+				file,
+				preview: URL.createObjectURL(file),
+			});
+			setExistingImageUrl("");
+
+			if (fileInputRef.current) {
+				fileInputRef.current.value = "";
+			}
+		},
+		[image],
+	);
+
+	const handleImageRemove = useCallback(() => {
+		if (image?.file) {
+			URL.revokeObjectURL(image.preview);
+		}
+		setImage(null);
+		setExistingImageUrl("");
+	}, [image]);
+
+	const currentPreview = image?.preview || existingImageUrl;
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
@@ -200,20 +282,52 @@ export default function EventForm({ barId, eventId }: EventFormProps) {
 
 			<div>
 				<label
-					htmlFor="image_url"
-					className="block text-sm font-medium text-gray-700"
+					htmlFor="event_image"
+					className="block text-sm font-medium text-gray-700 mb-2"
 				>
-					画像URL
+					画像
 				</label>
 				<input
-					type="url"
-					id="image_url"
-					name="image_url"
-					value={formData.image_url}
-					onChange={handleChange}
-					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-					placeholder="https://example.com/image.jpg"
+					ref={fileInputRef}
+					id="event_image"
+					type="file"
+					accept="image/jpeg,image/png,image/webp"
+					onChange={handleFileChange}
+					className="hidden"
 				/>
+
+				<div className="flex flex-wrap gap-4">
+					{currentPreview && (
+						<div className="relative w-32 h-32">
+							<Image
+								src={currentPreview}
+								alt="イベント画像"
+								fill
+								className="object-cover rounded-md border border-gray-200"
+							/>
+							<button
+								type="button"
+								onClick={handleImageRemove}
+								className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
+							>
+								x
+							</button>
+						</div>
+					)}
+
+					{!currentPreview && (
+						<button
+							type="button"
+							onClick={handleImageAdd}
+							className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center text-gray-400 hover:border-gray-400 hover:text-gray-500 transition-colors"
+						>
+							<span className="text-2xl">+</span>
+						</button>
+					)}
+				</div>
+				<p className="mt-1 text-xs text-gray-500">
+					JPEG、PNG、WebP形式（最大5MB）
+				</p>
 			</div>
 
 			<div className="flex items-center">

@@ -234,7 +234,9 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 									<button
 										type="button"
 										onClick={() => scrollToSlide("next")}
-										disabled={currentSlide === (bar.bar_images?.length ?? 1) - 1}
+										disabled={
+											currentSlide === (bar.bar_images?.length ?? 1) - 1
+										}
 										className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center ${
 											currentSlide === (bar.bar_images?.length ?? 1) - 1
 												? "bg-black/20 text-white/50 cursor-not-allowed"

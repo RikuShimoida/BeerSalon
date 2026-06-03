@@ -36,7 +36,12 @@ export async function PUT(
 			);
 		}
 
-		if (mediaIds.length === 0 || !mediaIds.every((id) => typeof id === "number" && Number.isInteger(id) && id > 0)) {
+		if (
+			mediaIds.length === 0 ||
+			!mediaIds.every(
+				(id) => typeof id === "number" && Number.isInteger(id) && id > 0,
+			)
+		) {
 			return NextResponse.json(
 				{ error: "mediaIdsは正の整数の配列である必要があります" },
 				{ status: 400 },
