@@ -6,6 +6,12 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const BUCKET_NAME = "bar-preview-images";
 
+const MIME_TO_EXTENSION: Record<string, string> = {
+	"image/jpeg": "jpg",
+	"image/png": "png",
+	"image/webp": "webp",
+};
+
 // POST /api/bars/:barId/preview-image - プレビュー画像アップロード
 export async function POST(
 	request: NextRequest,
@@ -59,7 +65,7 @@ export async function POST(
 
 		// ファイル名生成（タイムスタンプベース）
 		const timestamp = Date.now();
-		const extension = file.name.split(".").pop();
+		const extension = MIME_TO_EXTENSION[file.type] || "jpg";
 		const fileName = `bars/${barId}/preview_${timestamp}.${extension}`;
 
 		// 既存の画像を削除
@@ -177,6 +183,7 @@ export async function DELETE(
 			.remove([fileName]);
 
 		if (deleteError) {
+			console.error("Storage delete failed:", deleteError);
 		}
 
 		// DBのpreview_image_urlをNULLに更新

@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import type { Bar, BarOpeningHour } from "@/types/database";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { Bar, BarImage, BarOpeningHour } from "@/types/database";
 
 interface BarDetailProps {
 	barId: string;
@@ -54,16 +54,31 @@ function formatOpeningHours(hours: BarOpeningHour[]): string[] {
 	return lines;
 }
 
-interface ManageMenuItem {
-	label: string;
-	href: string;
-	description: string;
-}
-
 export default function BarDetail({ barId, userRole }: BarDetailProps) {
 	const [bar, setBar] = useState<Bar | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
+	const [currentSlide, setCurrentSlide] = useState(0);
+	const scrollRef = useRef<HTMLDivElement>(null);
+
+	const handleScroll = useCallback(() => {
+		if (!scrollRef.current) return;
+		const container = scrollRef.current;
+		const slideWidth = container.offsetWidth;
+		if (slideWidth === 0) return;
+		const index = Math.round(container.scrollLeft / slideWidth);
+		setCurrentSlide(index);
+	}, []);
+
+	const scrollToSlide = useCallback((direction: "prev" | "next") => {
+		if (!scrollRef.current) return;
+		const container = scrollRef.current;
+		const slideWidth = container.offsetWidth;
+		container.scrollBy({
+			left: direction === "next" ? slideWidth : -slideWidth,
+			behavior: "smooth",
+		});
+	}, []);
 
 	const fetchBar = useCallback(async () => {
 		try {
@@ -130,7 +145,7 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 		.filter(Boolean)
 		.join(" ");
 
-	const manageMenuItems: ManageMenuItem[] = [
+	const manageMenuItems = [
 		{
 			label: "メニュー管理",
 			href: `/bars/${barId}/menus`,
@@ -168,7 +183,83 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 
 			{/* Store info card */}
 			<section className="border border-gray-200 rounded-lg p-6 mb-8 space-y-4">
-				{bar.preview_image_url && (
+				{bar.bar_images && bar.bar_images.length > 0 ? (
+					<div className="mb-4">
+						<div className="relative">
+							<div
+								ref={scrollRef}
+								onScroll={handleScroll}
+								className="flex overflow-x-auto snap-x snap-mandatory"
+								style={{
+									scrollbarWidth: "none",
+									msOverflowStyle: "none",
+								}}
+							>
+								{bar.bar_images.map((img: BarImage, index: number) => (
+									<div
+										key={img.id}
+										className="flex-shrink-0 w-full snap-center relative h-64"
+									>
+										{img.media_type === "image" ? (
+											<Image
+												src={img.image_url}
+												alt={`${bar.name} 画像 ${index + 1}`}
+												fill
+												className="object-cover rounded-lg"
+											/>
+										) : (
+											<video
+												src={img.image_url}
+												className="w-full h-full object-cover rounded-lg"
+												controls
+											/>
+										)}
+									</div>
+								))}
+							</div>
+							{bar.bar_images.length > 1 && (
+								<>
+									<button
+										type="button"
+										onClick={() => scrollToSlide("prev")}
+										disabled={currentSlide === 0}
+										className={`absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center ${
+											currentSlide === 0
+												? "bg-black/20 text-white/50 cursor-not-allowed"
+												: "bg-black/50 text-white hover:bg-black/70"
+										}`}
+									>
+										&lt;
+									</button>
+									<button
+										type="button"
+										onClick={() => scrollToSlide("next")}
+										disabled={currentSlide === (bar.bar_images?.length ?? 1) - 1}
+										className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center ${
+											currentSlide === (bar.bar_images?.length ?? 1) - 1
+												? "bg-black/20 text-white/50 cursor-not-allowed"
+												: "bg-black/50 text-white hover:bg-black/70"
+										}`}
+									>
+										&gt;
+									</button>
+								</>
+							)}
+						</div>
+						{bar.bar_images.length > 1 && (
+							<div className="flex justify-center gap-1.5 mt-2">
+								{bar.bar_images.map((img: BarImage, index: number) => (
+									<div
+										key={img.id}
+										className={`w-2 h-2 rounded-full ${
+											index === currentSlide ? "bg-gray-900" : "bg-gray-300"
+										}`}
+									/>
+								))}
+							</div>
+						)}
+					</div>
+				) : bar.preview_image_url ? (
 					<div className="mb-4 relative w-full h-64">
 						<Image
 							src={bar.preview_image_url}
@@ -177,7 +268,7 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 							className="object-cover rounded-lg"
 						/>
 					</div>
-				)}
+				) : null}
 
 				{bar.description && (
 					<div>

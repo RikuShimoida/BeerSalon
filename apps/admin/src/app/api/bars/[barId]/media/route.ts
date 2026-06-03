@@ -9,6 +9,14 @@ const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm"];
 const BUCKET_NAME = "bar-media";
 
+const MIME_TO_EXTENSION: Record<string, string> = {
+	"image/jpeg": "jpg",
+	"image/png": "png",
+	"image/webp": "webp",
+	"video/mp4": "mp4",
+	"video/webm": "webm",
+};
+
 // GET /api/bars/:barId/media - メディア一覧取得
 export async function GET(
 	request: NextRequest,
@@ -85,7 +93,7 @@ export async function POST(
 
 		const { data: existingMedia } = await supabaseAdmin
 			.from("bar_images")
-			.select("id")
+			.select("id, sort_order")
 			.eq("bar_id", barId)
 			.eq("image_type", "slider");
 
@@ -129,7 +137,7 @@ export async function POST(
 		}
 
 		const timestamp = Date.now();
-		const extension = file.name.split(".").pop();
+		const extension = MIME_TO_EXTENSION[file.type] || "bin";
 		const mediaType = isImage ? "image" : "video";
 		const fileName = `bars/${barId}/slider_${timestamp}.${extension}`;
 
@@ -156,7 +164,9 @@ export async function POST(
 
 		const mediaUrl = publicUrlData.publicUrl;
 
-		const nextSortOrder = existingMedia?.length || 0;
+		const nextSortOrder = existingMedia && existingMedia.length > 0
+			? Math.max(...existingMedia.map((m: { sort_order: number }) => m.sort_order)) + 1
+			: 0;
 
 		const { data: newMedia, error: insertError } = await supabaseAdmin
 			.from("bar_images")

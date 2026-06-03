@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import OpeningHoursEditor from "@/components/OpeningHoursEditor";
+import SliderMediaManager from "@/components/SliderMediaManager";
 import {
 	SHIZUOKA_MUNICIPALITIES,
 	SHIZUOKA_PREFECTURE,
@@ -60,6 +62,11 @@ export default function BarEditForm({ barId }: { barId: string }) {
 		})),
 	);
 
+	// Preview image
+	const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+	const [uploadingImage, setUploadingImage] = useState(false);
+	const [imageError, setImageError] = useState("");
+
 	// Store ID change
 	const [currentBarManageId, setCurrentBarManageId] = useState("");
 	const [newBarManageId, setNewBarManageId] = useState("");
@@ -91,6 +98,7 @@ export default function BarEditForm({ barId }: { barId: string }) {
 
 			const data = await response.json();
 			setBar(data);
+			setPreviewImageUrl(data.preview_image_url || null);
 			setFormData({
 				name: data.name || "",
 				description: data.description || "",
@@ -153,6 +161,76 @@ export default function BarEditForm({ barId }: { barId: string }) {
 		>,
 	) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
+	};
+
+	const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		setImageError("");
+
+		const MAX_SIZE = 5 * 1024 * 1024;
+		const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+		if (file.size > MAX_SIZE) {
+			setImageError("画像サイズは5MB以下にしてください");
+			return;
+		}
+
+		if (!ALLOWED_TYPES.includes(file.type)) {
+			setImageError("画像形式はJPEG、PNG、WebPのみ対応しています");
+			return;
+		}
+
+		setUploadingImage(true);
+		try {
+			const uploadFormData = new FormData();
+			uploadFormData.append("file", file);
+
+			const response = await fetch(`/api/bars/${barId}/preview-image`, {
+				method: "POST",
+				body: uploadFormData,
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				setImageError(data.error || "画像のアップロードに失敗しました");
+				return;
+			}
+
+			const data = await response.json();
+			setPreviewImageUrl(data.preview_image_url);
+		} catch (_error) {
+			setImageError("画像のアップロードに失敗しました");
+		} finally {
+			setUploadingImage(false);
+		}
+	};
+
+	const handleImageDelete = async () => {
+		if (!previewImageUrl) return;
+		if (!confirm("プレビュー画像を削除しますか？")) return;
+
+		setUploadingImage(true);
+		setImageError("");
+
+		try {
+			const response = await fetch(`/api/bars/${barId}/preview-image`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				setImageError(data.error || "画像の削除に失敗しました");
+				return;
+			}
+
+			setPreviewImageUrl(null);
+		} catch (_error) {
+			setImageError("画像の削除に失敗しました");
+		} finally {
+			setUploadingImage(false);
+		}
 	};
 
 	const validateOpeningHours = (): boolean => {
@@ -599,6 +677,78 @@ export default function BarEditForm({ barId }: { barId: string }) {
 						placeholder="https://www.facebook.com/yourpage"
 						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 					/>
+				</div>
+
+				{/* Preview image section */}
+				<div>
+					<div className="block text-sm font-medium text-gray-700 mb-2">
+						プレビュー画像
+					</div>
+					<p className="text-sm text-gray-500 mb-3">
+						店舗一覧ページに表示されるサムネイル画像です（最大5MB、JPEG/PNG/WebP）
+					</p>
+
+					{imageError && (
+						<div className="mb-3 rounded-md bg-red-50 p-3">
+							<p className="text-sm text-red-800">{imageError}</p>
+						</div>
+					)}
+
+					{previewImageUrl ? (
+						<div className="space-y-3">
+							<div className="relative w-full max-w-md">
+								<Image
+									src={previewImageUrl}
+									alt="プレビュー画像"
+									width={400}
+									height={300}
+									unoptimized
+									className="w-full h-auto rounded-lg border border-gray-300"
+								/>
+							</div>
+							<div className="flex space-x-2">
+								<label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+									<input
+										type="file"
+										accept="image/jpeg,image/png,image/webp"
+										onChange={handleImageUpload}
+										disabled={uploadingImage}
+										className="hidden"
+									/>
+									{uploadingImage ? "アップロード中..." : "画像を変更"}
+								</label>
+								<button
+									type="button"
+									onClick={handleImageDelete}
+									disabled={uploadingImage}
+									className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									削除
+								</button>
+							</div>
+						</div>
+					) : (
+						<div>
+							<label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+								<input
+									type="file"
+									accept="image/jpeg,image/png,image/webp"
+									onChange={handleImageUpload}
+									disabled={uploadingImage}
+									className="hidden"
+								/>
+								{uploadingImage ? "アップロード中..." : "画像を選択"}
+							</label>
+							<p className="mt-2 text-sm text-gray-500">
+								画像が設定されていません
+							</p>
+						</div>
+					)}
+				</div>
+
+				{/* Slider media section */}
+				<div className="border-t border-gray-200 pt-6">
+					<SliderMediaManager barId={barId} />
 				</div>
 
 				<div className="flex justify-between pt-4">

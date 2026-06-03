@@ -52,6 +52,7 @@ export async function DELETE(
 			.remove([fileName]);
 
 		if (deleteError) {
+			console.error("Storage delete failed:", deleteError);
 		}
 
 		const { error: dbDeleteError } = await supabaseAdmin
@@ -66,6 +67,23 @@ export async function DELETE(
 				{ error: "データベースの削除に失敗しました" },
 				{ status: 500 },
 			);
+		}
+
+		// sort_orderの連番を再計算
+		const { data: remaining } = await supabaseAdmin
+			.from("bar_images")
+			.select("id")
+			.eq("bar_id", barId)
+			.eq("image_type", "slider")
+			.order("sort_order", { ascending: true });
+
+		if (remaining && remaining.length > 0) {
+			for (let i = 0; i < remaining.length; i++) {
+				await supabaseAdmin
+					.from("bar_images")
+					.update({ sort_order: i })
+					.eq("id", remaining[i].id);
+			}
 		}
 
 		return NextResponse.json({ success: true });

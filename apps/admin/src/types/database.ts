@@ -35,6 +35,16 @@ export interface BarOpeningHour {
 	updated_at: string;
 }
 
+export interface BarImage {
+	id: number;
+	bar_id: number;
+	media_type: "image" | "video";
+	image_type: string;
+	image_url: string;
+	sort_order: number;
+	created_at: string;
+}
+
 export interface Bar {
 	id: number;
 	name: string;
@@ -55,6 +65,7 @@ export interface Bar {
 	updated_at: string;
 	payment_method_ids?: string[];
 	opening_hours?: BarOpeningHour[];
+	bar_images?: BarImage[];
 }
 
 export interface BeerCategory {
