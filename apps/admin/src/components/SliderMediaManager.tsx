@@ -59,7 +59,7 @@ export default function SliderMediaManager({
 			}
 			const data = await response.json();
 			setMedia(data.media || []);
-		} catch (error) {
+		} catch {
 			setError("メディアの取得に失敗しました");
 		} finally {
 			setLoading(false);
@@ -125,7 +125,7 @@ export default function SliderMediaManager({
 
 				await fetchMedia();
 				e.target.value = "";
-			} catch (error) {
+			} catch {
 				setError("アップロードに失敗しました");
 			} finally {
 				setUploading(false);

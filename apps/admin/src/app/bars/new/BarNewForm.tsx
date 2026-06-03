@@ -25,6 +25,7 @@ interface OpeningHourInput {
 }
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const REDIRECT_DELAY_MS = 3000;
 
 export default function BarNewForm() {
 	const router = useRouter();
@@ -283,7 +284,7 @@ export default function BarNewForm() {
 					setTimeout(() => {
 						router.push("/bars");
 						router.refresh();
-					}, 3000);
+					}, REDIRECT_DELAY_MS);
 					return;
 				}
 			}

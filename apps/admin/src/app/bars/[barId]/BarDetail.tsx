@@ -54,12 +54,6 @@ function formatOpeningHours(hours: BarOpeningHour[]): string[] {
 	return lines;
 }
 
-interface ManageMenuItem {
-	label: string;
-	href: string;
-	description: string;
-}
-
 export default function BarDetail({ barId, userRole }: BarDetailProps) {
 	const [bar, setBar] = useState<Bar | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -151,7 +145,7 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 		.filter(Boolean)
 		.join(" ");
 
-	const manageMenuItems: ManageMenuItem[] = [
+	const manageMenuItems = [
 		{
 			label: "メニュー管理",
 			href: `/bars/${barId}/menus`,
@@ -228,14 +222,24 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 									<button
 										type="button"
 										onClick={() => scrollToSlide("prev")}
-										className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70"
+										disabled={currentSlide === 0}
+										className={`absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center ${
+											currentSlide === 0
+												? "bg-black/20 text-white/50 cursor-not-allowed"
+												: "bg-black/50 text-white hover:bg-black/70"
+										}`}
 									>
 										&lt;
 									</button>
 									<button
 										type="button"
 										onClick={() => scrollToSlide("next")}
-										className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70"
+										disabled={currentSlide === (bar.bar_images?.length ?? 1) - 1}
+										className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center ${
+											currentSlide === (bar.bar_images?.length ?? 1) - 1
+												? "bg-black/20 text-white/50 cursor-not-allowed"
+												: "bg-black/50 text-white hover:bg-black/70"
+										}`}
 									>
 										&gt;
 									</button>
