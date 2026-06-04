@@ -2,16 +2,28 @@
 -- Beer Salon - Seed Data
 -- ============================================================
 
--- Admin テストアカウント
--- password: admin1234
+-- ============================================================
+-- Admin テストアカウント（admin_usersが先に必要）
+-- ============================================================
+
+-- Admin アカウント（password: admin1234）
 INSERT INTO admin_users (bar_manage_id, password_hash, name, role, bar_id, is_active)
 VALUES ('admin', '$2b$10$wzjVvOFTvvCdDshrCpiICu/6LCLmrZWNZ8r10UgiO58LFvzivMgBu', 'システム管理者', 'admin', NULL, true)
 ON CONFLICT (bar_manage_id) DO NOTHING;
 
--- Bar Owner テストアカウント（ビアバー御殿場）
--- password: admin1234
+-- ============================================================
+-- テスト用バーデータ
+-- ============================================================
+
+INSERT INTO bars (name, prefecture, city, address_line1, description, is_active)
+VALUES ('ビアバー御殿場', '静岡県', '御殿場市', '新橋1-1-1', 'クラフトビール専門店', true)
+ON CONFLICT DO NOTHING;
+
+-- Bar Owner テストアカウント（password: admin1234）
+-- テスト用バーが存在する場合のみ紐付け
 INSERT INTO admin_users (bar_manage_id, password_hash, name, role, bar_id, is_active)
-VALUES ('fuji-beer-bar', '$2b$10$wzjVvOFTvvCdDshrCpiICu/6LCLmrZWNZ8r10UgiO58LFvzivMgBu', 'ビアバー御殿場オーナー', 'bar_owner', 5, true)
+SELECT 'fuji-beer-bar', '$2b$10$wzjVvOFTvvCdDshrCpiICu/6LCLmrZWNZ8r10UgiO58LFvzivMgBu', 'ビアバー御殿場オーナー', 'bar_owner', b.id, true
+FROM bars b WHERE b.name = 'ビアバー御殿場'
 ON CONFLICT (bar_manage_id) DO NOTHING;
 
 -- ============================================================
