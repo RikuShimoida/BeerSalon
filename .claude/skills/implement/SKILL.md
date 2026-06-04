@@ -19,7 +19,7 @@ agent: frontend-engineer
 #### 1-1. ブランチ作成
 
 - developベースで feature ブランチを作成する
-- `gh issue develop $ARGUMENTS --checkout` を使用する
+- `gh issue develop $ARGUMENTS --base develop --checkout` を使用する
 
 #### 1-2. プロダクトコード実装
 
