@@ -1,28 +1,14 @@
-import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import EventForm from "@/components/EventForm";
-import { canAccessBar, getCurrentUser } from "@/lib/auth";
+import { requireBarOwnerAccess } from "@/lib/auth";
 
 export default async function NewEventPage({
 	params,
 }: {
 	params: Promise<{ barId: string }>;
 }) {
-	const user = await getCurrentUser();
-
-	if (!user) {
-		redirect("/login");
-	}
-
-	if (user.role !== "bar_owner") {
-		redirect("/bars");
-	}
-
 	const { barId } = await params;
-
-	if (!canAccessBar(user, barId)) {
-		redirect("/bars");
-	}
+	const user = await requireBarOwnerAccess(barId);
 
 	return (
 		<DashboardLayout
