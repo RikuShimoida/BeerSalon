@@ -84,6 +84,7 @@ export default function BeerMenuDetail({
 
 	if (!menu) return null;
 
+	const countryName = menu.beer?.region?.country?.name;
 	const regionName = menu.beer?.region?.name;
 	const breweryName = menu.beer?.brewery?.name;
 
@@ -116,6 +117,13 @@ export default function BeerMenuDetail({
 			</h1>
 
 			<dl className="space-y-4">
+				{countryName && (
+					<div>
+						<dt className="text-sm font-medium text-gray-500">国</dt>
+						<dd className="mt-1 text-sm text-gray-900">{countryName}</dd>
+					</div>
+				)}
+
 				{regionName && (
 					<div>
 						<dt className="text-sm font-medium text-gray-500">産地</dt>

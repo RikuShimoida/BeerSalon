@@ -27,7 +27,10 @@ export async function GET(
 					*,
 					category:beer_categories (*),
 					brewery:breweries (*),
-					region:regions (*)
+					region:regions (
+						*,
+						country:countries (*)
+					)
 				),
 				sizes:bar_beer_menu_sizes (*)
 			`)

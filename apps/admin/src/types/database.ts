@@ -145,7 +145,7 @@ export interface BarBeerMenuDetail extends BarBeerMenu {
 	beer: Beer & {
 		category: BeerCategory;
 		brewery: Brewery | null;
-		region: Region | null;
+		region: (Region & { country: Country | null }) | null;
 	};
 	sizes: BarBeerMenuSize[];
 }
