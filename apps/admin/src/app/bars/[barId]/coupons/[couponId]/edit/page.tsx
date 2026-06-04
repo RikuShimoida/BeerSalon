@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import CouponForm from "@/components/CouponForm";
 import DashboardLayout from "@/components/DashboardLayout";
-import { getCurrentUser } from "@/lib/auth";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 
 export default async function EditCouponPage({
 	params,
@@ -14,7 +14,15 @@ export default async function EditCouponPage({
 		redirect("/login");
 	}
 
+	if (user.role !== "bar_owner") {
+		redirect("/bars");
+	}
+
 	const { barId, couponId } = await params;
+
+	if (!canAccessBar(user, barId)) {
+		redirect("/bars");
+	}
 
 	return (
 		<DashboardLayout
