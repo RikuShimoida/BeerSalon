@@ -16,7 +16,7 @@ CREATE POLICY "Public read access for bar preview images"
   FOR SELECT
   USING (bucket_id = 'bar-preview-images');
 
--- ポリシー: バーオーナーは自分のバーの画像のみアップロード可能
+-- ポリシー: admin_users ベースでアップロード制御
 DROP POLICY IF EXISTS "Bar owners can upload own bar preview images" ON storage.objects;
 CREATE POLICY "Bar owners can upload own bar preview images"
   ON storage.objects
@@ -25,14 +25,13 @@ CREATE POLICY "Bar owners can upload own bar preview images"
     bucket_id = 'bar-preview-images'
     AND (storage.foldername(name))[1] = 'bars'
     AND (
-      -- バーオーナーは自分のバーのみアップロード可能
       EXISTS (
-        SELECT 1 FROM bar_owners
+        SELECT 1 FROM admin_users
         WHERE bar_id::text = (storage.foldername(name))[2]
-          AND admin_user_id = auth.uid()::uuid
+          AND id = auth.uid()::uuid
+          AND role = 'bar_owner'
       )
       OR
-      -- 管理者は全バーの画像をアップロード可能
       EXISTS (
         SELECT 1 FROM admin_users
         WHERE id = auth.uid()::uuid AND role = 'admin'
@@ -40,7 +39,7 @@ CREATE POLICY "Bar owners can upload own bar preview images"
     )
   );
 
--- ポリシー: バーオーナーは自分のバーの画像のみ更新可能
+-- ポリシー: admin_users ベースで更新制御
 DROP POLICY IF EXISTS "Bar owners can update own bar preview images" ON storage.objects;
 CREATE POLICY "Bar owners can update own bar preview images"
   ON storage.objects
@@ -50,9 +49,10 @@ CREATE POLICY "Bar owners can update own bar preview images"
     AND (storage.foldername(name))[1] = 'bars'
     AND (
       EXISTS (
-        SELECT 1 FROM bar_owners
+        SELECT 1 FROM admin_users
         WHERE bar_id::text = (storage.foldername(name))[2]
-          AND admin_user_id = auth.uid()::uuid
+          AND id = auth.uid()::uuid
+          AND role = 'bar_owner'
       )
       OR
       EXISTS (
@@ -62,7 +62,7 @@ CREATE POLICY "Bar owners can update own bar preview images"
     )
   );
 
--- ポリシー: バーオーナーは自分のバーの画像のみ削除可能
+-- ポリシー: admin_users ベースで削除制御
 DROP POLICY IF EXISTS "Bar owners can delete own bar preview images" ON storage.objects;
 CREATE POLICY "Bar owners can delete own bar preview images"
   ON storage.objects
@@ -72,9 +72,10 @@ CREATE POLICY "Bar owners can delete own bar preview images"
     AND (storage.foldername(name))[1] = 'bars'
     AND (
       EXISTS (
-        SELECT 1 FROM bar_owners
+        SELECT 1 FROM admin_users
         WHERE bar_id::text = (storage.foldername(name))[2]
-          AND admin_user_id = auth.uid()::uuid
+          AND id = auth.uid()::uuid
+          AND role = 'bar_owner'
       )
       OR
       EXISTS (
