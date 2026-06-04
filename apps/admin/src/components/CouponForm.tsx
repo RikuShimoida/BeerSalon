@@ -90,7 +90,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					required
 					value={formData.title}
 					onChange={handleChange}
-					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 				/>
 			</div>
 			<div className="grid grid-cols-2 gap-4">
@@ -106,7 +106,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 						name="discount_type"
 						value={formData.discount_type}
 						onChange={handleChange}
-						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 					>
 						<option value="percentage">パーセント</option>
 						<option value="fixed_amount">固定金額</option>
@@ -126,7 +126,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 						required
 						value={formData.discount_value}
 						onChange={handleChange}
-						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 					/>
 				</div>
 			</div>
@@ -143,7 +143,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					name="code"
 					value={formData.code}
 					onChange={handleChange}
-					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 				/>
 			</div>
 			<div>
@@ -159,7 +159,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					name="usage_limit"
 					value={formData.usage_limit}
 					onChange={handleChange}
-					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 				/>
 			</div>
 			<div className="grid grid-cols-2 gap-4">
@@ -176,7 +176,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 						name="valid_from"
 						value={formData.valid_from}
 						onChange={handleChange}
-						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 					/>
 				</div>
 				<div>
@@ -192,7 +192,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 						name="valid_until"
 						value={formData.valid_until}
 						onChange={handleChange}
-						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 					/>
 				</div>
 			</div>
@@ -209,7 +209,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					rows={4}
 					value={formData.description}
 					onChange={handleChange}
-					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 				/>
 			</div>
 			<div className="flex items-center">
@@ -219,7 +219,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 					name="is_active"
 					checked={formData.is_active}
 					onChange={handleChange}
-					className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+					className="h-4 w-4 text-gray-900 focus:ring-gray-900 border-gray-300 rounded"
 				/>
 				<label htmlFor="is_active" className="ml-2 text-sm text-gray-900">
 					有効
@@ -229,14 +229,14 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 				<button
 					type="button"
 					onClick={() => router.back()}
-					className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+					className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
 				>
 					キャンセル
 				</button>
 				<button
 					type="submit"
 					disabled={loading}
-					className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+					className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{loading ? "保存中..." : couponId ? "更新" : "作成"}
 				</button>
