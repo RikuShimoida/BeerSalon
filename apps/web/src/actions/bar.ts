@@ -212,6 +212,10 @@ export async function getBarDetail(barId: string) {
 			barEvents: {
 				where: {
 					isActive: true,
+					OR: [
+						{ endDate: { gte: new Date() } },
+						{ endDate: null, startDate: { gte: new Date() } },
+					],
 				},
 				orderBy: {
 					startDate: "asc",

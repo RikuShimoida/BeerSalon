@@ -4,10 +4,10 @@ import { BarTabs } from "@/components/bar/bar-tabs";
 import { FavoriteButton } from "@/components/bar/favorite-button";
 import { MediaSlideshow } from "@/components/bar/media-slideshow";
 import { CouponsTab } from "@/components/bar/tabs/coupons-tab";
+import { EventsTab } from "@/components/bar/tabs/events-tab";
 import { MenuTab } from "@/components/bar/tabs/menu-tab";
 import { PostsTab } from "@/components/bar/tabs/posts-tab";
 import { TopTab } from "@/components/bar/tabs/top-tab";
-import { EventsTab } from "@/components/bar/tabs/events-tab";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
 
 export default async function BarDetailPage({

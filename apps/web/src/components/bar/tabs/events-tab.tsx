@@ -4,8 +4,8 @@ interface BarEvent {
 	id: string;
 	title: string;
 	description: string | null;
-	startDate: Date;
-	endDate: Date | null;
+	startDate: Date | string;
+	endDate: Date | string | null;
 	imageUrl: string | null;
 }
 
@@ -13,7 +13,7 @@ interface EventsTabProps {
 	events: BarEvent[];
 }
 
-function formatEventDateTime(date: Date): string {
+function formatEventDateTime(date: Date | string): string {
 	return new Date(date).toLocaleString("ja-JP", {
 		year: "numeric",
 		month: "2-digit",

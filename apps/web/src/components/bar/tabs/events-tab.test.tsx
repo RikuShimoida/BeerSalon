@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { EventsTab } from "./events-tab";
 
 vi.mock("next/image", () => ({
-	// biome-ignore lint/performance/noImgElement: テスト用next/imageモック
 	default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+		// biome-ignore lint/performance/noImgElement: テスト用next/imageモック
 		<img {...props} alt={props.alt} />
 	),
 }));
@@ -77,6 +77,17 @@ describe("EventsTab", () => {
 			expect(
 				screen.queryByAltText("クラフトビール祭り"),
 			).not.toBeInTheDocument();
+		});
+
+		it("日付が文字列で渡されても正しく表示される", () => {
+			const event = {
+				...baseEvent,
+				startDate: "2026-07-01T09:00:00.000Z",
+				endDate: "2026-07-01T13:00:00.000Z",
+			};
+			render(<EventsTab events={[event]} />);
+			expect(screen.getByText(/開始:/)).toBeInTheDocument();
+			expect(screen.getByText(/終了:/)).toBeInTheDocument();
 		});
 
 		it("複数イベントが表示される", () => {
