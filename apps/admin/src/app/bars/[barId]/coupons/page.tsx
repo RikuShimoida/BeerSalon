@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
-import { getCurrentUser } from "@/lib/auth";
+import { requireBarAccess } from "@/lib/auth";
 import CouponList from "./CouponList";
 
 export default async function CouponsPage({
@@ -8,13 +7,8 @@ export default async function CouponsPage({
 }: {
 	params: Promise<{ barId: string }>;
 }) {
-	const user = await getCurrentUser();
-
-	if (!user) {
-		redirect("/login");
-	}
-
 	const { barId } = await params;
+	const user = await requireBarAccess(barId);
 
 	return (
 		<DashboardLayout

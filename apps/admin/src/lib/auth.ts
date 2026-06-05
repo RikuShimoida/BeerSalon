@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import type { AdminUser } from "@/types/database";
 
 const jwtSecret = process.env.JWT_SECRET;
@@ -99,4 +100,21 @@ export function canAccessBar(
 ): boolean {
 	if (user.role === "admin") return true;
 	return user.barId === Number(barId);
+}
+
+export async function requireBarAccess(barId: string): Promise<CurrentUser> {
+	const user = await getCurrentUser();
+	if (!user) redirect("/login");
+	if (!canAccessBar(user, barId)) redirect("/bars");
+	return user;
+}
+
+export async function requireBarOwnerAccess(
+	barId: string,
+): Promise<CurrentUser> {
+	const user = await getCurrentUser();
+	if (!user) redirect("/login");
+	if (user.role !== "bar_owner") redirect("/bars");
+	if (!canAccessBar(user, barId)) redirect("/bars");
+	return user;
 }
