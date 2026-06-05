@@ -70,6 +70,10 @@ model Bar {
   viewHistories     ViewHistory[]
   barPaymentMethods BarPaymentMethod[]
   openingHours      BarOpeningHour[]
+  adminUsers        AdminUser[]
+  barEvents         BarEvent[]
+  barSubscriptions  BarSubscription[]
+  invoices          Invoice[]
 
   @@map("bars")
 }
@@ -119,11 +123,12 @@ model BeerCategory {
 
 /// 国マスタ
 model Country {
-  id        BigInt   @id @default(autoincrement())
-  name      String   @unique
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id        BigInt     @id @default(autoincrement())
+  name      String     @unique
+  isActive  Boolean    @default(true) @map("is_active")
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  breweries Brewery[]
   regions   Region[]
 
   @@map("countries")
@@ -149,12 +154,14 @@ model Region {
 model Brewery {
   id         BigInt   @id @default(autoincrement())
   name       String   @unique
+  countryId  BigInt?  @map("country_id")
   regionId   BigInt?  @map("region_id")
   websiteUrl String?  @map("website_url")
   isActive   Boolean  @default(true) @map("is_active")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
   beers      Beer[]
+  country    Country? @relation(fields: [countryId], references: [id])
   region     Region?  @relation(fields: [regionId], references: [id])
 
   @@map("breweries")
@@ -432,4 +439,106 @@ model BarPaymentMethod {
 
   @@unique([barId, paymentMethodId])
   @@map("bar_payment_methods")
+}
+
+// ============================================================
+// 管理画面専用テーブル
+// ============================================================
+
+/// 管理画面ログインユーザー
+model AdminUser {
+  id            String   @id @default(uuid()) @db.Uuid
+  barManageId   String   @unique @map("bar_manage_id")
+  passwordHash  String   @map("password_hash")
+  name          String
+  role          String   @default("bar_owner")
+  barId         BigInt?  @map("bar_id")
+  contactEmail  String?  @map("contact_email")
+  contactPhone  String?  @map("contact_phone")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bar           Bar?     @relation(fields: [barId], references: [id], onDelete: SetNull)
+
+  @@index([barId])
+  @@map("admin_users")
+}
+
+/// 店舗イベント
+model BarEvent {
+  id          BigInt    @id @default(autoincrement())
+  barId       BigInt    @map("bar_id")
+  title       String
+  description String?
+  startDate   DateTime  @map("start_date") @db.Timestamptz(6)
+  endDate     DateTime? @map("end_date") @db.Timestamptz(6)
+  imageUrl    String?   @map("image_url")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bar         Bar       @relation(fields: [barId], references: [id], onDelete: Cascade)
+
+  @@index([barId])
+  @@map("bar_events")
+}
+
+/// サブスクリプションプラン
+model SubscriptionPlan {
+  id             BigInt            @id @default(autoincrement())
+  name           String
+  stripePriceId  String            @map("stripe_price_id")
+  price          Int
+  currency       String
+  interval       String
+  features       Json?
+  isActive       Boolean           @default(true) @map("is_active")
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  subscriptions  BarSubscription[]
+
+  @@map("subscription_plans")
+}
+
+/// バーのサブスクリプション
+model BarSubscription {
+  id                   BigInt           @id @default(autoincrement())
+  barId                BigInt           @map("bar_id")
+  subscriptionPlanId   BigInt           @map("subscription_plan_id")
+  stripeCustomerId     String           @map("stripe_customer_id")
+  stripeSubscriptionId String           @map("stripe_subscription_id")
+  status               String           @default("active")
+  currentPeriodStart   DateTime         @map("current_period_start") @db.Timestamptz(6)
+  currentPeriodEnd     DateTime         @map("current_period_end") @db.Timestamptz(6)
+  cancelAtPeriodEnd    Boolean          @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime?        @map("canceled_at") @db.Timestamptz(6)
+  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bar                  Bar              @relation(fields: [barId], references: [id], onDelete: Cascade)
+  subscriptionPlan     SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
+  invoices             Invoice[]
+
+  @@index([barId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@map("bar_subscriptions")
+}
+
+/// 請求書
+model Invoice {
+  id                BigInt           @id @default(autoincrement())
+  barId             BigInt           @map("bar_id")
+  barSubscriptionId BigInt?          @map("bar_subscription_id")
+  stripeInvoiceId   String           @map("stripe_invoice_id")
+  amountPaid        Int              @map("amount_paid")
+  amountDue         Int              @map("amount_due")
+  currency          String
+  status            String
+  invoicePdf        String?          @map("invoice_pdf")
+  paidAt            DateTime?        @map("paid_at") @db.Timestamptz(6)
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  bar               Bar              @relation(fields: [barId], references: [id], onDelete: Cascade)
+  barSubscription   BarSubscription? @relation(fields: [barSubscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([barId])
+  @@map("invoices")
 }
