@@ -209,6 +209,18 @@ export async function getBarDetail(barId: string) {
 					createdAt: "desc",
 				},
 			},
+			barEvents: {
+				where: {
+					isActive: true,
+					OR: [
+						{ endDate: { gte: new Date() } },
+						{ endDate: null, startDate: { gte: new Date() } },
+					],
+				},
+				orderBy: {
+					startDate: "asc",
+				},
+			},
 		},
 	});
 
@@ -292,6 +304,11 @@ export async function getBarDetail(barId: string) {
 			...coupon,
 			id: coupon.id.toString(),
 			barId: coupon.barId.toString(),
+		})),
+		events: bar.barEvents.map((event) => ({
+			...event,
+			id: event.id.toString(),
+			barId: event.barId.toString(),
 		})),
 	};
 }

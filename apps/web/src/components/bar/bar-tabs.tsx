@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type Tab = "top" | "menu" | "posts" | "articles" | "coupons";
+type Tab = "top" | "menu" | "posts" | "articles" | "coupons" | "events";
 
 interface BarTabsProps {
 	children: {
@@ -11,6 +11,7 @@ interface BarTabsProps {
 		posts: React.ReactNode;
 		articles: React.ReactNode;
 		coupons: React.ReactNode;
+		events: React.ReactNode;
 	};
 }
 
@@ -23,6 +24,7 @@ export function BarTabs({ children }: BarTabsProps) {
 		{ key: "posts", label: "タグ付けされた投稿" },
 		{ key: "articles", label: "お店からの投稿" },
 		{ key: "coupons", label: "クーポン" },
+		{ key: "events", label: "イベント" },
 	];
 
 	return (
