@@ -58,6 +58,27 @@ export function validateFacebookUrl(url: string | null | undefined): {
 	return { isValid: true };
 }
 
+export function validateLineUrl(url: string | null | undefined): {
+	isValid: boolean;
+	error?: string;
+} {
+	if (!url || url.trim() === "") {
+		return { isValid: true };
+	}
+
+	const lineUrlPattern =
+		/^https:\/\/(line\.me|lin\.ee|page\.line\.me|liff\.line\.me)\/.+/i;
+	if (!lineUrlPattern.test(url)) {
+		return {
+			isValid: false,
+			error:
+				"LINE URLの形式が正しくありません。line.me, lin.ee, page.line.me, liff.line.me のURLを入力してください",
+		};
+	}
+
+	return { isValid: true };
+}
+
 export function validateWebsiteUrl(url: string | null | undefined): {
 	isValid: boolean;
 	error?: string;

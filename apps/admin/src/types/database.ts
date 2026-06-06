@@ -58,6 +58,7 @@ export interface Bar {
 	instagram_url: string | null;
 	x_url: string | null;
 	facebook_url: string | null;
+	line_url: string | null;
 	description: string | null;
 	preview_image_url: string | null;
 	is_active: boolean;
