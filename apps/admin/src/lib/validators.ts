@@ -66,12 +66,13 @@ export function validateLineUrl(url: string | null | undefined): {
 		return { isValid: true };
 	}
 
-	const lineUrlPattern = /^https:\/\/.+/i;
+	const lineUrlPattern =
+		/^https:\/\/(line\.me|lin\.ee|page\.line\.me|liff\.line\.me)\/.+/i;
 	if (!lineUrlPattern.test(url)) {
 		return {
 			isValid: false,
 			error:
-				"LINE URLの形式が正しくありません。https:// で始まるURLを入力してください",
+				"LINE URLの形式が正しくありません。line.me, lin.ee, page.line.me, liff.line.me のURLを入力してください",
 		};
 	}
 

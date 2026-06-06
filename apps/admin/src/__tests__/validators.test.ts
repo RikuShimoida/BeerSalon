@@ -18,25 +18,39 @@ describe("validateLineUrl", () => {
 		expect(validateLineUrl("   ")).toEqual({ isValid: true });
 	});
 
-	it("https://で始まるURLはバリデーションを通過する", () => {
+	it("https://line.me のURLはバリデーションを通過する", () => {
 		expect(validateLineUrl("https://line.me/R/ti/p/@example")).toEqual({
 			isValid: true,
 		});
 	});
 
-	it("https://lin.eeのURLもバリデーションを通過する", () => {
+	it("https://lin.ee のURLはバリデーションを通過する", () => {
 		expect(validateLineUrl("https://lin.ee/example")).toEqual({
 			isValid: true,
 		});
 	});
 
-	it("https://page.line.meのURLもバリデーションを通過する", () => {
+	it("https://page.line.me のURLはバリデーションを通過する", () => {
 		expect(validateLineUrl("https://page.line.me/example")).toEqual({
 			isValid: true,
 		});
 	});
 
-	it("http://で始まるURLはバリデーションに失敗する", () => {
+	it("https://liff.line.me のURLはバリデーションを通過する", () => {
+		expect(validateLineUrl("https://liff.line.me/1234567890-abcdefgh")).toEqual(
+			{
+				isValid: true,
+			},
+		);
+	});
+
+	it("LINE公式ドメイン以外のHTTPS URLはバリデーションに失敗する", () => {
+		const result = validateLineUrl("https://example.com/line");
+		expect(result.isValid).toBe(false);
+		expect(result.error).toBeDefined();
+	});
+
+	it("http://で始まるLINE URLはバリデーションに失敗する", () => {
 		const result = validateLineUrl("http://line.me/R/ti/p/@example");
 		expect(result.isValid).toBe(false);
 		expect(result.error).toBeDefined();
@@ -54,9 +68,9 @@ describe("validateLineUrl", () => {
 		expect(result.error).toBeDefined();
 	});
 
-	it("エラーメッセージにhttps://の案内が含まれる", () => {
+	it("エラーメッセージにline.meの案内が含まれる", () => {
 		const result = validateLineUrl("not-a-url");
 		expect(result.isValid).toBe(false);
-		expect(result.error).toContain("https://");
+		expect(result.error).toContain("line.me");
 	});
 });

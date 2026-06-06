@@ -271,10 +271,12 @@ export function TopTab({ bar }: TopTabProps) {
 							target="_blank"
 							rel="nofollow noopener"
 							className="inline-flex items-center gap-2 text-gray-700 hover:text-[#06C755] transition-colors"
-							aria-label="LINEで友だち追加"
+							aria-label="LINEで見る"
 						>
 							<LineIcon className="w-6 h-6" />
-							<span className="text-sm">友だち追加</span>
+							<span className="text-sm">
+								@{bar.lineUrl.split("/").filter(Boolean).pop()}
+							</span>
 						</a>
 					</div>
 				)}
