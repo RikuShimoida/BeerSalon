@@ -84,6 +84,9 @@
 		"https://www.facebook.com/testbar",
 	);
 
+	// LINE URL
+	setReactInput('input[name="line_url"]', "https://line.me/R/ti/p/@testbar");
+
 	// PR文
 	setReactInput(
 		'textarea[name="description"]',

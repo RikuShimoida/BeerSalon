@@ -1,5 +1,6 @@
 import { Instagram } from "lucide-react";
 import { FacebookIcon } from "@/components/icons/facebook-icon";
+import { LineIcon } from "@/components/icons/line-icon";
 import { XIcon } from "@/components/icons/x-icon";
 
 interface PaymentMethod {
@@ -34,6 +35,7 @@ interface BarInfo {
 	instagramUrl: string | null;
 	xUrl: string | null;
 	facebookUrl: string | null;
+	lineUrl: string | null;
 	paymentMethods: PaymentMethod[];
 	openingHours: OpeningHour[];
 }
@@ -257,6 +259,22 @@ export function TopTab({ bar }: TopTabProps) {
 							<span className="text-sm">
 								@{bar.facebookUrl.split("/").filter(Boolean).pop()}
 							</span>
+						</a>
+					</div>
+				)}
+
+				{bar.lineUrl && (
+					<div>
+						<h3 className="text-sm font-semibold text-gray-700 mb-1">LINE</h3>
+						<a
+							href={bar.lineUrl}
+							target="_blank"
+							rel="nofollow noopener"
+							className="inline-flex items-center gap-2 text-gray-700 hover:text-[#06C755] transition-colors"
+							aria-label="LINEで友だち追加"
+						>
+							<LineIcon className="w-6 h-6" />
+							<span className="text-sm">友だち追加</span>
 						</a>
 					</div>
 				)}

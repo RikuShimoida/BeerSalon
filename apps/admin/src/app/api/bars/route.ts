@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import {
 	validateFacebookUrl,
 	validateInstagramUrl,
+	validateLineUrl,
 	validateWebsiteUrl,
 	validateXUrl,
 } from "@/lib/validators";
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest) {
 			instagram_url,
 			x_url,
 			facebook_url,
+			line_url,
 			description,
 			opening_hours,
 		} = body;
@@ -189,6 +191,16 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		const lineUrlValidation = validateLineUrl(line_url);
+		if (!lineUrlValidation.isValid) {
+			return NextResponse.json(
+				{
+					error: lineUrlValidation.error || "LINE URLの形式が正しくありません",
+				},
+				{ status: 400 },
+			);
+		}
+
 		// バー作成
 		const now = new Date().toISOString();
 		const { data: bar, error: barError } = await supabaseAdmin
@@ -205,6 +217,7 @@ export async function POST(request: NextRequest) {
 				instagram_url: instagram_url || null,
 				x_url: x_url || null,
 				facebook_url: facebook_url || null,
+				line_url: line_url || null,
 				description: description || null,
 				updated_at: now,
 			})

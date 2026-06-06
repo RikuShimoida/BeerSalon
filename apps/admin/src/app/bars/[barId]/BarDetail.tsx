@@ -379,6 +379,20 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 						</a>
 					</div>
 				)}
+
+				{bar.line_url && (
+					<div>
+						<h3 className="text-sm font-medium text-gray-500 mb-1">LINE</h3>
+						<a
+							href={bar.line_url}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-gray-900 underline break-all"
+						>
+							{bar.line_url}
+						</a>
+					</div>
+				)}
 			</section>
 
 			{/* Management menu */}

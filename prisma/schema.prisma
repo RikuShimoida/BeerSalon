@@ -55,6 +55,7 @@ model Bar {
   instagramUrl      String?            @map("instagram_url")
   xUrl              String?            @map("x_url")
   facebookUrl       String?            @map("facebook_url")
+  lineUrl           String?            @map("line_url")
   description       String?
   previewImageUrl   String?            @map("preview_image_url")
   isActive          Boolean            @default(true) @map("is_active")

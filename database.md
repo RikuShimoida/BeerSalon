@@ -69,6 +69,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | instagram_url   | text       | NULLABLE                         | Instagram URL                           |
 | x_url           | text       | NULLABLE                         | X (Twitter) URL                         |
 | facebook_url    | text       | NULLABLE                         | Facebook URL                            |
+| line_url        | text       | NULLABLE                         | LINE URL                                |
 | description     | text       | NULLABLE                         | PR文                                    |
 | preview_image_url | text     | NULLABLE                         | 一覧表示用プレビュー画像URL             |
 | is_active       | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ                            |

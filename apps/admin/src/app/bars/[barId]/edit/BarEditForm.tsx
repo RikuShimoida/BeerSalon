@@ -12,6 +12,7 @@ import {
 import {
 	validateFacebookUrl,
 	validateInstagramUrl,
+	validateLineUrl,
 	validateWebsiteUrl,
 	validateXUrl,
 } from "@/lib/validators";
@@ -50,6 +51,7 @@ export default function BarEditForm({ barId }: { barId: string }) {
 		instagram_url: "",
 		x_url: "",
 		facebook_url: "",
+		line_url: "",
 	});
 
 	const [openingHours, setOpeningHours] = useState<OpeningHourInput[]>(
@@ -112,6 +114,7 @@ export default function BarEditForm({ barId }: { barId: string }) {
 				instagram_url: data.instagram_url || "",
 				x_url: data.x_url || "",
 				facebook_url: data.facebook_url || "",
+				line_url: data.line_url || "",
 			});
 
 			if (data.opening_hours && data.opening_hours.length > 0) {
@@ -285,6 +288,13 @@ export default function BarEditForm({ barId }: { barId: string }) {
 			const result = validateFacebookUrl(formData.facebook_url);
 			if (!result.isValid) {
 				setError(result.error || "Facebook URLの形式が正しくありません");
+				return;
+			}
+		}
+		if (formData.line_url) {
+			const result = validateLineUrl(formData.line_url);
+			if (!result.isValid) {
+				setError(result.error || "LINE URLの形式が正しくありません");
 				return;
 			}
 		}
@@ -675,6 +685,24 @@ export default function BarEditForm({ barId }: { barId: string }) {
 						value={formData.facebook_url}
 						onChange={handleChange}
 						placeholder="https://www.facebook.com/yourpage"
+						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
+					/>
+				</div>
+
+				<div>
+					<label
+						htmlFor="line_url"
+						className="block text-sm font-medium text-gray-700"
+					>
+						LINE
+					</label>
+					<input
+						type="url"
+						id="line_url"
+						name="line_url"
+						value={formData.line_url}
+						onChange={handleChange}
+						placeholder="https://line.me/R/ti/p/@example"
 						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 					/>
 				</div>

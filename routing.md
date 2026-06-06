@@ -169,6 +169,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
    - 電話番号（スマホならタップで電話アプリ起動）
    - 住所
    - ホームページリンク
+   - SNSリンク（Instagram、X、Facebook、LINE）
 
 2. メニュータブ
    - Beers（上半分）

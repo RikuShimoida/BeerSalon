@@ -12,6 +12,7 @@ import {
 import {
 	validateFacebookUrl,
 	validateInstagramUrl,
+	validateLineUrl,
 	validateWebsiteUrl,
 	validateXUrl,
 } from "@/lib/validators";
@@ -56,6 +57,7 @@ export default function BarNewForm() {
 		instagram_url: "",
 		x_url: "",
 		facebook_url: "",
+		line_url: "",
 	});
 
 	// Images
@@ -207,6 +209,13 @@ export default function BarNewForm() {
 			const result = validateFacebookUrl(phase2.facebook_url);
 			if (!result.isValid) {
 				setError(result.error || "Facebook URLの形式が正しくありません");
+				return;
+			}
+		}
+		if (phase2.line_url) {
+			const result = validateLineUrl(phase2.line_url);
+			if (!result.isValid) {
+				setError(result.error || "LINE URLの形式が正しくありません");
 				return;
 			}
 		}
@@ -665,6 +674,24 @@ export default function BarNewForm() {
 							value={phase2.facebook_url}
 							onChange={handlePhase2Change}
 							placeholder="https://www.facebook.com/yourpage"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
+						/>
+					</div>
+
+					<div>
+						<label
+							htmlFor="line_url"
+							className="block text-sm font-medium text-gray-700"
+						>
+							LINE
+						</label>
+						<input
+							type="url"
+							id="line_url"
+							name="line_url"
+							value={phase2.line_url}
+							onChange={handlePhase2Change}
+							placeholder="https://line.me/R/ti/p/@example"
 							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 						/>
 					</div>
