@@ -5,6 +5,54 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Bar, BarImage, BarOpeningHour } from "@/types/database";
 
+function PaymentManagementCard({ barId }: { barId: string }) {
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState("");
+
+	const handleClick = async () => {
+		setLoading(true);
+		setError("");
+
+		try {
+			const response = await fetch(`/api/bars/${barId}/portal`, {
+				method: "POST",
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				setError(data.error || "エラーが発生しました");
+				return;
+			}
+
+			window.location.href = data.url;
+		} catch (_e) {
+			setError("通信エラーが発生しました");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	return (
+		<div className="border border-gray-200 rounded-lg p-4">
+			<button
+				type="button"
+				onClick={handleClick}
+				disabled={loading}
+				className="w-full text-left hover:opacity-80 transition-opacity disabled:opacity-50"
+			>
+				<h3 className="font-medium text-gray-900">支払い方法管理</h3>
+				<p className="text-sm text-gray-500 mt-1">
+					{loading
+						? "Stripe Customer Portalを開いています..."
+						: "Stripe Customer Portal（外部サイト）"}
+				</p>
+			</button>
+			{error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+		</div>
+	);
+}
+
 interface BarDetailProps {
 	barId: string;
 	userRole: "bar_owner" | "admin";
@@ -414,17 +462,7 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 							)}
 						</Link>
 					))}
-					<a
-						href="https://billing.stripe.com/p/login/test"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="block border border-gray-200 rounded-lg p-4 hover:border-gray-400 transition-colors"
-					>
-						<h3 className="font-medium text-gray-900">支払い方法管理</h3>
-						<p className="text-sm text-gray-500 mt-1">
-							Stripe Customer Portal（外部サイト）
-						</p>
-					</a>
+					<PaymentManagementCard barId={barId} />
 				</div>
 			</section>
 		</div>
