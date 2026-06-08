@@ -1,14 +1,79 @@
 ---
 name: understand
-description: 実装完了後にユーザーの理解を確認する対話スキル。Claudeが何をやったのか・なぜそうしたのかを、ユーザー自身の言葉で説明させることで理解を定着させる。/implement の完了報告後に自動発動する。
+description: 実装完了後にユーザーの理解を確認する対話スキル。Claudeが何をやったのか・なぜそうしたのかを、ユーザー自身の言葉で説明させることで理解を定着させる。Spring Boot（Java）との対比で技術概念を翻訳する機能も持つ。/implement の完了報告後に自動発動する。
 when_to_use: /implement の Phase 2 完了報告の直後に自動発動する。手動で「/understand」と呼んだ場合も発動する。
 ---
 
-## 実装理解チェック
+## Phase 0: Spring Boot 翻訳（理解チェックの前に必ず実行）
+
+今回の実装で使われた Next.js / React の技術概念を、Spring Boot（Java）の対応概念に翻訳して説明する。
+ユーザーは Spring Boot / Java の開発経験があり、Next.js / React は学習中である。
+
+### 対応表
+
+| Next.js / React | Spring Boot / Java |
+|---|---|
+| Server Actions | `@Controller` の `@PostMapping` / `@GetMapping` メソッド |
+| Server Components (RSC) | Thymeleaf テンプレート + Controller（サーバーサイドレンダリング） |
+| Client Components (`"use client"`) | REST API を呼ぶフロントエンド JS（Thymeleaf + fetch/axios） |
+| App Router (`app/` ディレクトリ) | `@RequestMapping` によるルーティング定義 |
+| `layout.tsx` | 共通テンプレートレイアウト / Spring Security の `FilterChain` |
+| `middleware.ts` | Spring Security の `Filter` / `HandlerInterceptor` |
+| `page.tsx` | Controller メソッド + 対応する Thymeleaf テンプレート |
+| `loading.tsx` | ※ Spring MVC に直接対応なし（フロントエンド固有のローディング表示） |
+| `error.tsx` | `@ControllerAdvice` + `@ExceptionHandler` |
+| Prisma ORM | Spring Data JPA / Hibernate |
+| Prisma schema (`schema.prisma`) | `@Entity` アノテーション付き Java クラス |
+| Prisma の `findMany`, `create` 等 | JPA Repository の `findAll()`, `save()` 等 |
+| Zod バリデーション | Jakarta Bean Validation (`@Valid`, `@NotNull`, `@Size` 等) |
+| React Hook Form | Spring MVC のフォームバインディング (`@ModelAttribute`) |
+| Supabase Auth | Spring Security + JWT / OAuth2 |
+| API Route (`route.ts`) | `@RestController` のエンドポイント |
+| `useEffect` | ※ フロントエンド固有。Spring に対応なし |
+| `useState` | ※ フロントエンド固有。Spring に対応なし |
+| Tailwind CSS | ※ CSS フレームワーク。Java 側に対応なし |
+| `revalidatePath` / `revalidateTag` | Spring Cache の `@CacheEvict` |
+| `redirect()` | `return "redirect:/path"` |
+| `cookies()` / `headers()` | `HttpServletRequest` から取得 |
+| 環境変数 (`process.env`) | `application.properties` / `@Value` |
+
+### 出力フォーマット
+
+```
+---
+## Spring Boot 翻訳
+
+今回の実装を Spring Boot で例えると:
+
+**変更内容の要約**
+{1-2文で今回やったことを要約}
+
+**ファイルごとの対応**
+- `{変更したファイル}` → Spring Boot では `{対応するクラス/ファイル}` に相当
+  - {具体的な説明}
+
+**使われた技術概念**
+- {Next.js の概念}: Spring Boot でいう {対応概念}。{補足説明}
+
+**Spring Boot 開発者として注意すべき違い**
+- {考え方が根本的に異なる部分があれば記載。なければ省略}
+---
+```
+
+### ルール
+
+- 今回の実装で実際に使われた概念だけを翻訳する（対応表を全部出さない）
+- 対応がない概念（`useState` 等）は「Spring Boot に対応なし。フロントエンド固有の仕組みで〜」と正直に伝える
+- 翻訳は簡潔に。1概念につき1-2文で説明する
+- ユーザーが追加で「これは Spring Boot でいうと何？」と聞いてきたら、対応表を参考に回答する
+
+---
+
+## Phase 1: 実装理解チェック
 
 実装完了後、ユーザーが「何が変わったのか」「なぜそうしたのか」を自分の言葉で説明できるか確認する対話を行う。
 
-### 質問の生成ルール
+### Phase 1 の質問生成ルール
 
 今回の実装内容を振り返り、以下の両面から質問を作る:
 
