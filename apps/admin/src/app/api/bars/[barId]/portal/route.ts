@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, canAccessBar } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	const user = await getCurrentUser();
@@ -23,6 +23,7 @@ export async function POST(
 		.select("stripe_customer_id")
 		.eq("bar_id", barId)
 		.in("status", ["active", "trialing", "past_due"])
+		.order("created_at", { ascending: false })
 		.limit(1)
 		.single();
 
@@ -36,11 +37,12 @@ export async function POST(
 	try {
 		const portalSession = await stripe.billingPortal.sessions.create({
 			customer: subscription.stripe_customer_id,
-			return_url: `${process.env.NEXT_PUBLIC_APP_URL}/bars/${barId}`,
+			return_url: `${process.env.ADMIN_BASE_URL || process.env.NEXT_PUBLIC_APP_URL}/bars/${barId}`,
 		});
 
 		return NextResponse.json({ url: portalSession.url });
-	} catch (_e) {
+	} catch (e) {
+		console.error("Stripe Portal Session作成エラー:", e);
 		return NextResponse.json(
 			{ error: "Stripe Customer Portalの作成に失敗しました" },
 			{ status: 500 },

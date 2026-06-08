@@ -44,6 +44,7 @@ function mockSupabaseChain(result: { data: unknown; error: unknown }) {
 		select: vi.fn().mockReturnThis(),
 		eq: vi.fn().mockReturnThis(),
 		in: vi.fn().mockReturnThis(),
+		order: vi.fn().mockReturnThis(),
 		limit: vi.fn().mockReturnThis(),
 		single: vi.fn().mockResolvedValue(result),
 	};
@@ -129,7 +130,8 @@ describe("POST /api/bars/[barId]/portal", () => {
 		});
 	});
 
-	it("Stripe APIエラー時は500を返す", async () => {
+	it("Stripe APIエラー時は500を返し、エラーをログ出力する", async () => {
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		mockGetCurrentUser.mockResolvedValue({
 			id: "user-1",
 			role: "bar_owner",
@@ -140,13 +142,19 @@ describe("POST /api/bars/[barId]/portal", () => {
 			data: { stripe_customer_id: "cus_test123" },
 			error: null,
 		});
-		mockPortalSessionsCreate.mockRejectedValue(new Error("Stripe API Error"));
+		const stripeError = new Error("Stripe API Error");
+		mockPortalSessionsCreate.mockRejectedValue(stripeError);
 
 		const response = await POST(createMockRequest(), createMockParams("1"));
 		const body = await response.json();
 
 		expect(response.status).toBe(500);
 		expect(body.error).toBe("Stripe Customer Portalの作成に失敗しました");
+		expect(consoleSpy).toHaveBeenCalledWith(
+			"Stripe Portal Session作成エラー:",
+			stripeError,
+		);
+		consoleSpy.mockRestore();
 	});
 
 	it("admin権限でもアクセスできる", async () => {
