@@ -86,6 +86,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/bypass-heuristic.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -qE '(pnpm|npm)\\s+(run\\s+)?dev'; then echo 'BLOCKED: pnpm dev / npm run dev は禁止されています。ユーザーが起動済みのサーバーを利用してください。' >&2; exit 2; fi"
           },
           {
