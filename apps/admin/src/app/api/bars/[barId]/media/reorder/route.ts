@@ -66,7 +66,7 @@ export async function PUT(
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "順序の更新に失敗しました" },
 			{ status: 500 },

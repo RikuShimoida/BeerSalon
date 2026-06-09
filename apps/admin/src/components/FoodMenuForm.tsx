@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { BarFoodMenu } from "@/types/database";
 
 interface FoodMenuFormProps {
@@ -22,13 +22,7 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 		is_active: true,
 	});
 
-	useEffect(() => {
-		if (menuId) {
-			fetchMenu();
-		}
-	}, [menuId]);
-
-	const fetchMenu = async () => {
+	const fetchMenu = useCallback(async () => {
 		try {
 			const response = await fetch(`/api/bars/${barId}/menus/foods/${menuId}`);
 
@@ -47,10 +41,16 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 				image_url: menu.image_url || "",
 				is_active: menu.is_active,
 			});
-		} catch (error) {
+		} catch (_error) {
 			setError("フードメニューの取得に失敗しました");
 		}
-	};
+	}, [barId, menuId]);
+
+	useEffect(() => {
+		if (menuId) {
+			fetchMenu();
+		}
+	}, [menuId, fetchMenu]);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -71,7 +71,7 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 				},
 				body: JSON.stringify({
 					name: formData.name,
-					price: formData.price ? parseInt(formData.price) : null,
+					price: formData.price ? parseInt(formData.price, 10) : null,
 					description: formData.description || null,
 					image_url: formData.image_url || null,
 					is_active: formData.is_active,
@@ -85,7 +85,7 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 			}
 
 			router.push(`/bars/${barId}/menus/foods`);
-		} catch (error) {
+		} catch (_error) {
 			setError("保存に失敗しました");
 		} finally {
 			setLoading(false);

@@ -19,7 +19,7 @@ const MIME_TO_EXTENSION: Record<string, string> = {
 
 // GET /api/bars/:barId/media - メディア一覧取得
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -59,7 +59,7 @@ export async function GET(
 			media: media || [],
 			total: media?.length || 0,
 		});
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "メディアの取得に失敗しました" },
 			{ status: 500 },
@@ -174,7 +174,7 @@ export async function POST(
 		const { data: newMedia, error: insertError } = await supabaseAdmin
 			.from("bar_images")
 			.insert({
-				bar_id: parseInt(barId),
+				bar_id: parseInt(barId, 10),
 				media_type: mediaType,
 				image_type: "slider",
 				image_url: mediaUrl,
@@ -192,7 +192,7 @@ export async function POST(
 		}
 
 		return NextResponse.json(newMedia);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "ファイルのアップロードに失敗しました" },
 			{ status: 500 },

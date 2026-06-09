@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
 		}
 
 		return NextResponse.json(beers);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Failed to fetch beers" },
 			{ status: 500 },

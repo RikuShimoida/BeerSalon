@@ -1,8 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { BarFoodMenu } from "@/types/database";
 
 interface FoodMenuListProps {
@@ -10,17 +10,12 @@ interface FoodMenuListProps {
 }
 
 export default function FoodMenuList({ barId }: FoodMenuListProps) {
-	const router = useRouter();
 	const [menus, setMenus] = useState<BarFoodMenu[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 
-	useEffect(() => {
-		fetchMenus();
-	}, [barId]);
-
-	const fetchMenus = async () => {
+	const fetchMenus = useCallback(async () => {
 		try {
 			const response = await fetch(`/api/bars/${barId}/menus/foods`);
 
@@ -35,12 +30,16 @@ export default function FoodMenuList({ barId }: FoodMenuListProps) {
 
 			const data = await response.json();
 			setMenus(data.menus || []);
-		} catch (error) {
+		} catch (_error) {
 			setError("フードメニューの取得に失敗しました");
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [barId]);
+
+	useEffect(() => {
+		fetchMenus();
+	}, [fetchMenus]);
 
 	const handleDelete = async (menuId: number) => {
 		if (!confirm("このフードメニューを削除してもよろしいですか?")) {
@@ -58,7 +57,7 @@ export default function FoodMenuList({ barId }: FoodMenuListProps) {
 			}
 
 			fetchMenus();
-		} catch (error) {
+		} catch (_error) {
 			alert("削除に失敗しました");
 		}
 	};
@@ -142,6 +141,7 @@ export default function FoodMenuList({ barId }: FoodMenuListProps) {
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke="currentColor"
+						aria-hidden="true"
 					>
 						<path
 							strokeLinecap="round"
@@ -177,11 +177,14 @@ export default function FoodMenuList({ barId }: FoodMenuListProps) {
 							className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
 						>
 							{menu.image_url ? (
-								<img
-									src={menu.image_url}
-									alt={menu.name}
-									className="w-full h-48 object-cover"
-								/>
+								<div className="relative w-full h-48">
+									<Image
+										src={menu.image_url}
+										alt={menu.name}
+										fill
+										className="object-cover"
+									/>
+								</div>
 							) : (
 								<div className="w-full h-48 bg-gray-200 flex items-center justify-center">
 									<svg
@@ -189,6 +192,7 @@ export default function FoodMenuList({ barId }: FoodMenuListProps) {
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
+										aria-hidden="true"
 									>
 										<path
 											strokeLinecap="round"
@@ -240,6 +244,7 @@ export default function FoodMenuList({ barId }: FoodMenuListProps) {
 										編集
 									</Link>
 									<button
+										type="button"
 										onClick={() => handleDelete(menu.id)}
 										className="flex-1 px-3 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
 									>

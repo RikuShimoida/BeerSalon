@@ -448,19 +448,19 @@ test.describe("Bar Management", () => {
 	});
 
 	test.skip("should show error for oversized image (> 5MB)", async ({
-		barOwnerPage,
+		barOwnerPage: _barOwnerPage,
 	}) => {
 		// Note: このテストは実際のファイルアップロードが必要なのでスキップ
 	});
 
 	test.skip("should show error for unsupported image format", async ({
-		barOwnerPage,
+		barOwnerPage: _barOwnerPage,
 	}) => {
 		// Note: このテストは実際のファイルアップロードが必要なのでスキップ
 	});
 
 	test.skip("should delete preview image successfully", async ({
-		barOwnerPage,
+		barOwnerPage: _barOwnerPage,
 	}) => {
 		// Note: このテストは実際のファイルアップロードが必要なのでスキップ
 	});

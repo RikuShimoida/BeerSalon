@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BeerMenuForm from "@/components/BeerMenuForm";
 import type { BarBeerMenuDetail } from "@/types/database";
 
@@ -15,11 +15,7 @@ export default function BeerMenuEditForm({
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 
-	useEffect(() => {
-		fetchMenu();
-	}, [barId, menuId]);
-
-	const fetchMenu = async () => {
+	const fetchMenu = useCallback(async () => {
 		try {
 			const response = await fetch(`/api/bars/${barId}/menus/beers/${menuId}`);
 
@@ -36,12 +32,16 @@ export default function BeerMenuEditForm({
 
 			const data = await response.json();
 			setMenu(data);
-		} catch (error) {
+		} catch (_error) {
 			setError("ビールメニュー情報の取得に失敗しました");
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [barId, menuId]);
+
+	useEffect(() => {
+		fetchMenu();
+	}, [fetchMenu]);
 
 	if (loading) {
 		return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { BarCoupon } from "@/types/database";
 
 interface CouponFormProps {
@@ -24,11 +24,7 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 		is_active: true,
 	});
 
-	useEffect(() => {
-		if (couponId) fetchCoupon();
-	}, [couponId]);
-
-	const fetchCoupon = async () => {
+	const fetchCoupon = useCallback(async () => {
 		const res = await fetch(`/api/bars/${barId}/coupons/${couponId}`);
 		const data = await res.json();
 		const coupon: BarCoupon = data.coupon;
@@ -47,7 +43,11 @@ export default function CouponForm({ barId, couponId }: CouponFormProps) {
 				: "",
 			is_active: coupon.is_active,
 		});
-	};
+	}, [barId, couponId]);
+
+	useEffect(() => {
+		if (couponId) fetchCoupon();
+	}, [couponId, fetchCoupon]);
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();

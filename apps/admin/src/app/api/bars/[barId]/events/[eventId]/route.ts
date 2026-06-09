@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import type { BarEvent } from "@/types/database";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string; eventId: string }> },
 ) {
 	try {
@@ -37,7 +37,7 @@ export async function GET(
 		}
 
 		return NextResponse.json({ event });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -101,7 +101,7 @@ export async function PUT(
 		}
 
 		return NextResponse.json({ event: data });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -110,7 +110,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string; eventId: string }> },
 ) {
 	try {
@@ -139,7 +139,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

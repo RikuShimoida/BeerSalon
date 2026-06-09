@@ -53,9 +53,16 @@ export default function Modal({
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center">
+			{/* biome-ignore lint/a11y/useSemanticElements: モーダルバックドロップのクリック閉じにdiv+role=buttonを使用 */}
 			<div
 				className="absolute inset-0 bg-black bg-opacity-50"
 				onClick={onClose}
+				onKeyDown={(e) => {
+					if (e.key === "Escape" || e.key === "Enter") onClose();
+				}}
+				role="button"
+				tabIndex={0}
+				aria-label="モーダルを閉じる"
 			/>
 			<div
 				className={`relative bg-white rounded-lg shadow-xl ${sizeStyles[size]} w-full mx-4 max-h-[90vh] flex flex-col`}
@@ -67,6 +74,7 @@ export default function Modal({
 						)}
 						{showCloseButton && (
 							<button
+								type="button"
 								onClick={onClose}
 								className="text-gray-400 hover:text-gray-600 transition-colors"
 								aria-label="Close modal"
@@ -76,6 +84,7 @@ export default function Modal({
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"
+									aria-hidden="true"
 								>
 									<path
 										strokeLinecap="round"

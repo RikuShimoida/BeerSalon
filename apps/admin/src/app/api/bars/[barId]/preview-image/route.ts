@@ -126,7 +126,7 @@ export async function POST(
 		return NextResponse.json({
 			preview_image_url: previewImageUrl,
 		});
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "画像のアップロードに失敗しました" },
 			{ status: 500 },
@@ -136,7 +136,7 @@ export async function POST(
 
 // DELETE /api/bars/:barId/preview-image - プレビュー画像削除
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -200,7 +200,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "画像の削除��失敗しました" },
 			{ status: 500 },

@@ -107,7 +107,7 @@ describe("saveProfileToSession", () => {
 			);
 			expect(profileDataCall).toBeDefined();
 
-			const savedData = JSON.parse(profileDataCall![1]);
+			const savedData = JSON.parse(profileDataCall?.[1] ?? "");
 			expect(savedData).toMatchObject({
 				lastName: "佐藤",
 				firstName: "花子",
@@ -157,7 +157,7 @@ describe("saveProfileToSession", () => {
 				(call) => call[0] === "profile_image_path",
 			);
 			expect(imagePathCall).toBeDefined();
-			expect(imagePathCall![1]).toMatch(/^temp\/test-user-id\/\d+\.png$/);
+			expect(imagePathCall?.[1]).toMatch(/^temp\/test-user-id\/\d+\.png$/);
 		});
 	});
 

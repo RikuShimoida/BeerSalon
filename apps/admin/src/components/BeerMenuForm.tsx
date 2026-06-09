@@ -19,7 +19,7 @@ interface BeerMenuFormProps {
 export default function BeerMenuForm({
 	barId,
 	menu,
-	isEdit = false,
+	isEdit: _isEdit = false,
 }: BeerMenuFormProps) {
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);

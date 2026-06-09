@@ -17,7 +17,7 @@ export async function GET() {
 		}
 
 		return NextResponse.json(paymentMethods || []);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "支払い方法の取得に失敗しました" },
 			{ status: 500 },

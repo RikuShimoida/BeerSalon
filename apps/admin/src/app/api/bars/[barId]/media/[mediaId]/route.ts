@@ -6,7 +6,7 @@ const BUCKET_NAME = "bar-media";
 
 // DELETE /api/bars/:barId/media/:mediaId - メディア削除
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string; mediaId: string }> },
 ) {
 	try {
@@ -87,7 +87,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "メディアの削除に失敗しました" },
 			{ status: 500 },

@@ -99,7 +99,7 @@ test.describe("Authentication", () => {
 
 	test("should retrieve session information after login", async ({
 		page,
-		request,
+		request: _request,
 	}) => {
 		// ログイン
 		await page.goto("/login");

@@ -167,11 +167,15 @@ export default function ArticleCreateForm({ barId }: ArticleCreateFormProps) {
 			</div>
 
 			<div>
-				<label className="block text-sm font-medium text-gray-700 mb-2">
+				<label
+					htmlFor="article-create-images"
+					className="block text-sm font-medium text-gray-700 mb-2"
+				>
 					画像（最大3枚）
 				</label>
 				<input
 					ref={fileInputRef}
+					id="article-create-images"
 					type="file"
 					accept="image/*"
 					multiple

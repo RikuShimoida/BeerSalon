@@ -256,11 +256,14 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 												className="object-cover rounded-lg"
 											/>
 										) : (
-											<video
-												src={img.image_url}
-												className="w-full h-full object-cover rounded-lg"
-												controls
-											/>
+											<>
+												{/* biome-ignore lint/a11y/useMediaCaption: 店舗スライダーのプレビュー用動画 */}
+												<video
+													src={img.image_url}
+													className="w-full h-full object-cover rounded-lg"
+													controls
+												/>
+											</>
 										)}
 									</div>
 								))}

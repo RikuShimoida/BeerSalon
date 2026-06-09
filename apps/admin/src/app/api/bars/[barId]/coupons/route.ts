@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import type { BarCoupon } from "@/types/database";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -33,7 +33,7 @@ export async function GET(
 		}
 
 		return NextResponse.json({ coupons });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -79,13 +79,13 @@ export async function POST(
 		}
 
 		const newCoupon: Partial<BarCoupon> = {
-			bar_id: parseInt(barId),
+			bar_id: parseInt(barId, 10),
 			title,
 			description: description || null,
 			discount_type,
-			discount_value: parseInt(discount_value),
+			discount_value: parseInt(discount_value, 10),
 			code: code || null,
-			usage_limit: usage_limit ? parseInt(usage_limit) : null,
+			usage_limit: usage_limit ? parseInt(usage_limit, 10) : null,
 			used_count: 0,
 			valid_from: valid_from || null,
 			valid_until: valid_until || null,
@@ -106,7 +106,7 @@ export async function POST(
 		}
 
 		return NextResponse.json({ coupon: data }, { status: 201 });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

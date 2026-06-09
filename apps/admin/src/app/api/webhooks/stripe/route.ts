@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 		event = stripe.webhooks.constructEvent(
 			body,
 			signature,
-			process.env.STRIPE_WEBHOOK_SECRET!,
+			process.env.STRIPE_WEBHOOK_SECRET ?? "",
 		);
 	} catch (err) {
 		console.error("Webhook signature verification failed:", err);
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-	const customerId = subscription.customer as string;
+	const _customerId = subscription.customer as string;
 	const subscriptionId = subscription.id;
 
 	const { data: existingSub } = await supabaseAdmin
