@@ -162,14 +162,17 @@ describe("ProfileForm", () => {
 
 			const imageInput = screen.getByLabelText("プロフィール画像（任意）");
 			expect(imageInput).toHaveAttribute("type", "file");
-			expect(imageInput).toHaveAttribute("accept", "image/*");
+			expect(imageInput).toHaveAttribute(
+				"accept",
+				"image/jpeg,image/png,image/webp",
+			);
 		});
 
 		it("画像サイズのヒントが表示される", () => {
 			render(<ProfileForm />);
 
 			expect(
-				screen.getByText("推奨: 正方形の画像、最大5MB"),
+				screen.getByText("推奨: 正方形の画像、最大5MB、JPEG/PNG/WebP形式"),
 			).toBeInTheDocument();
 		});
 	});

@@ -44,7 +44,7 @@ describe("signUp", () => {
 				password: "SecurePass1!",
 				options: {
 					emailRedirectTo: expect.stringMatching(
-						/^http:\/\/(localhost|127\.0\.0\.1):3000\/signup\/profile$/,
+						/^http:\/\/(localhost|127\.0\.0\.1):3000\/auth\/callback\?next=\/signup\/profile$/,
 					),
 				},
 			});
