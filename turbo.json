@@ -9,7 +9,21 @@
 		},
 		"build": {
 			"dependsOn": ["^build", "db:generate"],
-			"outputs": [".next/**", "!.next/cache/**"]
+			"outputs": [".next/**", "!.next/cache/**"],
+			"passThroughEnv": [
+				"DATABASE_URL",
+				"DIRECT_URL",
+				"NEXT_PUBLIC_SUPABASE_URL",
+				"NEXT_PUBLIC_SUPABASE_ANON_KEY",
+				"SUPABASE_SERVICE_ROLE_KEY",
+				"NEXT_PUBLIC_GOOGLE_MAPS_API_KEY",
+				"JWT_SECRET",
+				"STRIPE_SECRET_KEY",
+				"STRIPE_WEBHOOK_SECRET",
+				"NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+				"NEXT_PUBLIC_APP_URL",
+				"ADMIN_BASE_URL"
+			]
 		},
 		"typecheck": {
 			"dependsOn": ["db:generate"]
