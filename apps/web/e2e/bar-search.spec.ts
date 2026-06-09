@@ -30,7 +30,7 @@ test.describe("トップページ（検索ページ）", () => {
 		await expect(searchInput.first()).toBeVisible();
 	});
 
-	test("店舗一覧エリアが表示される", async ({ page }) => {
+	test("店舗一覧エリアが表示される @smoke", async ({ page }) => {
 		await page.goto("/");
 
 		const barListArea = page

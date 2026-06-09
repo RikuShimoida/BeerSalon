@@ -1,7 +1,9 @@
 import { expect, test } from "./helpers/fixtures";
 
 test.describe("Bar Management", () => {
-	test("should display bars list for bar owner", async ({ barOwnerPage }) => {
+	test("should display bars list for bar owner @smoke", async ({
+		barOwnerPage,
+	}) => {
 		await barOwnerPage.goto("/bars");
 
 		// バー一覧ページのタイトルを確認

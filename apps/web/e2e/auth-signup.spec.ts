@@ -9,7 +9,9 @@ test.describe("新規登録ページ", () => {
 		await expect(page.locator("p")).toContainText("新規登録");
 	});
 
-	test("メールアドレスとパスワードの入力欄が表示される", async ({ page }) => {
+	test("メールアドレスとパスワードの入力欄が表示される @smoke", async ({
+		page,
+	}) => {
 		await page.goto("/signup");
 
 		await expect(page.locator('input[name="email"]')).toBeVisible();

@@ -1,0 +1,47 @@
+name: "Setup E2E Database"
+description: "Start Supabase, run Prisma migrations, and seed E2E data"
+
+inputs:
+  supabase-service-role-key:
+    description: "Supabase service_role key"
+    required: true
+  e2e-test-user-password:
+    description: "E2E smoke test user password (Supabase Auth)"
+    required: true
+  database-url:
+    description: "Postgres connection string (Supabase local)"
+    required: false
+    default: "postgresql://postgres:postgres@127.0.0.1:54422/postgres"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Supabase CLI
+      uses: supabase/setup-cli@v1
+      with:
+        version: latest
+
+    - name: Start Supabase local stack
+      shell: bash
+      run: supabase start
+
+    - name: Run Prisma migrations
+      shell: bash
+      env:
+        DATABASE_URL: ${{ inputs.database-url }}
+      run: pnpm exec prisma migrate deploy --schema=prisma/schema.prisma
+
+    - name: Apply E2E seed (SQL)
+      shell: bash
+      env:
+        PGPASSWORD: postgres
+      run: psql -h 127.0.0.1 -p 54422 -U postgres -d postgres -f supabase/seed.e2e.sql
+
+    - name: Apply E2E seed (Auth users)
+      shell: bash
+      env:
+        NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54421
+        SUPABASE_SERVICE_ROLE_KEY: ${{ inputs.supabase-service-role-key }}
+        E2E_TEST_USER_PASSWORD: ${{ inputs.e2e-test-user-password }}
+        DATABASE_URL: ${{ inputs.database-url }}
+      run: pnpm --filter @beersalon/web exec tsx ../../prisma/seed-e2e.ts

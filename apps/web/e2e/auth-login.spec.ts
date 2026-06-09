@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { fillLoginForm, generateTestUser } from "./helpers/auth";
 
 test.describe("ログインページ", () => {
-	test("ログインページにアクセスできる", async ({ page }) => {
+	test("ログインページにアクセスできる @smoke", async ({ page }) => {
 		await page.goto("/login");
 		await expect(page).toHaveURL("/login");
 		await expect(page.locator("h1")).toContainText("Beer Salon");

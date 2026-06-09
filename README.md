@@ -103,6 +103,7 @@ Beer Salon は以下を1つの場所に集約します。
 - `routing.md`：画面遷移・URL設計（ユーザー画面 + 管理画面）
 - `wireframe.md`：ワイヤーフレーム（ユーザー画面 UI構造）
 - `wireframe-admin.md`：ワイヤーフレーム（管理画面 UI構造）
+- `docs/e2e.md`：E2E テスト運用ガイド（ローカル/CI 実行手順・スモーク対象一覧）
 
 ---
 

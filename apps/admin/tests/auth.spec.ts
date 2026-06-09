@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Authentication", () => {
-	test("should display login page with email and password fields", async ({
+	test("should display login page with email and password fields @smoke", async ({
 		page,
 	}) => {
 		await page.goto("/login");
