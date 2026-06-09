@@ -222,11 +222,15 @@ export default function ArticleEditForm({
 			</div>
 
 			<div>
-				<label className="block text-sm font-medium text-gray-700 mb-2">
+				<label
+					htmlFor="article-edit-images"
+					className="block text-sm font-medium text-gray-700 mb-2"
+				>
 					画像（最大3枚）
 				</label>
 				<input
 					ref={fileInputRef}
+					id="article-edit-images"
 					type="file"
 					accept="image/*"
 					multiple

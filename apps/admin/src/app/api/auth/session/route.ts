@@ -13,7 +13,7 @@ export async function GET() {
 		}
 
 		return NextResponse.json({ user });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "セッション情報の取得に失敗しました" },
 			{ status: 500 },

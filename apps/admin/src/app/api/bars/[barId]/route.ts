@@ -12,7 +12,7 @@ import {
 import type { Bar } from "@/types/database";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -79,12 +79,24 @@ export async function GET(
 
 		const paymentMethods =
 			bar.bar_payment_methods
-				?.map((bpm: any) => bpm.payment_method?.id)
-				.filter((id: any) => id !== undefined) || [];
+				?.map(
+					(bpm: { payment_method?: { id: number } }) => bpm.payment_method?.id,
+				)
+				.filter((id: number | undefined) => id !== undefined) || [];
 
-		const barImages = (bar.bar_images || [])
-			.filter((img: any) => img.image_type === "slider")
-			.sort((a: any, b: any) => a.sort_order - b.sort_order);
+		const barImages = (
+			bar.bar_images as { image_type: string; sort_order: number }[]
+		)
+			.filter(
+				(img: { image_type: string; sort_order: number }) =>
+					img.image_type === "slider",
+			)
+			.sort(
+				(
+					a: { image_type: string; sort_order: number },
+					b: { image_type: string; sort_order: number },
+				) => a.sort_order - b.sort_order,
+			);
 
 		const response = {
 			...bar,
@@ -94,7 +106,7 @@ export async function GET(
 		};
 
 		return NextResponse.json(response);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "バー情報の取得に失敗しました" },
 			{ status: 500 },
@@ -243,8 +255,8 @@ export async function PUT(
 
 			if (Array.isArray(payment_method_ids) && payment_method_ids.length > 0) {
 				const paymentMethodsData = payment_method_ids.map((pmId: string) => ({
-					bar_id: parseInt(barId),
-					payment_method_id: parseInt(pmId),
+					bar_id: parseInt(barId, 10),
+					payment_method_id: parseInt(pmId, 10),
 				}));
 
 				const { error: insertError } = await supabaseAdmin
@@ -271,10 +283,20 @@ export async function PUT(
 
 			if (Array.isArray(opening_hours) && opening_hours.length > 0) {
 				const now = new Date().toISOString();
+				interface OpeningHourInput {
+					day_of_week: number;
+					open_time: string;
+					close_time: string;
+					sort_order: number;
+					is_closed: boolean;
+				}
 				const openingHoursData = opening_hours
-					.filter((oh: any) => oh.is_closed || (oh.open_time && oh.close_time))
-					.map((oh: any) => ({
-						bar_id: parseInt(barId),
+					.filter(
+						(oh: OpeningHourInput) =>
+							oh.is_closed || (oh.open_time && oh.close_time),
+					)
+					.map((oh: OpeningHourInput) => ({
+						bar_id: parseInt(barId, 10),
 						day_of_week: oh.day_of_week,
 						open_time: oh.is_closed ? "00:00:00" : `${oh.open_time}:00`,
 						close_time: oh.is_closed ? "00:00:00" : `${oh.close_time}:00`,
@@ -300,7 +322,7 @@ export async function PUT(
 		}
 
 		return NextResponse.json(bar);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "バーの更新に失敗しました" },
 			{ status: 500 },
@@ -309,7 +331,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -344,7 +366,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "バーの削除に失敗しました" },
 			{ status: 500 },

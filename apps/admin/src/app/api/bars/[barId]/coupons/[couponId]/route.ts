@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import type { BarCoupon } from "@/types/database";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string; couponId: string }> },
 ) {
 	try {
@@ -40,7 +40,7 @@ export async function GET(
 		}
 
 		return NextResponse.json({ coupon });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -89,9 +89,9 @@ export async function PUT(
 			title,
 			description: description || null,
 			discount_type,
-			discount_value: parseInt(discount_value),
+			discount_value: parseInt(discount_value, 10),
 			code: code || null,
-			usage_limit: usage_limit ? parseInt(usage_limit) : null,
+			usage_limit: usage_limit ? parseInt(usage_limit, 10) : null,
 			valid_from: valid_from || null,
 			valid_until: valid_until || null,
 			is_active: is_active !== undefined ? is_active : true,
@@ -119,7 +119,7 @@ export async function PUT(
 		}
 
 		return NextResponse.json({ coupon: data });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -128,7 +128,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string; couponId: string }> },
 ) {
 	try {
@@ -157,7 +157,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

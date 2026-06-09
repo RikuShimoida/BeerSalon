@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface Media {
 	id: number;
@@ -41,15 +41,7 @@ export default function SliderMediaManager({
 
 	const isEditMode = !!barId;
 
-	useEffect(() => {
-		if (isEditMode) {
-			fetchMedia();
-		} else {
-			setLoading(false);
-		}
-	}, [barId, isEditMode]);
-
-	const fetchMedia = async () => {
+	const fetchMedia = useCallback(async () => {
 		if (!barId) return;
 		try {
 			const response = await fetch(`/api/bars/${barId}/media`);
@@ -64,7 +56,15 @@ export default function SliderMediaManager({
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [barId]);
+
+	useEffect(() => {
+		if (isEditMode) {
+			fetchMedia();
+		} else {
+			setLoading(false);
+		}
+	}, [isEditMode, fetchMedia]);
 
 	const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -167,7 +167,7 @@ export default function SliderMediaManager({
 				}
 
 				await fetchMedia();
-			} catch (error) {
+			} catch (_error) {
 				alert("削除に失敗しました");
 			}
 		} else {
@@ -213,7 +213,7 @@ export default function SliderMediaManager({
 				}
 
 				await fetchMedia();
-			} catch (error) {
+			} catch (_error) {
 				alert("順序の変更に失敗しました");
 			}
 		} else {
@@ -259,7 +259,7 @@ export default function SliderMediaManager({
 				}
 
 				await fetchMedia();
-			} catch (error) {
+			} catch (_error) {
 				alert("順序の変更に失敗しました");
 			}
 		} else {
@@ -293,9 +293,9 @@ export default function SliderMediaManager({
 		<div>
 			<div className="flex justify-between items-center mb-3">
 				<div>
-					<label className="block text-sm font-medium text-gray-700">
+					<span className="block text-sm font-medium text-gray-700">
 						スライダー用メディア
-					</label>
+					</span>
 					<p className="text-xs text-gray-500 mt-1">
 						店舗詳細ページのスライダーに表示されます（登録済み: {currentCount} /{" "}
 						{MAX_MEDIA_COUNT}枚）
@@ -354,11 +354,14 @@ export default function SliderMediaManager({
 												onClick={() => setPreviewMedia(item)}
 											/>
 										) : (
-											<video
-												src={item.image_url}
-												className="w-full h-full object-cover rounded cursor-pointer"
-												onClick={() => setPreviewMedia(item)}
-											/>
+											<>
+												{/* biome-ignore lint/a11y/useMediaCaption: 店舗スライダーのプレビュー用動画でキャプション不要 */}
+												<video
+													src={item.image_url}
+													className="w-full h-full object-cover rounded cursor-pointer"
+													onClick={() => setPreviewMedia(item)}
+												/>
+											</>
 										)}
 										<div className="absolute top-1 left-1 bg-black bg-opacity-60 text-white text-xs px-2 py-0.5 rounded">
 											{item.media_type === "image" ? "画像" : "動画"}
@@ -408,11 +411,14 @@ export default function SliderMediaManager({
 							))
 						: localMedia.map((item, index) => (
 								<div
+									// biome-ignore lint/suspicious/noArrayIndexKey: ローカルメディアはIDを持たないためindexをkey使用
 									key={index}
 									className="bg-gray-50 rounded-lg p-3 border border-gray-200"
 								>
 									<div className="relative aspect-video bg-gray-100 rounded mb-2">
 										{item.media_type === "image" ? (
+											// biome-ignore lint/a11y/useKeyWithClickEvents: クリックでプレビュー表示するプレビュー画像
+											// biome-ignore lint/performance/noImgElement: ローカルプレビュー用のblob URLでnext/imageは使用不可
 											<img
 												src={item.previewUrl}
 												alt={`スライダー画像 ${index + 1}`}
@@ -420,11 +426,14 @@ export default function SliderMediaManager({
 												onClick={() => setPreviewMedia(item)}
 											/>
 										) : (
-											<video
-												src={item.previewUrl}
-												className="w-full h-full object-cover rounded cursor-pointer"
-												onClick={() => setPreviewMedia(item)}
-											/>
+											<>
+												{/* biome-ignore lint/a11y/useMediaCaption: 店舗スライダーのプレビュー用動画でキャプション不要 */}
+												<video
+													src={item.previewUrl}
+													className="w-full h-full object-cover rounded cursor-pointer"
+													onClick={() => setPreviewMedia(item)}
+												/>
+											</>
 										)}
 										<div className="absolute top-1 left-1 bg-black bg-opacity-60 text-white text-xs px-2 py-0.5 rounded">
 											{item.media_type === "image" ? "画像" : "動画"}
@@ -476,12 +485,19 @@ export default function SliderMediaManager({
 			)}
 
 			{previewMedia && (
+				// biome-ignore lint/a11y/useSemanticElements: オーバーレイ背景のクリック閉じにdiv+role=buttonを使用
 				<div
 					className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
 					onClick={() => setPreviewMedia(null)}
+					onKeyDown={(e) => {
+						if (e.key === "Escape" || e.key === "Enter") setPreviewMedia(null);
+					}}
+					role="button"
+					tabIndex={0}
 				>
 					<div className="max-w-4xl max-h-screen p-4">
 						{previewMedia.media_type === "image" ? (
+							// biome-ignore lint/performance/noImgElement: プレビュー表示用で外部/blob URLのためnext/image不可
 							<img
 								src={
 									"image_url" in previewMedia
@@ -492,15 +508,18 @@ export default function SliderMediaManager({
 								className="max-w-full max-h-screen object-contain"
 							/>
 						) : (
-							<video
-								src={
-									"image_url" in previewMedia
-										? previewMedia.image_url
-										: previewMedia.previewUrl
-								}
-								controls
-								className="max-w-full max-h-screen"
-							/>
+							<>
+								{/* biome-ignore lint/a11y/useMediaCaption: プレビュー用動画でキャプション不要 */}
+								<video
+									src={
+										"image_url" in previewMedia
+											? previewMedia.image_url
+											: previewMedia.previewUrl
+									}
+									controls
+									className="max-w-full max-h-screen"
+								/>
+							</>
 						)}
 					</div>
 				</div>

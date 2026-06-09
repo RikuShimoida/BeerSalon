@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
 // GET /api/master/beer-categories - ビールカテゴリ一覧取得
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
 	try {
 		const user = await getCurrentUser();
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 		}
 
 		return NextResponse.json(categories);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Failed to fetch beer categories" },
 			{ status: 500 },

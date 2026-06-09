@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 interface OpeningHourInput {
 	day_of_week: number;
 	open_time: string;
@@ -43,7 +41,7 @@ export default function OpeningHoursEditor({
 	};
 
 	const toggleClosed = (day: number) => {
-		const dayHours = getDayHours(day);
+		const _dayHours = getDayHours(day);
 		const isClosed = isDayClosed(day);
 
 		const newHours = value.map((h) => {
@@ -105,15 +103,14 @@ export default function OpeningHoursEditor({
 
 	return (
 		<div className="space-y-4">
-			<label className="block text-sm font-medium text-gray-700">
-				営業時間
-			</label>
+			<span className="block text-sm font-medium text-gray-700">営業時間</span>
 
 			{DAY_NAMES.map((dayName, day) => {
 				const dayHours = getDayHours(day);
 				const isClosed = isDayClosed(day);
 
 				return (
+					// biome-ignore lint/suspicious/noArrayIndexKey: day(0-6)は曜日の固定インデックスで順序変更なし
 					<div key={day} className="border border-gray-300 rounded-md">
 						<div className="px-4 py-3 bg-gray-50">
 							<h4 className="text-sm font-medium text-gray-900">{dayName}</h4>

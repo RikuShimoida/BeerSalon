@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import type { BarEvent } from "@/types/database";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -33,7 +33,7 @@ export async function GET(
 		}
 
 		return NextResponse.json({ events });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -70,7 +70,7 @@ export async function POST(
 		}
 
 		const newEvent: Partial<BarEvent> = {
-			bar_id: parseInt(barId),
+			bar_id: parseInt(barId, 10),
 			title,
 			description: description || null,
 			start_date,
@@ -93,7 +93,7 @@ export async function POST(
 		}
 
 		return NextResponse.json({ event: data }, { status: 201 });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

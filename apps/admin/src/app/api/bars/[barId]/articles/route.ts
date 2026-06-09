@@ -3,7 +3,7 @@ import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function GET(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	try {
@@ -82,7 +82,7 @@ export async function POST(
 		const { data, error } = await supabaseAdmin
 			.from("articles")
 			.insert({
-				bar_id: parseInt(barId),
+				bar_id: parseInt(barId, 10),
 				title,
 				body: articleBody,
 				image_url: image_url || null,

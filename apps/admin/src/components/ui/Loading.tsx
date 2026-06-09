@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface LoadingProps {
 	size?: "sm" | "md" | "lg";
 	text?: string;
@@ -24,6 +22,7 @@ export default function Loading({
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
 				viewBox="0 0 24 24"
+				aria-hidden="true"
 			>
 				<circle
 					className="opacity-25"

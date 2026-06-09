@@ -98,12 +98,7 @@
 	const closedCheckboxes = document.querySelectorAll('input[type="checkbox"]');
 	closedCheckboxes.forEach((cb) => {
 		const label = cb.nextElementSibling;
-		if (
-			label &&
-			label.textContent &&
-			label.textContent.includes("定休日") &&
-			cb.checked
-		) {
+		if (label?.textContent?.includes("定休日") && cb.checked) {
 			cb.click();
 		}
 	});
@@ -139,7 +134,7 @@
 
 		allCheckboxes.forEach((checkbox) => {
 			const label = checkbox.nextElementSibling;
-			if (label && label.textContent) {
+			if (label?.textContent) {
 				// 支払い方法のいずれかに一致する場合のみチェック
 				const isPaymentMethod = paymentMethods.some((method) =>
 					label.textContent.includes(method),
