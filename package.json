@@ -13,7 +13,9 @@
 		"e2e:web": "pnpm --filter @beersalon/web e2e",
 		"e2e:admin": "pnpm --filter @beersalon/admin e2e",
 		"e2e:smoke:web": "pnpm --filter @beersalon/web exec playwright test --grep @smoke",
-		"e2e:smoke:admin": "pnpm --filter @beersalon/admin exec playwright test --grep @smoke"
+		"e2e:smoke:admin": "pnpm --filter @beersalon/admin exec playwright test --grep @smoke",
+		"e2e:setup": "bash scripts/e2e-setup.sh",
+		"e2e:smoke": "pnpm e2e:smoke:web && pnpm e2e:smoke:admin"
 	},
 	"devDependencies": {
 		"@prisma/client": "^7.1.0",
