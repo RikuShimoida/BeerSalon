@@ -82,3 +82,18 @@ export async function createAuthenticatedUser(page: Page): Promise<TestUser> {
 
 	return user;
 }
+
+// Why not: スモークテストでサインアップフローを毎回完走させると CI 上で不安定になり遅い。
+// prisma/seed-e2e.ts で投入済みの固定ユーザーを直接ログインさせる。
+const SMOKE_USER_EMAIL = "smoke-user@example.test";
+
+export async function loginAsSmokeUser(page: Page) {
+	const password = process.env.E2E_TEST_USER_PASSWORD;
+	if (!password) {
+		throw new Error("E2E_TEST_USER_PASSWORD is not set");
+	}
+
+	await page.goto("/login");
+	await fillLoginForm(page, SMOKE_USER_EMAIL, password);
+	await page.waitForURL("/", { timeout: 15000 });
+}

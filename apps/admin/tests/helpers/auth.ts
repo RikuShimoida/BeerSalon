@@ -1,18 +1,23 @@
 import type { Page } from "@playwright/test";
 
+// Why not: 平文パスワードをコードに含めない。CI/ローカルともに E2E_ADMIN_PASSWORD 経由で渡す。
+const E2E_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "";
+
 /**
- * テストユーザーの認証情報
+ * テストユーザーの認証情報（seed.e2e.sql と同期）
  */
 export const TEST_USERS = {
 	admin: {
-		email: "admin@example.com",
-		password: "password123",
+		barManageId: "e2e-admin",
+		password: E2E_PASSWORD,
 		role: "admin",
+		redirectUrl: "/bars",
 	},
 	barOwner: {
-		email: "owner@example.com",
-		password: "password123",
+		barManageId: "e2e-bar-owner",
+		password: E2E_PASSWORD,
 		role: "bar_owner",
+		redirectUrl: "/bars/100001",
 	},
 } as const;
 
@@ -21,30 +26,41 @@ export const TEST_USERS = {
  */
 export async function login(
 	page: Page,
-	email: string = TEST_USERS.barOwner.email,
-	password: string = TEST_USERS.barOwner.password,
+	barManageId: string,
+	password: string,
+	redirectUrl: string,
 ) {
 	await page.goto("/login");
-	await page.getByLabel("メールアドレス").fill(email);
+	await page.getByLabel("店舗ID").fill(barManageId);
 	await page.getByLabel("パスワード").fill(password);
 	await page.getByRole("button", { name: "ログイン" }).click();
 
-	// ダッシュボードに遷移するまで待機
-	await page.waitForURL("/");
+	// ログイン後のリダイレクト先まで待機
+	await page.waitForURL(redirectUrl);
 }
 
 /**
  * 管理者としてログイン
  */
 export async function loginAsAdmin(page: Page) {
-	await login(page, TEST_USERS.admin.email, TEST_USERS.admin.password);
+	await login(
+		page,
+		TEST_USERS.admin.barManageId,
+		TEST_USERS.admin.password,
+		TEST_USERS.admin.redirectUrl,
+	);
 }
 
 /**
  * バーオーナーとしてログイン
  */
 export async function loginAsBarOwner(page: Page) {
-	await login(page, TEST_USERS.barOwner.email, TEST_USERS.barOwner.password);
+	await login(
+		page,
+		TEST_USERS.barOwner.barManageId,
+		TEST_USERS.barOwner.password,
+		TEST_USERS.barOwner.redirectUrl,
+	);
 }
 
 /**

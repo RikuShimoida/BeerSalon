@@ -61,3 +61,6 @@ playwright/.cache/
 
 # images (design reference)
 /images/
+
+# claude code runtime locks
+.claude/scheduled_tasks.lock

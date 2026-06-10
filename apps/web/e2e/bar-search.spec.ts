@@ -1,9 +1,16 @@
 import { expect, test } from "@playwright/test";
-import { createAuthenticatedUser } from "./helpers/auth";
+import { createAuthenticatedUser, loginAsSmokeUser } from "./helpers/auth";
 
 test.describe("トップページ（検索ページ）", () => {
-	test.beforeEach(async ({ page }) => {
-		await createAuthenticatedUser(page);
+	test.beforeEach(async ({ page }, testInfo) => {
+		// Why not: スモークテストはサインアップを毎回完走させず、seed済みユーザーで直接ログインさせて高速・安定化する。
+		// それ以外の既存テストは挙動を変えないため createAuthenticatedUser のまま。
+		// テスト題名に @smoke が含まれるかで判定する（playwright の --grep と同じ判定基準）。
+		if (testInfo.title.includes("@smoke")) {
+			await loginAsSmokeUser(page);
+		} else {
+			await createAuthenticatedUser(page);
+		}
 	});
 
 	test("認証済みユーザーがトップページにアクセスすると検索バーと店舗一覧が表示される", async ({
@@ -30,15 +37,12 @@ test.describe("トップページ（検索ページ）", () => {
 		await expect(searchInput.first()).toBeVisible();
 	});
 
-	test("店舗一覧エリアが表示される", async ({ page }) => {
+	test("店舗一覧エリアが表示される @smoke", async ({ page }) => {
 		await page.goto("/");
 
-		const barListArea = page
-			.locator('[data-testid="bar-list"], .bar-list, [role="list"]')
-			.or(page.locator('h2:has-text("店舗"), h2:has-text("検索結果")'));
-
-		const hasBarList = (await barListArea.count()) > 0;
-		expect(hasBarList).toBe(true);
+		// 店舗一覧コンポーネントの見出し（apps/web/src/components/bar/bar-list.tsx と同期）
+		const barListHeading = page.getByRole("heading", { name: "近くのお店" });
+		await expect(barListHeading).toBeVisible();
 	});
 
 	test("検索バーでテキスト検索ができる", async ({ page }) => {

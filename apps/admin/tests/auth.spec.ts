@@ -1,18 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Authentication", () => {
-	test("should display login page with email and password fields", async ({
+	test("should display login page with bar manage ID and password fields @smoke", async ({
 		page,
 	}) => {
 		await page.goto("/login");
 
 		// ページタイトルを確認
 		await expect(
-			page.getByRole("heading", { name: "BeerSalonAdmin" }),
+			page.getByRole("heading", { name: "Beer Salon Admin" }),
 		).toBeVisible();
 
-		// メールアドレス入力欄を確認
-		await expect(page.getByLabel("メールアドレス")).toBeVisible();
+		// 店舗ID入力欄を確認
+		await expect(page.getByLabel("店舗ID")).toBeVisible();
 
 		// パスワード入力欄を確認
 		await expect(page.getByLabel("パスワード")).toBeVisible();

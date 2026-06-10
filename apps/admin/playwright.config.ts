@@ -77,7 +77,7 @@ export default defineConfig({
 
 	// 開発サーバーの自動起動
 	webServer: {
-		command: "npm run dev",
+		command: "pnpm dev",
 		url: "http://localhost:3001",
 		reuseExistingServer: !process.env.CI,
 		timeout: 120000,

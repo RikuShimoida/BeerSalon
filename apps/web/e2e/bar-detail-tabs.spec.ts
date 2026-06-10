@@ -6,7 +6,7 @@ test.describe("店舗詳細ページ", () => {
 		await createAuthenticatedUser(page);
 	});
 
-	test("店舗詳細ページにアクセスすると店舗名とお気に入りボタンが表示される", async ({
+	test("店舗詳細ページにアクセスすると店舗名とお気に入りボタンが表示される @smoke", async ({
 		page,
 	}) => {
 		await page.goto("/bars/1");

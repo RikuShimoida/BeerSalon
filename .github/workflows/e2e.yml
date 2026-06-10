@@ -1,0 +1,141 @@
+name: E2E Smoke
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  e2e-web-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
+      DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
+      JWT_SECRET: ${{ secrets.E2E_JWT_SECRET }}
+      E2E_TEST_USER_PASSWORD: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: "dummy-google-maps-key"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate --schema=prisma/schema.prisma
+
+      - name: Cache Next.js build (web)
+        uses: actions/cache@v4
+        with:
+          path: apps/web/.next/cache
+          key: ${{ runner.os }}-nextjs-web-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/web/**/*.{js,jsx,ts,tsx}') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-web-${{ hashFiles('pnpm-lock.yaml') }}-
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @beersalon/web exec playwright install --with-deps chromium
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @beersalon/web exec playwright install-deps chromium
+
+      - name: Setup E2E database
+        uses: ./.github/actions/setup-db
+        with:
+          e2e-test-user-password: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+
+      - name: Run web smoke tests
+        run: pnpm e2e:smoke:web
+
+      - name: Upload Playwright report (web)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-web
+          path: apps/web/playwright-report/
+          retention-days: 7
+
+  e2e-admin-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
+      DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
+      JWT_SECRET: ${{ secrets.E2E_JWT_SECRET }}
+      E2E_TEST_USER_PASSWORD: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      STRIPE_SECRET_KEY: "sk_test_dummy"
+      STRIPE_WEBHOOK_SECRET: "whsec_dummy"
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_dummy"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3001"
+      ADMIN_BASE_URL: "http://localhost:3001"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate --schema=prisma/schema.prisma
+
+      - name: Cache Next.js build (admin)
+        uses: actions/cache@v4
+        with:
+          path: apps/admin/.next/cache
+          key: ${{ runner.os }}-nextjs-admin-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/admin/**/*.{js,jsx,ts,tsx}') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-admin-${{ hashFiles('pnpm-lock.yaml') }}-
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @beersalon/admin exec playwright install --with-deps chromium
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @beersalon/admin exec playwright install-deps chromium
+
+      - name: Setup E2E database
+        uses: ./.github/actions/setup-db
+        with:
+          e2e-test-user-password: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+
+      - name: Run admin smoke tests
+        run: pnpm e2e:smoke:admin
+
+      - name: Upload Playwright report (admin)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-admin
+          path: apps/admin/playwright-report/
+          retention-days: 7

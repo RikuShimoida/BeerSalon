@@ -11,7 +11,7 @@ test.describe("投稿作成ページ", () => {
 		await expect(page).toHaveURL("/posts/new");
 	});
 
-	test("投稿本文入力フォームが表示される", async ({ page }) => {
+	test("投稿本文入力フォームが表示される @smoke", async ({ page }) => {
 		await page.goto("/posts/new");
 
 		const bodyInput = page.locator(

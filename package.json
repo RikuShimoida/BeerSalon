@@ -9,7 +9,11 @@
 		"format": "turbo run format",
 		"test": "turbo run test",
 		"dev:web": "pnpm --filter @beersalon/web dev",
-		"dev:admin": "pnpm --filter @beersalon/admin dev"
+		"dev:admin": "pnpm --filter @beersalon/admin dev",
+		"e2e:web": "pnpm --filter @beersalon/web e2e",
+		"e2e:admin": "pnpm --filter @beersalon/admin e2e",
+		"e2e:smoke:web": "pnpm --filter @beersalon/web exec playwright test --grep @smoke",
+		"e2e:smoke:admin": "pnpm --filter @beersalon/admin exec playwright test --grep @smoke"
 	},
 	"devDependencies": {
 		"@prisma/client": "^7.1.0",
