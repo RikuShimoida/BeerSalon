@@ -34,32 +34,67 @@ Beer Salon の E2E テスト（Playwright）の実行方法と CI 連携につ�
 
 ## ローカルでの実行
 
-### 前提
+### ワンコマンドセットアップ（推奨）
 
-1. Supabase をローカルで起動（`supabase/migrations/*.sql` が自動適用される）
-   ```bash
-   supabase start
-   ```
-2. 環境変数を設定（`.env.local` を `apps/web/`、`apps/admin/` の両方で用意）
-3. 本番 seed と E2E seed を適用
-   ```bash
-   psql -h 127.0.0.1 -p 54422 -U postgres -d postgres -f supabase/seed.sql
-   psql -h 127.0.0.1 -p 54422 -U postgres -d postgres -f supabase/seed.e2e.sql
-   ```
-4. Supabase Auth に E2E テストユーザーを作成
-   ```bash
-   E2E_TEST_USER_PASSWORD=<任意のパスワード> \
-   pnpm --filter @beersalon/web exec tsx ../../prisma/seed-e2e.ts
-   ```
-
-### スモーク実行
+新規 clone 直後でも以下の3コマンドでスモーク E2E（7本）が緑になる。
 
 ```bash
-# web のスモークだけ
+# 1. Supabase ローカルスタックを起動（migrations 自動適用）
+supabase start
+
+# 2. seed.sql / seed.e2e.sql 投入 + Supabase Auth テストユーザー作成
+pnpm e2e:setup
+
+# 3. スモーク E2E を実行（web 5本 + admin 2本）
+pnpm e2e:smoke
+```
+
+`pnpm e2e:smoke` は `pnpm e2e:smoke:web && pnpm e2e:smoke:admin` のショートカット。
+個別に実行したい場合は `pnpm e2e:smoke:web` / `pnpm e2e:smoke:admin` を使う。
+
+#### `pnpm e2e:setup` の動作
+
+`scripts/e2e-setup.sh` が以下を順番に実行する:
+
+1. Docker / Supabase の起動状態チェック（未起動なら自動で `supabase start`）
+2. Supabase DB コンテナ名を動的取得（`docker ps --filter label=com.supabase.cli.project=BeerSalon`）
+3. `supabase status -o env` から接続情報をシェル変数に展開
+4. `.env.e2e.local` が無ければ `.env.e2e.local.example` からコピー（初回セットアップ自動化）
+5. `supabase/seed.sql` と `supabase/seed.e2e.sql` を **`docker exec -i` 経由で psql 投入**（ローカルに psql 不要）
+6. `prisma/seed-e2e.ts` で `smoke-user@example.test` の Supabase Auth ユーザーを作成
+
+冪等性は SQL の `ON CONFLICT DO NOTHING` と `seed-e2e.ts` の存在チェックで担保されているため、
+何度実行しても安全。
+
+### 環境変数の設定（`.env.e2e.local`）
+
+E2E 専用のパスワードは `.env.local` と分離し、`.env.e2e.local` で管理する。
+
+| ファイル | 用途 |
+|---------|------|
+| `apps/web/.env.e2e.local` | `E2E_TEST_USER_PASSWORD`（Supabase Auth スモークユーザー） |
+| `apps/admin/.env.e2e.local` | `E2E_ADMIN_PASSWORD`（`seed.e2e.sql` の bcrypt ハッシュに対応する平文） |
+
+実体ファイルは `.gitignore` 対象。サンプルは `apps/web/.env.e2e.local.example` /
+`apps/admin/.env.e2e.local.example` をリポジトリに同梱しているため、
+`pnpm e2e:setup` を実行すると自動的にコピー作成される。
+
+Playwright config（`apps/web/playwright.config.ts` / `apps/admin/playwright.config.ts`）は
+`.env.local` → `.env.e2e.local`（override）の順で `dotenv` で読み込むため、
+コマンドラインで毎回環境変数を渡す必要はない。
+
+### スモーク実行（個別）
+
+```bash
+# web のスモーク 5 本
 pnpm e2e:smoke:web
 
-# admin のスモークだけ
+# admin のスモーク 2 本
 pnpm e2e:smoke:admin
+
+# Playwright UI モード（対話的にテストを選択して実行）
+pnpm e2e:smoke:web --ui
+pnpm e2e:smoke:admin --ui
 ```
 
 ### フル実行
@@ -70,6 +105,28 @@ pnpm e2e:web
 
 # admin の全テスト
 pnpm e2e:admin
+```
+
+### 手動で psql 相当を叩きたい場合
+
+`pnpm e2e:setup` を使えば不要だが、デバッグ目的で個別に SQL を実行したい場合は
+Supabase の DB コンテナ経由で `psql` を叩く（ローカル `psql` のインストール不要）。
+
+```bash
+# DB コンテナ名を取得
+SUPABASE_DB=$(docker ps \
+  --filter "label=com.supabase.cli.project=BeerSalon" \
+  --filter "name=supabase_db" \
+  --format "{{.Names}}")
+
+# seed.sql 投入
+docker exec -i "$SUPABASE_DB" psql -U postgres -d postgres < supabase/seed.sql
+
+# seed.e2e.sql 投入
+docker exec -i "$SUPABASE_DB" psql -U postgres -d postgres < supabase/seed.e2e.sql
+
+# 任意のクエリ
+docker exec -i "$SUPABASE_DB" psql -U postgres -d postgres -c "SELECT count(*) FROM bars;"
 ```
 
 ## CI での実行

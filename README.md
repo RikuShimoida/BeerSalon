@@ -107,6 +107,20 @@ Beer Salon は以下を1つの場所に集約します。
 
 ---
 
+## 🧪 ローカル E2E 実行（3コマンドで完了）
+
+Docker を起動した状態で以下の3コマンドを叩けば、スモーク E2E（web 5本 / admin 2本）が緑になる。
+
+```bash
+supabase start        # Supabase ローカルスタックを起動
+pnpm e2e:setup        # seed.sql / seed.e2e.sql 投入 + Supabase Auth テストユーザー作成
+pnpm e2e:smoke        # スモーク E2E 7本を実行 (web 5本 + admin 2本)
+```
+
+詳細・トラブルシューティング・UIモード起動方法は `docs/e2e.md` を参照。
+
+---
+
 ## ✅ MVPに含める機能
 
 - ユーザー登録 / ログイン
