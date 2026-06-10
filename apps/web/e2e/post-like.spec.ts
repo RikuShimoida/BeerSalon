@@ -122,9 +122,9 @@ test.describe("いいね機能", () => {
 			.first();
 
 		if ((await postCard.count()) > 0) {
-			const likeCount = postCard.locator(
-				'[data-testid="like-count"], .like-count, text=/\\d+.*いいね/',
-			);
+			const likeCount = postCard
+				.locator('[data-testid="like-count"], .like-count')
+				.or(postCard.getByText(/\d+.*いいね/));
 
 			const hasLikeCount = (await likeCount.count()) > 0;
 			expect(hasLikeCount || true).toBe(true);
