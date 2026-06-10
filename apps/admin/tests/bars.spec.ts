@@ -1,14 +1,12 @@
 import { expect, test } from "./helpers/fixtures";
 
 test.describe("Bar Management", () => {
-	test("should display bars list for bar owner @smoke", async ({
-		barOwnerPage,
-	}) => {
-		await barOwnerPage.goto("/bars");
+	test("should display bars list for admin @smoke", async ({ adminPage }) => {
+		await adminPage.goto("/bars");
 
-		// バー一覧ページのタイトルを確認
+		// 店舗管理ページのタイトルを確認
 		await expect(
-			barOwnerPage.getByRole("heading", { name: "バー一覧" }),
+			adminPage.getByRole("heading", { name: "店舗管理" }),
 		).toBeVisible();
 	});
 
