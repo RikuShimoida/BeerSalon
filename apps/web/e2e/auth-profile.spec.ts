@@ -6,13 +6,6 @@ import {
 } from "./helpers/auth";
 
 test.describe("プロフィール入力・確認ページ", () => {
-	test.beforeEach(async ({ page }) => {
-		await page.goto("/signup");
-		const user = generateTestUser();
-		await fillSignUpForm(page, user);
-		await page.waitForURL(/\/signup\?success=true/, { timeout: 15000 });
-	});
-
 	test("未認証状態でプロフィール入力ページにアクセスすると新規登録ページにリダイレクトされる", async ({
 		page,
 	}) => {
