@@ -90,9 +90,8 @@ test.describe("通知一覧", () => {
 		if ((await notification.count()) > 0) {
 			const hasDate =
 				(await notification
-					.locator(
-						'time, [data-testid="notification-date"], text=/分前|時間前|日前/',
-					)
+					.locator('time, [data-testid="notification-date"]')
+					.or(notification.getByText(/分前|時間前|日前/))
 					.count()) > 0;
 
 			expect(hasDate || true).toBe(true);

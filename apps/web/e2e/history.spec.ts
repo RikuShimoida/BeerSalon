@@ -76,7 +76,8 @@ test.describe("閲覧履歴", () => {
 		if ((await barCard.count()) > 0) {
 			const hasLocation =
 				(await barCard
-					.locator('[data-testid="location"], .location, text=/都|県|市|町|村/')
+					.locator('[data-testid="location"], .location')
+					.or(barCard.getByText(/都|県|市|町|村/))
 					.count()) > 0;
 
 			expect(hasLocation || true).toBe(true);

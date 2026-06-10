@@ -24,12 +24,12 @@ test.describe("他ユーザープロフィール", () => {
 	test("フォロー数とフォロワー数が表示される", async ({ page }) => {
 		await page.goto("/users/test-user-id");
 
-		const followingCount = page.locator(
-			'[data-testid="following-count"], a[href*="following"], text=/フォロー|Following/',
-		);
-		const followersCount = page.locator(
-			'[data-testid="followers-count"], a[href*="followers"], text=/フォロワー|Followers/',
-		);
+		const followingCount = page
+			.locator('[data-testid="following-count"], a[href*="following"]')
+			.or(page.getByText(/フォロー|Following/));
+		const followersCount = page
+			.locator('[data-testid="followers-count"], a[href*="followers"]')
+			.or(page.getByText(/フォロワー|Followers/));
 
 		const hasFollowingCount = (await followingCount.count()) > 0;
 		const hasFollowersCount = (await followersCount.count()) > 0;
