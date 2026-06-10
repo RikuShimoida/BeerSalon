@@ -7,13 +7,13 @@ export async function middleware(request: NextRequest) {
 
 	const { pathname } = request.nextUrl;
 
-	const publicPaths = [
-		"/login",
-		"/signup",
-		"/password/reset",
-		"/auth/callback",
-	];
-	const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+	const publicExactPaths = ["/login", "/signup"];
+	const publicPrefixPaths = ["/password/reset", "/auth/callback"];
+	const isPublicPath =
+		publicExactPaths.includes(pathname) ||
+		publicPrefixPaths.some((path) => pathname.startsWith(path));
+	const isSignupSubPath =
+		pathname.startsWith("/signup/") && pathname !== "/signup";
 
 	let supabaseResponse = NextResponse.next({
 		request,
@@ -55,7 +55,8 @@ export async function middleware(request: NextRequest) {
 	}
 
 	if (!user && !isPublicPath) {
-		return NextResponse.redirect(new URL("/login", request.url));
+		const redirectTo = isSignupSubPath ? "/signup" : "/login";
+		return NextResponse.redirect(new URL(redirectTo, request.url));
 	}
 
 	if (user && !pathname.startsWith("/signup") && !pathname.startsWith("/api")) {
