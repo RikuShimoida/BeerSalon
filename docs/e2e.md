@@ -36,21 +36,17 @@ Beer Salon の E2E テスト（Playwright）の実行方法と CI 連携につ�
 
 ### 前提
 
-1. Supabase をローカルで起動
+1. Supabase をローカルで起動（`supabase/migrations/*.sql` が自動適用される）
    ```bash
    supabase start
    ```
 2. 環境変数を設定（`.env.local` を `apps/web/`、`apps/admin/` の両方で用意）
-3. マイグレーション適用
-   ```bash
-   pnpm exec prisma migrate deploy --schema=prisma/schema.prisma
-   ```
-4. 本番 seed と E2E seed を適用
+3. 本番 seed と E2E seed を適用
    ```bash
    psql -h 127.0.0.1 -p 54422 -U postgres -d postgres -f supabase/seed.sql
    psql -h 127.0.0.1 -p 54422 -U postgres -d postgres -f supabase/seed.e2e.sql
    ```
-5. Supabase Auth に E2E テストユーザーを作成
+4. Supabase Auth に E2E テストユーザーを作成
    ```bash
    E2E_TEST_USER_PASSWORD=<任意のパスワード> \
    pnpm --filter @beersalon/web exec tsx ../../prisma/seed-e2e.ts
@@ -98,8 +94,7 @@ Supabase ローカルの anon key / service_role key は固定値だが、平文
 2. `prisma generate`
 3. Next.js / Playwright のキャッシュ復元
 4. composite action `.github/actions/setup-db`
-   - `supabase start`
-   - `prisma migrate deploy`
+   - `supabase start`（`supabase/migrations/*.sql` を自動適用）
    - `supabase/seed.e2e.sql` 投入
    - `prisma/seed-e2e.ts` で Supabase Auth ユーザー作成
 5. `pnpm e2e:smoke:web` または `pnpm e2e:smoke:admin`
