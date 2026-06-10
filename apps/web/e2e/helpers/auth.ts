@@ -63,29 +63,20 @@ export async function fillProfileForm(page: Page, user: TestUser) {
 	await page.click('button[type="submit"]');
 }
 
-export async function createAuthenticatedUser(page: Page): Promise<TestUser> {
-	const user = generateTestUser();
-
-	await page.goto("/signup");
-	await fillSignUpForm(page, user);
-	await page.waitForURL(/\/signup\?success=true/, { timeout: 15000 });
-
-	await page.goto("/signup/profile");
-	await page.waitForURL(/\/signup\/profile/, { timeout: 15000 });
-
-	await fillProfileForm(page, user);
-	await page.waitForURL(/\/signup\/confirm/, { timeout: 15000 });
-
-	const confirmButton = page.locator('button:has-text("この内容で登録する")');
-	await confirmButton.click();
-	await page.waitForURL("/", { timeout: 15000 });
-
-	return user;
-}
-
-// Why not: スモークテストでサインアップフローを毎回完走させると CI 上で不安定になり遅い。
-// prisma/seed-e2e.ts で投入済みの固定ユーザーを直接ログインさせる。
+// Why not: prisma/seed-e2e.ts で投入済みの固定ユーザー (E2E_TEST_USER_PROFILE) と
+// 値を一致させる必要があるため、ヘルパー側にも同じ定数として持つ。
 const SMOKE_USER_EMAIL = "smoke-user@example.test";
+
+const SMOKE_USER_PROFILE: Omit<TestUser, "email" | "password"> = {
+	lastName: "スモーク",
+	firstName: "テスト",
+	nickname: "smoke-user",
+	year: "1990",
+	month: "1",
+	day: "1",
+	gender: "male",
+	prefecture: "東京都",
+};
 
 export async function loginAsSmokeUser(page: Page) {
 	const password = process.env.E2E_TEST_USER_PASSWORD;
@@ -96,4 +87,22 @@ export async function loginAsSmokeUser(page: Page) {
 	await page.goto("/login");
 	await fillLoginForm(page, SMOKE_USER_EMAIL, password);
 	await page.waitForURL("/", { timeout: 15000 });
+}
+
+// Why not: UI 経由のサインアップ完走 (/signup → /signup/profile → /signup/confirm → /) は
+// ローカル Supabase のセッション継承が不安定で beforeEach が 10 秒タイムアウトする。
+// seed-e2e.ts で投入済みのスモークユーザーで直接ログインする方式に統一する。
+export async function createAuthenticatedUser(page: Page): Promise<TestUser> {
+	const password = process.env.E2E_TEST_USER_PASSWORD;
+	if (!password) {
+		throw new Error("E2E_TEST_USER_PASSWORD is not set");
+	}
+
+	await loginAsSmokeUser(page);
+
+	return {
+		email: SMOKE_USER_EMAIL,
+		password,
+		...SMOKE_USER_PROFILE,
+	};
 }
