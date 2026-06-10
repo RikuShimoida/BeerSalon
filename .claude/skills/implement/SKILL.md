@@ -18,8 +18,39 @@ agent: frontend-engineer
 
 #### 1-1. ブランチ作成
 
-- developベースで feature ブランチを作成する
-- `gh issue develop $ARGUMENTS --base develop --checkout` を使用する
+- developベースでブランチを作成する
+- ブランチ命名規則: `feature/<issue番号>-<英語スラッグ>` または `bugfix/<issue番号>-<英語スラッグ>`
+  - 例: `feature/210-add-e2e-ci`, `bugfix/305-fix-login-redirect`
+- `gh issue develop` の `--name` オプションでブランチ名を明示指定する:
+  ```
+  gh issue develop $ARGUMENTS --base develop --checkout --name <prefix>/$ARGUMENTS-<英語スラッグ>
+  ```
+- ブランチ名に `--name` を渡さないと、Issueタイトル（日本語）からブランチ名が自動生成され、Git操作・URL・CI/CDログで扱いにくくなるので必ず明示指定する
+
+##### 英語スラッグの決め方
+
+- Issue内容から Claude 自身が短い英語スラッグを決める
+- ルール:
+  - 小文字 + ハイフン区切り（ケバブケース）
+  - 日本語禁止
+  - 3〜5語以内
+  - Issueタイトルの直訳ではなく、要点を短く表現する
+    - 例: 「CI/CDにE2Eテストを段階的に組み込む」→ `add-e2e-ci`
+    - 例: 「ログイン後のリダイレクトが効かないバグ修正」→ `fix-login-redirect`
+- プレフィックスの選択:
+  - バグ修正系Issue → `bugfix/`
+  - それ以外（機能追加・改善・リファクタ等）→ `feature/`
+
+##### `--name` が使えない場合の代替手順
+
+`gh` のバージョンが古く `--name` が使えない場合は、以下の手順でブランチを作成する:
+
+```
+git checkout develop
+git pull origin develop
+git checkout -b feature/$ARGUMENTS-<英語スラッグ> develop
+git push -u origin HEAD
+```
 
 #### 1-2. プロダクトコード実装
 
