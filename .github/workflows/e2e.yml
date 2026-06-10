@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54421
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
       DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
       JWT_SECRET: ${{ secrets.E2E_JWT_SECRET }}
@@ -61,7 +58,6 @@ jobs:
       - name: Setup E2E database
         uses: ./.github/actions/setup-db
         with:
-          supabase-service-role-key: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
           e2e-test-user-password: ${{ secrets.E2E_TEST_USER_PASSWORD }}
 
       - name: Run web smoke tests
@@ -79,9 +75,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54421
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
       DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
       JWT_SECRET: ${{ secrets.E2E_JWT_SECRET }}
@@ -134,7 +127,6 @@ jobs:
       - name: Setup E2E database
         uses: ./.github/actions/setup-db
         with:
-          supabase-service-role-key: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
           e2e-test-user-password: ${{ secrets.E2E_TEST_USER_PASSWORD }}
 
       - name: Run admin smoke tests

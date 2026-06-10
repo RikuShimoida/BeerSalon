@@ -1,10 +1,7 @@
 name: "Setup E2E Database"
-description: "Start Supabase, run Prisma migrations, and seed E2E data"
+description: "Start Supabase, export keys to GITHUB_ENV, and seed E2E data"
 
 inputs:
-  supabase-service-role-key:
-    description: "Supabase service_role key"
-    required: true
   e2e-test-user-password:
     description: "E2E smoke test user password (Supabase Auth)"
     required: true
@@ -25,6 +22,16 @@ runs:
       shell: bash
       run: supabase start
 
+    - name: Export Supabase keys to GITHUB_ENV
+      shell: bash
+      run: |
+        supabase status -o env \
+          --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
+          --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY \
+          --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY \
+          | sed -E 's/^([A-Z_]+)="(.*)"$/\1=\2/' \
+          >> "$GITHUB_ENV"
+
     - name: Apply E2E seed (SQL)
       shell: bash
       env:
@@ -34,8 +41,6 @@ runs:
     - name: Apply E2E seed (Auth users)
       shell: bash
       env:
-        NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54421
-        SUPABASE_SERVICE_ROLE_KEY: ${{ inputs.supabase-service-role-key }}
         E2E_TEST_USER_PASSWORD: ${{ inputs.e2e-test-user-password }}
         DATABASE_URL: ${{ inputs.database-url }}
       run: pnpm --filter @beersalon/web exec tsx ../../prisma/seed-e2e.ts
