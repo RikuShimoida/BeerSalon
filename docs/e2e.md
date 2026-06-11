@@ -2,18 +2,21 @@
 
 Beer Salon の E2E テスト（Playwright）の実行方法と CI 連携について。
 
-## テストの分類
+## 方針: テストピラミッドの原則により E2E は 7本に限定
 
-| 分類 | 本数 | トリガー | 目的 |
-|------|------|----------|------|
-| スモーク | 7本（web 5 / admin 2） | PR (`main` / `develop` 向け) | リグレッション最小検知 |
-| フル | 28本 | Step 3 で nightly に乗せる予定 | 全シナリオの動作保証 |
+E2E は壊れやすく実行時間も長いため、Beer Salon ではテストピラミッドの原則に従い
+**スモーク観点の 7本（web 5 / admin 2）に限定** している。それ以上の網羅は UT で担保する。
 
-**スモーク7本は固定**。本数を増やす場合は ADR 経由でレビューを必須とすること。
+| レイヤ | 担保すべき範囲 |
+|--------|---------------|
+| UT（Vitest） | バリデーション、Server Actions、middleware、認証ロジック、API ハンドラ、コンポーネント単体 |
+| E2E（Playwright） | 主要画面が「ログインして開ける／表示される」というスモーク観点のみ |
 
-### スモーク対象テスト
+新しい E2E テストを追加する場合は、UT で代替できないか検討した上で、必要性をレビューで合意してから追加すること。
 
-#### apps/web（5本）
+## E2E テスト一覧（7本）
+
+### apps/web（5本）
 
 | ファイル | テスト名 |
 |---------|---------|
@@ -23,34 +26,48 @@ Beer Salon の E2E テスト（Playwright）の実行方法と CI 連携につ�
 | `apps/web/e2e/bar-detail-tabs.spec.ts` | 店舗詳細ページにアクセスすると店舗名とお気に入りボタンが表示される |
 | `apps/web/e2e/post-create.spec.ts` | 投稿本文入力フォームが表示される |
 
-#### apps/admin（2本）
+### apps/admin（2本）
 
 | ファイル | テスト名 |
 |---------|---------|
-| `apps/admin/tests/auth.spec.ts` | should display login page with email and password fields |
-| `apps/admin/tests/bars.spec.ts` | should display bars list for bar owner |
+| `apps/admin/tests/auth.spec.ts` | should display login page with bar manage ID and password fields |
+| `apps/admin/tests/bars.spec.ts` | should display bars list for admin |
 
-スモーク対象は `@smoke` タグで識別する。`pnpm e2e:smoke:web` / `pnpm e2e:smoke:admin` は `--grep @smoke` で絞り込んで実行する。
+## UT でカバーする範囲
+
+E2E から削った観点は、以下の UT で代替している。
+
+| 観点 | UT ファイル |
+|------|------------|
+| 未認証時の保護ルート → `/login` リダイレクト（web） | `apps/web/src/middleware.test.ts` |
+| `/login`・`/signup` の認証済みリダイレクト（web） | `apps/web/src/middleware.test.ts` |
+| プロフィール未作成時の `/signup/profile` リダイレクト | `apps/web/src/middleware.test.ts` |
+| パスワードハッシュ生成・検証 / JWT 発行・検証 / アクセス制御（admin） | `apps/admin/src/lib/auth.test.ts` |
+| ログイン API（バリデーション・認証失敗・成功時のCookie発行） | `apps/admin/src/app/api/auth/login/route.test.ts` |
+| ログアウト API（Cookie削除） | `apps/admin/src/app/api/auth/logout/route.test.ts` |
+| セッション取得 API（200 / 401 / 500） | `apps/admin/src/app/api/auth/session/route.test.ts` |
+| admin middleware の `/login` 認証済みリダイレクト | `apps/admin/src/__tests__/middleware.test.ts` |
+| Server Actions / フォームバリデーション | `apps/web/src/**/*.test.{ts,tsx}` |
 
 ## ローカルでの実行
 
 ### ワンコマンドセットアップ（推奨）
 
-新規 clone 直後でも以下の3コマンドでスモーク E2E（7本）が緑になる。
+新規 clone 直後でも以下の 3 コマンドで E2E（7本）が緑になる。
 
 ```bash
 # 1. Supabase ローカルスタックを起動（migrations 自動適用）
 supabase start
 
-# 2. seed.sql / seed.e2e.sql 投入 + Supabase Auth テストユーザー作成
+# 2. seed.e2e.sql 投入 + Supabase Auth テストユーザー作成
 pnpm e2e:setup
 
-# 3. スモーク E2E を実行（web 5本 + admin 2本）
-pnpm e2e:smoke
+# 3. E2E を実行（web 5本 + admin 2本）
+pnpm e2e
 ```
 
-`pnpm e2e:smoke` は `pnpm e2e:smoke:web && pnpm e2e:smoke:admin` のショートカット。
-個別に実行したい場合は `pnpm e2e:smoke:web` / `pnpm e2e:smoke:admin` を使う。
+`pnpm e2e` は `pnpm e2e:web && pnpm e2e:admin` のショートカット。
+個別に実行したい場合は `pnpm e2e:web` / `pnpm e2e:admin` を使う。
 
 #### `pnpm e2e:setup` の動作
 
@@ -60,11 +77,16 @@ pnpm e2e:smoke
 2. Supabase DB コンテナ名を動的取得（`docker ps --filter label=com.supabase.cli.project=BeerSalon`）
 3. `supabase status -o env` から接続情報をシェル変数に展開
 4. `.env.e2e.local` が無ければ `.env.e2e.local.example` からコピー（初回セットアップ自動化）
-5. `supabase/seed.sql` と `supabase/seed.e2e.sql` を **`docker exec -i` 経由で psql 投入**（ローカルに psql 不要）
+5. `supabase/seed.e2e.sql` を **`docker exec -i` 経由で psql 投入**（ローカルに psql 不要）
 6. `prisma/seed-e2e.ts` で `smoke-user@example.test` の Supabase Auth ユーザーを作成
 
 冪等性は SQL の `ON CONFLICT DO NOTHING` と `seed-e2e.ts` の存在チェックで担保されているため、
 何度実行しても安全。
+
+> **重要**: 旧版ではローカル限定で `seed.sql`（本番想定データ）も投入していたが、
+> CI 側は `seed.e2e.sql` のみを投入するため、ローカルだけ別データになる不具合が頻発していた。
+> 現在は CI / ローカル共に `seed.e2e.sql` のみを投入する形に統一している。
+> 本番想定データを別途投入したい場合は `pnpm seed:dev`（ローカル psql 必須）を実行すること。
 
 ### 環境変数の設定（`.env.e2e.local`）
 
@@ -83,28 +105,18 @@ Playwright config（`apps/web/playwright.config.ts` / `apps/admin/playwright.con
 `.env.local` → `.env.e2e.local`（override）の順で `dotenv` で読み込むため、
 コマンドラインで毎回環境変数を渡す必要はない。
 
-### スモーク実行（個別）
+### 個別実行
 
 ```bash
-# web のスモーク 5 本
-pnpm e2e:smoke:web
-
-# admin のスモーク 2 本
-pnpm e2e:smoke:admin
-
-# Playwright UI モード（対話的にテストを選択して実行）
-pnpm e2e:smoke:web --ui
-pnpm e2e:smoke:admin --ui
-```
-
-### フル実行
-
-```bash
-# web の全テスト
+# web の E2E 5 本
 pnpm e2e:web
 
-# admin の全テスト
+# admin の E2E 2 本
 pnpm e2e:admin
+
+# Playwright UI モード（対話的にテストを選択して実行）
+pnpm e2e:web --ui
+pnpm e2e:admin --ui
 ```
 
 ### 手動で psql 相当を叩きたい場合
@@ -118,9 +130,6 @@ SUPABASE_DB=$(docker ps \
   --filter "label=com.supabase.cli.project=BeerSalon" \
   --filter "name=supabase_db" \
   --format "{{.Names}}")
-
-# seed.sql 投入
-docker exec -i "$SUPABASE_DB" psql -U postgres -d postgres < supabase/seed.sql
 
 # seed.e2e.sql 投入
 docker exec -i "$SUPABASE_DB" psql -U postgres -d postgres < supabase/seed.e2e.sql
@@ -154,15 +163,14 @@ Supabase ローカルの anon key / service_role key は固定値だが、平文
    - `supabase start`（`supabase/migrations/*.sql` を自動適用）
    - `supabase/seed.e2e.sql` 投入
    - `prisma/seed-e2e.ts` で Supabase Auth ユーザー作成
-5. `pnpm e2e:smoke:web` または `pnpm e2e:smoke:admin`
+5. `pnpm e2e:web` または `pnpm e2e:admin`
 6. 失敗時は Playwright の HTML レポートを artifact として保存
 
 ## テスト追加・変更時の注意
 
-- スモーク7本を超える追加は ADR を起こしてレビューを必須化すること
-- 新しい E2E テストを書いたら、まず `@smoke` を付けずに作成し、フル実行に乗せること
-- スモークに格上げする際は「失敗時に PR ブロッカーになる価値があるか」を考慮すること
-- 投稿作成 smoke は **フォーム表示・バリデーション** までを対象とする。Supabase Storage への画像アップロード／実投稿は Step 3 でフル E2E に乗せる
+- E2E は 7本に固定。追加する場合はテストピラミッドの原則に照らして UT で代替できないか検討する
+- E2E を追加する場合はレビューで合意してから本数を増やすこと
+- 既存 7本に手を入れる場合も、何のスモークなのかが明確に保たれるよう注意する
 
 ## トラブルシューティング
 

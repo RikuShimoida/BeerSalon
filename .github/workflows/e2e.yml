@@ -1,4 +1,4 @@
-name: E2E Smoke
+name: E2E
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  e2e-web-smoke:
+  e2e-web:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -60,8 +60,8 @@ jobs:
         with:
           e2e-test-user-password: ${{ secrets.E2E_TEST_USER_PASSWORD }}
 
-      - name: Run web smoke tests
-        run: pnpm e2e:smoke:web
+      - name: Run web E2E tests
+        run: pnpm e2e:web
 
       - name: Upload Playwright report (web)
         if: failure()
@@ -71,7 +71,7 @@ jobs:
           path: apps/web/playwright-report/
           retention-days: 7
 
-  e2e-admin-smoke:
+  e2e-admin:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -129,8 +129,8 @@ jobs:
         with:
           e2e-test-user-password: ${{ secrets.E2E_TEST_USER_PASSWORD }}
 
-      - name: Run admin smoke tests
-        run: pnpm e2e:smoke:admin
+      - name: Run admin E2E tests
+        run: pnpm e2e:admin
 
       - name: Upload Playwright report (admin)
         if: failure()
