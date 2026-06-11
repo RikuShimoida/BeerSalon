@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 # Beer Salon - E2E Local Setup
 #
-# ローカルでスモークE2E（web 5本 / admin 2本）を緑にするためのワンコマンドセットアップ。
+# ローカルでE2E（web 5本 / admin 2本 = 計7本）を緑にするためのワンコマンドセットアップ。
 # 内容: Docker起動チェック → Supabase起動チェック → 環境変数自動エクスポート
-#        → seed.sql / seed.e2e.sql をDocker exec経由でpsql投入 → seed-e2e.ts実行
+#        → seed.e2e.sql をDocker exec経由でpsql投入 → seed-e2e.ts実行
 #
 # 冪等性: 既存の `ON CONFLICT DO NOTHING` / seed-e2e.ts の `if exists then skip` により担保。
 #
 # Why not: ローカル開発機にpsqlが必ずインストールされているとは限らないため、
 #          DockerコンテナのpsqlをdockerexecAPIごしに叩くアプローチを採用。
+#
+# Why not: 旧版では seed.sql も投入していたが、CI（.github/actions/setup-db/action.yml）は
+#          seed.e2e.sql のみを投入する。CIとローカルでDB初期状態が乖離し、ローカル固有の
+#          失敗を生む原因となっていたため、ローカルでも seed.e2e.sql のみに統一する。
+#          開発用に本番想定データを入れたい場合は `pnpm seed:dev` を別途実行する。
 
 set -euo pipefail
 
@@ -106,11 +111,9 @@ if [ -z "${E2E_TEST_USER_PASSWORD:-}" ]; then
 	exit 1
 fi
 
-# 7. seed.sql と seed.e2e.sql を docker exec 経由で投入
-log "seed.sql を投入 (docker exec)..."
-docker exec -i "$SUPABASE_DB_CONTAINER" \
-	psql -v ON_ERROR_STOP=1 -U postgres -d postgres < supabase/seed.sql >/dev/null
-
+# 7. seed.e2e.sql を docker exec 経由で投入
+# Why not: CI（.github/actions/setup-db/action.yml）は seed.e2e.sql のみを投入しており、
+#          ローカルでも同じデータセットに揃えることで CI 非再現のローカル失敗を排除する。
 log "seed.e2e.sql を投入 (docker exec)..."
 docker exec -i "$SUPABASE_DB_CONTAINER" \
 	psql -v ON_ERROR_STOP=1 -U postgres -d postgres < supabase/seed.e2e.sql >/dev/null
@@ -121,6 +124,5 @@ pnpm --filter @beersalon/web exec tsx ../../prisma/seed-e2e.ts
 
 log "✅ ローカル E2E セットアップ完了"
 log ""
-log "次のコマンドでスモーク E2E を実行:"
-log "  pnpm e2e:smoke:web"
-log "  pnpm e2e:smoke:admin"
+log "次のコマンドで E2E を実行:"
+log "  pnpm e2e"

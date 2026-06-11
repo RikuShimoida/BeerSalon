@@ -3,7 +3,7 @@ description: "Start Supabase, export keys to GITHUB_ENV, and seed E2E data"
 
 inputs:
   e2e-test-user-password:
-    description: "E2E smoke test user password (Supabase Auth)"
+    description: "E2E test user password (Supabase Auth)"
     required: true
   database-url:
     description: "Postgres connection string (Supabase local)"
