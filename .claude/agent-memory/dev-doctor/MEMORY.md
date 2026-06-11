@@ -1,1 +1,0 @@
-- [重複Supabaseスタック](project_duplicate_supabase_stack.md) — web/adminは54421/54422の単一インスタンス共有が正。54321を使う別スタックは設計外
