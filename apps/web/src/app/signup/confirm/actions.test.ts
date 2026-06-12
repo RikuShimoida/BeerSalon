@@ -81,113 +81,28 @@ function setupCookies(
 	});
 }
 
-describe("confirmAndSaveProfile", () => {
+// Why not: user_profiles への INSERT 成功 / 既存プロフィール時の二重 INSERT 回避 / Cookie 削除 / redirect("/")
+// の正常系副作用は `actions.integration.test.ts` で実 DB に対して検証済み。本 UT では Cookie / 認証 /
+// 生年月日フォーマット検証 / Storage 経路のエラーハンドリング / DB 例外時の catch ブロックなど
+// 「モックでないと網羅が難しいエッジケース」だけを残す。
+describe("confirmAndSaveProfile (Unit: 早期 return / バリデーション / Storage エラー)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	describe("正常系", () => {
-		it("有効なプロフィールデータでDB保存が成功する", async () => {
-			setupCookies(validProfileData);
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-			mockPrismaFindUnique.mockResolvedValue(null);
-			mockPrismaCreate.mockResolvedValue({
-				id: "profile-id",
-				userAuthId: "test-user-id",
-			});
+	describe("早期 return", () => {
+		it("profile_data Cookie が存在しない場合、エラーが返り DB 書き込みは発生しない", async () => {
+			setupCookies(null);
 
-			try {
-				await confirmAndSaveProfile(undefined, new FormData());
-			} catch (_error) {
-				// redirectはthrowする
-			}
+			const result = await confirmAndSaveProfile(undefined, new FormData());
 
-			expect(mockPrismaCreate).toHaveBeenCalledWith({
-				data: {
-					userAuthId: "test-user-id",
-					lastName: "山田",
-					firstName: "太郎",
-					nickname: "やまちゃん",
-					birthday: new Date("1990-01-01"),
-					gender: "male",
-					prefecture: "東京都",
-					profileImageUrl: undefined,
-					bio: "",
-				},
+			expect(result).toEqual({
+				error: "プロフィールデータが見つかりません",
 			});
+			expect(mockPrismaCreate).not.toHaveBeenCalled();
 		});
 
-		it("成功時にredirect('/')が呼ばれる", async () => {
-			setupCookies(validProfileData);
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-			mockPrismaFindUnique.mockResolvedValue(null);
-			mockPrismaCreate.mockResolvedValue({ id: "profile-id" });
-
-			try {
-				await confirmAndSaveProfile(undefined, new FormData());
-			} catch (_error) {
-				// redirectはthrowする
-			}
-
-			expect(mockRedirect).toHaveBeenCalledWith("/");
-		});
-
-		it("プロフィール画像がある場合、Supabase Storageへアップロードされる", async () => {
-			const tempPath = "temp/test-user-id-123456.png";
-			setupCookies(validProfileData, tempPath);
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-			mockPrismaFindUnique.mockResolvedValue(null);
-
-			const mockFileBlob = new Blob(["fake-image-data"], {
-				type: "image/png",
-			});
-			mockDownload.mockResolvedValue({
-				data: mockFileBlob,
-				error: null,
-			});
-			mockUpload.mockResolvedValue({
-				data: { path: "profiles/test-user-id/avatar.png" },
-				error: null,
-			});
-			mockRemove.mockResolvedValue({ data: [], error: null });
-			mockGetPublicUrl.mockReturnValue({
-				data: {
-					publicUrl:
-						"https://storage.example.com/profiles/test-user-id/avatar.png",
-				},
-			});
-			mockPrismaCreate.mockResolvedValue({ id: "profile-id" });
-
-			try {
-				await confirmAndSaveProfile(undefined, new FormData());
-			} catch (_error) {
-				// redirectはthrowする
-			}
-
-			expect(mockDownload).toHaveBeenCalledWith(tempPath);
-			expect(mockUpload).toHaveBeenCalled();
-			expect(mockPrismaCreate).toHaveBeenCalledWith(
-				expect.objectContaining({
-					data: expect.objectContaining({
-						profileImageUrl:
-							"https://storage.example.com/profiles/test-user-id/avatar.png",
-					}),
-				}),
-			);
-		});
-	});
-
-	describe("異常系", () => {
-		it("未認証ユーザーの場合、エラーが返る", async () => {
+		it("未認証ユーザーの場合、エラーが返り DB 書き込みは発生しない", async () => {
 			setupCookies(validProfileData);
 			mockGetUser.mockResolvedValue({
 				data: { user: null },
@@ -201,46 +116,10 @@ describe("confirmAndSaveProfile", () => {
 			});
 			expect(mockPrismaCreate).not.toHaveBeenCalled();
 		});
+	});
 
-		it("DB保存失敗時、詳細なエラーメッセージが返る", async () => {
-			setupCookies(validProfileData);
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-			mockPrismaFindUnique.mockResolvedValue(null);
-			mockPrismaCreate.mockRejectedValue(new Error("Database error"));
-
-			const result = await confirmAndSaveProfile(undefined, new FormData());
-
-			expect(result).toEqual({
-				error: "プロフィールの保存に失敗しました: Database error",
-			});
-		});
-
-		it("プロフィールが既に存在する場合、redirect('/')が呼ばれる", async () => {
-			setupCookies(validProfileData);
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-			mockPrismaFindUnique.mockResolvedValue({
-				id: "existing-profile-id",
-				userAuthId: "test-user-id",
-				nickname: "既存ユーザー",
-			});
-
-			try {
-				await confirmAndSaveProfile(undefined, new FormData());
-			} catch (_error) {
-				// redirectはthrowする
-			}
-
-			expect(mockRedirect).toHaveBeenCalledWith("/");
-			expect(mockPrismaCreate).not.toHaveBeenCalled();
-		});
-
-		it("生年月日の形式が不正な場合、エラーが返る", async () => {
+	describe("バリデーション", () => {
+		it("生年月日の形式が不正な場合、エラーが返り DB 書き込みは発生しない", async () => {
 			setupCookies({ ...validProfileData, birthday: "invalid-date" });
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
@@ -255,8 +134,10 @@ describe("confirmAndSaveProfile", () => {
 			});
 			expect(mockPrismaCreate).not.toHaveBeenCalled();
 		});
+	});
 
-		it("画像アップロード失敗時、エラーが返る", async () => {
+	describe("Storage 経路 (画像処理)", () => {
+		it("画像アップロード失敗時、エラーが返り DB 書き込みは発生しない", async () => {
 			const consoleErrorSpy = vi
 				.spyOn(console, "error")
 				.mockImplementation(() => {});
@@ -291,6 +172,58 @@ describe("confirmAndSaveProfile", () => {
 				error: "画像の保存に失敗しました",
 			});
 			expect(mockPrismaCreate).not.toHaveBeenCalled();
+
+			consoleErrorSpy.mockRestore();
+		});
+
+		it("画像ダウンロード失敗時、エラーが返り DB 書き込みは発生しない", async () => {
+			const consoleErrorSpy = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+
+			const tempPath = "temp/test-user-id-123456.png";
+			setupCookies(validProfileData, tempPath);
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+			mockPrismaFindUnique.mockResolvedValue(null);
+
+			mockDownload.mockResolvedValue({
+				data: null,
+				error: { message: "Download failed" },
+			});
+
+			const result = await confirmAndSaveProfile(undefined, new FormData());
+
+			expect(result).toEqual({
+				error: "画像の処理に失敗しました",
+			});
+			expect(mockPrismaCreate).not.toHaveBeenCalled();
+
+			consoleErrorSpy.mockRestore();
+		});
+	});
+
+	describe("DB 例外時のエラーハンドリング", () => {
+		it("prisma.userProfile.create が throw した場合、詳細なエラーメッセージが返る", async () => {
+			const consoleErrorSpy = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+
+			setupCookies(validProfileData);
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+			mockPrismaFindUnique.mockResolvedValue(null);
+			mockPrismaCreate.mockRejectedValue(new Error("Database error"));
+
+			const result = await confirmAndSaveProfile(undefined, new FormData());
+
+			expect(result).toEqual({
+				error: "プロフィールの保存に失敗しました: Database error",
+			});
 
 			consoleErrorSpy.mockRestore();
 		});

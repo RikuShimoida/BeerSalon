@@ -42,6 +42,22 @@ globs: **/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/e2e/**, **/tests/**
 - 受入条件に該当するユーザー操作（画面遷移、表示、送信、エラー表示など）は E2E を追加すること
 - 追加する E2E は、**再現手順ベースで第三者が見ても分かる** 内容にすること
 
+### Integration Test（Vitest + 実 Supabase）
+
+以下のいずれかに該当する変更は Integration テストを追加すること。
+
+- Server Action の追加・変更で **DB への書き込み（INSERT / UPDATE / DELETE / `$transaction`）を伴うもの**
+- Prisma の `include` 構造を変更するクエリ
+- Supabase の RLS ポリシー / GRANT を追加・変更するマイグレーション
+- `auth.users` と `public.user_profiles` のリレーションに関わる変更
+
+UT のモックでカバーしてはならない領域:
+- `prisma.$transaction` の副作用検証
+- RLS / GRANT に依存するアクセス制御の検証
+- Prisma クエリ結果の構造検証（include の網羅性）
+
+ファイル命名は `*.integration.test.ts`。実行は `pnpm test:integration`（事前に `supabase start` + `pnpm e2e:setup` が必要）。
+
 ### 禁止事項
 - テストを後回しにして PR を出すこと
 - 「動いたので OK」で完了扱いにすること（必ずテストで担保すること）

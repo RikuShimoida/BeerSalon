@@ -63,245 +63,17 @@ vi.mock("@/lib/prisma", () => ({
 
 import { createPost } from "./actions";
 
-describe("createPost", () => {
+// Why not: 投稿の DB 副作用 (posts / post_images の INSERT、sortOrder の順序、リダイレクト URL) は
+// `actions.integration.test.ts` で実 DB に対して検証済み。本 UT では Server Action の早期 return
+// (認証チェック / プロフィール存在チェック / Zod バリデーション) と、画像 5 枚制限・ロールバックなど
+// 「モックでないと網羅が難しい分岐」だけを残す。
+describe("createPost (Unit: 早期 return / バリデーション / ロールバック)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	describe("正常系", () => {
-		it("本文 + 画像1枚で投稿作成が成功する", async () => {
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-
-			mockPrismaUserProfileFindUnique.mockResolvedValue({
-				id: "profile-id",
-				userAuthId: "test-user-id",
-			});
-
-			mockPrismaPostCreate.mockResolvedValue({
-				id: BigInt(1),
-				barId: BigInt(100),
-				body: "テスト投稿",
-			});
-
-			mockUpload.mockResolvedValue({
-				data: { path: "posts/1/image1.jpg" },
-				error: null,
-			});
-
-			mockGetPublicUrl.mockReturnValue({
-				data: { publicUrl: "https://storage.example.com/posts/1/image1.jpg" },
-			});
-
-			mockPrismaPostImageCreate.mockResolvedValue({
-				id: BigInt(1),
-				postId: BigInt(1),
-				imageUrl: "https://storage.example.com/posts/1/image1.jpg",
-				sortOrder: 0,
-			});
-
-			const image = new MockFile(["dummy content"], "test.jpg", {
-				type: "image/jpeg",
-			});
-
-			const formData = new FormData();
-			formData.append("barId", "100");
-			formData.append("body", "テスト投稿");
-			formData.append("image-0", image);
-
-			try {
-				await createPost(undefined, formData);
-			} catch (_error) {
-				// redirectはthrowする
-			}
-
-			expect(mockPrismaPostCreate).toHaveBeenCalledWith({
-				data: {
-					userId: "profile-id",
-					barId: BigInt(100),
-					body: "テスト投稿",
-				},
-			});
-			expect(mockUpload).toHaveBeenCalledTimes(1);
-			expect(mockPrismaPostImageCreate).toHaveBeenCalledTimes(1);
-			expect(mockRedirect).toHaveBeenCalledWith("/bars/100");
-		});
-
-		it("本文 + 画像複数枚(最大4枚)で投稿作成が成功する", async () => {
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-
-			mockPrismaUserProfileFindUnique.mockResolvedValue({
-				id: "profile-id",
-				userAuthId: "test-user-id",
-			});
-
-			mockPrismaPostCreate.mockResolvedValue({
-				id: BigInt(1),
-				barId: BigInt(100),
-			});
-
-			mockUpload.mockResolvedValue({
-				data: { path: "posts/1/image.jpg" },
-				error: null,
-			});
-
-			mockGetPublicUrl.mockReturnValue({
-				data: { publicUrl: "https://storage.example.com/posts/1/image.jpg" },
-			});
-
-			mockPrismaPostImageCreate.mockResolvedValue({
-				id: BigInt(1),
-			});
-
-			const images = [
-				new MockFile(["content1"], "image1.jpg", { type: "image/jpeg" }),
-				new MockFile(["content2"], "image2.jpg", { type: "image/jpeg" }),
-				new MockFile(["content3"], "image3.jpg", { type: "image/jpeg" }),
-				new MockFile(["content4"], "image4.jpg", { type: "image/jpeg" }),
-			];
-
-			const formData = new FormData();
-			formData.append("barId", "100");
-			formData.append("body", "複数画像投稿");
-			for (let i = 0; i < images.length; i++) {
-				formData.append(`image-${i}`, images[i]);
-			}
-
-			try {
-				await createPost(undefined, formData);
-			} catch (_error) {
-				// redirectはthrowする
-			}
-
-			expect(mockUpload).toHaveBeenCalledTimes(4);
-			expect(mockPrismaPostImageCreate).toHaveBeenCalledTimes(4);
-		});
-
-		it("本文のみ(画像なし)で投稿作成が成功する", async () => {
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-
-			mockPrismaUserProfileFindUnique.mockResolvedValue({
-				id: "profile-id",
-			});
-
-			mockPrismaPostCreate.mockResolvedValue({
-				id: BigInt(1),
-				barId: BigInt(100),
-			});
-
-			const formData = new FormData();
-			formData.append("barId", "100");
-			formData.append("body", "画像なし投稿");
-
-			try {
-				await createPost(undefined, formData);
-			} catch (_error) {
-				// redirectはthrowする
-			}
-
-			expect(mockPrismaPostCreate).toHaveBeenCalled();
-			expect(mockUpload).not.toHaveBeenCalled();
-			expect(mockPrismaPostImageCreate).not.toHaveBeenCalled();
-			expect(mockRedirect).toHaveBeenCalledWith("/bars/100");
-		});
-
-		it("成功時に/bars/[barId]へリダイレクトされる", async () => {
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-
-			mockPrismaUserProfileFindUnique.mockResolvedValue({
-				id: "profile-id",
-			});
-
-			mockPrismaPostCreate.mockResolvedValue({
-				id: BigInt(1),
-				barId: BigInt(999),
-			});
-
-			const formData = new FormData();
-			formData.append("barId", "999");
-			formData.append("body", "リダイレクト確認");
-
-			try {
-				await createPost(undefined, formData);
-			} catch (_error) {
-				// redirectはthrowする
-			}
-
-			expect(mockRedirect).toHaveBeenCalledWith("/bars/999");
-		});
-
-		it("画像のsortOrderが正しく設定される", async () => {
-			mockGetUser.mockResolvedValue({
-				data: { user: { id: "test-user-id" } },
-				error: null,
-			});
-
-			mockPrismaUserProfileFindUnique.mockResolvedValue({
-				id: "profile-id",
-			});
-
-			mockPrismaPostCreate.mockResolvedValue({
-				id: BigInt(1),
-			});
-
-			mockUpload.mockResolvedValue({
-				data: { path: "posts/1/image.jpg" },
-				error: null,
-			});
-
-			mockGetPublicUrl.mockReturnValue({
-				data: { publicUrl: "https://storage.example.com/image.jpg" },
-			});
-
-			mockPrismaPostImageCreate.mockResolvedValue({
-				id: BigInt(1),
-			});
-
-			const images = [
-				new MockFile(["content1"], "image1.jpg", { type: "image/jpeg" }),
-				new MockFile(["content2"], "image2.jpg", { type: "image/jpeg" }),
-			];
-
-			const formData = new FormData();
-			formData.append("barId", "100");
-			formData.append("body", "sortOrder確認");
-			formData.append("image-0", images[0]);
-			formData.append("image-1", images[1]);
-
-			try {
-				await createPost(undefined, formData);
-			} catch (_error) {
-				// redirectはthrowする
-			}
-
-			expect(mockPrismaPostImageCreate).toHaveBeenNthCalledWith(
-				1,
-				expect.objectContaining({
-					data: expect.objectContaining({ sortOrder: 0 }),
-				}),
-			);
-			expect(mockPrismaPostImageCreate).toHaveBeenNthCalledWith(
-				2,
-				expect.objectContaining({
-					data: expect.objectContaining({ sortOrder: 1 }),
-				}),
-			);
-		});
-	});
-
-	describe("異常系", () => {
-		it("未認証ユーザーの場合、エラーが返る", async () => {
+	describe("早期 return", () => {
+		it("未認証ユーザーの場合、エラーが返り DB 書き込みは発生しない", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: null },
 				error: null,
@@ -319,7 +91,7 @@ describe("createPost", () => {
 			expect(mockPrismaPostCreate).not.toHaveBeenCalled();
 		});
 
-		it("ユーザープロフィールが存在しない場合、エラーが返る", async () => {
+		it("ユーザープロフィールが存在しない場合、エラーが返り DB 書き込みは発生しない", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -338,8 +110,10 @@ describe("createPost", () => {
 			});
 			expect(mockPrismaPostCreate).not.toHaveBeenCalled();
 		});
+	});
 
-		it("barId未指定の場合、バリデーションエラーが返る", async () => {
+	describe("Zod バリデーション", () => {
+		it("barId 未指定の場合、バリデーションエラーが返る", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -358,7 +132,7 @@ describe("createPost", () => {
 			expect(mockPrismaPostCreate).not.toHaveBeenCalled();
 		});
 
-		it("body未指定または空の場合、バリデーションエラーが返る", async () => {
+		it("body が空の場合、バリデーションエラーが返る", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -377,8 +151,10 @@ describe("createPost", () => {
 			expect(result?.error).toBeTruthy();
 			expect(mockPrismaPostCreate).not.toHaveBeenCalled();
 		});
+	});
 
-		it("5枚の画像を追加しても最初の4枚のみが処理される", async () => {
+	describe("画像枚数制限", () => {
+		it("5 枚の画像を渡しても先頭 4 枚のみがアップロードされる", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -421,16 +197,18 @@ describe("createPost", () => {
 			try {
 				await createPost(undefined, formData);
 			} catch (_error) {
-				// redirectはthrowする
+				// redirect は throw する
 			}
 
-			// 実装上、i < 4でループしているため、最大4枚のみ処理される
+			// 実装上、actions.ts 内で `for (let i = 0; i < 4; i++)` でループしているため、最大 4 枚のみ処理される
 			expect(mockUpload).toHaveBeenCalledTimes(4);
 			expect(mockPrismaPostImageCreate).toHaveBeenCalledTimes(4);
 			expect(mockRedirect).toHaveBeenCalledWith("/bars/100");
 		});
+	});
 
-		it("画像アップロード失敗時、投稿がロールバックされる", async () => {
+	describe("ロールバック / エラーハンドリング", () => {
+		it("画像アップロード失敗時、posts と post_images の削除がリクエストされる", async () => {
 			const consoleErrorSpy = vi
 				.spyOn(console, "error")
 				.mockImplementation(() => {});
@@ -486,7 +264,11 @@ describe("createPost", () => {
 			consoleLogSpy.mockRestore();
 		});
 
-		it("DB保存失敗時、エラーが返る", async () => {
+		it("post.create が throw した場合、汎用エラーメッセージで barId 付きで返る", async () => {
+			const consoleErrorSpy = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
@@ -508,6 +290,8 @@ describe("createPost", () => {
 				error: "投稿の作成に失敗しました",
 				barId: "100",
 			});
+
+			consoleErrorSpy.mockRestore();
 		});
 	});
 });

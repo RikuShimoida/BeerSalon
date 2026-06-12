@@ -107,18 +107,21 @@ Beer Salon は以下を1つの場所に集約します。
 
 ---
 
-## 🧪 ローカル E2E 実行（3コマンドで完了）
+## 🧪 ローカルテスト実行
 
-Docker を起動した状態で以下の3コマンドを叩けば、E2E（web 5本 / admin 2本 = 計7本）が緑になる。
-E2E はテストピラミッドの原則により最小化しており、それ以上の網羅は UT で担保している。
+Beer Salon はテストピラミッドの 3 層構成（UT / Integration / E2E）でテストを管理している。
+Docker を起動した状態で以下のコマンドで各層を実行できる。
 
 ```bash
-supabase start        # Supabase ローカルスタックを起動
-pnpm e2e:setup        # seed.e2e.sql 投入 + Supabase Auth テストユーザー作成
-pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
+supabase start         # Supabase ローカルスタックを起動（Integration / E2E で必要）
+pnpm e2e:setup         # seed.e2e.sql 投入 + Supabase Auth テストユーザー作成
+
+pnpm test:unit         # UT（Vitest, モック）
+pnpm test:integration  # Integration（Vitest + 実 Supabase ローカル）
+pnpm e2e               # E2E 7本（Playwright, web 5本 + admin 2本）
 ```
 
-詳細・トラブルシューティング・UIモード起動方法は `docs/e2e.md` を参照。
+各層の責務とテストピラミッドの方針、トラブルシューティング・UI モード起動方法は `docs/e2e.md` を参照。
 
 ---
 
