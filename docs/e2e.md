@@ -2,17 +2,20 @@
 
 Beer Salon の E2E テスト（Playwright）の実行方法と CI 連携について。
 
-## 方針: テストピラミッドの原則により E2E は 7本に限定
+## 方針: テストピラミッドの 3 層構成
 
-E2E は壊れやすく実行時間も長いため、Beer Salon ではテストピラミッドの原則に従い
-**スモーク観点の 7本（web 5 / admin 2）に限定** している。それ以上の網羅は UT で担保する。
+Beer Salon ではテストピラミッドの原則に従い、以下の 3 層でテストを構成する。
+E2E は壊れやすく実行時間も長いため **スモーク観点の 7本（web 5 / admin 2）に限定** し、
+それ以上の網羅は UT および Integration（実 Supabase に対する Server Action 検証）で担保する。
 
-| レイヤ | 担保すべき範囲 |
-|--------|---------------|
-| UT（Vitest） | バリデーション、Server Actions、middleware、認証ロジック、API ハンドラ、コンポーネント単体 |
-| E2E（Playwright） | 主要画面が「ログインして開ける／表示される」というスモーク観点のみ |
+| レイヤ | 担保すべき範囲 | 本数の目安 |
+|--------|---------------|-----------|
+| UT（Vitest） | 純粋ロジック / バリデーション / コンポーネント / middleware 判定 | 30〜80本 |
+| Integration（Vitest + 実 Supabase） | Server Action の DB 副作用 / Prisma クエリ / RLS / GRANT | 20〜30本（現状 8〜12 本、最終目標 20〜30 本） |
+| E2E（Playwright） | 主要画面のスモーク表示 | 7本固定 |
 
-新しい E2E テストを追加する場合は、UT で代替できないか検討した上で、必要性をレビューで合意してから追加すること。
+新しい E2E テストを追加する場合は、UT および Integration で代替できないか検討した上で、
+必要性をレビューで合意してから追加すること。
 
 ## E2E テスト一覧（7本）
 
@@ -33,9 +36,12 @@ E2E は壊れやすく実行時間も長いため、Beer Salon ではテスト�
 | `apps/admin/tests/auth.spec.ts` | should display login page with bar manage ID and password fields |
 | `apps/admin/tests/bars.spec.ts` | should display bars list for admin |
 
-## UT でカバーする範囲
+## UT / Integration でカバーする範囲
 
-E2E から削った観点は、以下の UT で代替している。
+E2E から削った観点は、以下の UT および Integration テストで代替している。
+Integration（`*.integration.test.ts`）は **実 Supabase ローカル**（54421）に接続して
+Server Action の DB 副作用・Prisma クエリの `include` 網羅性・RLS / GRANT などを検証する。
+モック前提の UT では原理的に検知できない領域を中段で押さえることが目的。
 
 | 観点 | UT ファイル |
 |------|------------|
