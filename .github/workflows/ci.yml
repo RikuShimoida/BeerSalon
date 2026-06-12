@@ -46,6 +46,30 @@ jobs:
           DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
       - run: pnpm test
 
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
+      DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
+      E2E_TEST_USER_PASSWORD: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate --schema=prisma/schema.prisma
+      - name: Setup E2E database
+        uses: ./.github/actions/setup-db
+        with:
+          e2e-test-user-password: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+      - name: Run integration tests
+        run: pnpm test:integration
+
   build:
     runs-on: ubuntu-latest
     steps:

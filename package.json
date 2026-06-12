@@ -8,6 +8,8 @@
 		"lint": "turbo run lint",
 		"format": "turbo run format",
 		"test": "turbo run test",
+		"test:unit": "turbo run test",
+		"test:integration": "turbo run test:integration",
 		"dev:web": "pnpm --filter @beersalon/web dev",
 		"dev:admin": "pnpm --filter @beersalon/admin dev",
 		"e2e:web": "pnpm --filter @beersalon/web e2e",
