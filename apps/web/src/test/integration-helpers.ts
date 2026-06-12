@@ -67,20 +67,46 @@ export async function createTestAuthUser(
 
 export async function createTestBar(
 	prisma: PrismaClient,
-	overrides: { name?: string } = {},
+	overrides: { name?: string; city?: string; prefecture?: string } = {},
 ): Promise<{ id: bigint; name: string }> {
 	const suffix = faker.string.alphanumeric(8).toLowerCase();
 	const name = overrides.name ?? `${INTEGRATION_TEST_PREFIX}bar-${suffix}`;
 	const bar = await prisma.bar.create({
 		data: {
 			name,
-			prefecture: "東京都",
-			city: "渋谷区",
+			prefecture: overrides.prefecture ?? "東京都",
+			city: overrides.city ?? "渋谷区",
 			addressLine1: `${INTEGRATION_TEST_PREFIX}address-${suffix}`,
 			description: `${INTEGRATION_TEST_PREFIX}description`,
 		},
 	});
 	return { id: bar.id, name: bar.name };
+}
+
+export async function createTestCoupon(
+	prisma: PrismaClient,
+	barId: bigint,
+	overrides: {
+		title?: string;
+		description?: string | null;
+		validUntil?: Date | null;
+	} = {},
+): Promise<{ id: bigint }> {
+	const suffix = faker.string.alphanumeric(8).toLowerCase();
+	const coupon = await prisma.barCoupon.create({
+		data: {
+			barId,
+			title: overrides.title ?? `${INTEGRATION_TEST_PREFIX}coupon-${suffix}`,
+			description:
+				overrides.description === undefined
+					? `${INTEGRATION_TEST_PREFIX}coupon-desc`
+					: overrides.description,
+			discountType: "percentage",
+			discountValue: 10,
+			validUntil: overrides.validUntil ?? null,
+		},
+	});
+	return { id: coupon.id };
 }
 
 export type CleanupOptions = {
@@ -113,6 +139,26 @@ export async function cleanupTestData(
 		await prisma.postLike.deleteMany({
 			where: { userId: { in: profileIds } },
 		});
+		await prisma.articleLike.deleteMany({
+			where: { userId: { in: profileIds } },
+		});
+		await prisma.userCoupon.deleteMany({
+			where: { userId: { in: profileIds } },
+		});
+		await prisma.favoriteBar.deleteMany({
+			where: { userId: { in: profileIds } },
+		});
+		await prisma.viewHistory.deleteMany({
+			where: { userId: { in: profileIds } },
+		});
+		await prisma.userFollowRelation.deleteMany({
+			where: {
+				OR: [
+					{ followerId: { in: profileIds } },
+					{ followeeId: { in: profileIds } },
+				],
+			},
+		});
 		await prisma.post.deleteMany({
 			where: { userId: { in: profileIds } },
 		});
@@ -121,6 +167,9 @@ export async function cleanupTestData(
 		});
 	}
 
+	// Why not: bars の CASCADE で bar_coupons / bar_beer_menus / bar_food_menus / articles / posts /
+	// bar_payment_methods / bar_events / favorite_bars / view_histories などは自動で消える。
+	// it- 接頭辞の bar だけを対象に絞ることで seed.e2e.sql の固定店舗を侵さない。
 	await prisma.bar.deleteMany({
 		where: { name: { startsWith: INTEGRATION_TEST_PREFIX } },
 	});
