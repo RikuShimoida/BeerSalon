@@ -65,3 +65,6 @@ playwright/.cache/
 
 # claude code runtime locks
 .claude/scheduled_tasks.lock
+
+# claude code subagent personal memory (not shared across team)
+.claude/agent-memory/
