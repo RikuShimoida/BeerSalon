@@ -86,7 +86,20 @@ export async function loginAsSmokeUser(page: Page) {
 
 	await page.goto("/login");
 	await fillLoginForm(page, SMOKE_USER_EMAIL, password);
+
+	// Why not: 単純な waitForURL("/") は middleware が /signup/profile に
+	// リダイレクトしたケース（user_profiles 取得失敗）を検知できず、
+	// 後続テストが空のページに対して操作してタイムアウトするため、
+	// 「/ への到達」と「/signup/profile に飛ばされていないこと」を両方検証する。
 	await page.waitForURL("/", { timeout: 15000 });
+	const currentUrl = new URL(page.url());
+	if (currentUrl.pathname !== "/") {
+		throw new Error(
+			`loginAsSmokeUser: expected to land on "/" but got "${currentUrl.pathname}". ` +
+				"middleware may have redirected to /signup/profile because user_profiles was not found. " +
+				"Verify that seed-e2e.ts created the user_profiles row for the smoke user.",
+		);
+	}
 }
 
 // Why not: UI 経由のサインアップ完走 (/signup → /signup/profile → /signup/confirm → /) は

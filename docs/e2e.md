@@ -172,6 +172,23 @@ Supabase ローカルの anon key / service_role key は固定値だが、平文
 - E2E を追加する場合はレビューで合意してから本数を増やすこと
 - 既存 7本に手を入れる場合も、何のスモークなのかが明確に保たれるよう注意する
 
+### バー ID をテストで使う場合
+
+E2E から `/bars/[barId]` にアクセスする場合は、必ず `seed.e2e.sql` で固定投入される
+`id=100001`（E2Eテストバー静岡）または `id=100002`（E2Eテストバー東京）を使うこと。
+
+`id=1` は本番想定 seed（`seed.sql`）が投入されたローカル環境では存在するが、CI 環境では
+`seed.e2e.sql` のみが投入されるため存在せず、404 になってテストが失敗する。
+ローカルだけ通って CI で落ちる典型パターンなので注意する。
+
+### `loginAsSmokeUser` の URL 検証
+
+`apps/web/e2e/helpers/auth.ts` の `loginAsSmokeUser` は、ログイン後に `/` への到達だけでなく
+「`/signup/profile` にリダイレクトされていないこと」も検証する。これは middleware が
+`user_profiles` を取得できなかった場合に `/signup/profile` へ飛ばすため、原因を明示的に
+失敗メッセージとして出すための保護である。失敗した場合はまず `seed-e2e.ts` の結果と
+`user_profiles` テーブルに smoke-user の行が存在するかを確認すること。
+
 ## トラブルシューティング
 
 ### Supabase が起動しない

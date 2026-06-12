@@ -60,13 +60,25 @@ export async function middleware(request: NextRequest) {
 	}
 
 	if (user && !pathname.startsWith("/signup") && !pathname.startsWith("/api")) {
-		const { data } = await supabase
+		const { data, error } = await supabase
 			.from("user_profiles")
 			.select("id")
 			.eq("user_auth_id", user.id)
 			.single();
 
 		if (!data) {
+			// Why not: error をログ出力しないと、CI 環境で /signup/profile に
+			// リダイレクトされたときに「テーブルが空」なのか「クエリ失敗」なのか
+			// 切り分け不能になり、根本原因が追えなくなる。本番でも極稀に
+			// Supabase 側で一時的にクエリが失敗した場合の原因特定に必要。
+			console.warn(
+				"[middleware] user_profiles not found, redirecting to /signup/profile",
+				{
+					userId: user.id,
+					pathname,
+					error: error ? { code: error.code, message: error.message } : null,
+				},
+			);
 			return NextResponse.redirect(new URL("/signup/profile", request.url));
 		}
 	}
