@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev -p 3000",
-		"build": "next build",
+		"build": "pnpm db:generate && next build",
 		"db:generate": "prisma generate --schema=../../prisma/schema.prisma",
 		"start": "next start",
 		"typecheck": "tsc --noEmit",
