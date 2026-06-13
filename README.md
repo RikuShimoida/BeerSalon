@@ -100,8 +100,25 @@ Beer Salon は以下を1つの場所に集約します。
 詳細設計は以下に分離して管理する。
 
 - `database.md`：テーブル設計
-- `routing.md`：画面遷移・URL設計
-- `wireframe.md`：ワイヤーフレーム（UI構造）
+- `routing.md`：画面遷移・URL設計（ユーザー画面 + 管理画面）
+- `wireframe.md`：ワイヤーフレーム（ユーザー画面 UI構造）
+- `wireframe-admin.md`：ワイヤーフレーム（管理画面 UI構造）
+- `docs/e2e.md`：E2E テスト運用ガイド（ローカル/CI 実行手順・テスト一覧・UTカバー範囲）
+
+---
+
+## 🧪 ローカル E2E 実行（3コマンドで完了）
+
+Docker を起動した状態で以下の3コマンドを叩けば、E2E（web 5本 / admin 2本 = 計7本）が緑になる。
+E2E はテストピラミッドの原則により最小化しており、それ以上の網羅は UT で担保している。
+
+```bash
+supabase start        # Supabase ローカルスタックを起動
+pnpm e2e:setup        # seed.e2e.sql 投入 + Supabase Auth テストユーザー作成
+pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
+```
+
+詳細・トラブルシューティング・UIモード起動方法は `docs/e2e.md` を参照。
 
 ---
 

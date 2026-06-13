@@ -1,0 +1,70 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+coverage/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# turborepo
+.turbo
+
+# misc
+.DS_Store
+*.pem
+*.tmp
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+!.env.e2e.local.example
+
+# test user credentials
+email-pass.txt
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma
+**/generated/prisma
+
+# playwright
+test-results/
+playwright-report/
+playwright/.cache/
+.playwright-mcp/
+
+# vitest (duplicate coverage already above)
+
+# images (design reference)
+/images/
+
+# claude code runtime locks
+.claude/scheduled_tasks.lock
+
+# claude code subagent personal memory (not shared across team)
+.claude/agent-memory/

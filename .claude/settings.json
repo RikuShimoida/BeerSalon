@@ -1,0 +1,149 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(which:*)",
+      "Bash(echo:*)",
+      "Bash(pwd:*)",
+      "Bash(diff:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(jq:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(pnpm:*)",
+      "Bash(supabase db push:*)",
+      "Bash(supabase db reset:*)",
+      "Bash(supabase db diff:*)",
+      "Bash(supabase migration:*)",
+      "Bash(supabase gen:*)",
+      "Bash(supabase status:*)",
+      "Bash(PGPASSWORD:*)",
+      "Bash(DATABASE_URL:*)",
+      "mcp__Playwright__*"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git rebase:*)",
+      "Bash(git branch -D:*)",
+      "Bash(rm -rf:*)",
+      "Bash(supabase init:*)",
+      "Bash(prisma migrate reset:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"タスクが完了しました\" with title \"Claude Code\" sound name \"Glass\"'",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/check-dev-servers.sh",
+            "if": "Skill(implement *)"
+          },
+          {
+            "type": "command",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/check-playwright-mcp.sh",
+            "if": "Skill(implement *)"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/bypass-heuristic.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -qE '(pnpm|npm)\\s+(run\\s+)?dev'; then echo 'BLOCKED: pnpm dev / npm run dev は禁止されています。ユーザーが起動済みのサーバーを利用してください。' >&2; exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.run_in_background // false' | grep -q 'true'; then echo 'BLOCKED: run_in_background: true は禁止されています。' >&2; exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -q '54321'; then echo 'BLOCKED: ポート54321は使用禁止です。正しいポートは54421です。' >&2; exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -q 'supabase init'; then echo 'BLOCKED: supabase init は実行禁止です。' >&2; exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -qE 'git\\s+(reset\\s+--hard|rebase|push\\s+--force|push\\s+-f|branch\\s+-D)'; then echo 'BLOCKED: 破壊的Gitコマンドです。目的・影響範囲・リスクを明示してユーザーに確認してください。' >&2; exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "CMD=$(echo \"$TOOL_INPUT\" | jq -r '.command'); if echo \"$CMD\" | grep -qE 'prisma migrate reset'; then echo 'BLOCKED: prisma migrate reset はDBを完全にリセットします。ユーザーに確認してください。' >&2; exit 2; fi; if echo \"$CMD\" | grep -qE 'supabase db reset' && ! echo \"$CMD\" | grep -qE '\\-\\-linked=false'; then echo 'BLOCKED: supabase db reset（リモートDB）は危険です。ローカルDBのみリセットする場合は --linked=false を使用してください。' >&2; exit 2; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -qE 'git\\s+commit'; then LAST_TEST=$(find /tmp -name '.beersalon_last_test_run' -mmin -30 2>/dev/null); if [ -z \"$LAST_TEST\" ]; then echo 'BLOCKED: コミット前にテストを実行してください。pnpm test が直近30分以内に実行されていません。' >&2; exit 2; fi; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.command' | grep -qE 'pnpm\\s+test'; then touch /tmp/.beersalon_last_test_run; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$TOOL_INPUT\" | jq -r '.file_path // empty' | grep -qE '\\.env'; then echo 'WARNING: .envファイルの変更です。環境設定に影響があります。ユーザーに確認してください。' >&2; exit 2; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/post-edit-lint.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma generate --schema=prisma/schema.prisma
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+      - run: pnpm test
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
+      DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
+      E2E_TEST_USER_PASSWORD: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate --schema=prisma/schema.prisma
+      - name: Setup E2E database
+        uses: ./.github/actions/setup-db
+        with:
+          e2e-test-user-password: ${{ secrets.E2E_TEST_USER_PASSWORD }}
+      - name: Run integration tests
+        run: pnpm test:integration
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          DIRECT_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy-anon-key"
+          SUPABASE_SERVICE_ROLE_KEY: "dummy-service-role-key"
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: "dummy-google-maps-key"
+          JWT_SECRET: "dummy-jwt-secret-for-ci-build-only"
+          STRIPE_SECRET_KEY: "sk_test_dummy"
+          STRIPE_WEBHOOK_SECRET: "whsec_dummy"
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_dummy"
+          NEXT_PUBLIC_APP_URL: "http://localhost:3001"
+          ADMIN_BASE_URL: "http://localhost:3001"
+
+  prisma-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prisma validate --schema=prisma/schema.prisma
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"

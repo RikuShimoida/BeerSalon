@@ -1,0 +1,46 @@
+name: "Setup E2E Database"
+description: "Start Supabase, export keys to GITHUB_ENV, and seed E2E data"
+
+inputs:
+  e2e-test-user-password:
+    description: "E2E test user password (Supabase Auth)"
+    required: true
+  database-url:
+    description: "Postgres connection string (Supabase local)"
+    required: false
+    default: "postgresql://postgres:postgres@127.0.0.1:54422/postgres"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Supabase CLI
+      uses: supabase/setup-cli@v1
+      with:
+        version: latest
+
+    - name: Start Supabase local stack
+      shell: bash
+      run: supabase start
+
+    - name: Export Supabase keys to GITHUB_ENV
+      shell: bash
+      run: |
+        supabase status -o env \
+          --override-name api.url=NEXT_PUBLIC_SUPABASE_URL \
+          --override-name auth.anon_key=NEXT_PUBLIC_SUPABASE_ANON_KEY \
+          --override-name auth.service_role_key=SUPABASE_SERVICE_ROLE_KEY \
+          | sed -E 's/^([A-Z_]+)="(.*)"$/\1=\2/' \
+          >> "$GITHUB_ENV"
+
+    - name: Apply E2E seed (SQL)
+      shell: bash
+      env:
+        PGPASSWORD: postgres
+      run: psql -h 127.0.0.1 -p 54422 -U postgres -d postgres -f supabase/seed.e2e.sql
+
+    - name: Apply E2E seed (Auth users)
+      shell: bash
+      env:
+        E2E_TEST_USER_PASSWORD: ${{ inputs.e2e-test-user-password }}
+        DATABASE_URL: ${{ inputs.database-url }}
+      run: pnpm --filter @beersalon/web exec tsx ../../prisma/seed-e2e.ts

@@ -1,0 +1,16 @@
+name: Protect main branch
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-source-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check source branch is develop
+        run: |
+          if [ "${{ github.head_ref }}" != "develop" ]; then
+            echo "::error::mainへのマージはdevelopブランチからのみ許可されています。現在のソースブランチ: ${{ github.head_ref }}"
+            exit 1
+          fi

@@ -1,0 +1,69 @@
+import { Bell, LogOut, User } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { getUnreadNotificationCount } from "@/actions/notification";
+import { logout } from "./actions";
+
+export async function Header() {
+	const unreadCount = await getUnreadNotificationCount();
+
+	return (
+		<header
+			className="fixed top-0 left-0 right-0 backdrop-blur-xl border-b border-border/20 z-50 modern-shadow"
+			style={{ backgroundColor: "#f0e68c" }}
+		>
+			<div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+				<Link
+					href="/"
+					className="hover:opacity-80 transition-all duration-300"
+					aria-label="Beer Salon ホーム"
+				>
+					<Image
+						src="/beer-salon-logo.svg"
+						alt="Beer Salon"
+						width={240}
+						height={48}
+						priority
+					/>
+				</Link>
+
+				<div className="flex items-center gap-2">
+					<Link
+						href="/notifications"
+						className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300 relative"
+						aria-label="通知"
+						data-testid="notification-icon"
+					>
+						<Bell className="w-5 h-5" />
+						{unreadCount > 0 && (
+							<span
+								data-testid="notification-badge"
+								className="absolute -top-0.5 -right-0.5 min-w-[1.25rem] h-5 px-1 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full"
+							>
+								{unreadCount > 99 ? "99+" : unreadCount}
+							</span>
+						)}
+					</Link>
+
+					<Link
+						href="/mypage"
+						className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300"
+						aria-label="マイページ"
+					>
+						<User className="w-5 h-5" />
+					</Link>
+
+					<form action={logout}>
+						<button
+							type="submit"
+							className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300"
+							aria-label="ログアウト"
+						>
+							<LogOut className="w-5 h-5" />
+						</button>
+					</form>
+				</div>
+			</div>
+		</header>
+	);
+}

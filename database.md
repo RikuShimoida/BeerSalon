@@ -66,7 +66,12 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | regular_holiday | text       | NULLABLE                         | 定休日                                  |
 | access          | text       | NULLABLE                         | 交通手段・最寄駅など                    |
 | website_url     | text       | NULLABLE                         | 店舗公式サイト URL                      |
+| instagram_url   | text       | NULLABLE                         | Instagram URL                           |
+| x_url           | text       | NULLABLE                         | X (Twitter) URL                         |
+| facebook_url    | text       | NULLABLE                         | Facebook URL                            |
+| line_url        | text       | NULLABLE                         | LINE URL                                |
 | description     | text       | NULLABLE                         | PR文                                    |
+| preview_image_url | text     | NULLABLE                         | 一覧表示用プレビュー画像URL             |
 | is_active       | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ                            |
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                                |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                                |
@@ -75,10 +80,10 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ### 2-2. bar_images
 
-店舗の写真（外観・店内・ビール・料理）。
+店舗の写真・動画（外観・店内・ビール・料理）。
 
 - **Table name:** `bar_images`
-- **Description:** 店舗ごとの画像（外観/店内/ビール/料理など）
+- **Description:** 店舗ごとの画像・動画（外観/店内/ビール/料理など）
 
 #### Columns
 
@@ -86,10 +91,44 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 |--------------|------------|--------------------------------------|----------------------------------------------|
 | id           | bigserial  | PK                                   | 画像ID                                       |
 | bar_id       | bigint     | NOT NULL, FK → bars(id)             | 紐づく店舗                                   |
+| media_type   | text       | NOT NULL DEFAULT 'image'             | 'image' / 'video'（画像または動画）          |
 | image_type   | text       | NOT NULL                             | 'exterior' / 'interior' / 'beer' / 'food' など |
-| image_url    | text       | NOT NULL                             | 画像URL（Supabase Storage へのパス等）       |
+| image_url    | text       | NOT NULL                             | 画像・動画URL（Supabase Storage へのパス等） |
 | sort_order   | integer    | NOT NULL DEFAULT 0                   | 表示順                                       |
 | created_at   | timestamptz| NOT NULL DEFAULT now()               | 作成日時                                     |
+
+---
+
+### 2-2-2. bar_opening_hours
+
+店舗の曜日別・複数時間帯の営業時間。
+
+- **Table name:** `bar_opening_hours`
+- **Description:** 店舗の曜日別営業時間（複数時間帯対応）
+
+#### Columns
+
+| Column      | Type        | Constraints                     | Description                             |
+|-------------|------------|----------------------------------|-----------------------------------------|
+| id          | bigserial  | PK                               | ID                                      |
+| bar_id      | bigint     | NOT NULL, FK → bars(id)         | 店舗ID                                  |
+| day_of_week | integer    | NOT NULL CHECK (0-6)             | 曜日（0=月, 1=火, ..., 6=日）           |
+| open_time   | time       | NOT NULL                         | 開始時刻                                |
+| close_time  | time       | NOT NULL                         | 終了時刻                                |
+| sort_order  | integer    | NOT NULL DEFAULT 0               | 表示順                                  |
+| is_closed   | boolean    | NOT NULL DEFAULT false           | 定休日フラグ                            |
+| created_at  | timestamptz| NOT NULL DEFAULT now()           | 作成日時                                |
+| updated_at  | timestamptz| NOT NULL DEFAULT now()           | 更新日時                                |
+
+**インデックス**: `bar_id + day_of_week`
+
+**CASCADE削除**: 店舗削除時に関連する営業時間レコードも削除
+
+**使用例**:
+- 複数時間帯: 昼営業（11:00-14:00）+ 夜営業（17:00-23:00）を2レコードで表現
+- 定休日: `is_closed=true` のレコードで表現
+- 24時間営業: `open_time=00:00, close_time=23:59` で表現
+- 翌日にまたがる営業: `open_time=17:00, close_time=02:00` など
 
 ---
 
@@ -112,7 +151,48 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-### 2-4. breweries
+### 2-4. countries
+
+国マスタ。
+
+- **Table name:** `countries`
+- **Description:** 国マスタ
+
+#### Columns
+
+| Column      | Type        | Constraints            | Description          |
+|-------------|------------|------------------------|----------------------|
+| id          | bigserial  | PK                     | 国ID                 |
+| name        | text       | NOT NULL, UNIQUE       | 国名                 |
+| is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
+| created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
+| updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
+
+---
+
+### 2-5. regions
+
+地域マスタ（ビールの産地、ブルワリーの所在地）。
+
+- **Table name:** `regions`
+- **Description:** 地域マスタ（ビールの産地＝ブルワリーの所在地）
+
+#### Columns
+
+| Column      | Type        | Constraints            | Description          |
+|-------------|------------|------------------------|----------------------|
+| id          | bigserial  | PK                     | 地域ID               |
+| name        | text       | NOT NULL               | 地域名               |
+| country_id  | bigint     | NOT NULL, FK → countries(id) | 国ID           |
+| is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
+| created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
+| updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
+
+UNIQUE制約: `country_id + name`
+
+---
+
+### 2-6. breweries
 
 醸造所情報。
 
@@ -125,16 +205,18 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 |-------------|------------|------------------------|----------------------|
 | id          | bigserial  | PK                     | 醸造所ID             |
 | name        | text       | NOT NULL, UNIQUE       | 醸造所名             |
-| country     | text       | NULLABLE               | 国                   |
-| region      | text       | NULLABLE               | 地域/都道府県等      |
+| country_id  | bigint     | NOT NULL, FK → countries(id) | 国ID           |
+| region_id   | bigint     | NULLABLE, FK → regions(id) | 地域ID           |
 | website_url | text       | NULLABLE               | Webサイト            |
 | is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
 
+**管理画面での変更**: 国IDを必須化し、管理画面でのフィルタリングを容易にする。
+
 ---
 
-### 2-5. beers
+### 2-7. beers
 
 ビール単体の情報（ブランド）。
 
@@ -149,7 +231,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | name             | text       | NOT NULL                           | ビール名                    |
 | beer_category_id | bigint     | NOT NULL, FK → beer_categories(id) | カテゴリ                     |
 | brewery_id       | bigint     | NULLABLE, FK → breweries(id)       | 醸造所                       |
-| origin           | text       | NULLABLE                           | 産地（国/地域など）          |
+| region_id        | bigint     | NULLABLE, FK → regions(id)         | 地域ID（産地）              |
 | abv              | numeric(4,2)| NULLABLE                          | アルコール度数              |
 | ibu              | integer    | NULLABLE                           | IBU                         |
 | description      | text       | NULLABLE                           | 説明文                      |
@@ -160,7 +242,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-### 2-6. bar_beer_menus
+### 2-8. bar_beer_menus
 
 店舗ごとのビールメニュー。
 
@@ -174,17 +256,40 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | id           | bigserial  | PK                               | メニューID                          |
 | bar_id       | bigint     | NOT NULL, FK → bars(id)         | 店舗ID                              |
 | beer_id      | bigint     | NOT NULL, FK → beers(id)        | ビールID                            |
-| price        | integer    | NULLABLE                         | 価格（税抜/税込はUI側で定義）      |
-| size         | text       | NULLABLE                         | "Mサイズ", "パイント" 等            |
 | description  | text       | NULLABLE                         | メニュー用説明                      |
 | image_url    | text       | NULLABLE                         | 写真                                |
 | is_active    | boolean    | NOT NULL DEFAULT true            | 提供中フラグ                        |
 | created_at   | timestamptz| NOT NULL DEFAULT now()           | 作成日時                            |
 | updated_at   | timestamptz| NOT NULL DEFAULT now()           | 更新日時                            |
 
+**変更履歴**: `size` カラムと `price` カラムを削除。サイズ/価格は `bar_beer_menu_sizes` テーブルに移行（1メニューに複数サイズ/価格を設定可能に）。
+
 ---
 
-### 2-7. bar_food_menus
+### 2-8-2. bar_beer_menu_sizes
+
+ビールメニューのサイズ・価格バリエーション。
+
+- **Table name:** `bar_beer_menu_sizes`
+- **Description:** ビールメニューごとのサイズ/価格（1メニューに複数設定可能）
+
+#### Columns
+
+| Column            | Type        | Constraints                              | Description                 |
+|-------------------|------------|-------------------------------------------|-----------------------------|
+| id                | bigserial  | PK                                        | ID                          |
+| bar_beer_menu_id  | bigint     | NOT NULL, FK → bar_beer_menus(id)         | ビールメニューID            |
+| size_name         | text       | NOT NULL                                  | サイズ名（例: "パイント", "ハーフ", "Sサイズ"）|
+| price             | integer    | NULLABLE                                  | 価格（オプション）          |
+| sort_order        | integer    | NOT NULL DEFAULT 0                        | 表示順                      |
+| created_at        | timestamptz| NOT NULL DEFAULT now()                    | 作成日時                    |
+| updated_at        | timestamptz| NOT NULL DEFAULT now()                    | 更新日時                    |
+
+**CASCADE削除**: ビールメニュー削除時に関連するサイズ/価格レコードも削除
+
+---
+
+### 2-9. bar_food_menus
 
 店舗ごとのフードメニュー。
 
@@ -209,27 +314,34 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ## 3. クーポン・記事
 
-### 3-1. coupons
+### 3-1. bar_coupons
 
 店舗が発行するクーポン。
 
-- **Table name:** `coupons`
+- **Table name:** `bar_coupons`
 - **Description:** 店舗ごとのクーポン定義
 
 #### Columns
 
-| Column          | Type        | Constraints                  | Description             |
-|-----------------|------------|------------------------------|-------------------------|
-| id              | bigserial  | PK                           | クーポンID              |
-| bar_id          | bigint     | NOT NULL, FK → bars(id)      | 店舗ID                  |
-| title           | text       | NOT NULL                     | 見出し                  |
-| description     | text       | NOT NULL                     | 内容文                  |
-| conditions      | text       | NULLABLE                     | 取得/利用条件           |
-| valid_from      | timestamptz| NULLABLE                     | 有効期間開始            |
-| valid_until     | timestamptz| NULLABLE                     | 有効期間終了            |
-| is_active       | boolean    | NOT NULL DEFAULT true        | 掲載中フラグ            |
-| created_at      | timestamptz| NOT NULL DEFAULT now()       | 作成日時                |
-| updated_at      | timestamptz| NOT NULL DEFAULT now()       | 更新日時                |
+| Column          | Type           | Constraints                  | Description             |
+|-----------------|----------------|------------------------------|-------------------------|
+| id              | bigserial      | PK                           | クーポンID              |
+| bar_id          | bigint         | NOT NULL, FK → bars(id)      | 店舗ID                  |
+| title           | text           | NOT NULL                     | 見出し                  |
+| description     | text           | NULLABLE                     | 内容文                  |
+| discount_type   | text           | NOT NULL                     | 割引タイプ（'percentage', 'fixed_amount'） |
+| discount_value  | numeric(10,2)  | NOT NULL                     | 割引値（%または金額）   |
+| code            | text           | NULLABLE                     | クーポンコード（任意）  |
+| usage_limit     | integer        | NULLABLE                     | 利用回数上限（NULLで無制限） |
+| used_count      | integer        | NOT NULL DEFAULT 0           | 利用回数                |
+| valid_from      | timestamptz    | NULLABLE                     | 有効期間開始            |
+| valid_until     | timestamptz    | NULLABLE                     | 有効期間終了            |
+| is_active       | boolean        | NOT NULL DEFAULT true        | 掲載中フラグ            |
+| created_at      | timestamptz    | NOT NULL DEFAULT now()       | 作成日時                |
+| updated_at      | timestamptz    | NOT NULL DEFAULT now()       | 更新日時                |
+
+**インデックス**:
+- `bar_id`, `is_active`
 
 ---
 
@@ -246,7 +358,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 |---------------|------------|------------------------------------|----------------------|
 | id            | bigserial  | PK                                 | ID                   |
 | user_id       | uuid       | NOT NULL, FK → user_profiles(user_id) | ユーザーID       |
-| coupon_id     | bigint     | NOT NULL, FK → coupons(id)         | クーポンID          |
+| coupon_id     | bigint     | NOT NULL, FK → bar_coupons(id)     | クーポンID          |
 | obtained_at   | timestamptz| NOT NULL DEFAULT now()             | 取得日時            |
 | used_at       | timestamptz| NULLABLE                           | 使用日時            |
 | is_used       | boolean    | NOT NULL DEFAULT false             | 使用済みフラグ      |
@@ -268,11 +380,38 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | bar_id       | bigint     | NOT NULL, FK → bars(id)         | 店舗ID          |
 | title        | text       | NOT NULL                        | 記事タイトル    |
 | body         | text       | NOT NULL                        | 記事本文        |
-| image_url    | text       | NULLABLE                        | サムネイル画像   |
+| image_url    | text       | NULLABLE                        | 画像1（サムネイル兼用）|
+| image_url_2  | text       | NULLABLE                        | 画像2           |
+| image_url_3  | text       | NULLABLE                        | 画像3           |
+| status       | text       | NOT NULL DEFAULT 'draft'        | ステータス（'draft', 'published', 'scheduled'） |
 | published_at | timestamptz| NULLABLE                        | 公開日時        |
-| is_published | boolean    | NOT NULL DEFAULT false          | 公開フラグ      |
+| deleted_at   | timestamptz| NULLABLE                        | 削除日時（論理削除） |
 | created_at   | timestamptz| NOT NULL DEFAULT now()          | 作成日時        |
 | updated_at   | timestamptz| NOT NULL DEFAULT now()          | 更新日時        |
+
+**管理画面での変更**:
+- `is_published` を `status` に変更（draft/published/scheduledを管理）
+- `deleted_at` を追加（論理削除により誤削除からの復旧が可能）
+
+---
+
+### 3-4. article_likes
+
+記事への「いいね」。
+
+- **Table name:** `article_likes`
+- **Description:** 記事に対するいいね
+
+#### Columns
+
+| Column       | Type        | Constraints                         | Description       |
+|--------------|------------|--------------------------------------|-------------------|
+| id           | bigserial  | PK                                   | ID                |
+| article_id   | bigint     | NOT NULL, FK → articles(id)          | 記事ID            |
+| user_id      | uuid       | NOT NULL, FK → user_profiles(id)     | いいねしたユーザー |
+| created_at   | timestamptz| NOT NULL DEFAULT now()               | いいね日時         |
+
+`article_id + user_id` に UNIQUE 制約を張る想定。
 
 ---
 
@@ -376,9 +515,59 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-## 5. 閲覧履歴・通知
+## 5. 支払い方法
 
-### 5-1. view_histories
+### 5-1. payment_methods
+
+決済手段マスタ。
+
+- **Table name:** `payment_methods`
+- **Description:** 決済手段マスタ
+
+#### Columns
+
+| Column        | Type        | Constraints              | Description          |
+|---------------|------------|--------------------------|----------------------|
+| id            | bigserial  | PK                       | 決済手段ID           |
+| name          | text       | NOT NULL, UNIQUE         | 決済手段名           |
+| display_order | integer    | NOT NULL DEFAULT 0       | 表示順               |
+| is_active     | boolean    | NOT NULL DEFAULT true    | 使用中フラグ         |
+| created_at    | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
+| updated_at    | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
+
+**初期マスタデータ**:
+1. 現金
+2. クレジットカード
+3. 電子マネー
+4. QRコード決済
+
+---
+
+### 5-2. bar_payment_methods
+
+店舗と決済手段の中間テーブル。
+
+- **Table name:** `bar_payment_methods`
+- **Description:** 店舗×決済手段の中間テーブル
+
+#### Columns
+
+| Column            | Type        | Constraints                            | Description       |
+|-------------------|-------------|----------------------------------------|-------------------|
+| id                | bigserial   | PK                                     | ID                |
+| bar_id            | bigint      | NOT NULL, FK → bars(id)               | 店舗ID            |
+| payment_method_id | bigint      | NOT NULL, FK → payment_methods(id)    | 決済手段ID        |
+| created_at        | timestamptz | NOT NULL DEFAULT now()                 | 作成日時          |
+
+**UNIQUE制約**: `bar_id + payment_method_id`
+
+**CASCADE削除**: 店舗削除時に関連する `bar_payment_methods` も削除される
+
+---
+
+## 6. 閲覧履歴・通知
+
+### 6-1. view_histories
 
 店舗の閲覧履歴（閲覧履歴ページ用）。
 
@@ -396,7 +585,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-### 5-2. notifications
+### 6-2. notifications
 
 通知（いいね／フォロー／お気に入り店舗の新記事など）。
 
@@ -418,9 +607,9 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-## 6. ログ関連（任意で実装）
+## 7. ログ関連（任意で実装）
 
-### 6-1. login_histories
+### 7-1. login_histories
 
 ログイン履歴（セキュリティ・分析用）。MVPでは必須ではないが、将来用に設計。
 
@@ -441,7 +630,195 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 ---
 
-## 7. 今回の Prisma/Supabase への渡し方イメージ
+## 8. 管理画面専用テーブル
+
+BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプリでは使用しない。
+
+### 8-1. admin_users
+
+管理画面のログインユーザー（バーオーナー、システム管理者）。
+
+**※重要**: `user_profiles`（ユーザー向けアプリのユーザー）とは完全に別のテーブル。
+
+- **Table name:** `admin_users`
+- **Description:** 管理画面のバーオーナー・システム管理者アカウント
+
+#### Columns
+
+| Column          | Type        | Constraints                     | Description                 |
+|-----------------|------------|----------------------------------|-----------------------------|
+| id              | uuid       | PK, default gen_random_uuid()   | 管理ユーザーID              |
+| bar_manage_id   | text       | NOT NULL, UNIQUE                | 店舗管理ID（スラッグ形式のログインID。例: `fuji-beer-bar`）|
+| password_hash   | text       | NOT NULL                         | パスワードハッシュ          |
+| name            | text       | NOT NULL                         | 氏名                        |
+| role            | text       | NOT NULL DEFAULT 'bar_owner'    | 権限（`bar_owner`, `admin`）|
+| bar_id          | bigint     | NULLABLE, FK → bars(id)         | 紐づく店舗ID（bar_ownerは必須、adminはNULL）|
+| contact_email   | text       | NULLABLE                         | 店舗管理者メールアドレス（請求書送付用）|
+| contact_phone   | text       | NULLABLE                         | 店舗管理者電話番号（トラブル時連絡用）|
+| is_active       | boolean    | NOT NULL DEFAULT true            | アカウント有効フラグ        |
+| created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
+| updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
+
+**インデックス**:
+- `bar_manage_id` (UNIQUE)
+- `bar_id`
+
+**運用ルール**:
+- 1店舗 = 1アカウント（店舗スタッフ全員で `bar_manage_id` とパスワードを共有してログイン）
+- 店舗登録時に `admin_users` レコードも自動作成される
+
+**権限**:
+- `bar_owner`: 自店舗（`bar_id` で紐づく店舗）の全データを編集可能
+- `admin`: 全店舗の店舗情報（`bars`）を閲覧・編集可能。ただし店舗配下データ（メニュー・記事・クーポン・イベント）は参照のみで編集不可
+
+---
+
+### ~~8-2. bar_owners~~（廃止）
+
+**このテーブルは廃止されました。** `admin_users` テーブルに `bar_id` カラムを追加し、1対1の紐付けに変更。中間テーブルは不要になりました。
+
+---
+
+### 8-3. subscription_plans
+
+サブスクリプションプラン定義。
+
+- **Table name:** `subscription_plans`
+- **Description:** サブスクリプションのプラン定義マスタ
+
+#### Columns
+
+| Column          | Type        | Constraints                     | Description                 |
+|-----------------|------------|----------------------------------|-----------------------------|
+| id              | bigserial  | PK                               | プランID                    |
+| name            | text       | NOT NULL                         | プラン名                    |
+| stripe_price_id | text       | NOT NULL                         | Stripe Price ID             |
+| price           | integer    | NOT NULL                         | 価格                        |
+| currency        | text       | NOT NULL                         | 通貨コード（'jpy' 等）     |
+| interval        | text       | NOT NULL                         | 課金間隔（'month', 'year'） |
+| features        | jsonb      | NULLABLE                         | プラン機能一覧              |
+| is_active       | boolean    | NOT NULL DEFAULT true            | 有効フラグ                  |
+| created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
+| updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
+
+---
+
+### 8-4. bar_subscriptions
+
+バーごとのサブスクリプション情報（Stripe連携）。
+
+- **Table name:** `bar_subscriptions`
+- **Description:** バーごとのサブスクリプション状態
+
+#### Columns
+
+| Column                  | Type        | Constraints                              | Description                        |
+|-------------------------|------------|-------------------------------------------|------------------------------------|
+| id                      | bigserial  | PK                                        | サブスクリプションID               |
+| bar_id                  | bigint     | NOT NULL, FK → bars(id)                   | バーID                             |
+| subscription_plan_id    | bigint     | NOT NULL, FK → subscription_plans(id)     | プランID                           |
+| stripe_customer_id      | text       | NOT NULL                                  | Stripe顧客ID                      |
+| stripe_subscription_id  | text       | NOT NULL                                  | StripeサブスクリプションID         |
+| status                  | text       | NOT NULL DEFAULT 'active'                 | ステータス（'active', 'canceled', 'past_due', 'trialing', 'incomplete'） |
+| current_period_start    | timestamptz| NOT NULL                                  | 現在の課金期間開始日               |
+| current_period_end      | timestamptz| NOT NULL                                  | 現在の課金期間終了日               |
+| cancel_at_period_end    | boolean    | NOT NULL DEFAULT false                    | 期間終了時にキャンセルするか       |
+| canceled_at             | timestamptz| NULLABLE                                  | キャンセル日時                     |
+| created_at              | timestamptz| NOT NULL DEFAULT now()                    | 作成日時                           |
+| updated_at              | timestamptz| NOT NULL DEFAULT now()                    | 更新日時                           |
+
+**インデックス**:
+- `bar_id`
+- `stripe_customer_id`
+- `stripe_subscription_id`
+
+**権限**:
+- バーオーナー: 自バーのサブスクリプション参照のみ
+- プロダクト管理者: 全サブスクリプション参照可能
+
+---
+
+### 8-5. invoices
+
+請求書情報（Stripe連携）。
+
+- **Table name:** `invoices`
+- **Description:** バーごとの請求書
+
+#### Columns
+
+| Column              | Type        | Constraints                                | Description                 |
+|---------------------|------------|---------------------------------------------|-----------------------------|
+| id                  | bigserial  | PK                                          | 請求書ID                    |
+| bar_id              | bigint     | NOT NULL, FK → bars(id)                     | バーID                      |
+| bar_subscription_id | bigint     | NULLABLE, FK → bar_subscriptions(id)        | サブスクリプションID        |
+| stripe_invoice_id   | text       | NOT NULL                                    | Stripe Invoice ID           |
+| amount_paid         | integer    | NOT NULL                                    | 支払済み金額                |
+| amount_due          | integer    | NOT NULL                                    | 請求金額                    |
+| currency            | text       | NOT NULL                                    | 通貨コード                  |
+| status              | text       | NOT NULL                                    | ステータス（'paid', 'open', 'void', 'uncollectible'） |
+| invoice_pdf         | text       | NULLABLE                                    | PDF URL                     |
+| paid_at             | timestamptz| NULLABLE                                    | 支払日時                    |
+| created_at          | timestamptz| NOT NULL DEFAULT now()                      | 作成日時                    |
+
+**権限**:
+- バーオーナー: 自バーの請求書参照のみ
+- プロダクト管理者: 全請求書参照可能
+
+---
+
+### 8-6. bar_events
+
+店舗のイベント情報。管理画面で登録し、ユーザー画面の店舗詳細ページ（イベントタブ）でも表示する。
+
+- **Table name:** `bar_events`
+- **Description:** 店舗が開催するイベント（管理画面・ユーザー画面の両方で使用）
+
+#### Columns
+
+| Column       | Type        | Constraints                     | Description            |
+|--------------|------------|----------------------------------|------------------------|
+| id           | bigserial  | PK                               | イベントID             |
+| bar_id       | bigint     | NOT NULL, FK → bars(id)         | 店舗ID                 |
+| title        | text       | NOT NULL                         | イベントタイトル       |
+| description  | text       | NULLABLE                         | イベント説明文         |
+| start_date   | timestamptz| NOT NULL                         | 開始日時               |
+| end_date     | timestamptz| NULLABLE                         | 終了日時               |
+| image_url    | text       | NULLABLE                         | イベント画像URL        |
+| is_active    | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ           |
+| created_at   | timestamptz| NOT NULL DEFAULT now()           | 作成日時               |
+| updated_at   | timestamptz| NOT NULL DEFAULT now()           | 更新日時               |
+
+**インデックス**:
+- `bar_id`
+
+---
+
+### ~~8-7. master_beer_styles~~（廃止）
+
+**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
+
+---
+
+### ~~8-8. master_breweries~~（廃止）
+
+**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。醸造所情報は Web 側の `breweries` テーブルに一本化。
+
+---
+
+### ~~8-9. master_food_categories~~（廃止）
+
+**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
+
+---
+
+### ~~8-10. master_event_categories~~（廃止）
+
+**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
+
+---
+
+## 9. 今回の Prisma/Supabase への渡し方イメージ
 
 - この `database.md` を Claude Code に渡し、
   - 「この設計に基づいて Prisma schema を作成してください」
