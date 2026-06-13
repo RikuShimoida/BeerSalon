@@ -36,6 +36,13 @@ jobs:
         with:
           ref: ${{ needs.guard.outputs.sha }}
 
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
@@ -65,6 +72,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.guard.outputs.sha }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
