@@ -51,6 +51,8 @@ jobs:
 
       - name: Build project (web)
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
 
       - name: Deploy to Vercel (web)
         id: deploy
