@@ -4,29 +4,38 @@ on:
   workflow_run:
     workflows: ["CI"]
     types: [completed]
-    branches: [main]
+    branches: [main, develop]
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: deploy-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: false
 
 jobs:
   guard:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'develop') }}
     outputs:
       sha: ${{ github.event.workflow_run.head_sha }}
+      target: ${{ steps.target.outputs.target }}
+      prod_flag: ${{ steps.target.outputs.prod_flag }}
     steps:
-      - name: Log trigger
+      - name: Determine deploy target
+        id: target
         run: |
-          echo "Triggered by CI run: ${{ github.event.workflow_run.id }}"
-          echo "Head SHA: ${{ github.event.workflow_run.head_sha }}"
+          if [ "${{ github.event.workflow_run.head_branch }}" = "main" ]; then
+            echo "target=production" >> "$GITHUB_OUTPUT"
+            echo "prod_flag=--prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=preview" >> "$GITHUB_OUTPUT"
+            echo "prod_flag=" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Triggered by CI run: ${{ github.event.workflow_run.id }} on ${{ github.event.workflow_run.head_branch }}"
 
   deploy-web:
     needs: guard
     runs-on: ubuntu-latest
     environment:
-      name: production-web
+      name: ${{ needs.guard.outputs.target }}-web
       url: ${{ steps.deploy.outputs.url }}
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -47,25 +56,25 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel environment information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ needs.guard.outputs.target }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build project (web)
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }}
         env:
           DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
 
       - name: Deploy to Vercel (web)
         id: deploy
         run: |
-          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(vercel deploy --prebuilt ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "Deployed web: $url"
+          echo "Deployed web (${{ needs.guard.outputs.target }}): $url"
 
   deploy-admin:
     needs: guard
     runs-on: ubuntu-latest
     environment:
-      name: production-admin
+      name: ${{ needs.guard.outputs.target }}-admin
       url: ${{ steps.deploy.outputs.url }}
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -86,14 +95,14 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel environment information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ needs.guard.outputs.target }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build project (admin)
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel (admin)
         id: deploy
         run: |
-          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(vercel deploy --prebuilt ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "Deployed admin: $url"
+          echo "Deployed admin (${{ needs.guard.outputs.target }}): $url"
