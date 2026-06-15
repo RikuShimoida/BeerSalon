@@ -1,35 +1,33 @@
 name: Deploy to Vercel
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
+  push:
     branches: [main, develop]
+  workflow_dispatch:
 
 concurrency:
-  group: deploy-${{ github.event.workflow_run.head_branch }}
+  group: deploy-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   guard:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'develop') }}
     outputs:
-      sha: ${{ github.event.workflow_run.head_sha }}
+      sha: ${{ github.sha }}
       target: ${{ steps.target.outputs.target }}
       prod_flag: ${{ steps.target.outputs.prod_flag }}
     steps:
       - name: Determine deploy target
         id: target
         run: |
-          if [ "${{ github.event.workflow_run.head_branch }}" = "main" ]; then
+          if [ "${{ github.ref_name }}" = "main" ]; then
             echo "target=production" >> "$GITHUB_OUTPUT"
             echo "prod_flag=--prod" >> "$GITHUB_OUTPUT"
           else
             echo "target=preview" >> "$GITHUB_OUTPUT"
             echo "prod_flag=" >> "$GITHUB_OUTPUT"
           fi
-          echo "Triggered by CI run: ${{ github.event.workflow_run.id }} on ${{ github.event.workflow_run.head_branch }}"
+          echo "Triggered by push to ${{ github.ref_name }} (sha: ${{ github.sha }})"
 
   deploy-web:
     needs: guard
