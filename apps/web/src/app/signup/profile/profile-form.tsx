@@ -223,7 +223,6 @@ export function ProfileForm() {
 				<textarea
 					id="bio"
 					name="bio"
-					placeholder="自己紹介やビールの好みを入力してください"
 					maxLength={500}
 					rows={4}
 					onChange={(e) => setBioLength(e.target.value.length)}
