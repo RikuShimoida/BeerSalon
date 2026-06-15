@@ -51,7 +51,6 @@ export function ProfileForm() {
 						type="text"
 						id="lastName"
 						name="lastName"
-						placeholder="下井田"
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 						required
 					/>
@@ -68,7 +67,6 @@ export function ProfileForm() {
 						type="text"
 						id="firstName"
 						name="firstName"
-						placeholder="陸"
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 						required
 					/>
@@ -86,7 +84,6 @@ export function ProfileForm() {
 					type="text"
 					id="nickname"
 					name="nickname"
-					placeholder="りく"
 					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 					required
 				/>
@@ -226,7 +223,6 @@ export function ProfileForm() {
 				<textarea
 					id="bio"
 					name="bio"
-					placeholder="自己紹介やビールの好みを入力してください"
 					maxLength={500}
 					rows={4}
 					onChange={(e) => setBioLength(e.target.value.length)}

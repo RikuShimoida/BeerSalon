@@ -112,6 +112,20 @@ describe("ProfileForm", () => {
 			const bioInput = screen.getByLabelText("プロフィール文（任意）");
 			expect(bioInput).not.toBeRequired();
 		});
+
+		it("姓・名・ニックネーム・プロフィール文フィールドにplaceholder属性が設定されていない", () => {
+			render(<ProfileForm />);
+
+			const lastNameInput = screen.getByLabelText("姓");
+			const firstNameInput = screen.getByLabelText("名");
+			const nicknameInput = screen.getByLabelText("ニックネーム");
+			const bioInput = screen.getByLabelText("プロフィール文（任意）");
+
+			expect(lastNameInput).not.toHaveAttribute("placeholder");
+			expect(firstNameInput).not.toHaveAttribute("placeholder");
+			expect(nicknameInput).not.toHaveAttribute("placeholder");
+			expect(bioInput).not.toHaveAttribute("placeholder");
+		});
 	});
 
 	describe("正常系 - selectフィールド", () => {

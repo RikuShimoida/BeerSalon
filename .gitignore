@@ -68,3 +68,6 @@ playwright/.cache/
 
 # claude code subagent personal memory (not shared across team)
 .claude/agent-memory/
+
+# PR review screenshots (use GitHub uploaded image on PR comments instead)
+docs/screenshots/
