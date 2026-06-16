@@ -103,6 +103,11 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - `type=signup`（または `code` パラメータ）: 新規登録完了処理 → `/signup/profile` へ遷移
   - `type=recovery`: `verifyOtp` でリカバリーセッションを発行 → `next` クエリ（既定 `/password/reset`）へ遷移
   - リカバリー時に検証エラー: `/password/forgot?error=invalid_token` へリダイレクト
+- ベースURLの解決:
+  - 認証メールに記載するコールバックURLのオリジンは、Server Action 実行時のリクエストヘッダー（`x-forwarded-host` / `host`）から動的に解決する
+  - `NEXT_PUBLIC_SITE_URL` が設定されている場合はそれを最優先で使用する（production で固定したい場合のみ設定）
+  - これにより local / Vercel Preview / production のいずれの環境からの申請でも、メール内URLがリクエスト元のオリジンを指す
+  - 実装は `apps/web/src/lib/site-url.ts` の `getSiteUrl()` を参照
 
 #### 2-1-7. パスワード再設定ページ
 

@@ -9,11 +9,24 @@ vi.mock("@/lib/supabase/server", () => ({
 	})),
 }));
 
+// next/headers のモック（getSiteUrl がヘッダー参照するため）
+const mockHeaders = vi.fn();
+vi.mock("next/headers", () => ({
+	headers: () => mockHeaders(),
+	cookies: vi.fn(),
+}));
+
 import { forgotPasswordAction } from "./actions";
+
+const createHeaderMap = (entries: Record<string, string>) => ({
+	get: (key: string): string | null => entries[key.toLowerCase()] ?? null,
+});
 
 describe("forgotPasswordAction", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		process.env.NEXT_PUBLIC_SITE_URL = "";
+		mockHeaders.mockResolvedValue(createHeaderMap({ host: "localhost:3000" }));
 		mockResetPasswordForEmail.mockResolvedValue({
 			data: {},
 			error: null,
@@ -30,15 +43,36 @@ describe("forgotPasswordAction", () => {
 			expect(mockResetPasswordForEmail).toHaveBeenCalledWith(
 				"user@example.com",
 				{
-					redirectTo: expect.stringContaining(
-						"/auth/callback?next=/password/reset",
-					),
+					redirectTo:
+						"http://localhost:3000/auth/callback?next=/password/reset",
 				},
 			);
 			expect(result).toEqual({
 				success: true,
 				message: "該当アドレスが登録されていればメールを送信しました",
 			});
+		});
+
+		it("x-forwarded-host / x-forwarded-proto があれば redirectTo にそのドメインが使われる", async () => {
+			mockHeaders.mockResolvedValue(
+				createHeaderMap({
+					"x-forwarded-host": "preview.vercel.app",
+					"x-forwarded-proto": "https",
+				}),
+			);
+
+			const formData = new FormData();
+			formData.append("email", "user@example.com");
+
+			await forgotPasswordAction(undefined, formData);
+
+			expect(mockResetPasswordForEmail).toHaveBeenCalledWith(
+				"user@example.com",
+				{
+					redirectTo:
+						"https://preview.vercel.app/auth/callback?next=/password/reset",
+				},
+			);
 		});
 
 		it("Supabaseがエラーを返しても、ユーザー列挙を防ぐためsuccess: trueで返る", async () => {

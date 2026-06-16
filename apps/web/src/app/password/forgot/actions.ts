@@ -1,5 +1,6 @@
 "use server";
 
+import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 import { forgotPasswordSchema } from "@/lib/validations/auth";
 
@@ -26,7 +27,7 @@ export async function forgotPasswordAction(
 	}
 
 	const supabase = await createClient();
-	const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+	const siteUrl = await getSiteUrl();
 
 	// Why not: ユーザー列挙攻撃を防ぐため、登録有無に関わらず常に同じレスポンスを返す。
 	// Supabase 側でエラーが発生してもクライアントには成功扱いで返却する。
