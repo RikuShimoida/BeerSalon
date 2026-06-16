@@ -14,10 +14,7 @@ export const signUpSchema = z.object({
 		.regex(/[A-Z]/, {
 			message: "パスワードには大文字を含めてください",
 		})
-		.regex(/[0-9]/, { message: "パスワードには数字を含めてください" })
-		.regex(/[^a-zA-Z0-9]/, {
-			message: "パスワードには記号を含めてください",
-		}),
+		.regex(/[0-9]/, { message: "パスワードには数字を含めてください" }),
 });
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;

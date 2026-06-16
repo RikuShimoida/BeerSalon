@@ -145,15 +145,31 @@ describe("signUp", () => {
 			expect(mockSignUp).not.toHaveBeenCalled();
 		});
 
-		it("パスワードに記号が含まれていない場合、バリデーションエラーが返る", async () => {
+		it("パスワードに記号が含まれていない英数字のみの場合でも、新規登録が成功する", async () => {
+			mockSignUp.mockResolvedValue({
+				data: {
+					user: { id: "new-user-id" },
+					session: null,
+				},
+				error: null,
+			});
+
 			const formData = new FormData();
 			formData.append("email", "test@example.com");
-			formData.append("password", "Password1234");
+			formData.append("password", "vGp3sri9mj7CkYX");
 
 			const result = await signUp(undefined, formData);
 
-			expect(result?.error).toContain("記号");
-			expect(mockSignUp).not.toHaveBeenCalled();
+			expect(result).toBeUndefined();
+			expect(mockSignUp).toHaveBeenCalledWith({
+				email: "test@example.com",
+				password: "vGp3sri9mj7CkYX",
+				options: {
+					emailRedirectTo: expect.stringMatching(
+						/^http:\/\/(localhost|127\.0\.0\.1):3000\/auth\/callback\?next=\/signup\/profile$/,
+					),
+				},
+			});
 		});
 	});
 
