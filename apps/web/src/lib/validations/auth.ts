@@ -47,3 +47,38 @@ export const profileSchema = z.object({
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;
+
+export const forgotPasswordSchema = z.object({
+	email: z
+		.string()
+		.min(1, { message: "メールアドレスを入力してください" })
+		.email({ message: "有効なメールアドレスを入力してください" }),
+});
+
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+	.object({
+		password: z
+			.string()
+			.min(8, { message: "パスワードは8文字以上で入力してください" })
+			.regex(/[a-z]/, {
+				message: "パスワードには小文字を含めてください",
+			})
+			.regex(/[A-Z]/, {
+				message: "パスワードには大文字を含めてください",
+			})
+			.regex(/[0-9]/, { message: "パスワードには数字を含めてください" })
+			.regex(/[^a-zA-Z0-9]/, {
+				message: "パスワードには記号を含めてください",
+			}),
+		confirmPassword: z
+			.string()
+			.min(1, { message: "確認用パスワードを入力してください" }),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "パスワードが一致しません",
+		path: ["confirmPassword"],
+	});
+
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;

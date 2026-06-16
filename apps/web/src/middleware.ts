@@ -8,7 +8,11 @@ export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
 	const publicExactPaths = ["/login", "/signup"];
-	const publicPrefixPaths = ["/password/reset", "/auth/callback"];
+	const publicPrefixPaths = [
+		"/password/forgot",
+		"/password/reset",
+		"/auth/callback",
+	];
 	const isPublicPath =
 		publicExactPaths.includes(pathname) ||
 		publicPrefixPaths.some((path) => pathname.startsWith(path));

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { loginSchema, profileSchema, signUpSchema } from "./auth";
+import {
+	forgotPasswordSchema,
+	loginSchema,
+	profileSchema,
+	resetPasswordSchema,
+	signUpSchema,
+} from "./auth";
 
 describe("signUpSchema", () => {
 	describe("正常系", () => {
@@ -466,6 +472,150 @@ describe("profileSchema", () => {
 			const result = profileSchema.safeParse(validData);
 
 			expect(result.success).toBe(true);
+		});
+	});
+});
+
+describe("forgotPasswordSchema", () => {
+	describe("正常系", () => {
+		it("有効なメールアドレスでバリデーションが成功する", () => {
+			const result = forgotPasswordSchema.safeParse({
+				email: "test@example.com",
+			});
+
+			expect(result.success).toBe(true);
+		});
+	});
+
+	describe("異常系", () => {
+		it("メールアドレスが空文字の場合、エラーメッセージが返される", () => {
+			const result = forgotPasswordSchema.safeParse({ email: "" });
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.issues[0].message).toBe(
+					"メールアドレスを入力してください",
+				);
+			}
+		});
+
+		it("メールアドレスの形式が不正な場合、エラーメッセージが返される", () => {
+			const result = forgotPasswordSchema.safeParse({ email: "invalid" });
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				expect(result.error.issues[0].message).toBe(
+					"有効なメールアドレスを入力してください",
+				);
+			}
+		});
+	});
+});
+
+describe("resetPasswordSchema", () => {
+	describe("正常系", () => {
+		it("有効なパスワードと一致する確認用パスワードでバリデーションが成功する", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "NewPass1!",
+				confirmPassword: "NewPass1!",
+			});
+
+			expect(result.success).toBe(true);
+		});
+	});
+
+	describe("異常系 - パスワード強度", () => {
+		it("パスワードが8文字未満の場合、エラーメッセージが返される", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "Aa1!",
+				confirmPassword: "Aa1!",
+			});
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				const errors = result.error.issues.map((e) => e.message);
+				expect(errors).toContain("パスワードは8文字以上で入力してください");
+			}
+		});
+
+		it("パスワードに小文字が含まれていない場合、エラーメッセージが返される", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "PASSWORD1!",
+				confirmPassword: "PASSWORD1!",
+			});
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				const errors = result.error.issues.map((e) => e.message);
+				expect(errors).toContain("パスワードには小文字を含めてください");
+			}
+		});
+
+		it("パスワードに大文字が含まれていない場合、エラーメッセージが返される", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "password1!",
+				confirmPassword: "password1!",
+			});
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				const errors = result.error.issues.map((e) => e.message);
+				expect(errors).toContain("パスワードには大文字を含めてください");
+			}
+		});
+
+		it("パスワードに数字が含まれていない場合、エラーメッセージが返される", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "PasswordA!",
+				confirmPassword: "PasswordA!",
+			});
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				const errors = result.error.issues.map((e) => e.message);
+				expect(errors).toContain("パスワードには数字を含めてください");
+			}
+		});
+
+		it("パスワードに記号が含まれていない場合、エラーメッセージが返される", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "Password12",
+				confirmPassword: "Password12",
+			});
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				const errors = result.error.issues.map((e) => e.message);
+				expect(errors).toContain("パスワードには記号を含めてください");
+			}
+		});
+	});
+
+	describe("異常系 - 確認用パスワード", () => {
+		it("確認用パスワードが空文字の場合、エラーメッセージが返される", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "NewPass1!",
+				confirmPassword: "",
+			});
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				const errors = result.error.issues.map((e) => e.message);
+				expect(errors).toContain("確認用パスワードを入力してください");
+			}
+		});
+
+		it("パスワードと確認用パスワードが一致しない場合、エラーメッセージが返される", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "NewPass1!",
+				confirmPassword: "Other123!",
+			});
+
+			expect(result.success).toBe(false);
+			if (!result.success) {
+				const errors = result.error.issues.map((e) => e.message);
+				expect(errors).toContain("パスワードが一致しません");
+			}
 		});
 	});
 });
