@@ -6,7 +6,10 @@ export async function GET(request: NextRequest) {
 	const requestUrl = new URL(request.url);
 	const token_hash = requestUrl.searchParams.get("token_hash");
 	const type = requestUrl.searchParams.get("type") as EmailOtpType | null;
-	const next = requestUrl.searchParams.get("next") || "/signup/profile";
+	const isRecovery = type === "recovery";
+	const next =
+		requestUrl.searchParams.get("next") ||
+		(isRecovery ? "/password/reset" : "/signup/profile");
 
 	if (token_hash && type) {
 		const supabase = await createClient();
@@ -17,6 +20,11 @@ export async function GET(request: NextRequest) {
 
 		if (error) {
 			console.error("[Auth Callback] Failed to verify OTP:", error);
+			if (isRecovery) {
+				return NextResponse.redirect(
+					new URL("/password/forgot?error=invalid_token", request.url),
+				);
+			}
 			return NextResponse.redirect(
 				new URL(
 					`/signup/profile?error=${encodeURIComponent(error.message)}`,
