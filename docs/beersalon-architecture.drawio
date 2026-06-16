@@ -1,0 +1,99 @@
+<mxGraphModel adaptiveColors="auto" dx="1422" dy="757" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="title" value="BeerSalon System Architecture (Next.js + Supabase + Vercel)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="280" y="20" width="840" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="browser_group" value="クライアント層 (Spring Boot 相当: ブラウザ)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontSize=13;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="80" y="90" width="280" height="180" as="geometry" />
+    </mxCell>
+    <mxCell id="browser_user" value="ユーザーブラウザ&#10;(http://localhost:3000)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12" vertex="1" parent="1">
+      <mxGeometry x="100" y="140" width="240" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="browser_admin" value="管理者ブラウザ&#10;(http://localhost:3001)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12" vertex="1" parent="1">
+      <mxGeometry x="100" y="200" width="240" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="vercel_group" value="Vercel (アプリケーション層: Spring Boot アプリ相当)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontSize=13;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="480" y="90" width="520" height="620" as="geometry" />
+    </mxCell>
+    <mxCell id="web_app" value="apps/web (ユーザー画面: ポート 3000)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;fontSize=12;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="500" y="140" width="480" height="240" as="geometry" />
+    </mxCell>
+    <mxCell id="web_sc" value="Server Components (page.tsx)&#10;= @Controller + Thymeleaf 相当&#10;サーバーでHTMLを生成してブラウザへ返す" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+      <mxGeometry x="520" y="180" width="440" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="web_sa" value="Server Actions (actions/*.ts &quot;use server&quot;)&#10;= @Service + @PostMapping 相当&#10;いいね・フォロー・投稿等のミューテーション" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+      <mxGeometry x="520" y="245" width="440" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="web_auth" value="lib/supabase/server.ts (Supabase Auth クライアント)&#10;= Spring Security 相当 (Cookieセッション管理)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+      <mxGeometry x="520" y="310" width="440" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="admin_app" value="apps/admin (管理画面: ポート 3001)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontSize=12;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="500" y="400" width="480" height="240" as="geometry" />
+    </mxCell>
+    <mxCell id="admin_sc" value="Server Components (page.tsx)&#10;= @Controller + Thymeleaf 相当&#10;バー管理・メニュー・記事・クーポン管理画面" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+      <mxGeometry x="520" y="440" width="440" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="admin_rh" value="Route Handlers (api/**/route.ts)&#10;= @RestController 相当&#10;ログイン・店舗CRUD・Stripe Webhook 等の REST API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+      <mxGeometry x="520" y="505" width="440" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="admin_auth" value="lib/auth.ts (jose + bcryptjs カスタムJWT)&#10;= Spring Security JwtFilter + BCryptPasswordEncoder 相当" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10" vertex="1" parent="1">
+      <mxGeometry x="520" y="570" width="440" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="prisma" value="Prisma Client (lib/prisma.ts)&#10;= Spring Data JPA 相当 (DBアクセスORM・両アプリで共有)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;align=center" vertex="1" parent="1">
+      <mxGeometry x="500" y="660" width="480" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="supabase_group" value="Supabase (データ層: AWS RDS + Cognito 相当)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;verticalAlign=top;fontSize=13;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="1080" y="90" width="280" height="380" as="geometry" />
+    </mxCell>
+    <mxCell id="sb_postgres" value="PostgreSQL&#10;(全テーブル: bars, posts,&#10;user_profiles, admin_users 等)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#56517e;fontSize=12" vertex="1" parent="1">
+      <mxGeometry x="1100" y="140" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="sb_auth" value="Supabase Auth&#10;(auth.users テーブル)&#10;※apps/web のみが利用" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#56517e;fontSize=12" vertex="1" parent="1">
+      <mxGeometry x="1100" y="240" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="sb_storage" value="Supabase Storage&#10;(店舗画像・投稿画像)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#56517e;fontSize=12" vertex="1" parent="1">
+      <mxGeometry x="1100" y="340" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="stripe_group" value="Stripe (外部サービス)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;fontSize=13;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="1080" y="500" width="280" height="210" as="geometry" />
+    </mxCell>
+    <mxCell id="stripe_sub" value="Subscription API&#10;(月額課金 ¥5,000/月)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;fontSize=12" vertex="1" parent="1">
+      <mxGeometry x="1100" y="550" width="240" height="70" as="geometry" />
+    </mxCell>
+    <mxCell id="stripe_portal" value="Customer Portal&#10;(支払い方法管理)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;fontSize=12" vertex="1" parent="1">
+      <mxGeometry x="1100" y="630" width="240" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_user_web" value="HTTPS&#10;(SSR/Server Action)" style="endArrow=classic;html=1;strokeColor=#6c8ebf;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0" edge="1" parent="1" source="browser_user" target="web_app">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_admin_admin" value="HTTPS&#10;(fetch API)" style="endArrow=classic;html=1;strokeColor=#d6b656;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0" edge="1" parent="1" source="browser_admin" target="admin_app">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_web_prisma" value="ORM" style="endArrow=classic;html=1;strokeColor=#9673a6;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="web_app" target="prisma">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_admin_prisma" value="ORM" style="endArrow=classic;html=1;strokeColor=#d6b656;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="admin_app" target="prisma">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_prisma_pg" value="SQL (TCP 5432)" style="endArrow=classic;html=1;strokeColor=#b85450;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="prisma" target="sb_postgres">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_webauth_sbauth" value="OAuth/Email" style="endArrow=classic;html=1;strokeColor=#56517e;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="web_auth" target="sb_auth">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_web_storage" value="画像Upload/取得" style="endArrow=classic;html=1;strokeColor=#56517e;fontSize=10;dashed=1" edge="1" parent="1" source="web_app" target="sb_storage">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_admin_stripe" value="Stripe API&#10;(Subscription/Webhook)" style="endArrow=classic;html=1;strokeColor=#d79b00;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="admin_app" target="stripe_sub">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="edge_admin_portal" value="リダイレクト" style="endArrow=classic;html=1;strokeColor=#d79b00;fontSize=10;dashed=1" edge="1" parent="1" source="admin_app" target="stripe_portal">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="legend" value="凡例: 紫=apps/web (ユーザー画面) / 黄=apps/admin (管理画面) / 赤=Prisma ORM / 紫青=Supabase / オレンジ=Stripe&#10;認証: apps/web → Supabase Auth (auth.users)　/　apps/admin → 独自JWT (admin_users)" style="text;html=1;strokeColor=none;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;spacingLeft=15" vertex="1" parent="1">
+      <mxGeometry x="80" y="730" width="1280" height="50" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>
