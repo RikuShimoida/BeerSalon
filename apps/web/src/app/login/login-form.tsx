@@ -20,7 +20,6 @@ export function LoginForm() {
 					type="email"
 					id="email"
 					name="email"
-					placeholder="example@mail.com"
 					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 					required
 				/>
@@ -37,7 +36,6 @@ export function LoginForm() {
 					type="password"
 					id="password"
 					name="password"
-					placeholder="••••••••"
 					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 					required
 				/>

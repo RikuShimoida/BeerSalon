@@ -63,13 +63,16 @@ describe("LoginForm", () => {
 			expect(passwordInput).toHaveAttribute("id", "password");
 		});
 
-		it("プレースホルダーが正しく表示される", () => {
+		it("メールアドレス・パスワード入力欄にplaceholder属性が設定されていない", () => {
 			render(<LoginForm />);
 
-			expect(
-				screen.getByPlaceholderText("example@mail.com"),
-			).toBeInTheDocument();
-			expect(screen.getByPlaceholderText("••••••••")).toBeInTheDocument();
+			const emailInput = screen.getByRole("textbox", {
+				name: "メールアドレス",
+			});
+			const passwordInput = screen.getByLabelText("パスワード");
+
+			expect(emailInput).not.toHaveAttribute("placeholder");
+			expect(passwordInput).not.toHaveAttribute("placeholder");
 		});
 
 		it("送信ボタンが表示される", () => {
