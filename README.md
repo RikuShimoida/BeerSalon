@@ -122,6 +122,30 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 ---
 
+## 🌐 プレビュー環境（develop 追従）
+
+`develop` ブランチに push されると、GitHub Actions が Vercel に自動デプロイし、以下の固定 URL を最新ビルドに付け替える。
+共有時はコミット別ハッシュ URL ではなく **必ずこちらを使うこと**（ハッシュ URL はそのコミット時点のビルドに固定されるため、共有後に追加修正が反映されない）。
+
+| アプリ | プレビュー URL |
+|--------|---------------|
+| BeerSalon（ユーザー画面） | https://beer-salon-develop.vercel.app |
+| BeerSalonAdmin（管理画面） | https://beer-salon-admin-develop.vercel.app |
+
+`main` への merge では production（`https://beer-salon.vercel.app` / 管理画面本番ドメインは未確定）にデプロイされる。
+
+### トラブルシュート
+
+- **片肺で alias が古いまま残る場合**
+  - `deploy-web` / `deploy-admin` は並列実行されるため、片方の alias 付与だけ失敗すると web/admin の指すコミットがズレる可能性がある。
+  - 対処: `develop` に空コミット等で再 push し、両ジョブを揃え直す。
+- **初回マージで `vercel alias set` が失敗する場合**
+  - 同名 alias が他用途で予約済みの可能性あり。Vercel ダッシュボード → Project → Settings → Domains で該当 alias を解放してから再 push する。
+- **最新を確認したいのに古いビルドが見える場合**
+  - 上記固定 URL は CDN キャッシュの影響を受けることがある。ブラウザのスーパーリロード（Cmd+Shift+R）か、curl の `-H 'Cache-Control: no-cache'` で確認する。
+
+---
+
 ## ✅ MVPに含める機能
 
 - ユーザー登録 / ログイン
