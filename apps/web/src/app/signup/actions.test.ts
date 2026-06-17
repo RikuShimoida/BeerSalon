@@ -156,14 +156,14 @@ describe("signUp", () => {
 
 			const formData = new FormData();
 			formData.append("email", "test@example.com");
-			formData.append("password", "vGp3sri9mj7CkYX");
+			formData.append("password", "Password1234");
 
 			const result = await signUp(undefined, formData);
 
 			expect(result).toBeUndefined();
 			expect(mockSignUp).toHaveBeenCalledWith({
 				email: "test@example.com",
-				password: "vGp3sri9mj7CkYX",
+				password: "Password1234",
 				options: {
 					emailRedirectTo: expect.stringMatching(
 						/^http:\/\/(localhost|127\.0\.0\.1):3000\/auth\/callback\?next=\/signup\/profile$/,

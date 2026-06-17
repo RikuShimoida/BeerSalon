@@ -139,14 +139,14 @@ describe("signUpSchema", () => {
 		it("パスワードに記号が含まれていない英数字のみの場合でも、バリデーションが成功する", () => {
 			const validData = {
 				email: "test@example.com",
-				password: "vGp3sri9mj7CkYX",
+				password: "Password1234",
 			};
 
 			const result = signUpSchema.safeParse(validData);
 
 			expect(result.success).toBe(true);
 			if (result.success) {
-				expect(result.data.password).toBe("vGp3sri9mj7CkYX");
+				expect(result.data.password).toBe("Password1234");
 			}
 		});
 	});
