@@ -105,8 +105,9 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - リカバリー時に検証エラー: `/password/forgot?error=invalid_token` へリダイレクト
 - ベースURLの解決:
   - 認証メールに記載するコールバックURLのオリジンは、Server Action 実行時のリクエストヘッダー（`x-forwarded-host` / `host`）から動的に解決する
-  - `NEXT_PUBLIC_SITE_URL` が設定されている場合はそれを最優先で使用する（production で固定したい場合のみ設定）
+  - `NEXT_PUBLIC_SITE_URL` が設定されている場合はそれを最優先で使用する（production では Host Header Injection 対策のため必ず設定すること）
   - これにより local / Vercel Preview / production のいずれの環境からの申請でも、メール内URLがリクエスト元のオリジンを指す
+  - Supabase ダッシュボード側の Redirect URLs 許可リストには local / preview / production のいずれのオリジンも登録する必要がある。Vercel Preview はワイルドカード（例: `https://*.vercel.app/auth/callback`）で登録する
   - 実装は `apps/web/src/lib/site-url.ts` の `getSiteUrl()` を参照
 
 #### 2-1-7. パスワード再設定ページ
