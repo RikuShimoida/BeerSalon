@@ -6,6 +6,13 @@ vi.mock("next/navigation", () => ({
 	redirect: (...args: unknown[]) => mockRedirect(...args),
 }));
 
+// next/headers のモック（getSiteUrl がヘッダー参照するため）
+const mockHeaders = vi.fn();
+vi.mock("next/headers", () => ({
+	headers: () => mockHeaders(),
+	cookies: vi.fn(),
+}));
+
 // Supabase clientのモック
 const mockSignUp = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({
@@ -18,9 +25,15 @@ vi.mock("@/lib/supabase/server", () => ({
 
 import { signUp } from "./actions";
 
+const createHeaderMap = (entries: Record<string, string>) => ({
+	get: (key: string): string | null => entries[key.toLowerCase()] ?? null,
+});
+
 describe("signUp", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		process.env.NEXT_PUBLIC_SITE_URL = "";
+		mockHeaders.mockResolvedValue(createHeaderMap({ host: "localhost:3000" }));
 	});
 
 	describe("正常系", () => {
@@ -43,12 +56,42 @@ describe("signUp", () => {
 				email: "newuser@example.com",
 				password: "SecurePass1!",
 				options: {
-					emailRedirectTo: expect.stringMatching(
-						/^http:\/\/(localhost|127\.0\.0\.1):3000\/auth\/callback\?next=\/signup\/profile$/,
-					),
+					emailRedirectTo:
+						"http://localhost:3000/auth/callback?next=/signup/profile",
 				},
 			});
 			expect(result).toBeUndefined();
+		});
+
+		it("x-forwarded-host / x-forwarded-proto があれば emailRedirectTo にそのドメインが使われる", async () => {
+			mockHeaders.mockResolvedValue(
+				createHeaderMap({
+					"x-forwarded-host": "preview.vercel.app",
+					"x-forwarded-proto": "https",
+				}),
+			);
+			mockSignUp.mockResolvedValue({
+				data: {
+					user: { id: "new-user-id" },
+					session: null,
+				},
+				error: null,
+			});
+
+			const formData = new FormData();
+			formData.append("email", "newuser@example.com");
+			formData.append("password", "SecurePass1!");
+
+			await signUp(undefined, formData);
+
+			expect(mockSignUp).toHaveBeenCalledWith({
+				email: "newuser@example.com",
+				password: "SecurePass1!",
+				options: {
+					emailRedirectTo:
+						"https://preview.vercel.app/auth/callback?next=/signup/profile",
+				},
+			});
 		});
 
 		it("成功時にredirect('/signup?success=true')が呼ばれる", async () => {
