@@ -81,9 +81,7 @@ describe("SignUpForm", () => {
 			render(<SignUpForm />);
 
 			expect(
-				screen.getByText(
-					"8文字以上、大文字・小文字・数字・記号を含めてください",
-				),
+				screen.getByText("8文字以上、大文字・小文字・数字を含めてください"),
 			).toBeInTheDocument();
 		});
 	});

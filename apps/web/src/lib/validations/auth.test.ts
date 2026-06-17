@@ -136,27 +136,26 @@ describe("signUpSchema", () => {
 			}
 		});
 
-		it("パスワードに記号が含まれていない場合、エラーメッセージが返される", () => {
-			const invalidData = {
+		it("パスワードに記号が含まれていない英数字のみの場合でも、バリデーションが成功する", () => {
+			const validData = {
 				email: "test@example.com",
-				password: "Test1234",
+				password: "Password1234",
 			};
 
-			const result = signUpSchema.safeParse(invalidData);
+			const result = signUpSchema.safeParse(validData);
 
-			expect(result.success).toBe(false);
-			if (!result.success) {
-				const errors = result.error.issues.map((e) => e.message);
-				expect(errors).toContain("パスワードには記号を含めてください");
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.password).toBe("Password1234");
 			}
 		});
 	});
 
 	describe("境界値テスト", () => {
-		it("パスワードがちょうど8文字の有効なパスワードの場合、バリデーションが成功する", () => {
+		it("パスワードがちょうど8文字（記号なし）の有効なパスワードの場合、バリデーションが成功する", () => {
 			const validData = {
 				email: "test@example.com",
-				password: "Test123!",
+				password: "Test1234",
 			};
 
 			const result = signUpSchema.safeParse(validData);
