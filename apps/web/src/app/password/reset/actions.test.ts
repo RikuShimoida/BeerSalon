@@ -47,6 +47,22 @@ describe("resetPasswordAction", () => {
 			expect(mockSignOut).toHaveBeenCalled();
 			expect(mockRedirect).toHaveBeenCalledWith("/login?reset=success");
 		});
+
+		it("記号を含まないパスワードでもupdateUserが呼ばれる", async () => {
+			const formData = new FormData();
+			formData.append("password", "Password1234");
+			formData.append("confirmPassword", "Password1234");
+
+			try {
+				await resetPasswordAction(undefined, formData);
+			} catch (_error) {
+				// redirectでthrowされる
+			}
+
+			expect(mockUpdateUser).toHaveBeenCalledWith({ password: "Password1234" });
+			expect(mockSignOut).toHaveBeenCalled();
+			expect(mockRedirect).toHaveBeenCalledWith("/login?reset=success");
+		});
 	});
 
 	describe("異常系 - バリデーション", () => {
@@ -58,17 +74,6 @@ describe("resetPasswordAction", () => {
 			const result = await resetPasswordAction(undefined, formData);
 
 			expect(result?.error).toContain("パスワードは8文字以上");
-			expect(mockUpdateUser).not.toHaveBeenCalled();
-		});
-
-		it("パスワードに記号が含まれていない場合、エラーが返る", async () => {
-			const formData = new FormData();
-			formData.append("password", "Password1234");
-			formData.append("confirmPassword", "Password1234");
-
-			const result = await resetPasswordAction(undefined, formData);
-
-			expect(result?.error).toContain("記号");
 			expect(mockUpdateUser).not.toHaveBeenCalled();
 		});
 

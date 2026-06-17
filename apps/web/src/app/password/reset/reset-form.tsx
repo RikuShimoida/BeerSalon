@@ -27,7 +27,7 @@ export function ResetForm() {
 					required
 				/>
 				<p className="text-xs text-muted-foreground tracking-wide">
-					8文字以上、大文字・小文字・数字・記号を含めてください
+					8文字以上、大文字・小文字・数字を含めてください
 				</p>
 			</div>
 
