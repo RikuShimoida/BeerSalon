@@ -63,6 +63,9 @@ playwright/.cache/
 # images (design reference)
 /images/
 
+# mock (UI 確認用の使い捨て成果物。仕様合意のローカル参照用で、リポジトリ本体には含めない)
+/mock/
+
 # claude code runtime locks
 .claude/scheduled_tasks.lock
 

@@ -4,49 +4,57 @@ import { useEffect, useState } from "react";
 import { getBeerRegions } from "@/actions/bar";
 import { SHIZUOKA_CITIES } from "@/lib/constants/cities";
 
+const BEER_CATEGORIES = [
+	"IPA",
+	"ピルスナー",
+	"スタウト",
+	"ヴァイツェン",
+	"ペールエール",
+];
+
 interface SearchFormProps {
 	onSearch?: (params: {
 		city: string;
-		category: string;
+		categories: string[];
 		origin: string;
 	}) => void;
 }
 
 export function SearchForm({ onSearch }: SearchFormProps) {
 	const [origins, setOrigins] = useState<Record<string, string[]>>({});
+	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
 	useEffect(() => {
 		const fetchRegions = async () => {
 			const result = await getBeerRegions();
-			console.log("getBeerRegions result:", result);
-			console.log("Number of countries:", Object.keys(result).length);
 			setOrigins(result);
 		};
 		fetchRegions();
 	}, []);
 
 	const handleCityChange = (city: string) => {
-		const category =
-			(document.getElementById("category") as HTMLSelectElement)?.value || "";
 		const origin =
 			(document.getElementById("origin") as HTMLSelectElement)?.value || "";
-		onSearch?.({ city, category, origin });
+		onSearch?.({ city, categories: selectedCategories, origin });
 	};
 
-	const handleCategoryChange = (category: string) => {
+	const handleCategoryToggle = (category: string) => {
+		const nextCategories = selectedCategories.includes(category)
+			? selectedCategories.filter((c) => c !== category)
+			: [...selectedCategories, category];
+		setSelectedCategories(nextCategories);
+
 		const city =
 			(document.getElementById("city") as HTMLSelectElement)?.value || "";
 		const origin =
 			(document.getElementById("origin") as HTMLSelectElement)?.value || "";
-		onSearch?.({ city, category, origin });
+		onSearch?.({ city, categories: nextCategories, origin });
 	};
 
 	const handleOriginChange = (origin: string) => {
 		const city =
 			(document.getElementById("city") as HTMLSelectElement)?.value || "";
-		const category =
-			(document.getElementById("category") as HTMLSelectElement)?.value || "";
-		onSearch?.({ city, category, origin });
+		onSearch?.({ city, categories: selectedCategories, origin });
 	};
 
 	return (
@@ -77,26 +85,30 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 					</select>
 				</div>
 
-				<div>
-					<label
-						htmlFor="category"
-						className="block text-sm font-medium text-card-foreground mb-2 tracking-wide"
-					>
-						ビールカテゴリ
-					</label>
-					<select
-						id="category"
-						onChange={(e) => handleCategoryChange(e.target.value)}
-						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
-						style={{ backgroundColor: "#ffffff" }}
-					>
-						<option value="">全て</option>
-						<option value="IPA">IPA</option>
-						<option value="ピルスナー">ピルスナー</option>
-						<option value="スタウト">スタウト</option>
-						<option value="ヴァイツェン">ヴァイツェン</option>
-						<option value="ペールエール">ペールエール</option>
-					</select>
+				<div className="col-span-2 md:col-span-1">
+					<span className="block text-sm font-medium text-card-foreground mb-2 tracking-wide">
+						ビールカテゴリ（複数選択可）
+					</span>
+					<div className="flex flex-wrap gap-2">
+						{BEER_CATEGORIES.map((category) => {
+							const isSelected = selectedCategories.includes(category);
+							return (
+								<button
+									key={category}
+									type="button"
+									aria-pressed={isSelected}
+									onClick={() => handleCategoryToggle(category)}
+									className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+										isSelected
+											? "bg-primary text-primary-foreground"
+											: "bg-white text-card-foreground hover:opacity-80"
+									}`}
+								>
+									{isSelected ? `✓ ${category}` : category}
+								</button>
+							);
+						})}
+					</div>
 				</div>
 
 				<div>
