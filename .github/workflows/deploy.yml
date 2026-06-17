@@ -68,6 +68,12 @@ jobs:
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deployed web (${{ needs.guard.outputs.target }}): $url"
 
+      - name: Assign develop preview alias (web)
+        if: needs.guard.outputs.target == 'preview'
+        run: |
+          vercel alias set "${{ steps.deploy.outputs.url }}" beer-salon-develop.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Aliased web preview to https://beer-salon-develop.vercel.app"
+
   deploy-admin:
     needs: guard
     runs-on: ubuntu-latest
@@ -104,3 +110,9 @@ jobs:
           url=$(vercel deploy --prebuilt ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deployed admin (${{ needs.guard.outputs.target }}): $url"
+
+      - name: Assign develop preview alias (admin)
+        if: needs.guard.outputs.target == 'preview'
+        run: |
+          vercel alias set "${{ steps.deploy.outputs.url }}" beer-salon-admin-develop.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Aliased admin preview to https://beer-salon-admin-develop.vercel.app"

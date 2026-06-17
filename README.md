@@ -122,6 +122,20 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 ---
 
+## 🌐 プレビュー環境（develop 追従）
+
+`develop` ブランチに push されると、GitHub Actions が Vercel に自動デプロイし、以下の固定 URL を最新ビルドに付け替える。
+共有時はコミット別ハッシュ URL ではなく **必ずこちらを使うこと**（ハッシュ URL はそのコミット時点のビルドに固定されるため、共有後に追加修正が反映されない）。
+
+| アプリ | プレビュー URL |
+|--------|---------------|
+| BeerSalon（ユーザー画面） | https://beer-salon-develop.vercel.app |
+| BeerSalonAdmin（管理画面） | https://beer-salon-admin-develop.vercel.app |
+
+`main` への merge では production（`https://beer-salon.vercel.app` / 管理画面の本番ドメイン）にデプロイされる。
+
+---
+
 ## ✅ MVPに含める機能
 
 - ユーザー登録 / ログイン
