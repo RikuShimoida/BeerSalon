@@ -5,6 +5,9 @@ on:
     branches: [main, develop]
   workflow_dispatch:
 
+# Why not cancel-in-progress=true: develop 連続 push 時に古いデプロイの alias 付与が
+# 新しいデプロイより遅れて走ると、固定エイリアスが古いビルドを指し続ける事故が起きるため、
+# 同一ブランチのデプロイは直列化する。
 concurrency:
   group: deploy-${{ github.ref_name }}
   cancel-in-progress: false
@@ -38,6 +41,7 @@ jobs:
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,24 +58,30 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel environment information
-        run: vercel pull --yes --environment=${{ needs.guard.outputs.target }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ needs.guard.outputs.target }}
 
       - name: Build project (web)
-        run: vercel build ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ needs.guard.outputs.prod_flag }}
         env:
           DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
 
       - name: Deploy to Vercel (web)
         id: deploy
         run: |
-          url=$(vercel deploy --prebuilt ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
+          raw=$(vercel deploy --prebuilt ${{ needs.guard.outputs.prod_flag }})
+          url=$(echo "$raw" | grep -oE 'https://[^[:space:]]+\.vercel\.app' | tail -n 1)
+          if [ -z "$url" ]; then
+            echo "Failed to extract deployment URL from vercel deploy output:"
+            echo "$raw"
+            exit 1
+          fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deployed web (${{ needs.guard.outputs.target }}): $url"
 
       - name: Assign develop preview alias (web)
-        if: needs.guard.outputs.target == 'preview'
+        if: needs.guard.outputs.target == 'preview' && github.ref_name == 'develop'
         run: |
-          vercel alias set "${{ steps.deploy.outputs.url }}" beer-salon-develop.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+          vercel alias set "${{ steps.deploy.outputs.url }}" beer-salon-develop.vercel.app
           echo "Aliased web preview to https://beer-salon-develop.vercel.app"
 
   deploy-admin:
@@ -83,6 +93,7 @@ jobs:
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_ADMIN }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -99,20 +110,26 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel environment information
-        run: vercel pull --yes --environment=${{ needs.guard.outputs.target }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=${{ needs.guard.outputs.target }}
 
       - name: Build project (admin)
-        run: vercel build ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build ${{ needs.guard.outputs.prod_flag }}
 
       - name: Deploy to Vercel (admin)
         id: deploy
         run: |
-          url=$(vercel deploy --prebuilt ${{ needs.guard.outputs.prod_flag }} --token=${{ secrets.VERCEL_TOKEN }})
+          raw=$(vercel deploy --prebuilt ${{ needs.guard.outputs.prod_flag }})
+          url=$(echo "$raw" | grep -oE 'https://[^[:space:]]+\.vercel\.app' | tail -n 1)
+          if [ -z "$url" ]; then
+            echo "Failed to extract deployment URL from vercel deploy output:"
+            echo "$raw"
+            exit 1
+          fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deployed admin (${{ needs.guard.outputs.target }}): $url"
 
       - name: Assign develop preview alias (admin)
-        if: needs.guard.outputs.target == 'preview'
+        if: needs.guard.outputs.target == 'preview' && github.ref_name == 'develop'
         run: |
-          vercel alias set "${{ steps.deploy.outputs.url }}" beer-salon-admin-develop.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
+          vercel alias set "${{ steps.deploy.outputs.url }}" beer-salon-admin-develop.vercel.app
           echo "Aliased admin preview to https://beer-salon-admin-develop.vercel.app"
