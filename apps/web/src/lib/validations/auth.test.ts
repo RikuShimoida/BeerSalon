@@ -152,10 +152,10 @@ describe("signUpSchema", () => {
 	});
 
 	describe("境界値テスト", () => {
-		it("パスワードがちょうど8文字の有効なパスワードの場合、バリデーションが成功する", () => {
+		it("パスワードがちょうど8文字（記号なし）の有効なパスワードの場合、バリデーションが成功する", () => {
 			const validData = {
 				email: "test@example.com",
-				password: "Test123!",
+				password: "Test1234",
 			};
 
 			const result = signUpSchema.safeParse(validData);
