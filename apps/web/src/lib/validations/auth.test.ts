@@ -521,6 +521,15 @@ describe("resetPasswordSchema", () => {
 
 			expect(result.success).toBe(true);
 		});
+
+		it("パスワードに記号が含まれていない英数字のみの場合でも、バリデーションが成功する", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "Password1234",
+				confirmPassword: "Password1234",
+			});
+
+			expect(result.success).toBe(true);
+		});
 	});
 
 	describe("異常系 - パスワード強度", () => {
@@ -575,19 +584,6 @@ describe("resetPasswordSchema", () => {
 				expect(errors).toContain("パスワードには数字を含めてください");
 			}
 		});
-
-		it("パスワードに記号が含まれていない場合、エラーメッセージが返される", () => {
-			const result = resetPasswordSchema.safeParse({
-				password: "Password12",
-				confirmPassword: "Password12",
-			});
-
-			expect(result.success).toBe(false);
-			if (!result.success) {
-				const errors = result.error.issues.map((e) => e.message);
-				expect(errors).toContain("パスワードには記号を含めてください");
-			}
-		});
 	});
 
 	describe("異常系 - 確認用パスワード", () => {
@@ -615,6 +611,17 @@ describe("resetPasswordSchema", () => {
 				const errors = result.error.issues.map((e) => e.message);
 				expect(errors).toContain("パスワードが一致しません");
 			}
+		});
+	});
+
+	describe("境界値テスト", () => {
+		it("パスワードがちょうど8文字（記号なし）の有効なパスワードの場合、バリデーションが成功する", () => {
+			const result = resetPasswordSchema.safeParse({
+				password: "Test1234",
+				confirmPassword: "Test1234",
+			});
+
+			expect(result.success).toBe(true);
 		});
 	});
 });
