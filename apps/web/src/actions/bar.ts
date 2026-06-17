@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function getBars(params?: {
 	city?: string;
-	category?: string;
+	categories?: string[];
 	origin?: string;
 }) {
 	const where: {
@@ -15,7 +15,9 @@ export async function getBars(params?: {
 			some: {
 				beer: {
 					beerCategory?: {
-						name: string;
+						name: {
+							in: string[];
+						};
 					};
 					region?: {
 						country: {
@@ -34,16 +36,20 @@ export async function getBars(params?: {
 		where.city = params.city;
 	}
 
-	if (params?.category || params?.origin) {
+	const hasCategories = (params?.categories?.length ?? 0) > 0;
+
+	if (hasCategories || params?.origin) {
 		where.beerMenus = {
 			some: {
 				beer: {},
 			},
 		};
 
-		if (params?.category) {
+		if (hasCategories && params?.categories) {
 			where.beerMenus.some.beer.beerCategory = {
-				name: params.category,
+				name: {
+					in: params.categories,
+				},
 			};
 		}
 

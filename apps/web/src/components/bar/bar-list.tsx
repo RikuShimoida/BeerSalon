@@ -7,11 +7,11 @@ import { BarCardSkeleton } from "./bar-card-skeleton";
 
 interface BarListProps {
 	city?: string;
-	category?: string;
+	categories?: string[];
 	origin?: string;
 }
 
-export function BarList({ city, category, origin }: BarListProps) {
+export function BarList({ city, categories, origin }: BarListProps) {
 	const [bars, setBars] = useState<
 		Array<{
 			id: string;
@@ -23,16 +23,24 @@ export function BarList({ city, category, origin }: BarListProps) {
 	>([]);
 	const [isLoading, setIsLoading] = useState(true);
 
+	// Why not: categories は配列のため参照同一性が毎レンダリングで変わる。
+	// 依存配列に配列をそのまま渡すと無限ループの恐れがあるため、文字列化した値で比較する。
+	const categoriesKey = (categories ?? []).join(",");
+
 	useEffect(() => {
 		const fetchBars = async () => {
 			setIsLoading(true);
-			const result = await getBars({ city, category, origin });
+			const result = await getBars({
+				city,
+				categories: categoriesKey ? categoriesKey.split(",") : [],
+				origin,
+			});
 			setBars(result);
 			setIsLoading(false);
 		};
 
 		fetchBars();
-	}, [city, category, origin]);
+	}, [city, categoriesKey, origin]);
 
 	if (isLoading) {
 		return (

@@ -15,17 +15,17 @@ import { SearchForm } from "@/components/search/search-form";
 export function HomeClient() {
 	const [searchParams, setSearchParams] = useState<{
 		city: string;
-		category: string;
+		categories: string[];
 		origin: string;
 	}>({
 		city: "",
-		category: "",
+		categories: [],
 		origin: "",
 	});
 
 	const handleSearch = (params: {
 		city: string;
-		category: string;
+		categories: string[];
 		origin: string;
 	}) => {
 		setSearchParams(params);
@@ -181,7 +181,7 @@ export function HomeClient() {
 				{/* 店舗一覧 */}
 				<BarList
 					city={searchParams.city}
-					category={searchParams.category}
+					categories={searchParams.categories}
 					origin={searchParams.origin}
 				/>
 
