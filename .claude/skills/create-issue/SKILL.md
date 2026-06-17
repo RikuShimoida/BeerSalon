@@ -8,6 +8,8 @@ agent: beersalon-domain-expert
 
 ## GitHub Issue 作成フロー
 
+**このスキルの目的は GitHub Issue を新規作成すること。** 設計ドキュメントの更新・同期は一切行わない（それは sync-docs スキルの役割）。本スキルで設計ドキュメントに触れるのは、Issue 本文の項目を埋めるための「読み取り専用の参照」に限る。
+
 引数: `$ARGUMENTS`（課題No。例: ISSUE-001）
 
 ### Phase 1: 課題情報の取得
@@ -31,7 +33,7 @@ agent: beersalon-domain-expert
 
 #### feature テンプレートの場合
 
-設計ドキュメント（routing.md, wireframe.md, database.md, README.md）を参照し、課題情報をテンプレートの各セクションにマッピングする。
+Issue 本文の各項目を埋めるための材料として、設計ドキュメント（routing.md, wireframe.md, database.md, README.md）を読み取り専用で参照する（ドキュメント側は変更しない）。課題情報をテンプレートの各セクションに転記する。
 
 - **概要**: 課題の「課題」「なぜそれをやるのか？」を要約
 - **対象画面 / ルーティング**: 課題の「対象システム」「対象ページ」から特定し、routing.md と照合
@@ -73,3 +75,4 @@ EOF
 - @issue_note.txt に存在しない課題Noで作成を試みること
 - テンプレートの構造を無視してIssue本文を作成すること
 - 課題情報を推測で補完すること（不明点は「未確定事項」に記載する）
+- 設計ドキュメント（routing.md / wireframe.md / database.md / README.md）を更新・同期すること（本スキルは参照のみ。同期は sync-docs の役割）
