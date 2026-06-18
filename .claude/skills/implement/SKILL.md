@@ -13,19 +13,69 @@ agent: frontend-engineer
 
 - `/plan $ARGUMENTS` で計画を出力し、ユーザーが承認済みであること
 - 計画未承認の場合は、先に `/plan $ARGUMENTS` を実行するよう案内して終了すること
+- **このスキルは worktree 起点の常時運用が前提**。設計の全体像は `docs/worktree-workflow.md` を参照。
+  単独実装でも割り込み実装でも、1タスク = 1 worktree で行い、developメインは司令塔として clean に保つ。
+
+#### worktree モードと撤退路（`--no-worktree`）
+
+- **既定は worktree モード**（1タスク = 1 worktree）。
+- 引数に **`--no-worktree`** が含まれる場合は、worktree を作らず**従来の checkout 方式**で実装する
+  （1-0b / 1-1b を参照）。「今回は worktree が割に合わない」と判断したタスクで、その場で切り替えられる。
+  - 例: `/implement 210 --no-worktree`
+- この撤退路はコードを戻す必要がない。worktree 運用が常に割に合わないと感じたら、
+  運用として `--no-worktree` を既定にする（docs/worktree-workflow.md に方針を追記して判断を残す）。
 
 ### Phase 1: 実装
 
-#### 1-1. ブランチ作成
+> 以下 1-0 / 1-1 は worktree モードの手順。`--no-worktree` 指定時は代わりに 1-0b / 1-1b を行う。
 
-- developベースでブランチを作成する
+#### 1-0. 前提チェック（worktree モード。満たさなければ停止）
+
+- `git branch --show-current` が `develop` であること。
+  - developメイン会話を司令塔とし、ここから worktree を切る運用のため。
+  - develop 以外なら「`git switch develop` してから再実行してください」と案内して停止。
+- 司令塔（developメイン）の作業ツリーが clean であること（`git status --porcelain` が空）。
+  - clean でなければ、未コミット変更の扱いをユーザーに確認してから進む。
+
+#### 1-0b. 前提チェック（`--no-worktree` 時）
+
+- 既存の checkout 方式の作法に従う。worktree は作らない。
+- 並列実装はできない（メインの作業ツリーを1つ占有するため）。単独タスク向け。
+
+#### 1-1. worktree とブランチの作成（worktree モード）
+
+- **このタスク専用の worktree を develop 起点で作成する**（1タスク = 1 worktree）。
 - ブランチ命名規則: `feature/<issue番号>-<英語スラッグ>` または `bugfix/<issue番号>-<英語スラッグ>`
   - 例: `feature/210-add-e2e-ci`, `bugfix/305-fix-login-redirect`
-- `gh issue develop` の `--name` オプションでブランチ名を明示指定する:
+- 手順:
   ```
-  gh issue develop $ARGUMENTS --base develop --checkout --name <prefix>/$ARGUMENTS-<英語スラッグ>
+  git fetch origin develop
+  git worktree add .claude/worktrees/<prefix>-$ARGUMENTS-<英語スラッグ> origin/develop -b <prefix>/$ARGUMENTS-<英語スラッグ>
   ```
-- ブランチ名に `--name` を渡さないと、Issueタイトル（日本語）からブランチ名が自動生成され、Git操作・URL・CI/CDログで扱いにくくなるので必ず明示指定する
+  - **なぜ生の `git worktree add` か**: Claude Code の Agent `isolation: "worktree"` は既定ベースが
+    `origin/HEAD`(=main) で develop 起点に固定できない。develop追従プレビュー運用と整合させるため、
+    ベースを明示できる生コマンドを使う（`docs/worktree-workflow.md` §4 参照）。
+- 以降の実装作業（1-2〜1-6）は、すべてこの worktree ディレクトリ内で行う。
+
+##### worktree の初期化（スキルの手続きとして明示的に実行）
+
+git / Claude Code のネイティブ機能では自動化されないため、worktree 作成直後に必ず行う:
+
+1. 環境ファイルをコピー: `apps/web/.env.local` と `apps/admin/.env.local` を新 worktree へコピー。
+   （`.worktreeinclude` は標準機能ではなく取り決めにすぎないため、コピーはこの手続きで行う）
+2. 依存インストール: 新 worktree 内で `pnpm install`。
+
+#### 1-1b. ブランチ作成（`--no-worktree` 時）
+
+- worktree を作らず、メインの作業ツリー上で develop からブランチを切る:
+  ```
+  git switch develop
+  git pull origin develop
+  git switch -c <prefix>/$ARGUMENTS-<英語スラッグ>
+  ```
+- 環境ファイルのコピー・`pnpm install` は不要（既存の node_modules / .env.local をそのまま使う）。
+  これが worktree モードに対するオーバーヘッド削減の中身。
+- 以降の実装作業は通常どおりこのブランチ上で行う。
 
 ##### 英語スラッグの決め方
 
@@ -41,25 +91,32 @@ agent: frontend-engineer
   - バグ修正系Issue → `bugfix/`
   - それ以外（機能追加・改善・リファクタ等）→ `feature/`
 
-##### `--name` が使えない場合の代替手順
+##### Issue とブランチの紐付け
 
-`gh` のバージョンが古く `--name` が使えない場合は、以下の手順でブランチを作成する:
-
-```
-git checkout develop
-git pull origin develop
-git checkout -b feature/$ARGUMENTS-<英語スラッグ> develop
-git push -u origin HEAD
-```
+- worktree で作成したブランチを push する際、PR本文に `Closes #$ARGUMENTS` を記載することで
+  Issue と紐付ける（Phase 2-2）。`gh issue develop` は worktree 運用では使わない
+  （ブランチ作成は上記の `git worktree add ... -b` で行うため）。
 
 #### 1-2. プロダクトコード実装
 
 - Issue の要件に基づきコードを実装する
 
-#### 1-3. UT実装・実行
+#### 1-3. UT実装・実行（worktree内で完結＝並列OK）
 
-- Vitest でユニットテストを実装する
+- Vitest でユニットテストを実装する（`pnpm test`。Supabase/Prismaはモックし共有DBに触らない）
 - `pnpm test` で全テストがパスすることを確認する
+- UT は共有DBに依存しないため、複数 worktree で同時に実行してよい。
+
+#### 1-3-1. 共有DB依存テスト（IT・E2E）の扱い
+
+> **共有インフラ制約（厳守）**: 全 worktree は単一 Supabase（54421）・単一物理DB・固定ポートを共有する。
+> 以下は共有DBに触るため、複数 worktree で同時実行すると競合して非決定的になる:
+> - **IT（`pnpm test:integration`、`*.integration.test.ts`）** — seed済み共有DBに実接続する
+> - **E2E（`pnpm test:e2e`、Playwright）** — 共有DB＋固定ポートを使う
+>
+> 並列実装中はこれらを worktree 内で実行せず、**司令塔が `qa-engineer` を1体ずつ直列起動して消化**する
+> （`docs/worktree-workflow.md` §3）。
+> **単独実装（worktree が1つだけ）なら競合しない**ため、このフロー内でそのまま IT/E2E を実行してよい。
 
 #### 1-4. E2Eテスト実装・実行
 
@@ -112,6 +169,15 @@ Issueが画面レイアウト系タスク（UI実装、ページ作成、レイ�
 
 - `gh pr create --base develop` でPRを作成する
 - PR本文に `Closes #Issue番号` を記載する
+
+#### 2-2-1. worktree の後片付け
+
+- **worktree モードの場合のみ実施**（`--no-worktree` 時はスキップ）。
+- PR作成が完了したら、このタスクの worktree を撤去する:
+  ```
+  git worktree remove .claude/worktrees/<このタスクのworktree>
+  ```
+- 未コミット変更が残っている場合は撤去せず、その旨を完了報告に明記する。
 
 #### 2-3. 完了報告
 
