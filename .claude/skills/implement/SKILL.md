@@ -112,7 +112,7 @@ git / Claude Code のネイティブ機能では自動化されないため、wo
 > **共有インフラ制約（厳守）**: 全 worktree は単一 Supabase（54421）・単一物理DB・固定ポートを共有する。
 > 以下は共有DBに触るため、複数 worktree で同時実行すると競合して非決定的になる:
 > - **IT（`pnpm test:integration`、`*.integration.test.ts`）** — seed済み共有DBに実接続する
-> - **E2E（`pnpm test:e2e`、Playwright）** — 共有DB＋固定ポートを使う
+> - **E2E（`pnpm e2e`、Playwright）** — 共有DB＋固定ポートを使う（アプリ個別は `pnpm --filter @beersalon/web e2e` / `pnpm --filter @beersalon/admin e2e`）
 >
 > 並列実装中はこれらを worktree 内で実行せず、**司令塔が `qa-engineer` を1体ずつ直列起動して消化**する
 > （`docs/worktree-workflow.md` §3）。

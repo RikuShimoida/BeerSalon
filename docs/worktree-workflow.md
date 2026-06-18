@@ -56,7 +56,7 @@ worktree は作業ディレクトリのファイルを分離するが、**以下
 2つの worktree で同時に行うと互いに壊し合う。
 
 **対策**: スキーマ変更を含むタスクは、最初の worktree がロックを取得し、他 worktree は待機（直列化）。
-ロックは排他ファイル（例: `prisma/.migration.lock`）で表現する。
+ロックは排他ファイル（例: `prisma/.migration.lock`）で表現する（未実装の設計例。現状は司令塔が直列順序を手運用で担保する）。
 ロックは「同時書き込み事故」を防ぐが「変更の波及」は防げない点に注意——
 スキーマ変更中は他 worktree の dev/E2E も止めるのが安全。
 
@@ -117,8 +117,11 @@ DB単位の物理分離は認証層に効かない。これは CLAUDE.md の
 |---|---|---|---|
 | 実装 + **UT** | `pnpm test`（vitest、Supabase/Prismaをモック） | 触らない | **並列OK**（worktree内で完結） |
 | **IT（統合テスト）** | `pnpm test:integration`（`*.integration.test.ts`） | **触る** | **直列キュー** |
-| **E2E** | `pnpm test:e2e`（Playwright） | **触る（DB＋固定ポート）** | **直列キュー** |
+| **E2E** | `pnpm e2e`（Playwright） | **触る（DB＋固定ポート）** | **直列キュー** |
 
+- E2E のコマンドはルートとアプリ個別で異なる。ルートは `pnpm e2e`（= `e2e:web` + `e2e:admin`、web 5本 + admin 2本を一括実行）。
+  アプリ個別に走らせたいときは filter 経由で `pnpm --filter @beersalon/web e2e` / `pnpm --filter @beersalon/admin e2e` を使う。
+  `pnpm test:e2e` というスクリプトはルートには存在しない（admin サブパッケージにのみ `test:e2e` エイリアスがある）ため、ルートで叩かないこと。
 - IT は `apps/*/src/test/integration-setup.ts` が `supabase start` 必須・`DATABASE_URL` で実DB接続・
   `pnpm e2e:setup` の seed 済みDBを前提とする。**E2E と同じ共有DBを使う**ため、IT も E2E と同様に直列消化する。
 - 「並列で作る」のは **実装 + UT まで**。IT/E2E は司令塔の直列キューへ。
@@ -225,5 +228,10 @@ git worktree add .claude/worktrees/<branch> origin/develop -b <branch>
 
 ## 7. 検証の出典
 
-- DB物理複製不成立の実機検証: `.claude/agent-memory/dev-doctor/project_e2e_db_isolation_constraints.md`
-- worktree / ポート運用の制約: `.claude/agent-memory/claude-code-expert/project_worktree_constraints.md`
+本ドキュメントの制約は、いずれも 2026-06-18 時点の実機検証で確認した事実に基づく。
+
+- **DB物理複製は不成立**: ローカル Supabase（54421/54422）は単一物理DB（`postgres`）を前提とし、worktree ごとに
+  独立DBを払い出す構成は現状の `supabase/` 設定・`scripts/e2e-setup.sh` の前提と噛み合わないことを確認した。
+  よって共有DB依存テスト（IT/E2E）は並列化せず直列キューで消化する（§2 ③・§3）。
+- **worktree / ポート運用の制約**: 複数 worktree で `pnpm dev` を同時起動するとポートが衝突するため、
+  ポートプール払い出し＋`NEXT_PUBLIC_SITE_URL` 明示で回避できることを実機で確認した（§2 ②）。
