@@ -62,13 +62,16 @@ describe("SignUpForm", () => {
 			expect(passwordInput).toHaveAttribute("id", "password");
 		});
 
-		it("プレースホルダーが正しく表示される", () => {
+		it("メールアドレス・パスワード欄にプレースホルダーが表示されない", () => {
 			render(<SignUpForm />);
 
-			expect(
-				screen.getByPlaceholderText("example@mail.com"),
-			).toBeInTheDocument();
-			expect(screen.getByPlaceholderText("••••••••")).toBeInTheDocument();
+			const emailInput = screen.getByRole("textbox", {
+				name: "メールアドレス",
+			});
+			const passwordInput = screen.getByLabelText("パスワード");
+
+			expect(emailInput).not.toHaveAttribute("placeholder");
+			expect(passwordInput).not.toHaveAttribute("placeholder");
 		});
 
 		it("送信ボタンが表示される", () => {
