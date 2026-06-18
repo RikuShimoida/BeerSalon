@@ -66,6 +66,9 @@ playwright/.cache/
 # mock (UI 確認用の使い捨て成果物。仕様合意のローカル参照用で、リポジトリ本体には含めない)
 /mock/
 
+# sales materials (営業資料。製品コードではない事業資料のためローカル保管・Git管理外)
+/sales-materials/
+
 # claude code runtime locks
 .claude/scheduled_tasks.lock
 
