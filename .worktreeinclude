@@ -1,0 +1,5 @@
+# 並列開発スキル(/parallel)が develop 起点で worktree を作るとき、
+# gitignore 済みでチェックアウトに含まれない環境ファイルを新worktreeへ自動コピーする対象。
+# web/admin は同一Supabase(54421)・同一env構成を共有するため、両方の .env.local が必要。
+apps/web/.env.local
+apps/admin/.env.local
