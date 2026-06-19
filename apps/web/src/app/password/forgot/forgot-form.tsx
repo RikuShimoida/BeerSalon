@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { FormError } from "@/components/form/form-error";
+import { TextField } from "@/components/form/text-field";
 import { forgotPasswordAction } from "./actions";
 
 type Props = {
@@ -57,28 +59,15 @@ export function ForgotForm({ initialError }: Props) {
 			action={formAction}
 			className="flex flex-col gap-4 w-full"
 		>
-			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="email"
-					className="text-sm font-medium text-card-foreground tracking-wide"
-				>
-					メールアドレス
-				</label>
-				<input
-					type="email"
-					id="email"
-					name="email"
-					placeholder="example@mail.com"
-					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
-					required
-				/>
-			</div>
+			<TextField
+				id="email"
+				name="email"
+				label="メールアドレス"
+				type="email"
+				required
+			/>
 
-			{state && !state.success && (
-				<div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20">
-					{state.error}
-				</div>
-			)}
+			{state && !state.success && <FormError>{state.error}</FormError>}
 
 			<button
 				type="submit"

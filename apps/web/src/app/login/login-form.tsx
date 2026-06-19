@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { FormError } from "@/components/form/form-error";
+import { TextField } from "@/components/form/text-field";
 import { login } from "./actions";
 
 type Props = {
@@ -30,43 +32,23 @@ export function LoginForm({ resetSuccess = false }: Props) {
 
 	return (
 		<form action={formAction} className="flex flex-col gap-4 w-full">
-			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="email"
-					className="text-sm font-medium text-card-foreground tracking-wide"
-				>
-					メールアドレス
-				</label>
-				<input
-					type="email"
-					id="email"
-					name="email"
-					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
-					required
-				/>
-			</div>
+			<TextField
+				id="email"
+				name="email"
+				label="メールアドレス"
+				type="email"
+				required
+			/>
 
-			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="password"
-					className="text-sm font-medium text-card-foreground tracking-wide"
-				>
-					パスワード
-				</label>
-				<input
-					type="password"
-					id="password"
-					name="password"
-					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
-					required
-				/>
-			</div>
+			<TextField
+				id="password"
+				name="password"
+				label="パスワード"
+				type="password"
+				required
+			/>
 
-			{state?.error && (
-				<div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20">
-					{state.error}
-				</div>
-			)}
+			{state?.error && <FormError>{state.error}</FormError>}
 
 			<button
 				type="submit"

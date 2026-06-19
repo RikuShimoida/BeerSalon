@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import { FormError } from "@/components/form/form-error";
+import { TextField } from "@/components/form/text-field";
 import { resetPasswordAction } from "./actions";
 
 export function ResetForm() {
@@ -11,48 +13,24 @@ export function ResetForm() {
 
 	return (
 		<form action={formAction} className="flex flex-col gap-4 w-full">
-			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="password"
-					className="text-sm font-medium text-card-foreground tracking-wide"
-				>
-					新しいパスワード
-				</label>
-				<input
-					type="password"
-					id="password"
-					name="password"
-					placeholder="••••••••"
-					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
-					required
-				/>
-				<p className="text-xs text-muted-foreground tracking-wide">
-					8文字以上、大文字・小文字・数字を含めてください
-				</p>
-			</div>
+			<TextField
+				id="password"
+				name="password"
+				label="新しいパスワード"
+				type="password"
+				required
+				hint="8文字以上、大文字・小文字・数字を含めてください"
+			/>
 
-			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="confirmPassword"
-					className="text-sm font-medium text-card-foreground tracking-wide"
-				>
-					新しいパスワード（確認用）
-				</label>
-				<input
-					type="password"
-					id="confirmPassword"
-					name="confirmPassword"
-					placeholder="••••••••"
-					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
-					required
-				/>
-			</div>
+			<TextField
+				id="confirmPassword"
+				name="confirmPassword"
+				label="新しいパスワード（確認用）"
+				type="password"
+				required
+			/>
 
-			{state?.error && (
-				<div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20">
-					{state.error}
-				</div>
-			)}
+			{state?.error && <FormError>{state.error}</FormError>}
 
 			<button
 				type="submit"

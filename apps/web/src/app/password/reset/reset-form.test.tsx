@@ -67,6 +67,17 @@ describe("ResetForm", () => {
 				screen.getByLabelText("新しいパスワード（確認用）"),
 			).toHaveAttribute("type", "password");
 		});
+
+		it("両入力欄にplaceholder属性が設定されていない", () => {
+			render(<ResetForm />);
+
+			expect(screen.getByLabelText("新しいパスワード")).not.toHaveAttribute(
+				"placeholder",
+			);
+			expect(
+				screen.getByLabelText("新しいパスワード（確認用）"),
+			).not.toHaveAttribute("placeholder");
+		});
 	});
 
 	describe("正常系 - エラー表示", () => {

@@ -57,6 +57,15 @@ describe("ForgotForm", () => {
 			const link = screen.getByRole("link", { name: "ログインに戻る" });
 			expect(link).toHaveAttribute("href", "/login");
 		});
+
+		it("メールアドレス入力欄にplaceholder属性が設定されていない", () => {
+			render(<ForgotForm />);
+
+			const emailInput = screen.getByRole("textbox", {
+				name: "メールアドレス",
+			});
+			expect(emailInput).not.toHaveAttribute("placeholder");
+		});
 	});
 
 	describe("正常系 - フォーム送信", () => {
