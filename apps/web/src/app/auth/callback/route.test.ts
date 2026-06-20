@@ -50,14 +50,14 @@ describe("GET /auth/callback", () => {
 			expect(locationOf(response)).toBe("/password/reset");
 		});
 
-		it("code 交換が失敗すると signup エラー付きで /signup/profile へリダイレクトする", async () => {
+		it("code 交換が失敗すると /signup?error=invalid_token へリダイレクトする", async () => {
 			mockExchangeCodeForSession.mockResolvedValue({
 				error: { message: "invalid code" },
 			});
 
 			const response = await GET(buildRequest("/auth/callback?code=bad-code"));
 
-			expect(locationOf(response)).toBe("/signup/profile?error=invalid%20code");
+			expect(locationOf(response)).toBe("/signup?error=invalid_token");
 		});
 
 		it("recovery タイプで code 交換が失敗すると /password/forgot?error=invalid_token へリダイレクトする", async () => {
@@ -124,14 +124,14 @@ describe("GET /auth/callback", () => {
 			expect(locationOf(response)).toBe("/password/forgot?error=invalid_token");
 		});
 
-		it("signup の token_hash 検証が失敗すると signup エラー付きでリダイレクトする", async () => {
+		it("signup の token_hash 検証が失敗すると /signup?error=invalid_token へリダイレクトする", async () => {
 			mockVerifyOtp.mockResolvedValue({ error: { message: "bad token" } });
 
 			const response = await GET(
 				buildRequest("/auth/callback?token_hash=hash&type=signup"),
 			);
 
-			expect(locationOf(response)).toBe("/signup/profile?error=bad%20token");
+			expect(locationOf(response)).toBe("/signup?error=invalid_token");
 		});
 	});
 

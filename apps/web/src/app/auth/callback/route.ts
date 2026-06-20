@@ -30,10 +30,7 @@ export async function GET(request: NextRequest) {
 				);
 			}
 			return NextResponse.redirect(
-				new URL(
-					`/signup/profile?error=${encodeURIComponent(error.message)}`,
-					request.url,
-				),
+				new URL("/signup?error=invalid_token", request.url),
 			);
 		}
 
@@ -55,10 +52,7 @@ export async function GET(request: NextRequest) {
 				);
 			}
 			return NextResponse.redirect(
-				new URL(
-					`/signup/profile?error=${encodeURIComponent(error.message)}`,
-					request.url,
-				),
+				new URL("/signup?error=invalid_token", request.url),
 			);
 		}
 	}
