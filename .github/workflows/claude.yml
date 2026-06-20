@@ -1,3 +1,13 @@
+# understand 理解チェック（Phase G）の出題・回答・判定を、外出先のスマホから GitHub コメントで
+# 完結させる用途も兼ねる。運用方針（認証・コスト・トリガー範囲・濫用対策）は
+# docs/understand-homework/README.md を参照。
+#
+# Why-not: 専用ワークフローを新設せず claude.yml に相乗りさせる。
+# 理解チェック専用の issue_comment トリガーを別ファイルで作ると、`@claude` メンションへの
+# 応答が二重に起動し Actions 枠を無駄に消費するため。トリガー条件は本ファイルの if に集約する。
+#
+# Why-not: 認証は ANTHROPIC_API_KEY（従量課金）ではなく CLAUDE_CODE_OAUTH_TOKEN（サブスク連携）。
+# 1問ごとに Actions が起動するため、従量課金だとコストが読みにくい。サブスク枠で固定する。
 name: Claude Code
 
 on:
