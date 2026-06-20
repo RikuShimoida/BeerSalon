@@ -146,6 +146,41 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 ---
 
+## ✉️ 認証メール（登録確認・パスワード再設定）の配信設定
+
+新規登録の確認メール・パスワード再設定メールは Supabase Auth が送信する。
+**全環境でメールが届くようにするには、コード（リポジトリ）側の設定に加えて、各環境のダッシュボード／環境変数の設定が必須**。
+
+### コード側（このリポジトリで管理。設定済み）
+
+- `supabase/config.toml`
+  - `[auth.email] enable_confirmations = true`（確認メールを送信し、確認後にプロフィール登録へ進ませる）
+  - `[auth.email.template.confirmation]` / `[auth.email.template.recovery]`（日本語の確認・再設定メールテンプレート）
+- `/auth/callback`（`apps/web/src/app/auth/callback/route.ts`）
+  - PKCE フローの `?code=` と OTP フローの `?token_hash=&type=` の両方を処理する
+
+### ローカル
+
+- `supabase start` で起動する Mailpit（`http://127.0.0.1:54424`）に送信メールが届く。
+- `config.toml` を変更した場合は `supabase stop && supabase start` で再起動して反映する。
+
+### プレビュー / 本番（Supabase ダッシュボード・Vercel）※コード外。手動設定が必要
+
+メールが「届かない」場合、まず以下を確認する。
+
+1. **Supabase ダッシュボード → Authentication → Providers → Email**
+   - "Confirm email" が ON になっていること（OFF だと確認メールが送られない）。
+2. **Supabase ダッシュボード → Authentication → URL Configuration → Redirect URLs**
+   - local / preview / production の各オリジンの `/auth/callback` が許可されていること。
+   - Vercel Preview はワイルドカード（例: `https://*.vercel.app/auth/callback`）で登録する。
+   - 許可外オリジンへのリダイレクトはブロックされ、メール内リンクが無効化される。
+3. **Supabase ダッシュボード → Project Settings → Authentication → SMTP**
+   - 無料枠のデフォルト SMTP は送信レート・到達率が低い。独自 SMTP（SendGrid 等）の設定を推奨。
+4. **Vercel → 環境変数 `NEXT_PUBLIC_SITE_URL`**
+   - production では必ず設定する（Host Header Injection 対策。`apps/web/src/lib/site-url.ts` の `getSiteUrl()` が最優先で参照する）。
+
+---
+
 ## ✅ MVPに含める機能
 
 - ユーザー登録 / ログイン
