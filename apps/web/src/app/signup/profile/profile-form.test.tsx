@@ -223,7 +223,53 @@ describe("ProfileForm", () => {
 		});
 	});
 
-	// NOTE: フォーム送信のテストは生年月日selectの複雑な処理のため省略
+	describe("正常系 - 生年月日のhidden birthday連動", () => {
+		it("年月日を選択すると hidden birthday が YYYY-MM-DD 形式で埋まる", async () => {
+			const user = userEvent.setup();
+			render(<ProfileForm />);
+
+			const yearSelect = document.querySelector(
+				'select[name="year"]',
+			) as HTMLSelectElement;
+			const monthSelect = document.querySelector(
+				'select[name="month"]',
+			) as HTMLSelectElement;
+			const daySelect = document.querySelector(
+				'select[name="day"]',
+			) as HTMLSelectElement;
+			const birthdayInput = document.querySelector(
+				'input[name="birthday"]',
+			) as HTMLInputElement;
+
+			await user.selectOptions(yearSelect, "1990");
+			await user.selectOptions(monthSelect, "5");
+			await user.selectOptions(daySelect, "3");
+
+			// 1桁の月日は0埋めされる
+			expect(birthdayInput.value).toBe("1990-05-03");
+		});
+
+		it("年月日のいずれかが未選択なら hidden birthday は空のままになる", async () => {
+			const user = userEvent.setup();
+			render(<ProfileForm />);
+
+			const yearSelect = document.querySelector(
+				'select[name="year"]',
+			) as HTMLSelectElement;
+			const monthSelect = document.querySelector(
+				'select[name="month"]',
+			) as HTMLSelectElement;
+			const birthdayInput = document.querySelector(
+				'input[name="birthday"]',
+			) as HTMLInputElement;
+
+			await user.selectOptions(yearSelect, "1990");
+			await user.selectOptions(monthSelect, "5");
+			// 日は未選択
+
+			expect(birthdayInput.value).toBe("");
+		});
+	});
 
 	describe("正常系 - エラー表示", () => {
 		it("エラーメッセージが表示される", () => {

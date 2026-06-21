@@ -94,4 +94,58 @@ test.describe("新規登録ページ", () => {
 			page.getByRole("heading", { name: "プロフィール入力" }),
 		).toBeVisible();
 	});
+
+	// Why not: プロフィール入力→確認の遷移は Server Action の redirect 例外処理に依存し、
+	// 複数画面にまたがるためブラウザ統合動作として E2E で担保する（Issue #285 の再発防止の核）。
+	test("プロフィール入力後、登録内容を確認すると /signup/confirm へ遷移し入力値が表示される", async ({
+		page,
+	}) => {
+		const email = faker.internet.email().toLowerCase();
+		const password = "Test1234!@#";
+
+		await page.goto("/signup");
+		await page.fill('input[name="email"]', email);
+		await page.fill('input[name="password"]', password);
+		await page.click('button[type="submit"]');
+		await page.waitForURL("/signup?success=true");
+
+		await expect
+			.poll(async () => (await findConfirmationMessage(email)) !== null, {
+				timeout: 15000,
+				message: "確認メールが Mailpit に届くこと",
+			})
+			.toBe(true);
+
+		const confirmed = await findConfirmationMessage(email);
+		if (confirmed === null) {
+			throw new Error("確認メールが見つかりませんでした");
+		}
+		const html = await getMessageHtml(confirmed.ID);
+		const callbackLink = html.match(
+			/https?:\/\/[^"\s<>]+\/auth\/callback\?[^"\s<>]+/,
+		)?.[0];
+		const linkUrl = new URL(callbackLink as string);
+		await page.goto(`${linkUrl.pathname}${linkUrl.search}`);
+		await page.waitForURL("/signup/profile");
+
+		await page.fill('input[name="lastName"]', "下井田");
+		await page.fill('input[name="firstName"]', "陸");
+		await page.fill('input[name="nickname"]', "りく");
+		await page.selectOption('select[name="year"]', "1994");
+		await page.selectOption('select[name="month"]', "5");
+		await page.selectOption('select[name="day"]', "13");
+		await page.selectOption('select[name="gender"]', "male");
+		await page.selectOption('select[name="prefecture"]', "静岡県");
+
+		await page.getByRole("button", { name: "登録内容を確認" }).click();
+
+		await page.waitForURL("/signup/confirm");
+		await expect(
+			page.getByRole("heading", { name: "登録内容の確認" }),
+		).toBeVisible();
+		await expect(page.getByText("下井田")).toBeVisible();
+		await expect(page.getByText("りく")).toBeVisible();
+		await expect(page.getByText("1994年5月13日")).toBeVisible();
+		await expect(page.getByText("静岡県")).toBeVisible();
+	});
 });
