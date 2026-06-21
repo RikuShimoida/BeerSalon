@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 export async function getBars(params?: {
+	q?: string;
 	city?: string;
 	categories?: string[];
 	origin?: string;
@@ -11,6 +12,10 @@ export async function getBars(params?: {
 	const where: {
 		isActive: boolean;
 		city?: string;
+		OR?: Array<{
+			name?: { contains: string; mode: "insensitive" };
+			description?: { contains: string; mode: "insensitive" };
+		}>;
 		beerMenus?: {
 			some: {
 				beer: {
@@ -31,6 +36,14 @@ export async function getBars(params?: {
 	} = {
 		isActive: true,
 	};
+
+	const keyword = params?.q?.trim();
+	if (keyword) {
+		where.OR = [
+			{ name: { contains: keyword, mode: "insensitive" } },
+			{ description: { contains: keyword, mode: "insensitive" } },
+		];
+	}
 
 	if (params?.city) {
 		where.city = params.city;

@@ -6,12 +6,13 @@ import { BarCard } from "./bar-card";
 import { BarCardSkeleton } from "./bar-card-skeleton";
 
 interface BarListProps {
+	q?: string;
 	city?: string;
 	categories?: string[];
 	origin?: string;
 }
 
-export function BarList({ city, categories, origin }: BarListProps) {
+export function BarList({ q, city, categories, origin }: BarListProps) {
 	const [bars, setBars] = useState<
 		Array<{
 			id: string;
@@ -31,6 +32,7 @@ export function BarList({ city, categories, origin }: BarListProps) {
 		const fetchBars = async () => {
 			setIsLoading(true);
 			const result = await getBars({
+				q,
 				city,
 				categories: categoriesKey ? categoriesKey.split(",") : [],
 				origin,
@@ -40,7 +42,7 @@ export function BarList({ city, categories, origin }: BarListProps) {
 		};
 
 		fetchBars();
-	}, [city, categoriesKey, origin]);
+	}, [q, city, categoriesKey, origin]);
 
 	if (isLoading) {
 		return (

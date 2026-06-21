@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { BarList } from "@/components/bar/bar-list";
 import { FooterLinks } from "@/components/home/footer-links";
 import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
@@ -11,24 +12,50 @@ import { PopularCitiesSection } from "@/components/home/popular-cities-section";
 import { PopularRegionsSection } from "@/components/home/popular-regions-section";
 import { GoogleMap } from "@/components/map/google-map";
 import { SearchForm } from "@/components/search/search-form";
+import {
+	buildSearchQueryString,
+	parseSearchParams,
+} from "@/lib/search/query-params";
 
 export function HomeClient() {
+	const router = useRouter();
+	const urlSearchParams = useSearchParams();
+	const urlQuery = urlSearchParams.get("q") ?? "";
+	const urlCity = urlSearchParams.get("city") ?? "";
+
 	const [searchParams, setSearchParams] = useState<{
+		q: string;
 		city: string;
 		categories: string[];
 		origin: string;
-	}>({
-		city: "",
-		categories: [],
-		origin: "",
-	});
+	}>(() => parseSearchParams(urlSearchParams));
+
+	// Why not: useState 初期化関数は初回マウントのみ実行されるため、ブラウザバック等で
+	// URL だけが変わるケースに追従できない。URL を真実の源とし、URL の q/city が変わったら
+	// state を同期する。
+	useEffect(() => {
+		setSearchParams((prev) => ({
+			...prev,
+			q: urlQuery,
+			city: urlCity,
+		}));
+	}, [urlQuery, urlCity]);
 
 	const handleSearch = (params: {
+		q: string;
 		city: string;
 		categories: string[];
 		origin: string;
 	}) => {
 		setSearchParams(params);
+
+		const queryString = buildSearchQueryString({
+			q: params.q,
+			city: params.city,
+		});
+		router.replace(queryString ? `/?${queryString}` : "/", {
+			scroll: false,
+		});
 	};
 
 	const mockPopularArticles = [
@@ -173,13 +200,20 @@ export function HomeClient() {
 		<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
 			<div className="flex flex-col gap-8 md:gap-12">
 				{/* 検索セクション */}
-				<SearchForm onSearch={handleSearch} />
+				{/* Why not: 制御 input の value を毎レンダリング上書きすると入力中のIME変換が
+				    途切れるため、URL の q/city が変わったときだけ key で再マウントして初期値を反映する。 */}
+				<SearchForm
+					key={`${urlQuery}|${urlCity}`}
+					initialValues={searchParams}
+					onSearch={handleSearch}
+				/>
 
 				{/* 地図エリア */}
 				<GoogleMap city={searchParams.city} />
 
 				{/* 店舗一覧 */}
 				<BarList
+					q={searchParams.q}
 					city={searchParams.city}
 					categories={searchParams.categories}
 					origin={searchParams.origin}
