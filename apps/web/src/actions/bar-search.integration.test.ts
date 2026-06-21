@@ -31,12 +31,14 @@ const uniqueCategoryName = `it-cat-${faker.string.alphanumeric(6).toLowerCase()}
 const uniqueCategoryName2 = `it-cat2-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueCountryName = `it-country-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueRegionName = `it-region-${faker.string.alphanumeric(6).toLowerCase()}`;
+const uniqueKeyword = `it-kw-${faker.string.alphanumeric(6).toLowerCase()}`;
 
 let barOnlyCityId: bigint;
 let barOnlyCategoryId: bigint;
 let barOnlyCategory2Id: bigint;
 let barOnlyOriginId: bigint;
 let barAllMatchedId: bigint;
+let barKeywordInNameId: bigint;
 let createdCategoryId: bigint;
 let createdCategory2Id: bigint;
 let createdCountryId: bigint;
@@ -146,6 +148,12 @@ beforeAll(async () => {
 	await prisma.barBeerMenu.create({
 		data: { barId: barAllMatched.id, beerId: beer3.id },
 	});
+
+	// 5) フリーワード一致: 店名に uniqueKeyword を含む bar (city / category / origin はデフォルト)
+	const barKeywordInName = await createTestBar(prisma, {
+		name: `${INTEGRATION_TEST_PREFIX}bar-${uniqueKeyword}`,
+	});
+	barKeywordInNameId = barKeywordInName.id;
 });
 
 afterAll(async () => {
@@ -263,5 +271,36 @@ describe("getBars (Integration)", () => {
 		expect(ids).not.toContain(barOnlyCityId.toString());
 		expect(ids).not.toContain(barOnlyCategoryId.toString());
 		expect(ids).not.toContain(barOnlyOriginId.toString());
+	});
+
+	it("q フリーワードは店名に一致する bar を返す", async () => {
+		const result = await getBars({ q: uniqueKeyword });
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toContain(barKeywordInNameId.toString());
+		expect(ids).not.toContain(barOnlyCityId.toString());
+		expect(ids).not.toContain(barOnlyCategoryId.toString());
+	});
+
+	it("q フリーワードは大文字小文字を区別しない (insensitive)", async () => {
+		const result = await getBars({ q: uniqueKeyword.toUpperCase() });
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toContain(barKeywordInNameId.toString());
+	});
+
+	it("q + city は両方を満たす bar のみ返す (AND 結合)", async () => {
+		// barKeywordInName は city がデフォルト (uniqueCity ではない) のため、
+		// uniqueCity との AND では除外される。
+		const result = await getBars({ q: uniqueKeyword, city: uniqueCity });
+		const ids = result.map((bar) => bar.id);
+		expect(ids).not.toContain(barKeywordInNameId.toString());
+	});
+
+	it("どの bar にも一致しない q は空配列を返す", async () => {
+		const result = await getBars({
+			q: `it-nomatch-${faker.string.alphanumeric(10).toLowerCase()}`,
+		});
+		const ids = result.map((bar) => bar.id);
+		expect(ids).not.toContain(barKeywordInNameId.toString());
+		expect(ids).not.toContain(barOnlyCityId.toString());
 	});
 });

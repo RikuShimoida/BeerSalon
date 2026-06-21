@@ -13,16 +13,30 @@ const BEER_CATEGORIES = [
 ];
 
 interface SearchFormProps {
+	initialValues?: {
+		q?: string;
+		city?: string;
+		categories?: string[];
+		origin?: string;
+	};
 	onSearch?: (params: {
+		q: string;
 		city: string;
 		categories: string[];
 		origin: string;
 	}) => void;
 }
 
-export function SearchForm({ onSearch }: SearchFormProps) {
+export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 	const [origins, setOrigins] = useState<Record<string, string[]>>({});
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [query, setQuery] = useState(initialValues?.q ?? "");
+	const [selectedCity, setSelectedCity] = useState(initialValues?.city ?? "");
+	const [selectedCategories, setSelectedCategories] = useState<string[]>(
+		initialValues?.categories ?? [],
+	);
+	const [selectedOrigin, setSelectedOrigin] = useState(
+		initialValues?.origin ?? "",
+	);
 
 	useEffect(() => {
 		const fetchRegions = async () => {
@@ -32,10 +46,23 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 		fetchRegions();
 	}, []);
 
+	const handleKeywordSearch = () => {
+		onSearch?.({
+			q: query,
+			city: selectedCity,
+			categories: selectedCategories,
+			origin: selectedOrigin,
+		});
+	};
+
 	const handleCityChange = (city: string) => {
-		const origin =
-			(document.getElementById("origin") as HTMLSelectElement)?.value || "";
-		onSearch?.({ city, categories: selectedCategories, origin });
+		setSelectedCity(city);
+		onSearch?.({
+			q: query,
+			city,
+			categories: selectedCategories,
+			origin: selectedOrigin,
+		});
 	};
 
 	const handleCategoryToggle = (category: string) => {
@@ -43,18 +70,22 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 			? selectedCategories.filter((c) => c !== category)
 			: [...selectedCategories, category];
 		setSelectedCategories(nextCategories);
-
-		const city =
-			(document.getElementById("city") as HTMLSelectElement)?.value || "";
-		const origin =
-			(document.getElementById("origin") as HTMLSelectElement)?.value || "";
-		onSearch?.({ city, categories: nextCategories, origin });
+		onSearch?.({
+			q: query,
+			city: selectedCity,
+			categories: nextCategories,
+			origin: selectedOrigin,
+		});
 	};
 
 	const handleOriginChange = (origin: string) => {
-		const city =
-			(document.getElementById("city") as HTMLSelectElement)?.value || "";
-		onSearch?.({ city, categories: selectedCategories, origin });
+		setSelectedOrigin(origin);
+		onSearch?.({
+			q: query,
+			city: selectedCity,
+			categories: selectedCategories,
+			origin,
+		});
 	};
 
 	return (
@@ -62,6 +93,38 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 			className="p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in"
 			style={{ backgroundColor: "#f0e68c" }}
 		>
+			<div className="mb-4">
+				<label
+					htmlFor="search-keyword"
+					className="block text-sm font-medium text-card-foreground mb-2 tracking-wide"
+				>
+					キーワードで探す
+				</label>
+				<div className="flex gap-2">
+					<input
+						id="search-keyword"
+						type="text"
+						value={query}
+						onChange={(e) => setQuery(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === "Enter") {
+								handleKeywordSearch();
+							}
+						}}
+						className="glass-input flex-1 px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
+						style={{ backgroundColor: "#ffffff" }}
+					/>
+					<button
+						type="button"
+						aria-label="検索"
+						onClick={handleKeywordSearch}
+						className="px-5 py-3 rounded-xl bg-primary text-primary-foreground font-medium transition-all duration-300 hover:opacity-80"
+					>
+						🔍
+					</button>
+				</div>
+			</div>
+
 			<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 				<div>
 					<label
@@ -72,6 +135,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 					</label>
 					<select
 						id="city"
+						value={selectedCity}
 						onChange={(e) => handleCityChange(e.target.value)}
 						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						style={{ backgroundColor: "#ffffff" }}
@@ -120,6 +184,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
 					</label>
 					<select
 						id="origin"
+						value={selectedOrigin}
 						onChange={(e) => handleOriginChange(e.target.value)}
 						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						style={{ backgroundColor: "#ffffff" }}
