@@ -338,6 +338,36 @@ describe("saveProfileToSession", () => {
 		});
 	});
 
+	describe("回帰防止 - redirect例外がエラーに握りつぶされない", () => {
+		// Why not message判定: Next.jsのredirect()はNEXT_REDIRECTを含む例外をthrowして動く。
+		// この例外をtry/catchで捕捉し{error}に変換してしまうと、確認ページへ遷移できない（Issue #285）。
+		// 本物のredirect同様にthrowするモックを与え、その例外が呼び出し元へ伝播することを検証する。
+		it("redirectがthrowしても{error}に変換されず、例外がそのまま伝播する", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+			const redirectError = new Error("NEXT_REDIRECT");
+			mockRedirect.mockImplementation(() => {
+				throw redirectError;
+			});
+
+			const formData = new FormData();
+			formData.append("lastName", "山田");
+			formData.append("firstName", "太郎");
+			formData.append("nickname", "やまちゃん");
+			formData.append("birthday", "1990-01-01");
+			formData.append("gender", "male");
+			formData.append("prefecture", "東京都");
+			formData.append("bio", "");
+
+			await expect(saveProfileToSession(undefined, formData)).rejects.toThrow(
+				"NEXT_REDIRECT",
+			);
+			expect(mockRedirect).toHaveBeenCalledWith("/signup/confirm");
+		});
+	});
+
 	describe("異常系 - 認証エラー", () => {
 		it("未認証ユーザーの場合、エラーが返る", async () => {
 			mockGetUser.mockResolvedValue({
