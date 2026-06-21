@@ -105,6 +105,10 @@ git / Claude Code のネイティブ機能では自動化されないため、wo
 - worktree で作成したブランチを push する際、PR本文に `Closes #$ARGUMENTS` を記載することで
   Issue と紐付ける（Phase 2-2）。`gh issue develop` は worktree 運用では使わない
   （ブランチ作成は上記の `git worktree add ... -b` で行うため）。
+- **注意**: 本リポジトリのPRはベースが `develop`（非デフォルトブランチ）のため、`Closes #N` を本文に書いても
+  GitHub による Issue 自動クローズは**働かない**（自動クローズはデフォルトブランチ `main` 向けPRのみ）。
+  `Closes #N` は紐付け表示・`/merge` がマージ後に Issue 番号を抽出する根拠として記載する。
+  実際のクローズはマージ時に `/merge` スキルが `gh issue close` で行う。
 
 #### 1-2. プロダクトコード実装
 
@@ -179,7 +183,8 @@ Issueが画面レイアウト系タスク（UI実装、ページ作成、レイ�
 #### 2-2. PR作成
 
 - `gh pr create --base develop` でPRを作成する
-- PR本文に `Closes #Issue番号` を記載する
+- PR本文に `Closes #Issue番号` を記載する（Issue との紐付け用。develop ベースのため自動クローズは働かず、
+  実際のクローズはマージ時に `/merge` スキルが行う。1-1 の「Issue とブランチの紐付け」参照）
 
 #### 2-2-1. worktree の後片付け
 
