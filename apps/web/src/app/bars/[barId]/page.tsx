@@ -3,6 +3,7 @@ import { getBarDetail, isFavoriteBar, recordViewHistory } from "@/actions/bar";
 import { BarTabs } from "@/components/bar/bar-tabs";
 import { FavoriteButton } from "@/components/bar/favorite-button";
 import { MediaSlideshow } from "@/components/bar/media-slideshow";
+import { ArticlesTab } from "@/components/bar/tabs/articles-tab";
 import { CouponsTab } from "@/components/bar/tabs/coupons-tab";
 import { EventsTab } from "@/components/bar/tabs/events-tab";
 import { MenuTab } from "@/components/bar/tabs/menu-tab";
@@ -56,7 +57,7 @@ export default async function BarDetailPage({
 							posts: (
 								<PostsTab posts={bar.posts} barId={barId} barName={bar.name} />
 							),
-							articles: <div />,
+							articles: <ArticlesTab articles={bar.articles} />,
 							coupons: <CouponsTab coupons={bar.coupons} />,
 							events: <EventsTab events={bar.events} />,
 						}}
