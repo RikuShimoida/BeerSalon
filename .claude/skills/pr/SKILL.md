@@ -31,7 +31,10 @@ when_to_use: PR作成時、ブランチ作成時、「PR作って」「プルリ
 ### PR と Issue のクローズルール
 
 - **PR をクローズ（マージまたは Close）した場合、関連付けられている Issue も必ずクローズすること**
-- PR と Issue の紐付けは、PR 作成時に本文に `Closes #issue番号` を記載することで自動化される
+- PR と Issue の紐付けは、PR 作成時に本文に `Closes #issue番号` を記載することで行う。
+  - **ただし本リポジトリのPRはベースが `develop`（非デフォルトブランチ）のため、`Closes #N` を書いても
+    GitHub による自動クローズは働かない**（自動クローズはデフォルトブランチ `main` 向けPRのみ）。
+  - 通常のマージ経路では `/merge` スキルがマージ後に PR 本文の `Closes #N` を抽出し `gh issue close` でクローズする。
 - 手動で PR を Close した場合は、必ず関連 Issue も手動で Close すること
 - Issue 番号の確認方法:
   - PR 作成時に紐付けた Issue 番号を確認
@@ -40,10 +43,13 @@ when_to_use: PR作成時、ブランチ作成時、「PR作って」「プルリ
 ### 実行コマンド例
 
 ```bash
-# PR をマージ後、関連 Issue を自動クローズ（"Closes #123" が本文にある場合）
+# 通常はマージを /merge スキルに任せる（CI 見届け + マージ + ブランチ削除 + Issue クローズまで一貫実行）。
+# 以下は /merge を使わず手動でマージする場合の例。
+# develop ベースのため "Closes #123" による自動クローズは働かないので、Issue は明示的にクローズする。
 gh pr merge <PR番号> --merge
+gh issue close <Issue番号>
 
-# 手動で PR をクローズした場合は、Issue も手動でクローズ
+# 手動で PR をクローズ（マージせず Close）した場合も、Issue を手動でクローズ
 gh pr close <PR番号>
 gh issue close <Issue番号>
 ```

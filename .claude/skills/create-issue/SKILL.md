@@ -2,8 +2,6 @@
 name: create-issue
 description: @issue_note.txt の課題Noをもとに、GitHub Issueを作成する。対応種別に応じてfeature/bugfixテンプレートを使い分ける。
 when_to_use: 「Issue作成」「create-issue」などの発言時、課題Noを指定してIssue作成を依頼された時
-context: fork
-agent: beersalon-domain-expert
 ---
 
 ## GitHub Issue 作成フロー
