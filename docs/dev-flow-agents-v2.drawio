@@ -1,0 +1,143 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="dev-flow-agents-v2" id="devflow2">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="BeerSalon 開発フロー（スキル × サブエージェント × git worktree）" style="text;html=1;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1574" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Skill catalog table ===== -->
+        <mxCell id="cat_title" value="スキル別 worktree / サブエージェント対応表" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="500" height="24" as="geometry" />
+        </mxCell>
+
+        <mxCell id="th1" value="スキル" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="98" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="th2" value="実行サブエージェント" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="98" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="th3" value="worktree" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="98" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="th4" value="worktreeを作る仕組み" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="550" y="98" width="280" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- plan -->
+        <mxCell id="r1a" value="/plan" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="128" width="160" height="30" as="geometry"/></mxCell>
+        <mxCell id="r1b" value="frontend-engineer" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="200" y="128" width="220" height="30" as="geometry"/></mxCell>
+        <mxCell id="r1c" value="✅ 使用" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="420" y="128" width="130" height="30" as="geometry"/></mxCell>
+        <mxCell id="r1d" value="frontmatter context: fork" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="128" width="280" height="30" as="geometry"/></mxCell>
+
+        <!-- implement -->
+        <mxCell id="r2a" value="/implement" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="40" y="158" width="160" height="40" as="geometry"/></mxCell>
+        <mxCell id="r2b" value="frontend-engineer&#10;(品質ゲートのみ system-architect / qa-engineer)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="200" y="158" width="220" height="40" as="geometry"/></mxCell>
+        <mxCell id="r2c" value="✅ 使用（既定）&#10;--no-worktree で撤退可" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="420" y="158" width="130" height="40" as="geometry"/></mxCell>
+        <mxCell id="r2d" value="SKILL.md本文の生 git worktree add&#10;（origin/develop 起点・1-1）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="550" y="158" width="280" height="40" as="geometry"/></mxCell>
+
+        <!-- parallel -->
+        <mxCell id="r3a" value="/parallel" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="198" width="160" height="40" as="geometry"/></mxCell>
+        <mxCell id="r3b" value="frontend-engineer ×N&#10;（各Issueを /implement 手順で）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="200" y="198" width="220" height="40" as="geometry"/></mxCell>
+        <mxCell id="r3c" value="✅ 使用（Issue毎に1つ）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="420" y="198" width="130" height="40" as="geometry"/></mxCell>
+        <mxCell id="r3d" value="/implement と同じ（worktree並列）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="198" width="280" height="40" as="geometry"/></mxCell>
+
+        <!-- pr-review -->
+        <mxCell id="r4a" value="/pr-review" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="238" width="160" height="30" as="geometry"/></mxCell>
+        <mxCell id="r4b" value="system-architect" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="200" y="238" width="220" height="30" as="geometry"/></mxCell>
+        <mxCell id="r4c" value="✅ 使用" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="420" y="238" width="130" height="30" as="geometry"/></mxCell>
+        <mxCell id="r4d" value="frontmatter context: fork" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="238" width="280" height="30" as="geometry"/></mxCell>
+
+        <!-- review-fix -->
+        <mxCell id="r5a" value="/review-fix" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="268" width="160" height="30" as="geometry"/></mxCell>
+        <mxCell id="r5b" value="frontend-engineer" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="200" y="268" width="220" height="30" as="geometry"/></mxCell>
+        <mxCell id="r5c" value="✅ 使用" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="420" y="268" width="130" height="30" as="geometry"/></mxCell>
+        <mxCell id="r5d" value="frontmatter context: fork" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="268" width="280" height="30" as="geometry"/></mxCell>
+
+        <!-- layout-review -->
+        <mxCell id="r6a" value="/layout-review" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="298" width="160" height="30" as="geometry"/></mxCell>
+        <mxCell id="r6b" value="frontend-engineer" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="200" y="298" width="220" height="30" as="geometry"/></mxCell>
+        <mxCell id="r6c" value="✅ 使用" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="420" y="298" width="130" height="30" as="geometry"/></mxCell>
+        <mxCell id="r6d" value="frontmatter context: fork" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="298" width="280" height="30" as="geometry"/></mxCell>
+
+        <!-- merge -->
+        <mxCell id="r7a" value="/merge" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="328" width="160" height="30" as="geometry"/></mxCell>
+        <mxCell id="r7b" value="メイン会話（司令塔）" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="200" y="328" width="220" height="30" as="geometry"/></mxCell>
+        <mxCell id="r7c" value="— 使わない" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="420" y="328" width="130" height="30" as="geometry"/></mxCell>
+        <mxCell id="r7d" value="司令塔develop上で直接マージ・ブランチ削除" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="328" width="280" height="30" as="geometry"/></mxCell>
+
+        <mxCell id="note_key" value="★ 重要: /implement は『既定で worktree 内で実装』する（frontmatter context ではなく SKILL.md 本文の git worktree add で実現）。&#10;旧図の『実装は worktree 外』は誤り。worktree を使わないのは --no-worktree 撤退時のみ。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="850" y="98" width="760" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Swimlane flow ===== -->
+        <mxCell id="flow_title" value="単独実装フロー（/implement）" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="380" width="500" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- Lane: User -->
+        <mxCell id="laneUser" value="ユーザー" style="swimlane;horizontal=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="40" y="410" width="1574" height="110" as="geometry" />
+        </mxCell>
+        <!-- Lane: Commander (develop main = 司令塔) -->
+        <mxCell id="laneCmd" value="司令塔（develop メイン会話 / Claude Code CLI）" style="swimlane;horizontal=0;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="1574" height="130" as="geometry" />
+        </mxCell>
+        <!-- Lane: worktree -->
+        <mxCell id="laneWt" value="git worktree（.claude/worktrees/&lt;branch&gt;）&#10;frontend-engineer が実装" style="swimlane;horizontal=0;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="40" y="650" width="1574" height="150" as="geometry" />
+        </mxCell>
+        <!-- Lane: external -->
+        <mxCell id="laneExt" value="外部 / 共有インフラ" style="swimlane;horizontal=0;fillColor=#f5f5f5;strokeColor=#999999;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="40" y="800" width="1574" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- User nodes -->
+        <mxCell id="u1" value="① Issue作成&#10;(@claude / 手動)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="120" y="445" width="120" height="50" as="geometry"/></mxCell>
+        <mxCell id="u2" value="② /plan N&#10;計画を承認" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="290" y="445" width="120" height="50" as="geometry"/></mxCell>
+        <mxCell id="u3" value="③ /implement N&#10;実装開始を指示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="460" y="445" width="120" height="50" as="geometry"/></mxCell>
+        <mxCell id="u4" value="⑥ 3択を選択&#10;(review-fix / merge / あとで)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1280" y="445" width="160" height="50" as="geometry"/></mxCell>
+
+        <!-- Commander nodes -->
+        <mxCell id="c1" value="/plan を context:fork で起動&#10;→ 一時worktreeで調査・計画&#10;（変更なければ自動削除）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="270" y="555" width="160" height="60" as="geometry"/></mxCell>
+        <mxCell id="c2" value="/implement 前提チェック&#10;1-0: developがclean / ff-only pull&#10;1-1: git worktree add origin/develop -b" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="555" width="200" height="60" as="geometry"/></mxCell>
+        <mxCell id="c3" value="2-2-1 worktree撤去&#10;2-2-2 司令塔フェーズ&#10;(pr-review / IT・E2E)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="980" y="555" width="200" height="60" as="geometry"/></mxCell>
+
+        <!-- Worktree nodes -->
+        <mxCell id="w1" value="1-1 初期化&#10;.env.local コピー&#10;pnpm install" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="685" width="130" height="55" as="geometry"/></mxCell>
+        <mxCell id="w2" value="1-2 実装" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1"><mxGeometry x="600" y="685" width="90" height="55" as="geometry"/></mxCell>
+        <mxCell id="w3" value="1-3 UT&#10;pnpm test&#10;(DBモック=並列OK)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1"><mxGeometry x="710" y="685" width="120" height="55" as="geometry"/></mxCell>
+        <mxCell id="w4" value="1-5 format/lint&#10;1-6 docs同期" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1"><mxGeometry x="850" y="685" width="120" height="55" as="geometry"/></mxCell>
+        <mxCell id="w5" value="2-1 commit/push&#10;2-2 gh pr create&#10;--base develop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1"><mxGeometry x="990" y="685" width="130" height="55" as="geometry"/></mxCell>
+
+        <!-- External nodes -->
+        <mxCell id="e1" value="GitHub Issue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;" vertex="1" parent="1"><mxGeometry x="120" y="845" width="120" height="40" as="geometry"/></mxCell>
+        <mxCell id="e2" value="GitHub Actions CI&#10;(Lint/型/UT/IT/Build/Prisma 並列)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1140" y="845" width="200" height="45" as="geometry"/></mxCell>
+        <mxCell id="e3" value="Playwright MCP / 共有Supabase(54421)&#10;qa-engineer 1体ずつ直列でIT・E2E" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;" vertex="1" parent="1"><mxGeometry x="900" y="845" width="220" height="45" as="geometry"/></mxCell>
+        <mxCell id="e4" value="Vercel&#10;develop→Preview / main→Production" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1360" y="845" width="200" height="45" as="geometry"/></mxCell>
+
+        <!-- edges -->
+        <mxCell id="ed1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u1" target="u2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u2" target="c1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u2" target="u3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u3" target="c2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="c2" target="w1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="w1" target="w2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="w2" target="w3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="w3" target="w4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="w4" target="w5"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="w5" target="c3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="c3" target="u4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;" edge="1" parent="1" source="u1" target="e1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;" edge="1" parent="1" source="w5" target="e2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed14" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;" edge="1" parent="1" source="c3" target="e3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed15" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;" edge="1" parent="1" source="e2" target="e4"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
