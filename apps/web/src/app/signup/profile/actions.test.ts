@@ -159,6 +159,41 @@ describe("saveProfileToSession", () => {
 			expect(imagePathCall).toBeDefined();
 			expect(imagePathCall?.[1]).toMatch(/^temp\/test-user-id\/\d+\.png$/);
 		});
+
+		// Why not bodySizeLimit 自体を検証: 1MB 制限はフレームワーク層(next.config.ts)の挙動で UT 対象外(E2E/手動で担保)。
+		// この UT が検証するのはアプリ側バリデーション ── 1MB超〜5MB以下の画像が 5MB 上限を通過しアップロードまで進むこと(Issue #301)。
+		it("1MB超〜5MB以下の画像はアプリ側5MBバリデーションを通過しアップロードされる", async () => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { id: "test-user-id" } },
+				error: null,
+			});
+			mockUpload.mockResolvedValue({
+				data: { path: "temp/test-user-id/123456789.png" },
+				error: null,
+			});
+
+			const formData = new FormData();
+			formData.append("lastName", "山田");
+			formData.append("firstName", "太郎");
+			formData.append("nickname", "やまちゃん");
+			formData.append("birthday", "1990-01-01");
+			formData.append("gender", "male");
+			formData.append("prefecture", "東京都");
+			formData.append("bio", "");
+
+			const largeBlob = new Blob([new ArrayBuffer(3 * 1024 * 1024)], {
+				type: "image/png",
+			});
+			const file = new File([largeBlob], "phone-photo.png", {
+				type: "image/png",
+			});
+			formData.append("profileImage", file);
+
+			const result = await saveProfileToSession(undefined, formData);
+
+			expect(result).toBeUndefined();
+			expect(mockUpload).toHaveBeenCalled();
+		});
 	});
 
 	describe("異常系 - 画像バリデーションエラー", () => {
