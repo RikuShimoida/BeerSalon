@@ -110,6 +110,12 @@ export default function FoodMenuDetail({
 
 			<h1 className="text-2xl font-bold text-gray-900">{menu.name}</h1>
 
+			{menu.price !== null && (
+				<p className="text-lg font-bold text-gray-900">
+					¥{menu.price.toLocaleString()}
+				</p>
+			)}
+
 			{menu.description && (
 				<div>
 					<dt className="text-sm font-medium text-gray-500">説明</dt>
