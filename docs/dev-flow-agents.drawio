@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram name="BeerSalon Claude Code 開発フロー" id="dev-flow-agents">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== TITLE ===== -->
+        <mxCell id="title" value="BeerSalon Claude Code 開発フロー　— スキル・サブエージェント・git worktree 観点 —" style="text;html=1;align=center;fontSize=18;fontStyle=1;verticalAlign=middle;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="12" width="1800" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ===== LEGEND ===== -->
+        <mxCell id="leg-box" value="凡例" style="swimlane;fontStyle=1;align=left;startSize=22;html=1;fillColor=#f8f8f8;strokeColor=#888;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="20" y="75" width="265" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="ユーザー操作" style="rounded=1;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" vertex="1" parent="leg-box">
+          <mxGeometry x="10" y="30" width="175" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="メイン会話 (Claude Code CLI)" style="rounded=1;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="leg-box">
+          <mxGeometry x="10" y="75" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="スキル / サブエージェント" style="rounded=1;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="leg-box">
+          <mxGeometry x="10" y="120" width="200" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="git worktree (context:fork)" style="rounded=1;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=center;" vertex="1" parent="leg-box">
+          <mxGeometry x="10" y="165" width="220" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5" value="外部システム (GitHub/Playwright/Vercel)" style="rounded=1;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=center;" vertex="1" parent="leg-box">
+          <mxGeometry x="10" y="210" width="245" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg6" value="フック (自動実行 / PreToolUse・PostToolUse・Stop)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=center;" vertex="1" parent="leg-box">
+          <mxGeometry x="10" y="255" width="245" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- ===== SKILL CATALOG ===== -->
+        <mxCell id="cat-box" value="スキルカタログ" style="swimlane;fontStyle=1;align=center;startSize=25;html=1;fillColor=#f0f0f0;strokeColor=#666;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="300" y="75" width="1680" height="315" as="geometry" />
+        </mxCell>
+
+        <!-- Header row -->
+        <mxCell id="ch1" value="スキル" style="text;html=1;align=center;fontStyle=1;strokeColor=#999;fillColor=#e0e0e0;fontSize=11;" vertex="1" parent="cat-box">
+          <mxGeometry x="0" y="25" width="130" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="ch2" value="トリガー例" style="text;html=1;align=center;fontStyle=1;strokeColor=#999;fillColor=#e0e0e0;fontSize=11;" vertex="1" parent="cat-box">
+          <mxGeometry x="130" y="25" width="350" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="ch3" value="エージェント" style="text;html=1;align=center;fontStyle=1;strokeColor=#999;fillColor=#e0e0e0;fontSize=11;" vertex="1" parent="cat-box">
+          <mxGeometry x="480" y="25" width="230" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="ch4" value="モデル" style="text;html=1;align=center;fontStyle=1;strokeColor=#999;fillColor=#e0e0e0;fontSize=11;" vertex="1" parent="cat-box">
+          <mxGeometry x="710" y="25" width="100" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="ch5" value="worktree" style="text;html=1;align=center;fontStyle=1;strokeColor=#999;fillColor=#e0e0e0;fontSize=11;" vertex="1" parent="cat-box">
+          <mxGeometry x="810" y="25" width="110" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="ch6" value="内容" style="text;html=1;align=center;fontStyle=1;strokeColor=#999;fillColor=#e0e0e0;fontSize=11;" vertex="1" parent="cat-box">
+          <mxGeometry x="920" y="25" width="760" height="28" as="geometry" />
+        </mxCell>
+
+        <!-- /plan -->
+        <mxCell id="cr1a" value="/plan" style="text;html=1;align=center;fontStyle=1;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="0" y="53" width="130" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr1b" value="「計画して」「plan」「/plan #123」" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="130" y="53" width="350" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr1c" value="frontend-engineer" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="480" y="53" width="230" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr1d" value="Opus" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="710" y="53" width="100" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr1e" value="✅ 使用" style="text;html=1;align=center;fontSize=11;fillColor=#e1d5e7;" vertex="1" parent="cat-box"><mxGeometry x="810" y="53" width="110" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr1f" value="Issue内容・設計ドキュメントを読み、実装計画（影響範囲・実装方針・テスト方針）を出力" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="920" y="53" width="760" height="32" as="geometry" /></mxCell>
+
+        <!-- /implement -->
+        <mxCell id="cr2a" value="/implement" style="text;html=1;align=center;fontStyle=1;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="0" y="85" width="130" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr2b" value="「実装して」「implement」「/implement #123」" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="130" y="85" width="350" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr2c" value="frontend-engineer" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="480" y="85" width="230" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr2d" value="Opus" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="710" y="85" width="100" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr2e" value="—" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="810" y="85" width="110" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr2f" value="ブランチ作成 → 実装 → UT → E2E(Playwright MCP) → lint → commit → PR作成 → /understand" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="920" y="85" width="760" height="32" as="geometry" /></mxCell>
+
+        <!-- /ask -->
+        <mxCell id="cr3a" value="/ask" style="text;html=1;align=center;fontStyle=1;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="0" y="117" width="130" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr3b" value="「/ask 〇〇」「仕様確認して」" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="130" y="117" width="350" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr3c" value="beersalon-domain-expert" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="480" y="117" width="230" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr3d" value="Opus" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="710" y="117" width="100" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr3e" value="—" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="810" y="117" width="110" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr3f" value="設計ドキュメント（routing/wireframe/database.md）を参照し、ドメイン仕様の質問に回答" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="920" y="117" width="760" height="32" as="geometry" /></mxCell>
+
+        <!-- /layout-review -->
+        <mxCell id="cr4a" value="/layout-review" style="text;html=1;align=center;fontStyle=1;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="0" y="149" width="130" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr4b" value="画面レイアウト実装後、「レイアウトレビュー」" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="130" y="149" width="350" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr4c" value="frontend-engineer" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="480" y="149" width="230" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr4d" value="Opus" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="710" y="149" width="100" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr4e" value="✅ 使用" style="text;html=1;align=center;fontSize=11;fillColor=#e1d5e7;" vertex="1" parent="cat-box"><mxGeometry x="810" y="149" width="110" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr4f" value="Playwright MCPでスクリーンショット → wireframe.mdと照合 → PRコメントにキャプチャと判断根拠を投稿" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="920" y="149" width="760" height="32" as="geometry" /></mxCell>
+
+        <!-- /playwright -->
+        <mxCell id="cr5a" value="/playwright" style="text;html=1;align=center;fontStyle=1;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="0" y="181" width="130" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr5b" value="「E2Eテストして」「動作確認して」" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="130" y="181" width="350" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr5c" value="メイン会話（エージェントなし）" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="480" y="181" width="230" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr5d" value="—" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="710" y="181" width="100" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr5e" value="—" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="810" y="181" width="110" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr5f" value="Playwright MCPで起動済みlocalhost上のブラウザ操作でE2E動作確認" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="920" y="181" width="760" height="32" as="geometry" /></mxCell>
+
+        <!-- /dev-doctor -->
+        <mxCell id="cr6a" value="/dev-doctor" style="text;html=1;align=center;fontStyle=1;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="0" y="213" width="130" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr6b" value="「動かない」「壊れた」「dev-doctor」" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="130" y="213" width="350" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr6c" value="dev-doctor" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="480" y="213" width="230" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr6d" value="—" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="710" y="213" width="100" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr6e" value="—" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="810" y="213" width="110" height="32" as="geometry" /></mxCell>
+        <mxCell id="cr6f" value="開発環境の問題を体系的に診断（devサーバー/ビルド/テスト/DB/型エラー/Git問題）" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="920" y="213" width="760" height="32" as="geometry" /></mxCell>
+
+        <!-- /pr /clarify /create-issue -->
+        <mxCell id="cr7a" value="/pr&#xa;/clarify&#xa;/create-issue" style="text;html=1;align=center;fontStyle=1;fontSize=10;" vertex="1" parent="cat-box"><mxGeometry x="0" y="245" width="130" height="45" as="geometry" /></mxCell>
+        <mxCell id="cr7b" value="「PRを作成」「要件整理して」「Issue作成」" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="130" y="245" width="350" height="45" as="geometry" /></mxCell>
+        <mxCell id="cr7c" value="メイン会話（エージェントなし）" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="480" y="245" width="230" height="45" as="geometry" /></mxCell>
+        <mxCell id="cr7d" value="—" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="710" y="245" width="100" height="45" as="geometry" /></mxCell>
+        <mxCell id="cr7e" value="—" style="text;html=1;align=center;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="810" y="245" width="110" height="45" as="geometry" /></mxCell>
+        <mxCell id="cr7f" value="/pr: gh pr create --base develop / /clarify: 要件深掘り / /create-issue: GitHub Issue作成" style="text;html=1;align=left;fontSize=11;" vertex="1" parent="cat-box"><mxGeometry x="920" y="245" width="760" height="45" as="geometry" /></mxCell>
+
+        <!-- ===== PHASE HEADER BAR ===== -->
+        <mxCell id="ph-bar" value="" style="html=1;fillColor=#eeeeee;strokeColor=#888;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="20" y="402" width="1960" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ph-label0" value="レーン" style="text;html=1;align=center;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="20" y="402" width="130" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ph1" value="① Issue作成" style="text;html=1;align=center;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="150" y="402" width="200" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ph2" value="② /plan フェーズ" style="text;html=1;align=center;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="350" y="402" width="460" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ph3" value="③ /implement 準備" style="text;html=1;align=center;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="810" y="402" width="230" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ph4" value="④ 実装フェーズ" style="text;html=1;align=center;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="402" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ph5" value="⑤ テスト" style="text;html=1;align=center;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="402" width="220" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ph6" value="⑥ 完了" style="text;html=1;align=center;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="402" width="320" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- Phase divider lines -->
+        <mxCell id="div1" value="" style="line;html=1;strokeColor=#aaaaaa;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="428" width="1" height="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="div2" value="" style="line;html=1;strokeColor=#aaaaaa;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="810" y="428" width="1" height="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="div3" value="" style="line;html=1;strokeColor=#aaaaaa;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="428" width="1" height="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="div4" value="" style="line;html=1;strokeColor=#aaaaaa;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="428" width="1" height="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="div5" value="" style="line;html=1;strokeColor=#aaaaaa;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="428" width="1" height="1000" as="geometry" />
+        </mxCell>
+
+        <!-- ===== SWIM LANE BACKGROUNDS ===== -->
+
+        <!-- Lane 1: ユーザー (y=428, h=130) -->
+        <mxCell id="lane1-bg" value="" style="html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="428" width="1960" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="lane1-lbl" value="ユーザー" style="text;html=1;align=center;fontStyle=1;fontSize=12;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="20" y="428" width="130" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 2: メイン会話 (y=558, h=180) -->
+        <mxCell id="lane2-bg" value="" style="html=1;fillColor=#d5e8d4;strokeColor=#82b366;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="558" width="1960" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="lane2-lbl" value="メイン会話&#xa;(Claude Code CLI)" style="text;html=1;align=center;fontStyle=1;fontSize=11;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="20" y="558" width="130" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 3: スキル + サブエージェント (y=738, h=330) -->
+        <mxCell id="lane3-bg" value="" style="html=1;fillColor=#fff2cc;strokeColor=#d6b656;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="738" width="1960" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="lane3-lbl" value="スキル +&#xa;サブエージェント" style="text;html=1;align=center;fontStyle=1;fontSize=11;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="20" y="738" width="130" height="330" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 4: git worktree (y=1068, h=160) -->
+        <mxCell id="lane4-bg" value="" style="html=1;fillColor=#e1d5e7;strokeColor=#9673a6;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="1068" width="1960" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="lane4-lbl" value="git worktree&#xa;(context:fork)" style="text;html=1;align=center;fontStyle=1;fontSize=11;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="20" y="1068" width="130" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- Lane 5: 外部システム (y=1228, h=200) -->
+        <mxCell id="lane5-bg" value="" style="html=1;fillColor=#f5f5f5;strokeColor=#666666;opacity=40;" vertex="1" parent="1">
+          <mxGeometry x="20" y="1228" width="1960" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="lane5-lbl" value="外部システム" style="text;html=1;align=center;fontStyle=1;fontSize=12;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="20" y="1228" width="130" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- ===== PROCESS NODES ===== -->
+
+        <!-- PHASE 1: Issue作成 -->
+        <mxCell id="n1" value="GitHub Issue 作成&#xa;(feature/bugfix template)&#xa;受入条件を記載" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="155" y="448" width="175" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- PHASE 2: /plan -->
+        <!-- User: /plan コマンド -->
+        <mxCell id="n2" value="/plan #123" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="360" y="455" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Main Claude: Skill plan 起動 -->
+        <mxCell id="n3" value="Skill: plan を起動&#xa;(context: fork)&#xa;→ worktree 生成" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="360" y="572" width="170" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: frontend-engineer 起動 -->
+        <mxCell id="n4" value="frontend-engineer&#xa;サブエージェント起動&#xa;(model: Opus)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="360" y="752" width="170" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- git worktree: 作成 -->
+        <mxCell id="n5" value="git worktree 作成&#xa;(独立した作業コピー&#xa;変更なし → 自動削除)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="360" y="1083" width="175" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: Issue読み込み -->
+        <mxCell id="n6" value="gh issue view #123&#xa;Issue内容を読む" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="560" y="752" width="160" height="58" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: 設計ドキュメント参照 -->
+        <mxCell id="n7" value="設計ドキュメント参照&#xa;routing.md&#xa;wireframe.md / database.md" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="560" y="828" width="160" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: 計画出力 -->
+        <mxCell id="n8" value="実装計画 出力&#xa;(影響範囲・実装方針&#xa;テスト方針)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="740" y="752" width="160" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- User: 計画確認・承認 -->
+        <mxCell id="n9" value="計画確認・承認" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="830" y="448" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- PHASE 3: /implement 準備 -->
+        <!-- User: /implement -->
+        <mxCell id="n10" value="/implement #123" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="825" y="506" width="165" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Hook: PreToolUse check-dev-servers -->
+        <mxCell id="n11" value="PreToolUse Hook:&#xa;check-dev-servers.sh&#xa;devサーバー起動を確認" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="820" y="568" width="185" height="68" as="geometry" />
+        </mxCell>
+
+        <!-- Hook: PreToolUse check-playwright-mcp -->
+        <mxCell id="n12" value="PreToolUse Hook:&#xa;check-playwright-mcp.sh&#xa;Playwright MCPの準備確認" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="820" y="648" width="185" height="68" as="geometry" />
+        </mxCell>
+
+        <!-- Main Claude: Skill implement起動 -->
+        <mxCell id="n13" value="Skill: implement 起動" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1048" y="600" width="175" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- PHASE 4: 実装 -->
+        <!-- Skill+Agent: frontend-engineer 起動 -->
+        <mxCell id="n14" value="frontend-engineer&#xa;サブエージェント起動&#xa;(model: Opus)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1058" y="752" width="170" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: ブランチ作成 -->
+        <mxCell id="n15" value="ブランチ作成&#xa;gh issue develop #123&#xa;feature/#123-slug" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1255" y="752" width="165" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: コード実装 -->
+        <mxCell id="n16" value="コード実装&#xa;(Edit/Write/Read/Grep/Glob)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1255" y="835" width="165" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Hook: PostToolUse lint -->
+        <mxCell id="n17" value="PostToolUse Hook:&#xa;post-edit-lint.sh&#xa;Biome lint 自動実行" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1255" y="912" width="165" height="68" as="geometry" />
+        </mxCell>
+
+        <!-- PHASE 5: テスト -->
+        <!-- Skill+Agent: UT -->
+        <mxCell id="n18" value="pnpm test&#xa;(Vitest UT実行)&#xa;touch /tmp/.beersalon_last_test_run" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1455" y="752" width="165" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: E2E -->
+        <mxCell id="n19" value="Playwright MCP&#xa;E2E確認&#xa;(localhost:3000 / 3001)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1455" y="840" width="165" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: format/lint -->
+        <mxCell id="n20" value="pnpm format&#xa;pnpm lint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1455" y="922" width="165" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- External: Playwright MCP -->
+        <mxCell id="n21" value="Playwright MCP&#xa;ブラウザ起動・操作" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1455" y="1248" width="165" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- PHASE 6: 完了 -->
+        <!-- Hook: pre-commit test check -->
+        <mxCell id="n22" value="PreToolUse Hook (git commit):&#xa;test timestamp 確認&#xa;(/tmp/.beersalon_last_test_run)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1672" y="752" width="185" height="72" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: git commit push -->
+        <mxCell id="n23" value="git commit + push&#xa;(コード/テスト/ドキュメント)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1672" y="840" width="175" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: PR作成 -->
+        <mxCell id="n24" value="PR作成&#xa;gh pr create --base develop&#xa;Closes #123" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1862" y="752" width="110" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Skill+Agent: /understand -->
+        <mxCell id="n25" value="/understand&#xa;理解度確認" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1862" y="840" width="110" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- Main Claude: Stop hook -->
+        <mxCell id="n26" value="Stop Hook:&#xa;macOS通知音&#xa;(タスク完了)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1862" y="568" width="115" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- External: GitHub Actions CI -->
+        <mxCell id="n27" value="GitHub Actions CI&#xa;Lint / TypeCheck&#xa;UT / Build / Prisma" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1672" y="1248" width="165" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- External: Vercel Deploy -->
+        <mxCell id="n28" value="Vercel&#xa;Preview Deploy&#xa;(develop branch)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1858" y="1248" width="115" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ===== EDGES ===== -->
+
+        <!-- n1 → n2 -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" source="n1" target="n2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n2 → n3 (/plan → Skill起動) -->
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n2" target="n3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n3 → n4 (Skill → Agent起動) -->
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n3" target="n4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n4 → n5 (Agent → worktree作成, dashed) -->
+        <mxCell id="e4" value="worktree生成" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeColor=#9673a6;" edge="1" source="n4" target="n5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n4 → n6 (Agent → Issue読み込み) -->
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n4" target="n6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n6 → n7 -->
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n6" target="n7" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n7 → n8 -->
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n7" target="n8" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n8 → n9 (計画→ユーザーへ返却) -->
+        <mxCell id="e8" value="計画をメイン会話へ返却" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d6b656;dashed=1;" edge="1" source="n8" target="n9" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n9 → n10 -->
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n9" target="n10" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n10 → n11 (/implement → hook1) -->
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;" edge="1" source="n10" target="n11" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n11 → n12 -->
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;" edge="1" source="n11" target="n12" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n12 → n13 (hooks → Skill implement起動) -->
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n12" target="n13" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n13 → n14 -->
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n13" target="n14" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n14 → n15 -->
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n14" target="n15" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n15 → n16 -->
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n15" target="n16" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n16 → n17 (後Hook) -->
+        <mxCell id="e16" value="Edit/Write毎に自動実行" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;" edge="1" source="n16" target="n17" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n16 → n18 (実装→UT) -->
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n16" target="n18" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n18 → n19 (UT→E2E) -->
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n18" target="n19" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n19 → n21 (E2E → Playwright外部) -->
+        <mxCell id="e19" value="Playwright MCPで操作" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#666;" edge="1" source="n19" target="n21" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n19 → n20 (E2E→format/lint) -->
+        <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n19" target="n20" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n20 → n22 (format→commit hook) -->
+        <mxCell id="e21" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n20" target="n22" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n22 → n23 (commit hook → commit) -->
+        <mxCell id="e22" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n22" target="n23" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n23 → n24 (commit→PR) -->
+        <mxCell id="e23" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n23" target="n24" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n24 → n25 (PR→/understand) -->
+        <mxCell id="e24" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="n24" target="n25" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n24 → n27 (PR→CI) -->
+        <mxCell id="e25" value="PR作成トリガー" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#666;" edge="1" source="n24" target="n27" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n27 → n28 (CI→Vercel) -->
+        <mxCell id="e26" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#666;" edge="1" source="n27" target="n28" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- n25 → n26 (complete→Stop hook) -->
+        <mxCell id="e27" value="全タスク完了" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#d79b00;" edge="1" source="n25" target="n26" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
