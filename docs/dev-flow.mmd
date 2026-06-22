@@ -1,0 +1,56 @@
+---
+title: BeerSalon 開発フロー
+---
+flowchart TD
+    A["💡 機能/バグ発見"] --> B["GitHub Issue 作成\n(feature / bugfix テンプレート)"]
+
+    B --> C{"実装方法"}
+    C -->|"手動で実装"| D["ローカルで実装\nfeature/xxx ブランチ"]
+    C -->|"Claudeに依頼"| E["Issue に @claude メンション\nClaudeが自動でブランチ作成"]
+
+    E --> F["💬 /plan コマンド\n実装計画の確認・承認"]
+    F --> G["💬 /implement コマンド\nClaudeが自動実装"]
+    G --> H["claude/issue-xxx ブランチ\nPR自動作成"]
+
+    D --> PR["PR 作成\nfeature → develop"]
+    H --> PR
+
+    PR --> CI_GROUP
+
+    subgraph CI_GROUP ["🔄 CI Pipeline（全て並列実行）"]
+        direction LR
+        K1["Lint\nBiome"]
+        K2["TypeCheck\nTypeScript"]
+        K3["Unit Test\nVitest"]
+        K4["Integration Test"]
+        K5["Build\nNext.js"]
+        K6["Prisma Validate"]
+    end
+
+    PR --> E2E_GROUP
+
+    subgraph E2E_GROUP ["🎭 E2E Tests（Playwright / 並列実行）"]
+        direction LR
+        M1["Web E2E\nユーザー画面 5本"]
+        M2["Admin E2E\n管理画面 2本"]
+    end
+
+    PR --> N["🤖 Claude Code Review\n自動コードレビュー"]
+
+    CI_GROUP --> RESULT{{"CI / E2E\n成功?"}}
+    E2E_GROUP --> RESULT
+    N --> RESULT
+
+    RESULT -->|"❌ 失敗"| FIX["修正してプッシュ"]
+    FIX --> CI_GROUP
+
+    RESULT -->|"✅ 全て成功"| MERGE_DEV["レビュー承認\ndevelop にマージ"]
+
+    MERGE_DEV --> DEV_DEPLOY["🌐 Vercel Preview Deploy\ndevelop 環境"]
+
+    DEV_DEPLOY --> MAIN_PR["PR 作成\ndevelop → main\n※ main へは develop からのみ許可"]
+
+    MAIN_PR --> MAIN_CI["CI Pipeline + E2E Tests 再実行"]
+
+    MAIN_CI --> MAIN_RESULT{{"成功?"}}
+    MAIN_RESULT -->|"✅"| PROD["🚀 Vercel Production Deploy\nbeersalon.com"]
