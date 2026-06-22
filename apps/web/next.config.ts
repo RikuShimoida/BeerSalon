@@ -1,10 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	// Why not experimental.serverActions: Next.js 14.0 以降 bodySizeLimit は stable に昇格しており、
-	// experimental 配下に書くと無視される。アプリ側の画像バリデーション(5MB)とフレームワーク制限を揃える。
-	serverActions: {
-		bodySizeLimit: "5mb",
+	// Why not トップレベル serverActions: next@16 の NextConfig 型では serverActions は experimental 配下にあり、
+	// トップレベルに置くと型エラー(TS2353)になる。アプリ側の画像バリデーション(5MB)とフレームワーク制限を揃える。
+	experimental: {
+		serverActions: {
+			bodySizeLimit: "5mb",
+		},
 	},
 	images: {
 		remotePatterns: [

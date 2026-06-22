@@ -160,10 +160,9 @@ describe("saveProfileToSession", () => {
 			expect(imagePathCall?.[1]).toMatch(/^temp\/test-user-id\/\d+\.png$/);
 		});
 
-		// Why not 1MBちょうど: Server Actions のデフォルト 1MB 制限と 5MB バリデーションの不整合(Issue #301)を検証する。
-		// 1MB超〜5MB以下の画像は next.config.ts の bodySizeLimit=5mb 設定により Server Action に到達し、
-		// アプリ側バリデーション(5MB)を通過してアップロードされる。
-		it("1MB超〜5MB以下の画像はバリデーションを通過しアップロードされる", async () => {
+		// Why not bodySizeLimit 自体を検証: 1MB 制限はフレームワーク層(next.config.ts)の挙動で UT 対象外(E2E/手動で担保)。
+		// この UT が検証するのはアプリ側バリデーション ── 1MB超〜5MB以下の画像が 5MB 上限を通過しアップロードまで進むこと(Issue #301)。
+		it("1MB超〜5MB以下の画像はアプリ側5MBバリデーションを通過しアップロードされる", async () => {
 			mockGetUser.mockResolvedValue({
 				data: { user: { id: "test-user-id" } },
 				error: null,
