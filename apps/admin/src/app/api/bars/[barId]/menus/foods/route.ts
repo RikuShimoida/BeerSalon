@@ -61,7 +61,7 @@ export async function POST(
 		}
 
 		const body = await request.json();
-		const { name, description, image_url } = body;
+		const { name, price, description, image_url } = body;
 
 		if (!name) {
 			return NextResponse.json(
@@ -75,6 +75,7 @@ export async function POST(
 			.insert({
 				bar_id: Number(barId),
 				name,
+				price: price ?? null,
 				description: description || null,
 				image_url: image_url || null,
 			})
