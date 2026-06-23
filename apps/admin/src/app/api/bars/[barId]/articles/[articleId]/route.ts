@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { resolveArticlePublishing } from "@/lib/validators";
 
 export async function GET(
 	_request: NextRequest,
@@ -75,6 +76,8 @@ export async function PUT(
 			image_url,
 			image_url_2,
 			image_url_3,
+			status,
+			published_at,
 		} = body;
 
 		if (!title || !articleBody) {
@@ -82,6 +85,15 @@ export async function PUT(
 				{ error: "Title and body are required" },
 				{ status: 400 },
 			);
+		}
+
+		const publishing = resolveArticlePublishing(
+			status ?? "published",
+			published_at,
+			new Date(),
+		);
+		if (!publishing.isValid) {
+			return NextResponse.json({ error: publishing.error }, { status: 400 });
 		}
 
 		const { data, error } = await supabaseAdmin
@@ -92,6 +104,8 @@ export async function PUT(
 				image_url: image_url || null,
 				image_url_2: image_url_2 || null,
 				image_url_3: image_url_3 || null,
+				status: publishing.status,
+				published_at: publishing.published_at,
 				updated_at: new Date().toISOString(),
 			})
 			.eq("id", articleId)

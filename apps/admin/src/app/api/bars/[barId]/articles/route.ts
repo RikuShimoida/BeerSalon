@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { resolveArticlePublishing } from "@/lib/validators";
 
 export async function GET(
 	_request: NextRequest,
@@ -68,6 +69,8 @@ export async function POST(
 			image_url,
 			image_url_2,
 			image_url_3,
+			status,
+			published_at,
 		} = body;
 
 		if (!title || !articleBody) {
@@ -77,7 +80,15 @@ export async function POST(
 			);
 		}
 
-		const now = new Date().toISOString();
+		// status 未指定時は published（公開）として扱い、登録時の既存挙動を踏襲する
+		const publishing = resolveArticlePublishing(
+			status ?? "published",
+			published_at,
+			new Date(),
+		);
+		if (!publishing.isValid) {
+			return NextResponse.json({ error: publishing.error }, { status: 400 });
+		}
 
 		const { data, error } = await supabaseAdmin
 			.from("articles")
@@ -88,8 +99,8 @@ export async function POST(
 				image_url: image_url || null,
 				image_url_2: image_url_2 || null,
 				image_url_3: image_url_3 || null,
-				status: "published",
-				published_at: now,
+				status: publishing.status,
+				published_at: publishing.published_at,
 			})
 			.select()
 			.single();
