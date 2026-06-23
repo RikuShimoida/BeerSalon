@@ -1,0 +1,39 @@
+name: Apply Supabase migrations
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/config.toml"
+  workflow_dispatch:
+
+# Why not cancel-in-progress=true: マイグレーション適用中に後続 push でジョブを中断すると、
+# 一部の DDL だけ適用された中途半端な状態になり得るため、同一参照への適用は直列化する。
+concurrency:
+  group: migrate-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Why not version: latest: リモート本番DBへの DDL 適用は CLI 仕様変更で
+      # 非対話実行の挙動が壊れると事故に直結するため、ローカルで db push 実績のある版に固定する。
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.65.5
+
+      - name: Link to remote project
+        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"
+
+      # Why not --dry-run: dry-run では適用されない。CLI が schema_migrations を見て
+      # 未適用分のみ適用するため冪等。失敗時は非ゼロ終了でジョブが fail する。
+      - name: Push migrations to remote
+        run: supabase db push

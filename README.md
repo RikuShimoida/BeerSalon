@@ -134,6 +134,24 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 `main` への merge では production（`https://beer-salon.vercel.app` / 管理画面本番ドメインは未確定）にデプロイされる。
 
+### DB マイグレーションの自動適用
+
+`develop` / `main` に push され、`supabase/migrations/**` または `supabase/config.toml` に変更が含まれる場合、GitHub Actions（`.github/workflows/migrate.yml`）が `supabase db push` でリモート Supabase へ未適用のマイグレーションを自動適用する。
+
+- preview / production は同一 Supabase プロジェクトを共用しているため、適用先は1つ（develop / main どちらの push でも同じプロジェクトに適用される）。
+- `supabase db push` は `supabase_migrations.schema_migrations` を見て未適用分のみを適用するため冪等。マイグレーション変更が無い push ではワークフロー自体が起動しない（paths フィルタ）。
+- 適用に失敗するとジョブが fail する。
+
+**必要な GitHub Secrets**（事前に登録すること。未登録だと自動適用が動かない）:
+
+| Secret 名 | 用途 |
+|-----------|------|
+| `SUPABASE_ACCESS_TOKEN` | Supabase CLI のアクセストークン（`supabase link` 用）。ダッシュボード → Account → Access Tokens で発行 |
+| `SUPABASE_DB_PASSWORD` | リモート DB のパスワード（`supabase db push` 用） |
+| `SUPABASE_PROJECT_ID` | リモートプロジェクトの ref（`supabase link --project-ref` に渡す） |
+
+> 過去に、この自動適用が存在せずリモート DB へマイグレーションが一切適用されていなかったため、プロフィール画像アップロード時にバケットが無く「画像のアップロードに失敗しました」が発生した経緯がある（Issue #313）。この仕組みはその再発防止のためのもの。
+
 ### トラブルシュート
 
 - **片肺で alias が古いまま残る場合**
