@@ -1,6 +1,6 @@
 # understand 理解チェック（Phase G）の出題・回答・判定を、外出先のスマホから GitHub コメントで
 # 完結させる用途も兼ねる。運用方針（認証・コスト・トリガー範囲・濫用対策）は
-# docs/understand-homework/README.md を参照。
+# .claude/skills/understand/SKILL.md の Phase G を参照。
 #
 # Why-not: 専用ワークフローを新設せず claude.yml に相乗りさせる。
 # 理解チェック専用の issue_comment トリガーを別ファイルで作ると、`@claude` メンションへの
