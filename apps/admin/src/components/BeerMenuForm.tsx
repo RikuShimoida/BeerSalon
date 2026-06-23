@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useRef, useState } from "react";
 import type { BarBeerMenuDetail } from "@/types/database";
@@ -38,8 +39,32 @@ export default function BeerMenuForm({
 	});
 
 	const [description, setDescription] = useState(menu?.description ?? "");
-	const [imageUrl, setImageUrl] = useState(menu?.image_url ?? "");
+	// 保存対象の画像URL。既存値を初期表示し、差し替え時はアップロード後のURLで上書き、
+	// 削除時は null にする。
+	const [imageUrl, setImageUrl] = useState<string | null>(
+		menu?.image_url ?? null,
+	);
+	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [imagePreview, setImagePreview] = useState(menu?.image_url ?? "");
 	const [isActive, setIsActive] = useState(menu?.is_active ?? true);
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			setImageFile(file);
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setImagePreview(reader.result as string);
+			};
+			reader.readAsDataURL(file);
+		}
+	};
+
+	const handleImageRemove = () => {
+		setImageFile(null);
+		setImageUrl(null);
+		setImagePreview("");
+	};
 
 	const addSizeRow = () => {
 		const newId = sizeIdCounter.current;
@@ -75,6 +100,28 @@ export default function BeerMenuForm({
 		setLoading(true);
 
 		try {
+			let nextImageUrl: string | null = imageUrl;
+
+			if (imageFile) {
+				const uploadForm = new FormData();
+				uploadForm.append("file", imageFile);
+				uploadForm.append("type", "beer-menu");
+
+				const uploadRes = await fetch(`/api/bars/${barId}/media`, {
+					method: "POST",
+					body: uploadForm,
+				});
+
+				if (!uploadRes.ok) {
+					const data = await uploadRes.json();
+					setError(data.error || "画像のアップロードに失敗しました");
+					return;
+				}
+
+				const uploadData = await uploadRes.json();
+				nextImageUrl = uploadData.url || null;
+			}
+
 			const url = `/api/bars/${barId}/menus/beers/${menu?.id}`;
 
 			const response = await fetch(url, {
@@ -82,7 +129,7 @@ export default function BeerMenuForm({
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					description: description.trim() || null,
-					image_url: imageUrl.trim() || null,
+					image_url: nextImageUrl,
 					is_active: isActive,
 					sizes: validSizes.map((s, i) => ({
 						size_name: s.sizeName.trim(),
@@ -194,22 +241,41 @@ export default function BeerMenuForm({
 
 			<div>
 				<label
-					htmlFor="image_url"
+					htmlFor="beer-image"
 					className="block text-sm font-medium text-gray-700"
 				>
-					画像URL（店舗独自の写真）
+					画像（店舗独自の写真）
 				</label>
 				<input
-					type="url"
-					id="image_url"
-					value={imageUrl}
-					onChange={(e) => setImageUrl(e.target.value)}
-					placeholder="https://example.com/image.jpg"
-					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+					type="file"
+					id="beer-image"
+					accept="image/*"
+					onChange={handleImageChange}
+					className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
 				/>
 				<p className="mt-1 text-sm text-gray-500">
-					※未入力の場合はビールマスタの画像が表示されます
+					※未設定の場合はビールマスタの画像が表示されます
 				</p>
+				{imagePreview && (
+					<div className="mt-2 flex items-start gap-3">
+						<div className="relative w-40 h-40">
+							<Image
+								src={imagePreview}
+								alt="プレビュー"
+								fill
+								unoptimized
+								className="object-cover rounded-md border border-gray-200"
+							/>
+						</div>
+						<button
+							type="button"
+							onClick={handleImageRemove}
+							className="text-sm text-red-500 hover:text-red-700 transition-colors underline"
+						>
+							画像を削除
+						</button>
+					</div>
+				)}
 			</div>
 
 			<div>
