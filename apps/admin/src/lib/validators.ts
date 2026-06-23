@@ -79,6 +79,76 @@ export function validateLineUrl(url: string | null | undefined): {
 	return { isValid: true };
 }
 
+export type ArticleStatus = "draft" | "published" | "scheduled";
+
+export const ARTICLE_STATUSES: ArticleStatus[] = [
+	"draft",
+	"published",
+	"scheduled",
+];
+
+export function isArticleStatus(value: unknown): value is ArticleStatus {
+	return (
+		typeof value === "string" && (ARTICLE_STATUSES as string[]).includes(value)
+	);
+}
+
+/**
+ * 記事の status / published_at を保存値へ正規化する。
+ *
+ * - draft: 公開日時は持たない（null）
+ * - published: 指定された published_at を尊重し、無ければ now（登録時の既存挙動を踏襲）
+ * - scheduled: published_at 必須かつ未来日時のみ許容
+ *
+ * `now` は呼び出し側から渡してテスト容易性を確保する。
+ */
+export function resolveArticlePublishing(
+	status: unknown,
+	publishedAtInput: string | null | undefined,
+	now: Date,
+):
+	| { isValid: true; status: ArticleStatus; published_at: string | null }
+	| { isValid: false; error: string } {
+	if (!isArticleStatus(status)) {
+		return {
+			isValid: false,
+			error:
+				"status は draft / published / scheduled のいずれかを指定してください",
+		};
+	}
+
+	if (status === "draft") {
+		return { isValid: true, status, published_at: null };
+	}
+
+	if (status === "published") {
+		const publishedAt = publishedAtInput
+			? new Date(publishedAtInput).toISOString()
+			: now.toISOString();
+		return { isValid: true, status, published_at: publishedAt };
+	}
+
+	if (!publishedAtInput) {
+		return {
+			isValid: false,
+			error: "予約公開には公開日時を指定してください",
+		};
+	}
+
+	const scheduledAt = new Date(publishedAtInput);
+	if (Number.isNaN(scheduledAt.getTime())) {
+		return { isValid: false, error: "公開日時の形式が正しくありません" };
+	}
+	if (scheduledAt.getTime() <= now.getTime()) {
+		return {
+			isValid: false,
+			error: "予約公開の公開日時は未来の日時を指定してください",
+		};
+	}
+
+	return { isValid: true, status, published_at: scheduledAt.toISOString() };
+}
+
 export function validateWebsiteUrl(url: string | null | undefined): {
 	isValid: boolean;
 	error?: string;

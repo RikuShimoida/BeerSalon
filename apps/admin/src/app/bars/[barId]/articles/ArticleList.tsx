@@ -3,6 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import {
+	ARTICLE_STATUS_BADGE_CLASSES,
+	ARTICLE_STATUS_LABELS,
+} from "@/lib/article-status";
 import type { Article } from "@/types/database";
 
 interface ArticleListProps {
@@ -116,7 +120,12 @@ export default function ArticleList({ barId, userRole }: ArticleListProps) {
 								</div>
 							)}
 							<div className="p-4">
-								<h3 className="font-bold text-gray-900 truncate">
+								<span
+									className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ARTICLE_STATUS_BADGE_CLASSES[article.status]}`}
+								>
+									{ARTICLE_STATUS_LABELS[article.status]}
+								</span>
+								<h3 className="font-bold text-gray-900 truncate mt-2">
 									{article.title}
 								</h3>
 								<p className="text-sm text-gray-500 mt-1">

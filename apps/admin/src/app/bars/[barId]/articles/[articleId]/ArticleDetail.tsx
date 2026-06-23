@@ -4,6 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import {
+	ARTICLE_STATUS_BADGE_CLASSES,
+	ARTICLE_STATUS_LABELS,
+} from "@/lib/article-status";
 import type { Article } from "@/types/database";
 
 interface ArticleDetailProps {
@@ -115,12 +119,22 @@ export default function ArticleDetail({
 				<span className="text-sm text-gray-700">記事詳細</span>
 			</div>
 
+			<div className="flex items-center gap-3">
+				<span
+					className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ARTICLE_STATUS_BADGE_CLASSES[article.status]}`}
+				>
+					{ARTICLE_STATUS_LABELS[article.status]}
+				</span>
+			</div>
+
 			<h1 className="text-2xl font-bold text-gray-900">{article.title}</h1>
 
 			<p className="text-sm text-gray-500">
-				{article.published_at
-					? formatDate(article.published_at)
-					: formatDate(article.created_at)}
+				{article.status === "scheduled" && article.published_at
+					? `公開予定: ${formatDate(article.published_at)}`
+					: article.published_at
+						? formatDate(article.published_at)
+						: formatDate(article.created_at)}
 			</p>
 
 			{imageUrls.length > 0 && (

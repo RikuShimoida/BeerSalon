@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ArticleStatus } from "@/lib/validators";
 import type { Article } from "@/types/database";
+import ArticleStatusField from "../../ArticleStatusField";
 
 interface ArticleEditFormProps {
 	barId: string;
@@ -23,6 +25,11 @@ export default function ArticleEditForm({
 	const router = useRouter();
 	const [title, setTitle] = useState("");
 	const [body, setBody] = useState("");
+	const [status, setStatus] = useState<ArticleStatus>("published");
+	const [publishedAt, setPublishedAt] = useState("");
+	const [originalPublishedAt, setOriginalPublishedAt] = useState<string | null>(
+		null,
+	);
 	const [images, setImages] = useState<ImageSlot[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [fetching, setFetching] = useState(true);
@@ -41,6 +48,13 @@ export default function ArticleEditForm({
 
 			setTitle(article.title);
 			setBody(article.body);
+			setStatus(article.status);
+			setOriginalPublishedAt(article.published_at);
+			if (article.published_at) {
+				setPublishedAt(
+					new Date(article.published_at).toISOString().slice(0, 16),
+				);
+			}
 
 			const existingImages: ImageSlot[] = [];
 			if (article.image_url) {
@@ -153,6 +167,14 @@ export default function ArticleEditForm({
 					image_url: uploadedUrls[0] || null,
 					image_url_2: uploadedUrls[1] || null,
 					image_url_3: uploadedUrls[2] || null,
+					status,
+					// published は元の公開日時を維持（無ければ API が now を補完）、scheduled は入力値、draft は null
+					published_at:
+						status === "scheduled" && publishedAt
+							? new Date(publishedAt).toISOString()
+							: status === "published"
+								? originalPublishedAt
+								: null,
 				}),
 			});
 
@@ -220,6 +242,13 @@ export default function ArticleEditForm({
 					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-sm"
 				/>
 			</div>
+
+			<ArticleStatusField
+				status={status}
+				onStatusChange={setStatus}
+				publishedAt={publishedAt}
+				onPublishedAtChange={setPublishedAt}
+			/>
 
 			<div>
 				<label
