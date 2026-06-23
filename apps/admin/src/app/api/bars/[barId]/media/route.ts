@@ -117,12 +117,16 @@ export async function POST(
 
 		// スライダー枠の5枚制限はメニュー画像には適用しない。
 		// メニュー画像は bar_images とは別テーブルの単一 image_url に保存されるため。
+		// Why not: 枚数チェックと後段の nextSortOrder で同一 SELECT を二度走らせない。
+		//          スライダー経路でのみ一度だけ取得し、両方で使い回す。
+		let existingSliderMedia: { id: number; sort_order: number }[] | null = null;
 		if (!isMenuMedia) {
-			const { data: existingSliderMedia } = await supabaseAdmin
+			const { data } = await supabaseAdmin
 				.from("bar_images")
 				.select("id, sort_order")
 				.eq("bar_id", barId)
 				.eq("image_type", "slider");
+			existingSliderMedia = data;
 
 			if (
 				existingSliderMedia &&
@@ -192,17 +196,9 @@ export async function POST(
 			return NextResponse.json({ url: mediaUrl });
 		}
 
-		const { data: existingMedia } = await supabaseAdmin
-			.from("bar_images")
-			.select("id, sort_order")
-			.eq("bar_id", barId)
-			.eq("image_type", "slider");
-
 		const nextSortOrder =
-			existingMedia && existingMedia.length > 0
-				? Math.max(
-						...existingMedia.map((m: { sort_order: number }) => m.sort_order),
-					) + 1
+			existingSliderMedia && existingSliderMedia.length > 0
+				? Math.max(...existingSliderMedia.map((m) => m.sort_order)) + 1
 				: 0;
 
 		const { data: newMedia, error: insertError } = await supabaseAdmin
