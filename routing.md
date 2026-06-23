@@ -516,6 +516,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - ビールメニュータブ: メニュー名、ビールカテゴリ（必須）、国、産地（国連動）、醸造所、サイズ/価格（動的追加）、説明、画像
     - ビールカテゴリ未選択時はエラーを表示して登録させない（`beers.beer_category_id` は NOT NULL のため、暗黙のデフォルトカテゴリでの保存は行わない）
   - 食事メニュータブ: メニュー名、価格（任意）、説明、画像
+  - 画像はファイルアップロード方式（`/api/bars/[barId]/media` に `type=beer-menu` / `food-menu` で送信し、返却された公開URLを `image_url` として保存）。メニュー画像は店舗スライダー画像（`bar_images`）とは別物で、`bar_beer_menus.image_url` / `bar_food_menus.image_url` に単一保存する
   - 登録ボタン（画面遷移なし）
 
 #### 3-4-3. ビールメニュー詳細ページ
@@ -539,6 +540,19 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - メニュー名、価格、説明、画像
   - 編集ボタン → `/bars/[barId]/menus/foods/[menuId]/edit`（bar_ownerのみ）
   - 削除ボタン（bar_ownerのみ）
+
+#### 3-4-5. メニュー編集ページ
+
+- Path: `/bars/[barId]/menus/beers/[menuId]/edit` / `/bars/[barId]/menus/foods/[menuId]/edit`
+- 認証: 必須（bar_owner のみ）
+- 役割:
+  - ビール / 食事メニューの編集
+- UI 要素:
+  - 入力項目は登録ページ（3-4-2）と同等
+  - 画像は登録ページと同じファイルアップロード方式（URL文字列の手入力は廃止）
+    - 既存画像をプレビュー表示し、ファイル選択で差し替え（アップロード後に `image_url` を更新）
+    - 画像削除は `image_url` を null 化する論理削除（Storage 上の旧ファイルは物理削除しない）
+  - 保存ボタン（保存後にメニュー一覧へ戻る）
 
 ### 3-5. 記事管理
 
