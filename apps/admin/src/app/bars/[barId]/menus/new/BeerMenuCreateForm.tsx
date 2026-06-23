@@ -154,6 +154,11 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 			return;
 		}
 
+		if (!beerCategoryId) {
+			setError("ビールカテゴリを選択してください");
+			return;
+		}
+
 		const validSizes = sizes.filter((s) => s.sizeName.trim());
 		if (validSizes.length === 0) {
 			setError("サイズを1つ以上入力してください");
@@ -253,7 +258,7 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 					htmlFor="beer-category"
 					className="block text-sm font-medium text-gray-700"
 				>
-					ビールカテゴリ
+					ビールカテゴリ <span className="text-red-500">*</span>
 				</label>
 				<select
 					id="beer-category"
