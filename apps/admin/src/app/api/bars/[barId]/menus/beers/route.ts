@@ -89,6 +89,13 @@ export async function POST(
 			);
 		}
 
+		if (!beer_category_id) {
+			return NextResponse.json(
+				{ error: "ビールカテゴリを選択してください" },
+				{ status: 400 },
+			);
+		}
+
 		let breweryId: number | null = null;
 		if (brewery_name) {
 			const { data: existingBrewery } = await supabaseAdmin
@@ -123,7 +130,7 @@ export async function POST(
 			.from("beers")
 			.insert({
 				name,
-				beer_category_id: beer_category_id || 1,
+				beer_category_id,
 				brewery_id: breweryId,
 				region_id: region_id || null,
 				description,

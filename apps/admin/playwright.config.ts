@@ -11,6 +11,12 @@ dotenv.config({
 	override: true,
 });
 
+// Why not: baseURL/ポートを固定しない。worktree 並列開発では別ポートで起動した
+//          dev サーバーに対して E2E を流す必要があるため、環境変数で差し替え可能にする。
+const ADMIN_PORT = process.env.E2E_ADMIN_PORT ?? "3001";
+const ADMIN_BASE_URL =
+	process.env.PLAYWRIGHT_TEST_BASE_URL ?? `http://localhost:${ADMIN_PORT}`;
+
 /**
  * Playwright E2E テスト設定
  * 詳細: https://playwright.dev/docs/test-configuration
@@ -43,7 +49,7 @@ export default defineConfig({
 	// 共通のブラウザ設定
 	use: {
 		// ベースURL
-		baseURL: "http://localhost:3001",
+		baseURL: ADMIN_BASE_URL,
 
 		// 失敗時のトレース記録
 		trace: "on-first-retry",
@@ -88,8 +94,8 @@ export default defineConfig({
 
 	// 開発サーバーの自動起動
 	webServer: {
-		command: "pnpm dev",
-		url: "http://localhost:3001",
+		command: `pnpm exec next dev -p ${ADMIN_PORT}`,
+		url: ADMIN_BASE_URL,
 		reuseExistingServer: !process.env.CI,
 		timeout: 120000,
 	},
