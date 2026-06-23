@@ -3,10 +3,17 @@ name: Apply Supabase migrations
 on:
   push:
     branches: [main, develop]
+    # Why not config.toml を含める: supabase db push は migrations しか適用せず config.toml を反映しない。
+    # トリガーに含めると config.toml だけ変更した push が「CI は緑なのに何も反映されない」沈黙バグになるため、
+    # このワークフローは migrations 専用に限定する（config.toml の反映は別運用）。
     paths:
       - "supabase/migrations/**"
-      - "supabase/config.toml"
   workflow_dispatch:
+
+# Why not contents: write: マイグレーション適用はリモート DB への操作のみで、リポジトリへの書き込みは不要。
+# 最小権限の原則で read に絞る。
+permissions:
+  contents: read
 
 # Why not cancel-in-progress=true: マイグレーション適用中に後続 push でジョブを中断すると、
 # 一部の DDL だけ適用された中途半端な状態になり得るため、同一参照への適用は直列化する。
@@ -23,6 +30,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Why not link 時に空文字で進める: Secret 未登録だと link が分かりにくい形で失敗するため、
+      # 先に必須 Secret の有無を検査して原因が一目で分かる形で fail させる。
+      - name: Check required secrets
+        run: |
+          missing=0
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_PROJECT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Required secret '$name' is not set"
+              missing=1
+            fi
+          done
+          [ "$missing" -eq 0 ]
+        env:
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
       # Why not version: latest: リモート本番DBへの DDL 適用は CLI 仕様変更で
       # 非対話実行の挙動が壊れると事故に直結するため、ローカルで db push 実績のある版に固定する。
       - name: Setup Supabase CLI
@@ -30,6 +52,8 @@ jobs:
         with:
           version: 2.65.5
 
+      # Why not develop/main で適用先を分ける: 現状 preview/production は同一 Supabase プロジェクトを共用するため
+      # 適用先は1つ。将来プロジェクトを分離する場合は、ここの project-ref を環境別 Secret に切り替える。
       - name: Link to remote project
         run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"
 
