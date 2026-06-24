@@ -13,7 +13,7 @@ BeerSalon の「常時 worktree 開発」と並列開発の設計をまとめた
 
 そのため、個人開発では「重い独立タスクが本当に同時に複数ある」場面以外は worktree が割に合わないことがある。
 
-**撤退路**: `/implement <Issue> --no-worktree` でその場で従来の checkout 方式に切り替えられる
+**撤退路**: `/impl <Issue> --no-worktree` でその場で従来の checkout 方式に切り替えられる
 （worktree を作らず install もスキップ）。コードを巻き戻す必要はない。
 worktree が恒常的に割に合わないと判断したら、運用として `--no-worktree` を既定にし、その判断をこの節に追記する。
 
@@ -32,7 +32,7 @@ worktree が恒常的に割に合わないと判断したら、運用として `
 ### なぜこの形か（Why）
 
 - 司令塔の `git status` がいつ見ても綺麗で、ブランチ取り違え・stash地獄が起きない。
-- `/implement`（単独）も `/parallel`（並列）も「worktreeを切る」が共通の起点になる。
+- `/impl`（単独）も `/parallel`（並列）も「worktreeを切る」が共通の起点になる。
 - worktree はファイルを物理的に分離するので、複数タスクのコードが混ざらない。
 
 ### 重要な前提：worktree が隔離するのは「ファイルだけ」
@@ -180,7 +180,7 @@ git fetch origin develop
 git worktree add .claude/worktrees/<branch> origin/develop -b <branch>
 ```
 
-- ブランチ命名は /implement と同じ規則: `feature/<issue番号>-<英語スラッグ>` 等。
+- ブランチ命名は /impl と同じ規則: `feature/<issue番号>-<英語スラッグ>` 等。
 - **なぜ生の `git worktree add` か**: Claude Code の Agent `isolation: "worktree"` /
   `--worktree` は既定ベースが `origin/HEAD`(=main) で、`worktree.baseRef` も
   `"fresh"`/`"head"` の2択のみ。`origin/develop` を直接指定できない（公式確認済み）。
@@ -217,8 +217,8 @@ git worktree add .claude/worktrees/<branch> origin/develop -b <branch>
 
 | 対象 | 影響 |
 |---|---|
-| `/implement` スキル | **worktree起点に統合済み**。1タスク=1worktreeの実装フロー本体。単独でも割り込みでもこれを呼ぶ |
-| `/parallel` スキル | **薄い司令塔バッチに変更済み**。複数Issue一括投入時のみ使用。中身は各Issueへ/implement相当を発火しE2Eキューを束ねるだけ |
+| `/impl` スキル | **worktree起点に統合済み**。1タスク=1worktreeの実装フロー本体。単独でも割り込みでもこれを呼ぶ |
+| `/parallel` スキル | **薄い司令塔バッチに変更済み**。複数Issue一括投入時のみ使用。中身は各Issueへ/impl相当を発火しE2Eキューを束ねるだけ |
 | `package.json` dev script | ポート可変化の改修が必要（②） |
 | Playwright config | baseURL/webServer.url 固定解除の改修が必要（②） |
 | `scripts/e2e-setup.sh` | 現行維持（DB名 `postgres` 固定、冪等seed）。物理分離は採らない |

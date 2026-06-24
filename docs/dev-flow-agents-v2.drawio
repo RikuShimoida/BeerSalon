@@ -34,17 +34,17 @@
         <mxCell id="r1c" value="✅ 使用" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="420" y="128" width="130" height="30" as="geometry"/></mxCell>
         <mxCell id="r1d" value="frontmatter context: fork" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="128" width="280" height="30" as="geometry"/></mxCell>
 
-        <!-- implement -->
-        <mxCell id="r2a" value="/implement" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="40" y="158" width="160" height="40" as="geometry"/></mxCell>
+        <!-- impl -->
+        <mxCell id="r2a" value="/impl" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="40" y="158" width="160" height="40" as="geometry"/></mxCell>
         <mxCell id="r2b" value="frontend-engineer&#10;(品質ゲートのみ system-architect / qa-engineer)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="200" y="158" width="220" height="40" as="geometry"/></mxCell>
         <mxCell id="r2c" value="✅ 使用（既定）&#10;--no-worktree で撤退可" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="420" y="158" width="130" height="40" as="geometry"/></mxCell>
         <mxCell id="r2d" value="SKILL.md本文の生 git worktree add&#10;（origin/develop 起点・1-1）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="550" y="158" width="280" height="40" as="geometry"/></mxCell>
 
         <!-- parallel -->
         <mxCell id="r3a" value="/parallel" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="40" y="198" width="160" height="40" as="geometry"/></mxCell>
-        <mxCell id="r3b" value="frontend-engineer ×N&#10;（各Issueを /implement 手順で）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="200" y="198" width="220" height="40" as="geometry"/></mxCell>
+        <mxCell id="r3b" value="frontend-engineer ×N&#10;（各Issueを /impl 手順で）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="200" y="198" width="220" height="40" as="geometry"/></mxCell>
         <mxCell id="r3c" value="✅ 使用（Issue毎に1つ）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="420" y="198" width="130" height="40" as="geometry"/></mxCell>
-        <mxCell id="r3d" value="/implement と同じ（worktree並列）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="198" width="280" height="40" as="geometry"/></mxCell>
+        <mxCell id="r3d" value="/impl と同じ（worktree並列）" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="198" width="280" height="40" as="geometry"/></mxCell>
 
         <!-- pr-review -->
         <mxCell id="r4a" value="/pr-review" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="238" width="160" height="30" as="geometry"/></mxCell>
@@ -70,12 +70,12 @@
         <mxCell id="r7c" value="— 使わない" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="420" y="328" width="130" height="30" as="geometry"/></mxCell>
         <mxCell id="r7d" value="司令塔develop上で直接マージ・ブランチ削除" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" vertex="1" parent="1"><mxGeometry x="550" y="328" width="280" height="30" as="geometry"/></mxCell>
 
-        <mxCell id="note_key" value="★ 重要: /implement は『既定で worktree 内で実装』する（frontmatter context ではなく SKILL.md 本文の git worktree add で実現）。&#10;旧図の『実装は worktree 外』は誤り。worktree を使わないのは --no-worktree 撤退時のみ。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+        <mxCell id="note_key" value="★ 重要: /impl は『既定で worktree 内で実装』する（frontmatter context ではなく SKILL.md 本文の git worktree add で実現）。&#10;旧図の『実装は worktree 外』は誤り。worktree を使わないのは --no-worktree 撤退時のみ。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;fontSize=12;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="850" y="98" width="760" height="70" as="geometry" />
         </mxCell>
 
         <!-- ===== Swimlane flow ===== -->
-        <mxCell id="flow_title" value="単独実装フロー（/implement）" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+        <mxCell id="flow_title" value="単独実装フロー（/impl）" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
           <mxGeometry x="40" y="380" width="500" height="24" as="geometry" />
         </mxCell>
 
@@ -99,12 +99,12 @@
         <!-- User nodes -->
         <mxCell id="u1" value="① Issue作成&#10;(@claude / 手動)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="120" y="445" width="120" height="50" as="geometry"/></mxCell>
         <mxCell id="u2" value="② /plan N&#10;計画を承認" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="290" y="445" width="120" height="50" as="geometry"/></mxCell>
-        <mxCell id="u3" value="③ /implement N&#10;実装開始を指示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="460" y="445" width="120" height="50" as="geometry"/></mxCell>
+        <mxCell id="u3" value="③ /impl N&#10;実装開始を指示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="460" y="445" width="120" height="50" as="geometry"/></mxCell>
         <mxCell id="u4" value="⑥ 3択を選択&#10;(review-fix / merge / あとで)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1280" y="445" width="160" height="50" as="geometry"/></mxCell>
 
         <!-- Commander nodes -->
         <mxCell id="c1" value="/plan を context:fork で起動&#10;→ 一時worktreeで調査・計画&#10;（変更なければ自動削除）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="270" y="555" width="160" height="60" as="geometry"/></mxCell>
-        <mxCell id="c2" value="/implement 前提チェック&#10;1-0: developがclean / ff-only pull&#10;1-1: git worktree add origin/develop -b" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="555" width="200" height="60" as="geometry"/></mxCell>
+        <mxCell id="c2" value="/impl 前提チェック&#10;1-0: developがclean / ff-only pull&#10;1-1: git worktree add origin/develop -b" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="555" width="200" height="60" as="geometry"/></mxCell>
         <mxCell id="c3" value="2-2-1 worktree撤去&#10;2-2-2 司令塔フェーズ&#10;(pr-review / IT・E2E)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="980" y="555" width="200" height="60" as="geometry"/></mxCell>
 
         <!-- Worktree nodes -->
