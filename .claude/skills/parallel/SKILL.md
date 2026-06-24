@@ -1,7 +1,7 @@
 ---
 name: parallel
-description: 複数Issueを一括投入し、各タスクを /implement の手順でworktree並列実装する司令塔バッチ。実装ロジック本体は /implement が持つ。
-when_to_use: 文脈の異なる複数のIssueを一度にまとめて実装させたいとき、「並列で」「parallel」「まとめて実装」などの発言時。1タスクだけなら /implement を直接使う。割り込みで後から1本足すときも /implement を呼べばよい。
+description: 複数Issueを一括投入し、各タスクを /impl の手順でworktree並列実装する司令塔バッチ。実装ロジック本体は /impl が持つ。
+when_to_use: 文脈の異なる複数のIssueを一度にまとめて実装させたいとき、「並列で」「parallel」「まとめて実装」などの発言時。1タスクだけなら /impl を直接使う。割り込みで後から1本足すときも /impl を呼べばよい。
 agent: frontend-engineer
 ---
 
@@ -11,12 +11,12 @@ agent: frontend-engineer
 
 ### このスキルの位置づけ
 
-**実装フローの本体は `/implement` が持つ**（worktree作成・前提チェック・実装・テスト・PR・後片付け）。
-このスキルは「複数Issueを一度にまとめて指示したいとき」に、各Issueへ `/implement` 相当の手順を
+**実装フローの本体は `/impl` が持つ**（worktree作成・前提チェック・実装・テスト・PR・後片付け）。
+このスキルは「複数Issueを一度にまとめて指示したいとき」に、各Issueへ `/impl` 相当の手順を
 発火し、E2Eキューを束ねるだけの薄いオーケストレーターである。
 
-> 並列は本来「`/implement` を複数回呼んだ結果として自然に発生する」もの。
-> 1タスクだけ、あるいは割り込みで後から1本足すだけなら **このスキルは不要で、`/implement` を直接呼ぶ**。
+> 並列は本来「`/impl` を複数回呼んだ結果として自然に発生する」もの。
+> 1タスクだけ、あるいは割り込みで後から1本足すだけなら **このスキルは不要で、`/impl` を直接呼ぶ**。
 > このスキルは「最初から複数Issueをまとめて投入したい」ときの入口にすぎない。
 
 設計の全体像・共有インフラ制約・E2Eキューの根拠は `docs/worktree-workflow.md` を参照。
@@ -35,11 +35,11 @@ agent: frontend-engineer
   並列禁止。最初の1つがロックを取り、他は待機（直列化）する。
 - 判定に迷う場合は推測せず、「このタスクはDBスキーマを触りますか？」とユーザーに確認する。
 
-### Phase 1: 並列実装（各Issueを /implement の手順で）
+### Phase 1: 並列実装（各Issueを /impl の手順で）
 
 - 適格な各Issueについて、`subagent_type: "frontend-engineer"` のサブエージェントを
   **1メッセージ内でまとめて起動**し、並列に走らせる。
-- 各サブエージェントには `/implement` の Phase 1 手順を実行させる:
+- 各サブエージェントには `/impl` の Phase 1 手順を実行させる:
   - develop起点で `.claude/worktrees/<branch>` を作成（`git worktree add ... origin/develop -b <branch>`）
   - 環境ファイルコピー + `pnpm install`
   - 実装 + UT（`pnpm test`。共有DBに触らないので並列OK）
@@ -58,7 +58,7 @@ agent: frontend-engineer
 
 ### Phase 3: コミット・PR・後片付け
 
-各 worktree について、`/implement` の Phase 2 手順に準拠:
+各 worktree について、`/impl` の Phase 2 手順に準拠:
 
 - コミット → push → `gh pr create --base develop`（PR本文に `Closes #<Issue>`）。
 - PR作成後、`git worktree remove .claude/worktrees/<branch>` で撤去（未コミット変更が残る場合は報告）。

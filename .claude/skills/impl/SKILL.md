@@ -1,5 +1,5 @@
 ---
-name: implement
+name: impl
 description: Issue起点の実装フロー。ブランチ作成→実装→テスト→品質チェック→コミット→PR作成→完了報告を一貫して実行する。事前に /plan で計画承認済みであることが前提。
 when_to_use: 「実装して」「このIssueやって」「implement」などの発言時、Issue番号を指定して実装を依頼された時。事前に /plan で計画がユーザーに承認されていること。
 agent: frontend-engineer
@@ -21,7 +21,7 @@ agent: frontend-engineer
 - **既定は worktree モード**（1タスク = 1 worktree）。
 - 引数に **`--no-worktree`** が含まれる場合は、worktree を作らず**従来の checkout 方式**で実装する
   （1-0b / 1-1b を参照）。「今回は worktree が割に合わない」と判断したタスクで、その場で切り替えられる。
-  - 例: `/implement 210 --no-worktree`
+  - 例: `/impl 210 --no-worktree`
 - この撤退路はコードを戻す必要がない。worktree 運用が常に割に合わないと感じたら、
   運用として `--no-worktree` を既定にする（docs/worktree-workflow.md に方針を追記して判断を残す）。
 
@@ -207,7 +207,7 @@ worktree は既に 2-2-1 で撤去済みのため、以降はすべて develop�
      - `pr-review` は `agent: system-architect`・`context: fork` で動く。
        エージェント一貫性ルールの例外として、レビューに限り system-architect への委譲を認める（後述）。
    - **レビュー観点・コメントフォーマットの正は `pr-review` スキル（`.claude/skills/pr-review/SKILL.md`）が単一の真実の源**。
-     implement 側に観点やフォーマットを複製しない（二重メンテ防止）。pr-review が `gh pr diff <PR番号>` で差分を取得する作りのため、PR作成後に司令塔から呼ぶのが構造的に自然。
+     impl 側に観点やフォーマットを複製しない（二重メンテ防止）。pr-review が `gh pr diff <PR番号>` で差分を取得する作りのため、PR作成後に司令塔から呼ぶのが構造的に自然。
    - **結果は PR コメントとして投稿するのみ**。指摘の取り込み可否はユーザーが判断する
      （このフロー内でコード修正は行わない。修正する場合の `/review-fix` 起動もユーザーの判断に委ねる）。
    - レビューはコードの読み取りのみで共有DBに触らないため、並列実装中でも安全に実行できる。
@@ -261,12 +261,12 @@ worktree は既に 2-2-1 で撤去済みのため、以降はすべて develop�
 完了報告の直後に `/understand` スキルの手順を実行する。
 
 **この自動発動では、モード選択（「いま解く」/「宿題にする」）は聞かれず、常に宿題化される**。
-実装に充てたい時間を理解チェックの対話に取られないようにするため、`/understand` の自動発動（implement 経由）は
+実装に充てたい時間を理解チェックの対話に取られないようにするため、`/understand` の自動発動（impl 経由）は
 Phase M（モード選択）を経由せず、直接 Phase H（宿題化）へ直行する設計になっている（`.claude/skills/understand/SKILL.md` の起動分岐を参照）。
 
 - `/understand` は今回の問いを**宿題用 Issue として起票する**（ローカルファイルは作らない。宿題は Issue を唯一の正とする）。
 - 起票が完了した時点でこのスキルは終了する（解き終えるまでブロックしない）。
-  Issue 起票に失敗した場合も、その旨を報告して完了とみなして終了してよい（implement を止めない）。
+  Issue 起票に失敗した場合も、その旨を報告して完了とみなして終了してよい（impl を止めない）。
 - 理解チェック本体は、外出先で宿題 Issue のコメントに `@claude` 付きで回答するか（Phase G）、
   机に戻って手動 `/understand`（Phase R）で取り組む。机で今すぐ解きたい場合も、手動 `/understand` を別途起動すれば
   Phase M でモード選択（「いま解く」）を選べる。
