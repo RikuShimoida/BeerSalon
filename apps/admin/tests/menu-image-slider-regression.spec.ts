@@ -38,16 +38,29 @@ test.describe("Menu image does not consume slider quota (Issue #318)", () => {
 		await barOwnerPage.goto(`/bars/${BAR_ID}/edit`);
 		await expect(barOwnerPage.getByText(/登録済み: \d+ \/ 5枚/)).toBeVisible();
 
-		// 「削除」ボタンが無くなる（=0枚）まで先頭から削除し続ける。
-		const deleteButtons = barOwnerPage.getByRole("button", { name: "削除" });
+		// スライダー削除ボタンに限定する。
+		// 同一編集画面には「プレビュー画像」用の別「削除」ボタン（BarEditForm.tsx の
+		// L748-755 付近）も存在し、name:"削除" で広く拾うとプレビュー削除を巻き込み
+		// flaky 化し得る。SliderMediaManager.tsx の編集モードは、各スライダーカードを
+		// 同一クラス（bg-gray-50 rounded-lg p-3 border border-gray-200）の div で包み、
+		// その中に alt="スライダー画像 N" の画像と「削除」ボタンを同居させているため
+		// （L342-411）、カード単位（=画像とボタンが 1:1 で同居する最小コンテナ）に
+		// scope する。各カードはスライダー画像をちょうど1枚持つので、has フィルタで
+		// alt 画像を持つカードに絞れば、カードごとに「削除」ボタンが1つだけ対象になる。
+		const sliderCards = barOwnerPage
+			.locator("div.bg-gray-50.rounded-lg.p-3.border.border-gray-200")
+			.filter({ has: barOwnerPage.getByAltText(/スライダー画像 \d+/) });
+		const sliderDeleteButtons = sliderCards.getByRole("button", {
+			name: "削除",
+		});
 		// 削除1回ごとに件数が1つ減るのをアサーションの同期点として待つ。
 		// 初期件数を起点に、残数を明示的に指定して縮退を待機する（DOM変化との競合回避）。
-		let remaining = await deleteButtons.count();
+		let remaining = await sliderDeleteButtons.count();
 		while (remaining > 0) {
-			await deleteButtons.first().click();
+			await sliderDeleteButtons.first().click();
 			remaining -= 1;
 			// 削除→サーバー反映→再フェッチで件数が remaining に減るのを待つ。
-			await expect(deleteButtons).toHaveCount(remaining);
+			await expect(sliderDeleteButtons).toHaveCount(remaining);
 		}
 		await expect(barOwnerPage.getByText(sliderCountText(0))).toBeVisible();
 
