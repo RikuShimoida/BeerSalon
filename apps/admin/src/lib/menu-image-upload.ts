@@ -23,7 +23,11 @@ export async function uploadMenuImage(
 	});
 
 	if (!uploadRes.ok) {
-		const data = await uploadRes.json();
+		// Why not 失敗パスで素の uploadRes.json() を使わない:
+		//   変更前の登録フォームは失敗ボディを一切読まず握りつぶしていたため、
+		//   空ボディや HTML を返す失敗（502/プロキシエラー等）でも json() を throw
+		//   させず既定文言にフォールバックして元の挙動と等価にする。
+		const data = await uploadRes.json().catch(() => ({}) as { error?: string });
 		return {
 			ok: false,
 			error: data.error || "画像のアップロードに失敗しました",

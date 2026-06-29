@@ -92,4 +92,21 @@ describe("uploadMenuImage", () => {
 			error: "画像のアップロードに失敗しました",
 		});
 	});
+
+	it("失敗レスポンスのボディが非JSON（json() が reject）でも throw せず既定文言で ok:false を返す", async () => {
+		const fetchMock = vi.mocked(fetch);
+		const nonJsonFailure = {
+			ok: false,
+			json: () =>
+				Promise.reject(new SyntaxError("Unexpected end of JSON input")),
+		} as unknown as Response;
+		fetchMock.mockResolvedValue(nonJsonFailure);
+
+		const result = await uploadMenuImage("42", makeFile(), "food-menu");
+
+		expect(result).toEqual({
+			ok: false,
+			error: "画像のアップロードに失敗しました",
+		});
+	});
 });
