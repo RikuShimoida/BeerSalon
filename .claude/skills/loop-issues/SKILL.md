@@ -80,17 +80,66 @@ gh issue edit <N> --remove-label ready --add-label in-progress
   （worktree作成 → 実装 → UT → format/lint → 設計doc同期 → コミット → push → `gh pr create --base develop`（本文に `Closes #N`）→ worktree撤去）。
   - **Skill ツールで `/impl` を呼び出さない**。`context:fork` / `agent:` が無視される既知制約のため、
     impl の手順を本スキル（`agent: frontend-engineer`）の文脈で辿る。
-- **ループ実行時にスキップする impl の手順（重要）**:
-  - **2-2-2 の AskUserQuestion 3択を出さない**（ループは止めない。マージ判断は後で人が行う）。
+- **ループ実行時の impl 手順の扱い（重要・取り違え注意）**:
+  - **2-2-2 の `pr-review`（system-architect 委譲のコードレビュー）は実行する**（→ 1-4）。
+    レビューはループでも必須。ここを止めない。
+  - **2-2-2 の AskUserQuestion 3択（review-fix / マージ / あとで）だけは出さない**（ループを止めないため。
+    マージ判断は後で人が行う）。**「2-2-2 を丸ごとスキップ」ではない**——スキップするのは3択の問いかけのみ。
   - **2-4 の `/understand` 自動発動を行わない**（ループ実行中の宿題化は無効）。
 - **共有DB依存テスト（IT/E2E）の扱い**: ループ中は worktree 内で実行せず、PR作成までで止める。
   IT/E2E は Phase 2 で司令塔がまとめて直列消化する（並列実行は共有DB競合のため禁止）。
 - **エージェント一貫性**: 1-3 内でサブエージェントを起動する場合も必ず `subagent_type: "frontend-engineer"` を指定する。
 
-#### 1-4. pr-review（任意・読み取りのみ）
+#### 1-4. pr-review（必須・読み取りのみ）
 
-- PR 作成後、`pr-review` スキルの手順で PR にレビューコメントを投稿してよい（コードは読むだけ・共有DBに触らない）。
-- 指摘の取り込み（`/review-fix`）は行わない。マージ前に人が判断する材料として残すだけ。
+- PR 作成後、**必ず** `pr-review` の手順で PR にレビューコメントを投稿する（`/impl` 2-2-2 と同じ品質ゲート。
+  コードは読むだけ・共有DBに触らないため、ループでも安全に走る）。
+- **実装方式（重要）**: `pr-review` を **Skill ツールで呼ばない**。Skill 経由だと `pr-review` の
+  frontmatter（`agent: system-architect` / `context: fork`）が無視されるため、代わりに
+  **`subagent_type: "system-architect"` のサブエージェントを直接起動**し、`pr-review` スキル本文
+  （`.claude/skills/pr-review/SKILL.md`）のレビュー観点・コメントフォーマットに従ってレビューさせ、
+  `gh pr comment <PR番号>` で PR にレビュー結果を投稿させる。
+  - レビュー観点・フォーマットの正は `pr-review` スキルが単一の真実の源（このファイルに複製しない）。
+  - 実装は frontend-engineer が担うが、レビューは独立性確保のため system-architect に委譲する
+    （`/impl` 2-2-2 のエージェント例外と同じ理由）。
+- レビュー結果から、**指摘事項の最大重要度**（High / Medium / Low / 指摘なし）を判定する。
+  - **Medium 以上の指摘がある** → 1-4b（自動 review-fix ループ）へ。
+  - **Low のみ / 指摘なし** → 1-5 へ（自動修正しない。Low は人の判断材料として残す）。
+- **3択の AskUserQuestion は出さない**（ループを止めない）。
+
+#### 1-4b. 自動 review-fix ループ（Medium 以上の指摘がある場合のみ）
+
+レビューで **Medium 以上**の指摘が出た場合、自動で修正を取り込む。暴走防止のため**再レビューは最大1回**。
+
+> **方針（ユーザー合意・2026-06-29）**: Medium 以上で自動 review-fix。再レビュー1回、それでも Medium 以上が
+> 残れば `blocked` 化して人にエスカレーションする。マージ自体は引き続き人が握る（B案は維持）。
+
+手順:
+
+1. **修正の取り込み（review-fix 相当）**: `review-fix` を Skill ツールで呼ばず、
+   **`subagent_type: "frontend-engineer"` のサブエージェントを直接起動**し、`review-fix` スキル本文
+   （`.claude/skills/review-fix/SKILL.md`）の手順に従って **Medium 以上の指摘のみ**をコード修正させる。
+   - worktree は 2-2-1 で撤去済みのため、**この修正用に同じブランチで worktree を再作成**してから行う
+     （`git worktree add <パス> origin/<headRef> -b ...` ではなく、既存ブランチをチェックアウトする形。
+     具体的には `git worktree add <パス> <headRefName>`）。修正後 UT / format / lint を通し、コミットして
+     同じ feature ブランチへ push する。完了したら worktree を撤去する。
+   - Low の指摘・設計提案（「議論の余地」系）は**取り込まない**。Medium 以上の機械的に直せる指摘に限定する。
+     修正すると挙動や設計判断が変わる指摘で、frontend-engineer が「これは人の判断が要る」と判断した場合は、
+     無理に直さず 3 の `blocked` 扱いとしてエスカレーションする。
+2. **再レビュー（最大1回）**: 1-4 と同じ方式で system-architect を再起動し、修正後の PR を再レビューさせて
+   PR にコメント投稿する。
+   - 再レビューで **Medium 以上が解消** → 1-5 へ（`needs-merge`）。
+   - 再レビューで **なお Medium 以上が残る** → 3 へ（`blocked` 化）。**2回目の自動 review-fix は行わない**。
+3. **エスカレーション（`blocked`）**: 再レビュー後も Medium 以上が残る、または 1 で人の判断が要ると判断した場合:
+
+   ```bash
+   gh issue edit <N> --remove-label in-progress --add-label blocked
+   gh issue comment <N> --body "loop-issues: 自動 review-fix 後も Medium 以上の指摘が残ったため blocked。PR #<PR番号> のレビューコメントを確認し手動対応してください。"
+   ```
+
+   - PR はマージせず残す（人が `/review-fix <PR番号>` で続きを対応できる）。
+   - 修正用 worktree が残っていれば撤去する。1-6 と同じく、このIssueはスキップして次へ。
+   - **この `blocked` も Phase 1-S の「連続2件失敗」カウントに含める**。
 
 #### 1-5. 成功時のラベル更新
 
@@ -132,9 +181,12 @@ gh issue comment <N> --body "loop-issues: <失敗理由（実装失敗/仕様の
 1. 今回処理した件数 / `ready` 対象の総件数（上限で残した件数があれば明記）
 2. `needs-merge` にできた Issue 一覧（Issue番号・PR番号・PR URL）
 3. `blocked` にした Issue 一覧（Issue番号・理由）
-4. IT/E2E 結果（Phase 2 で消化した分）
-5. ループ中断が発生した場合はその理由
-6. 次アクションの案内: 「マージするには各 PR を確認して `/merge <PR番号>` を実行してください」
+4. 各 PR の pr-review 結果（コメントURL・指摘件数と重要度の内訳。1-4 で投稿した分）
+5. 自動 review-fix を実施した PR（1-4b。修正した指摘・再レビュー結果・解消したか否か）
+6. IT/E2E 結果（Phase 2 で消化した分）
+7. ループ中断が発生した場合はその理由
+8. 次アクションの案内: 「マージするには各 PR を確認して `/merge <PR番号>` を実行してください。
+   `blocked` の Issue は PR のレビューコメントを確認し、手動で `/review-fix <PR番号>` で続きを対応してください」
 
 ### 禁止事項
 
@@ -142,5 +194,10 @@ gh issue comment <N> --body "loop-issues: <失敗理由（実装失敗/仕様の
 - `ready` ラベルが付いていない Issue（= 手動モード対象）に触れること。
 - ループ内で勝手に `/merge` してマージすること（マージは人が判断する。B案の前提）。
 - 仕様に穴がある Issue を推測で実装すること（`blocked` 化してスキップする）。
-- Skill ツールで `/impl` / `/plan` を呼び出すこと（`context:fork`/`agent:` が無視されるため、手順を文脈で辿る）。
+- Skill ツールで `/impl` / `/plan` / `pr-review` / `review-fix` を呼び出すこと（`context:fork`/`agent:` が
+  無視されるため、手順を文脈で辿る。pr-review/再レビューは `subagent_type: "system-architect"`、
+  review-fix は `subagent_type: "frontend-engineer"` を直接起動する。1-4 / 1-4b 参照）。
+- pr-review（1-4）を省略して PR を `needs-merge` にすること（レビューは必須の品質ゲート）。
+- 自動 review-fix の再レビューを 2 回以上回すこと（再レビューは最大1回。残れば `blocked`。1-4b 参照）。
+- Low の指摘・設計提案（議論の余地系）を自動で取り込むこと（自動修正は Medium 以上の機械的指摘に限定）。
 - 作成途中の worktree を撤去せずに次の Issue へ進むこと。
