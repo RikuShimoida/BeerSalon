@@ -177,9 +177,13 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 					imageFile,
 					"beer-menu",
 				);
-				if (uploadResult.ok) {
-					imageUrl = uploadResult.url;
+
+				if (!uploadResult.ok) {
+					setError(uploadResult.error);
+					return;
 				}
+
+				imageUrl = uploadResult.url;
 			}
 
 			const res = await fetch(`/api/bars/${barId}/menus/beers`, {

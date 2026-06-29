@@ -5,9 +5,9 @@ export type MenuImageUploadResult =
 	| { ok: false; error: string };
 
 // Why not 戻り値を string | null にしない:
-//   登録フォームはアップロード失敗を握りつぶし、編集フォームは失敗レスポンスの
-//   error 文言を読んで中断する。両者の挙動を維持するには成功/失敗を判別できる
-//   結果型が必要で、string | null では「成功かつ url なし」と「失敗」を区別できない。
+//   登録フォーム・編集フォームとも、失敗レスポンスの error 文言を読んで中断する。
+//   この挙動には成功/失敗を判別できる結果型が必要で、string | null では
+//   「成功かつ url なし」と「失敗」を区別できない。
 export async function uploadMenuImage(
 	barId: string,
 	file: File,
