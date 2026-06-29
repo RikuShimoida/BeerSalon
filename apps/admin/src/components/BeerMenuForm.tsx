@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useRef, useState } from "react";
+import { uploadMenuImage } from "@/lib/menu-image-upload";
 import type { BarBeerMenuDetail } from "@/types/database";
 
 interface SizeRow {
@@ -103,23 +104,18 @@ export default function BeerMenuForm({
 			let nextImageUrl: string | null = imageUrl;
 
 			if (imageFile) {
-				const uploadForm = new FormData();
-				uploadForm.append("file", imageFile);
-				uploadForm.append("type", "beer-menu");
+				const uploadResult = await uploadMenuImage(
+					barId,
+					imageFile,
+					"beer-menu",
+				);
 
-				const uploadRes = await fetch(`/api/bars/${barId}/media`, {
-					method: "POST",
-					body: uploadForm,
-				});
-
-				if (!uploadRes.ok) {
-					const data = await uploadRes.json();
-					setError(data.error || "画像のアップロードに失敗しました");
+				if (!uploadResult.ok) {
+					setError(uploadResult.error);
 					return;
 				}
 
-				const uploadData = await uploadRes.json();
-				nextImageUrl = uploadData.url || null;
+				nextImageUrl = uploadResult.url;
 			}
 
 			const url = `/api/bars/${barId}/menus/beers/${menu?.id}`;

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { type FormEvent, useState } from "react";
+import { uploadMenuImage } from "@/lib/menu-image-upload";
 
 interface FoodMenuCreateFormProps {
 	barId: string;
@@ -54,18 +55,13 @@ export default function FoodMenuCreateForm({ barId }: FoodMenuCreateFormProps) {
 			let imageUrl: string | null = null;
 
 			if (imageFile) {
-				const formData = new FormData();
-				formData.append("file", imageFile);
-				formData.append("type", "food-menu");
-
-				const uploadRes = await fetch(`/api/bars/${barId}/media`, {
-					method: "POST",
-					body: formData,
-				});
-
-				if (uploadRes.ok) {
-					const uploadData = await uploadRes.json();
-					imageUrl = uploadData.url || null;
+				const uploadResult = await uploadMenuImage(
+					barId,
+					imageFile,
+					"food-menu",
+				);
+				if (uploadResult.ok) {
+					imageUrl = uploadResult.url;
 				}
 			}
 

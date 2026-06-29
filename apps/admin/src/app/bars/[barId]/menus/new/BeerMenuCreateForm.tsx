@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { uploadMenuImage } from "@/lib/menu-image-upload";
 import type { BeerCategory, Country, Region } from "@/types/database";
 
 interface SizeRow {
@@ -171,18 +172,13 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 			let imageUrl: string | null = null;
 
 			if (imageFile) {
-				const formData = new FormData();
-				formData.append("file", imageFile);
-				formData.append("type", "beer-menu");
-
-				const uploadRes = await fetch(`/api/bars/${barId}/media`, {
-					method: "POST",
-					body: formData,
-				});
-
-				if (uploadRes.ok) {
-					const uploadData = await uploadRes.json();
-					imageUrl = uploadData.url || null;
+				const uploadResult = await uploadMenuImage(
+					barId,
+					imageFile,
+					"beer-menu",
+				);
+				if (uploadResult.ok) {
+					imageUrl = uploadResult.url;
 				}
 			}
 
