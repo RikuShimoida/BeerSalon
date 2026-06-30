@@ -605,6 +605,14 @@ UNIQUE制約: `country_id + name`
 | is_read       | boolean    | NOT NULL DEFAULT false               | 既読フラグ                                 |
 | created_at    | timestamptz| NOT NULL DEFAULT now()               | 作成日時                                   |
 
+**生成される `type` と発火タイミング**:
+
+| type          | 発火タイミング                                                                 | title      | message 例                                  | link_url 例           |
+|---------------|--------------------------------------------------------------------------------|------------|---------------------------------------------|-----------------------|
+| `post_liked`  | 自分の投稿に他ユーザーがいいねしたとき（`apps/web` の `togglePostLike`）。自分の投稿への自己いいねは除外 | いいね     | `${ニックネーム}さんがあなたの投稿にいいねしました` | `/timeline`           |
+| `followed`    | 他ユーザーにフォローされたとき（`apps/web` の `followUser`）。自己フォローは除外。フォロー解除では生成しない | フォロー   | `${ニックネーム}さんにフォローされました`        | `/users/[userId]`（フォローした側のアプリ内ユーザーID `user_profiles.id`） |
+| `new_article` | お気に入り登録した店舗が記事を公開したとき（`apps/admin` の記事 POST / PUT で status が published へ遷移した瞬間）。配信対象は `favorite_bars` 経由で解決。published のまま再保存した場合は二重通知防止のため生成しない。予約公開（scheduled→published）を実行するバッチは未実装のため、scheduled は通知対象外 | 新着記事   | `${店舗名}が新しい記事「${記事タイトル}」を公開しました` | `/articles/[articleId]` |
+
 ---
 
 ## 7. ログ関連（任意で実装）

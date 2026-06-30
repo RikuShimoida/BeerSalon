@@ -1,4 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
+import {
+	notifyFavoriteUsersOfNewArticle,
+	shouldNotifyNewArticle,
+} from "@/lib/article-notification";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { resolveArticlePublishing } from "@/lib/validators";
@@ -96,6 +100,15 @@ export async function PUT(
 			return NextResponse.json({ error: publishing.error }, { status: 400 });
 		}
 
+		// 公開遷移（published 以外 → published）の判定に保存前ステータスを使うため更新前に取得する
+		const { data: previousArticle } = await supabaseAdmin
+			.from("articles")
+			.select("status")
+			.eq("id", articleId)
+			.eq("bar_id", barId)
+			.is("deleted_at", null)
+			.single();
+
 		const { data, error } = await supabaseAdmin
 			.from("articles")
 			.update({
@@ -124,6 +137,17 @@ export async function PUT(
 				{ error: "Failed to update article" },
 				{ status: 500 },
 			);
+		}
+
+		// 今回の保存で公開へ遷移した場合のみ通知（published のまま再保存では二重通知しない）
+		if (
+			shouldNotifyNewArticle(previousArticle?.status ?? null, publishing.status)
+		) {
+			await notifyFavoriteUsersOfNewArticle({
+				barId: parseInt(barId, 10),
+				articleId: parseInt(articleId, 10),
+				articleTitle: title,
+			});
 		}
 
 		return NextResponse.json({ article: data });

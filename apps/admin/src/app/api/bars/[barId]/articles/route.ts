@@ -1,4 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
+import {
+	notifyFavoriteUsersOfNewArticle,
+	shouldNotifyNewArticle,
+} from "@/lib/article-notification";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { resolveArticlePublishing } from "@/lib/validators";
@@ -110,6 +114,15 @@ export async function POST(
 				{ error: "Failed to create article" },
 				{ status: 500 },
 			);
+		}
+
+		// 新規作成では保存前ステータスが存在しないため null を渡す
+		if (shouldNotifyNewArticle(null, publishing.status)) {
+			await notifyFavoriteUsersOfNewArticle({
+				barId: parseInt(barId, 10),
+				articleId: data.id,
+				articleTitle: title,
+			});
 		}
 
 		return NextResponse.json({ article: data }, { status: 201 });
