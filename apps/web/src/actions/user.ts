@@ -329,6 +329,19 @@ export async function followUser(targetUserId: string) {
 			followeeId: targetUserId,
 		},
 	});
+
+	// 自己フォローは UI 上発生しないが、post_liked が自分の投稿を除外しているのと同様に防御する
+	if (targetUserId !== userProfile.id) {
+		await prisma.notification.create({
+			data: {
+				userId: targetUserId,
+				type: "followed",
+				title: "フォロー",
+				message: `${userProfile.nickname}さんにフォローされました`,
+				linkUrl: `/users/${userProfile.id}`,
+			},
+		});
+	}
 }
 
 export async function unfollowUser(targetUserId: string) {

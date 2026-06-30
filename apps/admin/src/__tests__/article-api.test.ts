@@ -14,6 +14,16 @@ vi.mock("@/lib/supabase", () => ({
 	},
 }));
 
+// 通知生成は article-notification.test.ts で検証するため、ここでは副作用を切り離す
+const mockShouldNotifyNewArticle = vi.fn().mockReturnValue(false);
+const mockNotifyFavoriteUsers = vi.fn().mockResolvedValue(undefined);
+vi.mock("@/lib/article-notification", () => ({
+	shouldNotifyNewArticle: (...args: unknown[]) =>
+		mockShouldNotifyNewArticle(...args),
+	notifyFavoriteUsersOfNewArticle: (...args: unknown[]) =>
+		mockNotifyFavoriteUsers(...args),
+}));
+
 import { PUT } from "@/app/api/bars/[barId]/articles/[articleId]/route";
 import { POST } from "@/app/api/bars/[barId]/articles/route";
 
@@ -31,13 +41,26 @@ function mockInsertChain(result: { data: unknown; error: unknown }) {
 	return { insert, select, single };
 }
 
-function mockUpdateChain(result: { data: unknown; error: unknown }) {
+function mockUpdateChain(
+	result: { data: unknown; error: unknown },
+	previousStatus: string | null = "draft",
+) {
 	const single = vi.fn().mockResolvedValue(result);
-	const select = vi.fn().mockReturnValue({ single });
-	const eqBar = vi.fn().mockReturnValue({ select });
+	const updateSelect = vi.fn().mockReturnValue({ single });
+	const eqBar = vi.fn().mockReturnValue({ select: updateSelect });
 	const eqId = vi.fn().mockReturnValue({ eq: eqBar });
 	const update = vi.fn().mockReturnValue({ eq: eqId });
-	mockSupabaseFrom.mockReturnValue({ update });
+
+	// 更新前の保存前ステータス取得（.select("status").eq().eq().is().single()）に対応する
+	const fetchSingle = vi
+		.fn()
+		.mockResolvedValue({ data: { status: previousStatus }, error: null });
+	const fetchIs = vi.fn().mockReturnValue({ single: fetchSingle });
+	const fetchEqBar = vi.fn().mockReturnValue({ is: fetchIs });
+	const fetchEqId = vi.fn().mockReturnValue({ eq: fetchEqBar });
+	const fetchSelect = vi.fn().mockReturnValue({ eq: fetchEqId });
+
+	mockSupabaseFrom.mockReturnValue({ select: fetchSelect, update });
 	return { update };
 }
 
