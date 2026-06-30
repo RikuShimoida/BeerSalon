@@ -207,3 +207,125 @@ describe("PUT 記事編集時の新着記事通知", () => {
 		expect(mockNotifyFavoriteUsers).not.toHaveBeenCalled();
 	});
 });
+
+describe("通知配信が失敗しても記事保存レスポンスは成功で返る（観点3 High）", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockGetCurrentUser.mockResolvedValue({
+			id: "user-1",
+			role: "bar_owner",
+			barId: 1,
+		});
+		mockCanAccessBar.mockReturnValue(true);
+	});
+
+	it("POST: 通知配信が例外を投げても記事は 201 で返る", async () => {
+		mockInsertChain({ data: { id: 30 }, error: null });
+		mockNotifyFavoriteUsers.mockRejectedValueOnce(
+			new Error("notification failed"),
+		);
+
+		const response = await POST(
+			createMockRequest({
+				title: "公開記事",
+				body: "本文",
+				status: "published",
+				// biome-ignore lint/suspicious/noExplicitAny: テスト用の最小モック
+			}) as any,
+			{ params: Promise.resolve({ barId: "1" }) },
+		);
+
+		expect(mockNotifyFavoriteUsers).toHaveBeenCalledTimes(1);
+		expect(response.status).toBe(201);
+	});
+
+	it("PUT: 通知配信が例外を投げても記事は 200 で返る", async () => {
+		mockUpdateChain({ data: { id: 31 }, error: null }, "draft");
+		mockNotifyFavoriteUsers.mockRejectedValueOnce(
+			new Error("notification failed"),
+		);
+
+		const response = await PUT(
+			createMockRequest({
+				title: "公開記事",
+				body: "本文",
+				status: "published",
+				// biome-ignore lint/suspicious/noExplicitAny: テスト用の最小モック
+			}) as any,
+			{ params: Promise.resolve({ barId: "1", articleId: "31" }) },
+		);
+
+		expect(mockNotifyFavoriteUsers).toHaveBeenCalledTimes(1);
+		expect(response.status).toBe(200);
+	});
+});
+
+describe("PUT 保存前 status 取得失敗時の挙動（観点2 Medium）", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockGetCurrentUser.mockResolvedValue({
+			id: "user-1",
+			role: "bar_owner",
+			barId: 1,
+		});
+		mockCanAccessBar.mockReturnValue(true);
+	});
+
+	function mockUpdateChainWithFetchError(fetchError: {
+		code?: string;
+		message: string;
+	}) {
+		const update = vi.fn();
+		const fetchSingle = vi
+			.fn()
+			.mockResolvedValue({ data: null, error: fetchError });
+		const fetchIs = vi.fn().mockReturnValue({ single: fetchSingle });
+		const fetchEqBar = vi.fn().mockReturnValue({ is: fetchIs });
+		const fetchEqId = vi.fn().mockReturnValue({ eq: fetchEqBar });
+		const fetchSelect = vi.fn().mockReturnValue({ eq: fetchEqId });
+		mockSupabaseFrom.mockReturnValue({ select: fetchSelect, update });
+		return { update };
+	}
+
+	it("保存前 status が PGRST116（該当なし）なら 404 を返し update も通知もしない", async () => {
+		const { update } = mockUpdateChainWithFetchError({
+			code: "PGRST116",
+			message: "no rows",
+		});
+
+		const response = await PUT(
+			createMockRequest({
+				title: "公開記事",
+				body: "本文",
+				status: "published",
+				// biome-ignore lint/suspicious/noExplicitAny: テスト用の最小モック
+			}) as any,
+			{ params: Promise.resolve({ barId: "1", articleId: "404" }) },
+		);
+
+		expect(response.status).toBe(404);
+		expect(update).not.toHaveBeenCalled();
+		expect(mockNotifyFavoriteUsers).not.toHaveBeenCalled();
+	});
+
+	it("保存前 status 取得が PGRST116 以外のエラーなら 500 を返し update も通知もしない", async () => {
+		const { update } = mockUpdateChainWithFetchError({
+			code: "PGRST500",
+			message: "db error",
+		});
+
+		const response = await PUT(
+			createMockRequest({
+				title: "公開記事",
+				body: "本文",
+				status: "published",
+				// biome-ignore lint/suspicious/noExplicitAny: テスト用の最小モック
+			}) as any,
+			{ params: Promise.resolve({ barId: "1", articleId: "1" }) },
+		);
+
+		expect(response.status).toBe(500);
+		expect(update).not.toHaveBeenCalled();
+		expect(mockNotifyFavoriteUsers).not.toHaveBeenCalled();
+	});
+});

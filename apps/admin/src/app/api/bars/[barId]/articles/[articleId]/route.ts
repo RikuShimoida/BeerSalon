@@ -101,13 +101,27 @@ export async function PUT(
 		}
 
 		// 公開遷移（published 以外 → published）の判定に保存前ステータスを使うため更新前に取得する
-		const { data: previousArticle } = await supabaseAdmin
-			.from("articles")
-			.select("status")
-			.eq("id", articleId)
-			.eq("bar_id", barId)
-			.is("deleted_at", null)
-			.single();
+		const { data: previousArticle, error: previousArticleError } =
+			await supabaseAdmin
+				.from("articles")
+				.select("status")
+				.eq("id", articleId)
+				.eq("bar_id", barId)
+				.is("deleted_at", null)
+				.single();
+
+		if (previousArticleError) {
+			if (previousArticleError.code === "PGRST116") {
+				return NextResponse.json(
+					{ error: "Article not found" },
+					{ status: 404 },
+				);
+			}
+			return NextResponse.json(
+				{ error: "Failed to fetch article" },
+				{ status: 500 },
+			);
+		}
 
 		const { data, error } = await supabaseAdmin
 			.from("articles")
@@ -140,14 +154,23 @@ export async function PUT(
 		}
 
 		// 今回の保存で公開へ遷移した場合のみ通知（published のまま再保存では二重通知しない）
+		// 通知は記事保存の副次処理。失敗しても記事は保存済みのため、
+		// 外側 catch に巻き込んで 500 を返さずログ記録に留めて 200 を返す
 		if (
 			shouldNotifyNewArticle(previousArticle?.status ?? null, publishing.status)
 		) {
-			await notifyFavoriteUsersOfNewArticle({
-				barId: parseInt(barId, 10),
-				articleId: parseInt(articleId, 10),
-				articleTitle: title,
-			});
+			try {
+				await notifyFavoriteUsersOfNewArticle({
+					barId: parseInt(barId, 10),
+					articleId: parseInt(articleId, 10),
+					articleTitle: title,
+				});
+			} catch (notifyError) {
+				console.error(
+					"Failed to send new_article notifications after article update",
+					notifyError,
+				);
+			}
 		}
 
 		return NextResponse.json({ article: data });

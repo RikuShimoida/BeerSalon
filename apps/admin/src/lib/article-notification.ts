@@ -26,6 +26,10 @@ export function shouldNotifyNewArticle(
  *
  * web 側（prisma）ではなく admin 側の既存 DB アクセス流儀（supabaseAdmin）に合わせる。
  * notifications テーブルのカラムは snake_case。
+ *
+ * supabase 呼び出しの error は握りつぶさず throw する。
+ * 通知は記事保存の副次処理であり、呼び出し側（記事 POST/PUT）が独立した
+ * try/catch で受けてログに留め、記事保存の正常レスポンスは巻き込まないため。
  */
 export async function notifyFavoriteUsersOfNewArticle(params: {
 	barId: number;
@@ -34,18 +38,30 @@ export async function notifyFavoriteUsersOfNewArticle(params: {
 }): Promise<void> {
 	const { barId, articleId, articleTitle } = params;
 
-	const { data: bar } = await supabaseAdmin
+	const { data: bar, error: barError } = await supabaseAdmin
 		.from("bars")
 		.select("name")
 		.eq("id", barId)
 		.single();
 
+	if (barError) {
+		throw new Error(
+			`Failed to fetch bar for new_article notification: ${barError.message}`,
+		);
+	}
+
 	const barName = bar?.name ?? "";
 
-	const { data: favorites } = await supabaseAdmin
+	const { data: favorites, error: favoritesError } = await supabaseAdmin
 		.from("favorite_bars")
 		.select("user_id")
 		.eq("bar_id", barId);
+
+	if (favoritesError) {
+		throw new Error(
+			`Failed to fetch favorite_bars for new_article notification: ${favoritesError.message}`,
+		);
+	}
 
 	if (!favorites || favorites.length === 0) {
 		return;
@@ -60,5 +76,13 @@ export async function notifyFavoriteUsersOfNewArticle(params: {
 		is_read: false,
 	}));
 
-	await supabaseAdmin.from("notifications").insert(rows);
+	const { error: insertError } = await supabaseAdmin
+		.from("notifications")
+		.insert(rows);
+
+	if (insertError) {
+		throw new Error(
+			`Failed to insert new_article notifications: ${insertError.message}`,
+		);
+	}
 }

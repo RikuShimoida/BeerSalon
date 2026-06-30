@@ -90,4 +90,86 @@ describe("notifyFavoriteUsersOfNewArticle（配信対象解決と通知行の組
 
 		expect(insert).not.toHaveBeenCalled();
 	});
+
+	it("bars 取得が error なら throw する（黙って握りつぶさない）", async () => {
+		const barSingle = vi.fn().mockResolvedValue({
+			data: null,
+			error: { message: "bar fetch failed" },
+		});
+		const barEq = vi.fn().mockReturnValue({ single: barSingle });
+		const barSelect = vi.fn().mockReturnValue({ eq: barEq });
+
+		mockSupabaseFrom.mockImplementation((table: string) => {
+			if (table === "bars") return { select: barSelect };
+			throw new Error(`unexpected table: ${table}`);
+		});
+
+		await expect(
+			notifyFavoriteUsersOfNewArticle({
+				barId: 1,
+				articleId: 99,
+				articleTitle: "限定IPA入荷",
+			}),
+		).rejects.toThrow(/bar fetch failed/);
+	});
+
+	it("favorite_bars 取得が error なら throw する（黙って握りつぶさない）", async () => {
+		const barSingle = vi
+			.fn()
+			.mockResolvedValue({ data: { name: "Fuji Beer Bar" }, error: null });
+		const barEq = vi.fn().mockReturnValue({ single: barSingle });
+		const barSelect = vi.fn().mockReturnValue({ eq: barEq });
+
+		const favoriteEq = vi.fn().mockResolvedValue({
+			data: null,
+			error: { message: "favorites fetch failed" },
+		});
+		const favoriteSelect = vi.fn().mockReturnValue({ eq: favoriteEq });
+
+		mockSupabaseFrom.mockImplementation((table: string) => {
+			if (table === "bars") return { select: barSelect };
+			if (table === "favorite_bars") return { select: favoriteSelect };
+			throw new Error(`unexpected table: ${table}`);
+		});
+
+		await expect(
+			notifyFavoriteUsersOfNewArticle({
+				barId: 1,
+				articleId: 99,
+				articleTitle: "限定IPA入荷",
+			}),
+		).rejects.toThrow(/favorites fetch failed/);
+	});
+
+	it("notifications insert が error なら throw する（黙って握りつぶさない）", async () => {
+		const insert = vi
+			.fn()
+			.mockResolvedValue({ data: null, error: { message: "insert failed" } });
+
+		const barSingle = vi
+			.fn()
+			.mockResolvedValue({ data: { name: "Fuji Beer Bar" }, error: null });
+		const barEq = vi.fn().mockReturnValue({ single: barSingle });
+		const barSelect = vi.fn().mockReturnValue({ eq: barEq });
+
+		const favoriteEq = vi
+			.fn()
+			.mockResolvedValue({ data: [{ user_id: "user-a" }], error: null });
+		const favoriteSelect = vi.fn().mockReturnValue({ eq: favoriteEq });
+
+		mockSupabaseFrom.mockImplementation((table: string) => {
+			if (table === "bars") return { select: barSelect };
+			if (table === "favorite_bars") return { select: favoriteSelect };
+			if (table === "notifications") return { insert };
+			throw new Error(`unexpected table: ${table}`);
+		});
+
+		await expect(
+			notifyFavoriteUsersOfNewArticle({
+				barId: 1,
+				articleId: 99,
+				articleTitle: "限定IPA入荷",
+			}),
+		).rejects.toThrow(/insert failed/);
+	});
 });
