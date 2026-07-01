@@ -3,6 +3,7 @@ import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { SHIZUOKA_PREFECTURE } from "@/lib/shizuoka-cities";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
+	validateCoordinates,
 	validateFacebookUrl,
 	validateInstagramUrl,
 	validateLineUrl,
@@ -143,6 +144,8 @@ export async function PUT(
 			city,
 			address_line1,
 			address_line2,
+			latitude,
+			longitude,
 			phone_number,
 			access,
 			website_url,
@@ -216,6 +219,14 @@ export async function PUT(
 			);
 		}
 
+		const coordinatesValidation = validateCoordinates(latitude, longitude);
+		if (!coordinatesValidation.isValid) {
+			return NextResponse.json(
+				{ error: coordinatesValidation.error },
+				{ status: 400 },
+			);
+		}
+
 		const { data: bar, error } = await supabaseAdmin
 			.from("bars")
 			.update({
@@ -224,6 +235,8 @@ export async function PUT(
 				city: city || "",
 				address_line1: address_line1 || "",
 				address_line2: address_line2 || null,
+				latitude: coordinatesValidation.latitude,
+				longitude: coordinatesValidation.longitude,
 				phone_number: phone_number || null,
 				access: access || null,
 				website_url: website_url || null,

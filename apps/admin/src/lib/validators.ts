@@ -168,3 +168,59 @@ export function validateWebsiteUrl(url: string | null | undefined): {
 
 	return { isValid: true };
 }
+
+function validateCoordinate(
+	value: string | number | null | undefined,
+	min: number,
+	max: number,
+	label: string,
+): { isValid: boolean; error?: string; value: number | null } {
+	if (value === null || value === undefined || value === "") {
+		return { isValid: true, value: null };
+	}
+
+	const parsed = typeof value === "number" ? value : Number(value);
+	if (Number.isNaN(parsed)) {
+		return {
+			isValid: false,
+			error: `${label}は数値で入力してください`,
+			value: null,
+		};
+	}
+
+	if (parsed < min || parsed > max) {
+		return {
+			isValid: false,
+			error: `${label}は${min}〜${max}の範囲で入力してください`,
+			value: null,
+		};
+	}
+
+	return { isValid: true, value: parsed };
+}
+
+/**
+ * 緯度・経度を検証し、保存用の数値（未入力は null）へ正規化する。
+ *
+ * 緯度・経度はそれぞれ独立した任意項目とする。
+ * Why not「両方揃える」制約: 他の Phase 2 項目（住所・SNS 等）が各々独立して任意入力である流儀に合わせ、
+ * 片方だけの入力も許容する。
+ */
+export function validateCoordinates(
+	latitude: string | number | null | undefined,
+	longitude: string | number | null | undefined,
+):
+	| { isValid: true; latitude: number | null; longitude: number | null }
+	| { isValid: false; error: string } {
+	const lat = validateCoordinate(latitude, -90, 90, "緯度");
+	if (!lat.isValid) {
+		return { isValid: false, error: lat.error as string };
+	}
+
+	const lng = validateCoordinate(longitude, -180, 180, "経度");
+	if (!lng.isValid) {
+		return { isValid: false, error: lng.error as string };
+	}
+
+	return { isValid: true, latitude: lat.value, longitude: lng.value };
+}

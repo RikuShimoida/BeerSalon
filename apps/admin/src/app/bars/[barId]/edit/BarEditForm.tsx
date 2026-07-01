@@ -10,6 +10,7 @@ import {
 	SHIZUOKA_PREFECTURE,
 } from "@/lib/shizuoka-cities";
 import {
+	validateCoordinates,
 	validateFacebookUrl,
 	validateInstagramUrl,
 	validateLineUrl,
@@ -47,6 +48,8 @@ export default function BarEditForm({ barId }: { barId: string }) {
 		city: "",
 		address_line1: "",
 		address_line2: "",
+		latitude: "",
+		longitude: "",
 		website_url: "",
 		instagram_url: "",
 		x_url: "",
@@ -110,6 +113,8 @@ export default function BarEditForm({ barId }: { barId: string }) {
 				city: data.city || "",
 				address_line1: data.address_line1 || "",
 				address_line2: data.address_line2 || "",
+				latitude: data.latitude != null ? String(data.latitude) : "",
+				longitude: data.longitude != null ? String(data.longitude) : "",
 				website_url: data.website_url || "",
 				instagram_url: data.instagram_url || "",
 				x_url: data.x_url || "",
@@ -297,6 +302,15 @@ export default function BarEditForm({ barId }: { barId: string }) {
 				setError(result.error || "LINE URLの形式が正しくありません");
 				return;
 			}
+		}
+
+		const coordinatesResult = validateCoordinates(
+			formData.latitude,
+			formData.longitude,
+		);
+		if (!coordinatesResult.isValid) {
+			setError(coordinatesResult.error);
+			return;
 		}
 
 		if (!validateOpeningHours()) {
@@ -615,6 +629,50 @@ export default function BarEditForm({ barId }: { barId: string }) {
 						onChange={handleChange}
 						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 					/>
+				</div>
+
+				<div>
+					<label
+						htmlFor="latitude"
+						className="block text-sm font-medium text-gray-700"
+					>
+						緯度
+					</label>
+					<input
+						type="number"
+						step="any"
+						id="latitude"
+						name="latitude"
+						value={formData.latitude}
+						onChange={handleChange}
+						placeholder="35.0116"
+						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
+					/>
+					<p className="mt-1 text-sm text-gray-500">
+						-90〜90（マップ表示用・任意）
+					</p>
+				</div>
+
+				<div>
+					<label
+						htmlFor="longitude"
+						className="block text-sm font-medium text-gray-700"
+					>
+						経度
+					</label>
+					<input
+						type="number"
+						step="any"
+						id="longitude"
+						name="longitude"
+						value={formData.longitude}
+						onChange={handleChange}
+						placeholder="135.7681"
+						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
+					/>
+					<p className="mt-1 text-sm text-gray-500">
+						-180〜180（マップ表示用・任意）
+					</p>
 				</div>
 
 				<div>

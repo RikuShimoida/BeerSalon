@@ -3,6 +3,7 @@ import { getCurrentUser, hashPassword } from "@/lib/auth";
 import { SHIZUOKA_PREFECTURE } from "@/lib/shizuoka-cities";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
+	validateCoordinates,
 	validateFacebookUrl,
 	validateInstagramUrl,
 	validateLineUrl,
@@ -81,6 +82,8 @@ export async function POST(request: NextRequest) {
 			city,
 			address_line1,
 			address_line2,
+			latitude,
+			longitude,
 			phone_number,
 			access,
 			website_url,
@@ -201,6 +204,14 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		const coordinatesValidation = validateCoordinates(latitude, longitude);
+		if (!coordinatesValidation.isValid) {
+			return NextResponse.json(
+				{ error: coordinatesValidation.error },
+				{ status: 400 },
+			);
+		}
+
 		// バー作成
 		const now = new Date().toISOString();
 		const { data: bar, error: barError } = await supabaseAdmin
@@ -211,6 +222,8 @@ export async function POST(request: NextRequest) {
 				city: city || "",
 				address_line1: address_line1 || "",
 				address_line2: address_line2 || null,
+				latitude: coordinatesValidation.latitude,
+				longitude: coordinatesValidation.longitude,
 				phone_number: phone_number || null,
 				access: access || null,
 				website_url: website_url || null,
