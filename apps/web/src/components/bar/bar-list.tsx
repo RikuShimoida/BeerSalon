@@ -1,49 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getBars } from "@/actions/bar";
 import { BarCard } from "./bar-card";
 import { BarCardSkeleton } from "./bar-card-skeleton";
+import type { BarSummary } from "./bar-summary";
 
 interface BarListProps {
-	q?: string;
-	city?: string;
-	categories?: string[];
-	origin?: string;
+	bars: BarSummary[];
+	isLoading: boolean;
 }
 
-export function BarList({ q, city, categories, origin }: BarListProps) {
-	const [bars, setBars] = useState<
-		Array<{
-			id: string;
-			name: string;
-			prefecture: string;
-			city: string;
-			imageUrl?: string;
-		}>
-	>([]);
-	const [isLoading, setIsLoading] = useState(true);
-
-	// Why not: categories は配列のため参照同一性が毎レンダリングで変わる。
-	// 依存配列に配列をそのまま渡すと無限ループの恐れがあるため、文字列化した値で比較する。
-	const categoriesKey = (categories ?? []).join(",");
-
-	useEffect(() => {
-		const fetchBars = async () => {
-			setIsLoading(true);
-			const result = await getBars({
-				q,
-				city,
-				categories: categoriesKey ? categoriesKey.split(",") : [],
-				origin,
-			});
-			setBars(result);
-			setIsLoading(false);
-		};
-
-		fetchBars();
-	}, [q, city, categoriesKey, origin]);
-
+export function BarList({ bars, isLoading }: BarListProps) {
 	if (isLoading) {
 		return (
 			<div className="animate-fade-in">
@@ -75,7 +41,14 @@ export function BarList({ q, city, categories, origin }: BarListProps) {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{bars.map((bar) => (
-					<BarCard key={bar.id} {...bar} />
+					<BarCard
+						key={bar.id}
+						id={bar.id}
+						name={bar.name}
+						prefecture={bar.prefecture}
+						city={bar.city}
+						imageUrl={bar.imageUrl}
+					/>
 				))}
 			</div>
 
