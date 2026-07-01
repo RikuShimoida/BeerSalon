@@ -159,6 +159,7 @@
   - X テキストボックス ドメインバリデーション
   - Facebook テキストボックス ドメインバリデーション
   - LINE テキストボックス https://で始まるURLバリデーション
+  - 支払い方法 チェックボックス群（複数選択可）。`payment_methods`（`/api/payment-methods` から取得。`is_active=true` を `display_order` 順）を一覧表示し、店舗が対応する支払い方法を選択する。保存時に選択済み `payment_method_id` 群を PUT `/api/bars/[barId]` に `payment_method_ids` として送信し、`bar_payment_methods` を全削除→再登録で同期する（UNIQUE 制約 `bar_id + payment_method_id` を遵守）。既存の選択状態は GET `/api/bars/[barId]` の `payment_method_ids` で初期表示する。ユーザー画面の店舗詳細「基本情報」タブに「、」区切りで反映され、未選択時は「-」表示になる。Stripe Customer Portal（サブスク支払い）とは別概念
   - プレビュー画像 画像アップロード・変更・削除（1枚）
   - スライダー用メディア 画像・動画アップロード・削除・並び替え（最大5枚）
 

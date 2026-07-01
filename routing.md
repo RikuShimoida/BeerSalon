@@ -497,6 +497,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - 店舗ID変更、パスワード変更
 - UI 要素:
   - 店舗情報編集フォーム（Phase 2 と同じ項目）
+  - 支払い方法の複数選択（チェックボックス群）。`payment_methods` マスタ（`/api/payment-methods`）を一覧表示し、店舗が対応する支払い方法を選択して保存する。保存時に選択済み `payment_method_id` 群を `payment_method_ids` として PUT し、`bar_payment_methods`（中間テーブル）を全削除→再登録で同期する（UNIQUE 制約 `bar_id + payment_method_id` を遵守）。選択済み支払い方法はユーザー画面の店舗詳細「基本情報」タブに反映され、未設定時は「-」表示になる。Stripe Customer Portal（サブスクリプション支払い）とは別概念
   - 店舗ID変更セクション
   - パスワード変更セクション
 

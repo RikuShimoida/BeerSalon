@@ -27,6 +27,12 @@ interface OpeningHourInput {
 	is_closed: boolean;
 }
 
+interface PaymentMethodOption {
+	id: number;
+	name: string;
+	display_order: number;
+}
+
 export default function BarEditForm({ barId }: { barId: string }) {
 	const router = useRouter();
 	const [bar, setBar] = useState<Bar | null>(null);
@@ -66,6 +72,14 @@ export default function BarEditForm({ barId }: { barId: string }) {
 			is_closed: false,
 		})),
 	);
+
+	// Payment methods
+	const [paymentMethodOptions, setPaymentMethodOptions] = useState<
+		PaymentMethodOption[]
+	>([]);
+	const [selectedPaymentMethodIds, setSelectedPaymentMethodIds] = useState<
+		number[]
+	>([]);
 
 	// Preview image
 	const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
@@ -122,6 +136,12 @@ export default function BarEditForm({ barId }: { barId: string }) {
 				line_url: data.line_url || "",
 			});
 
+			if (Array.isArray(data.payment_method_ids)) {
+				setSelectedPaymentMethodIds(
+					data.payment_method_ids.map((id: number | string) => Number(id)),
+				);
+			}
+
 			if (data.opening_hours && data.opening_hours.length > 0) {
 				setOpeningHours(
 					data.opening_hours.map(
@@ -162,6 +182,27 @@ export default function BarEditForm({ barId }: { barId: string }) {
 	useEffect(() => {
 		fetchBar();
 	}, [fetchBar]);
+
+	useEffect(() => {
+		const fetchPaymentMethods = async () => {
+			try {
+				const response = await fetch("/api/payment-methods");
+				if (response.ok) {
+					const data = await response.json();
+					setPaymentMethodOptions(data);
+				}
+			} catch (_error) {
+				// payment method options are optional for display
+			}
+		};
+		fetchPaymentMethods();
+	}, []);
+
+	const handlePaymentMethodToggle = (id: number) => {
+		setSelectedPaymentMethodIds((prev) =>
+			prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
+		);
+	};
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -330,6 +371,7 @@ export default function BarEditForm({ barId }: { barId: string }) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					...formData,
+					payment_method_ids: selectedPaymentMethodIds,
 					opening_hours: filteredOpeningHours,
 				}),
 			});
@@ -764,6 +806,39 @@ export default function BarEditForm({ barId }: { barId: string }) {
 						className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 					/>
 				</div>
+
+				<fieldset>
+					<legend className="block text-sm font-medium text-gray-700">
+						支払い方法
+					</legend>
+					<p className="mt-1 text-sm text-gray-500 mb-2">
+						店舗で利用できる支払い方法を選択してください（複数選択可）
+					</p>
+					{paymentMethodOptions.length === 0 ? (
+						<p className="text-sm text-gray-500">
+							支払い方法が登録されていません
+						</p>
+					) : (
+						<div className="space-y-2">
+							{paymentMethodOptions.map((method) => (
+								<label
+									key={method.id}
+									htmlFor={`payment_method_${method.id}`}
+									className="flex items-center gap-2 text-sm text-gray-900"
+								>
+									<input
+										type="checkbox"
+										id={`payment_method_${method.id}`}
+										checked={selectedPaymentMethodIds.includes(method.id)}
+										onChange={() => handlePaymentMethodToggle(method.id)}
+										className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+									/>
+									{method.name}
+								</label>
+							))}
+						</div>
+					)}
+				</fieldset>
 
 				{/* Preview image section */}
 				<div>
