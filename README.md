@@ -138,19 +138,25 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 `develop` / `main` に push され、`supabase/migrations/**` に変更が含まれる場合、GitHub Actions（`.github/workflows/migrate.yml`）が `supabase db push` でリモート Supabase へ未適用のマイグレーションを自動適用する。
 
-- preview / production は同一 Supabase プロジェクトを共用しているため、適用先は1つ（develop / main どちらの push でも同じプロジェクトに適用される）。
+- **preview（develop）と production（main）は別々の Supabase プロジェクトに分離している**。`migrate.yml` は `github.ref_name` に応じて適用先を切り替える（`develop` → dev プロジェクト、`main` → prod プロジェクト）。これにより、`develop` への破壊的マイグレーションが本番 DB に直撃する事故と、preview のテストデータ・テストユーザー（`auth.users`）が本番に混入する事故を防ぐ。
 - `supabase db push` は `supabase_migrations.schema_migrations` を見て未適用分のみを適用するため冪等。マイグレーション変更が無い push ではワークフロー自体が起動しない（paths フィルタ）。
 - 適用に失敗するとジョブが fail する。
-- **`supabase/config.toml`（認証メールテンプレート・`enable_confirmations` 等）は `supabase db push` の対象外**。このワークフローでは反映されないため、config.toml を変更した場合は別途リモートへ反映する必要がある（誤って「自動反映される」と誤認しないよう、トリガーの paths からも `config.toml` を除外している）。
+- **`supabase/config.toml`（認証メールテンプレート・`enable_confirmations` 等）は `supabase db push` の対象外**。このワークフローでは反映されないため、config.toml を変更した場合は別途リモートへ反映する必要がある（誤って「自動反映される」と誤認しないよう、トリガーの paths からも `config.toml` を除外している）。プロジェクトを分離しているため、dev / prod の**両プロジェクト**へ手動反映が必要になる点に注意。
 - **`deploy.yml`（Vercel デプロイ）と `migrate.yml` は実行順序が保証されず並列で走る**。スキーマ追加に依存するアプリ変更を同一 push に含めると、マイグレーション適用前にデプロイが先行して実行時エラーになり得る。スキーマ変更とそれに依存するアプリ変更は、マイグレーションを先行 push してから（または別 PR で先にマージしてから）アプリ変更を入れるのが安全。
 
 **必要な GitHub Secrets**（事前に登録すること。未登録だと自動適用が動かない）:
 
 | Secret 名 | 用途 |
 |-----------|------|
-| `SUPABASE_ACCESS_TOKEN` | Supabase CLI のアクセストークン（`supabase link` 用）。ダッシュボード → Account → Access Tokens で発行 |
-| `SUPABASE_DB_PASSWORD` | リモート DB のパスワード（`supabase db push` 用） |
-| `SUPABASE_PROJECT_ID` | リモートプロジェクトの ref（`supabase link --project-ref` に渡す） |
+| `SUPABASE_ACCESS_TOKEN` | Supabase CLI のアクセストークン（`supabase link` 用）。ダッシュボード → Account → Access Tokens で発行。dev / prod 共通で1つ。**ただしトークンは組織スコープのため、dev プロジェクトは prod と同一 Supabase 組織に作成すること**（別組織に作るとこの1トークンでは dev を link できず、組織ごとに別トークンが必要になる） |
+| `SUPABASE_PROJECT_ID` | **prod（main 用）** プロジェクトの ref（`supabase link --project-ref` に渡す） |
+| `SUPABASE_DB_PASSWORD` | **prod（main 用）** リモート DB のパスワード（`supabase db push` 用） |
+| `SUPABASE_PROJECT_ID_DEV` | **dev（develop 用）** プロジェクトの ref |
+| `SUPABASE_DB_PASSWORD_DEV` | **dev（develop 用）** リモート DB のパスワード |
+
+> `develop` push 時は `*_DEV` Secret、`main` push 時は無印（prod 用）Secret が参照される。push したブランチ側の Secret が未登録だと、`Resolve target project by branch` ステップで「どの Secret が足りないか」を明示して fail する。
+
+> **接続文字列の注意**: dev プロジェクトの `DATABASE_URL` / `DIRECT_URL` は Session pooler を使う（過去に Pooler ホストが `aws-0` → 正しくは `aws-1` のズレで `tenant not found` が起きた経緯がある）。
 
 > 過去に、この自動適用が存在せずリモート DB へマイグレーションが一切適用されていなかったため、プロフィール画像アップロード時にバケットが無く「画像のアップロードに失敗しました」が発生した経緯がある（Issue #313）。この仕組みはその再発防止のためのもの。
 
@@ -191,8 +197,9 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 1. **Supabase ダッシュボード → Authentication → Providers → Email**
    - "Confirm email" が ON になっていること（OFF だと確認メールが送られない）。
 2. **Supabase ダッシュボード → Authentication → URL Configuration → Redirect URLs**
-   - local / preview / production の各オリジンの `/auth/callback` が許可されていること。
-   - Vercel Preview はワイルドカード（例: `https://*.vercel.app/auth/callback`）で登録する。
+   - **preview（develop）と production（main）は別 Supabase プロジェクトに分離しているため、登録先プロジェクトを取り違えないこと**。preview のオリジンは dev プロジェクト、production のオリジンは prod プロジェクトに登録する。
+   - dev プロジェクト: preview オリジン（Vercel Preview はワイルドカード `https://*.vercel.app/auth/callback`。固定 URL の `https://beer-salon-develop.vercel.app/auth/callback` 等）＋ローカル（`http://127.0.0.1:3000/auth/callback` 等）の `/auth/callback` を許可する。
+   - prod プロジェクト: production オリジン（`https://beer-salon.vercel.app/auth/callback` 等）の `/auth/callback` を許可する。
    - 許可外オリジンへのリダイレクトはブロックされ、メール内リンクが無効化される。
 3. **Supabase ダッシュボード → Project Settings → Authentication → SMTP**
    - 無料枠のデフォルト SMTP は送信レート・到達率が低い。独自 SMTP（SendGrid 等）の設定を推奨。

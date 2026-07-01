@@ -26,24 +26,55 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
-      # Why not link 時に空文字で進める: Secret 未登録だと link が分かりにくい形で失敗するため、
-      # 先に必須 Secret の有無を検査して原因が一目で分かる形で fail させる。
-      - name: Check required secrets
-        run: |
-          missing=0
-          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_PROJECT_ID; do
-            if [ -z "${!name}" ]; then
-              echo "::error::Required secret '$name' is not set"
-              missing=1
-            fi
-          done
-          [ "$missing" -eq 0 ]
+      # Why not project_ref / db_password を GitHub Actions 式で直接分岐: 式で分岐すると develop/main いずれかの
+      # Secret を必ず両方参照でき、未登録でも空文字で素通りして link が分かりにくい形で失敗する。ここで ref_name に応じて
+      # 適用先（main=prod / develop=dev）を1組だけ選び、選んだ Secret の有無を検査して原因が一目で分かる形で fail させる。
+      # preview/production は別 Supabase プロジェクトに分離済み（README「DB マイグレーションの自動適用」参照）。
+      #
+      # Why not シークレットを run 本文へ ${{ secrets... }} で直接展開: DB パスワードは記号・改行等の特殊文字を含み得るため、
+      # 本文展開だと (a) スクリプトが構文破壊で異常終了し、(b) その行に ::add-mask:: 実行前の生値が露出する恐れがある
+      # （add-mask は同ステップ内でも当該行より後に効くため後追いになる）。シークレットは env 経由で環境変数へ渡し、
+      # 本文では "$VAR" 参照に限定して展開を避ける。
+      - name: Resolve target project by branch
+        id: target
         env:
-          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+          PROD_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+          PROD_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          DEV_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_DEV }}
+          DEV_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_DEV }}
+        run: |
+          # Why not else を dev 扱い: 「main 以外は全部 dev」だと将来トリガーブランチが増えたとき暗黙で dev に流れて事故る。
+          # develop を明示し、想定外ブランチは fail させて意図を固定する。
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            project_id="$PROD_PROJECT_ID"
+            db_password="$PROD_DB_PASSWORD"
+            missing_names="SUPABASE_PROJECT_ID / SUPABASE_DB_PASSWORD"
+          elif [ "$GITHUB_REF_NAME" = "develop" ]; then
+            project_id="$DEV_PROJECT_ID"
+            db_password="$DEV_DB_PASSWORD"
+            missing_names="SUPABASE_PROJECT_ID_DEV / SUPABASE_DB_PASSWORD_DEV"
+          else
+            echo "::error::Unsupported branch '$GITHUB_REF_NAME': this workflow applies migrations only for 'main' (prod) or 'develop' (dev)"
+            exit 1
+          fi
+
+          missing=0
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "::error::Required secret 'SUPABASE_ACCESS_TOKEN' is not set"
+            missing=1
+          fi
+          if [ -z "$project_id" ] || [ -z "$db_password" ]; then
+            echo "::error::Required secret(s) not set for branch '$GITHUB_REF_NAME': $missing_names"
+            missing=1
+          fi
+          [ "$missing" -eq 0 ]
+
+          echo "project_id=$project_id" >> "$GITHUB_OUTPUT"
+          echo "::add-mask::$db_password"
+          echo "db_password=$db_password" >> "$GITHUB_OUTPUT"
 
       # Why not version: latest: リモート本番DBへの DDL 適用は CLI 仕様変更で
       # 非対話実行の挙動が壊れると事故に直結するため、ローカルで db push 実績のある版に固定する。
@@ -52,12 +83,14 @@ jobs:
         with:
           version: 2.65.5
 
-      # Why not develop/main で適用先を分ける: 現状 preview/production は同一 Supabase プロジェクトを共用するため
-      # 適用先は1つ。将来プロジェクトを分離する場合は、ここの project-ref を環境別 Secret に切り替える。
       - name: Link to remote project
-        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"
+        run: supabase link --project-ref "${{ steps.target.outputs.project_id }}"
+        env:
+          SUPABASE_DB_PASSWORD: ${{ steps.target.outputs.db_password }}
 
       # Why not --dry-run: dry-run では適用されない。CLI が schema_migrations を見て
       # 未適用分のみ適用するため冪等。失敗時は非ゼロ終了でジョブが fail する。
       - name: Push migrations to remote
         run: supabase db push
+        env:
+          SUPABASE_DB_PASSWORD: ${{ steps.target.outputs.db_password }}
