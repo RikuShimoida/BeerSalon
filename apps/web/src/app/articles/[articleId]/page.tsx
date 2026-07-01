@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleDetail } from "@/actions/article";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
+import { getArticleImageUrls } from "./article-images";
 
 export default async function ArticlePage({
 	params,
@@ -22,6 +23,8 @@ export default async function ArticlePage({
 		const d = new Date(date);
 		return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 	};
+
+	const imageUrls = getArticleImageUrls(article);
 
 	return (
 		<AuthenticatedLayout>
@@ -45,16 +48,19 @@ export default async function ArticlePage({
 							</p>
 						)}
 
-						{article.imageUrl && (
-							<div className="relative w-full h-96 mb-6 rounded-xl overflow-hidden bg-muted/30">
+						{imageUrls.map((url) => (
+							<div
+								key={url}
+								className="relative w-full h-96 mb-6 rounded-xl overflow-hidden bg-muted/30"
+							>
 								<Image
-									src={article.imageUrl}
+									src={url}
 									alt={article.title}
 									fill
 									className="object-cover"
 								/>
 							</div>
-						)}
+						))}
 
 						<div className="prose prose-lg max-w-none">
 							<p className="text-card-foreground whitespace-pre-wrap tracking-wide leading-relaxed">
