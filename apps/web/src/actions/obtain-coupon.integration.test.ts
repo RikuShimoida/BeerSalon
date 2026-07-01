@@ -83,6 +83,38 @@ describe("obtainCoupon (Integration)", () => {
 		expect(rows).toHaveLength(1);
 	});
 
+	it("同一クーポンへの並行取得でも二重にならず、成功1件・もう一方は取得済みになる", async () => {
+		// mockResolvedValue（持続）で並行呼び出しの getUser を両方満たす。
+		mockGetUser.mockResolvedValue({
+			data: { user: { id: alice.authUserId } },
+		});
+		const coupon = await createTestCoupon(prisma, barId, {
+			validUntil: new Date("2099-12-31T00:00:00.000Z"),
+		});
+
+		// Promise.all で同一ユーザー・同一クーポンへの取得を並行実行し、
+		// TOCTOU（findFirst すり抜け → 並行 INSERT）でも UNIQUE 制約 + P2002 で
+		// 1件に収束することを検証する。
+		const [a, b] = await Promise.all([
+			obtainCoupon(coupon.id.toString()),
+			obtainCoupon(coupon.id.toString()),
+		]);
+
+		const results = [a, b];
+		const successCount = results.filter((r) => r.ok).length;
+		const alreadyObtainedCount = results.filter(
+			(r) => !r.ok && r.reason === "already_obtained",
+		).length;
+
+		expect(successCount).toBe(1);
+		expect(alreadyObtainedCount).toBe(1);
+
+		const rows = await prisma.userCoupon.findMany({
+			where: { userId: alice.userProfileId, couponId: coupon.id },
+		});
+		expect(rows).toHaveLength(1);
+	});
+
 	it("有効期限切れ（validUntil が過去）のクーポンは取得できない", async () => {
 		mockGetUser.mockResolvedValueOnce({
 			data: { user: { id: alice.authUserId } },

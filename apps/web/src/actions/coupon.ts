@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
@@ -58,30 +59,41 @@ export async function obtainCoupon(
 		return { ok: false, reason: "limit_reached" };
 	}
 
-	// Why not: user_coupons に (user_id, coupon_id) の UNIQUE 制約が無い（database.md 3-2）ため
-	// DB レベルで二重取得を弾けない。存在チェックと INSERT をトランザクションで囲い、
-	// 直列化された同一トランザクション内で重複を防ぐ。
-	return prisma.$transaction(async (tx) => {
-		const existing = await tx.userCoupon.findFirst({
-			where: {
-				userId: userProfile.id,
-				couponId: coupon.id,
-			},
-		});
+	// 事前の存在チェックは UX 上のフィードバック（連打前に取得済みを返す）のために残す。
+	// ただし最終的な二重取得防止は DB の UNIQUE 制約 (user_id, coupon_id) と、
+	// 下の P2002 ハンドリングで担保する（並行リクエストで findFirst をすり抜けても
+	// UNIQUE 違反で1件に収束させる）。
+	const existing = await prisma.userCoupon.findFirst({
+		where: {
+			userId: userProfile.id,
+			couponId: coupon.id,
+		},
+	});
 
-		if (existing) {
-			return { ok: false, reason: "already_obtained" };
-		}
+	if (existing) {
+		return { ok: false, reason: "already_obtained" };
+	}
 
-		await tx.userCoupon.create({
+	try {
+		await prisma.userCoupon.create({
 			data: {
 				userId: userProfile.id,
 				couponId: coupon.id,
 			},
 		});
+	} catch (error) {
+		// Why not: TOCTOU（findFirst 通過 → 並行 INSERT）をアプリ側ロックで直列化するのではなく、
+		// DB の UNIQUE 制約に委ねる。P2002（unique constraint violation）は「既に取得済み」として扱う。
+		if (
+			error instanceof Prisma.PrismaClientKnownRequestError &&
+			error.code === "P2002"
+		) {
+			return { ok: false, reason: "already_obtained" };
+		}
+		throw error;
+	}
 
-		return { ok: true };
-	});
+	return { ok: true };
 }
 
 export async function hasObtainedCoupon(couponId: string): Promise<boolean> {
