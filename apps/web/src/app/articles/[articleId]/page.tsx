@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleDetail } from "@/actions/article";
+import { ArticleLikeButton } from "@/components/article/like-button";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
 import { getArticleImageUrls } from "./article-images";
 
@@ -42,11 +43,18 @@ export default async function ArticlePage({
 							{article.title}
 						</h1>
 
-						{article.publishedAt && (
-							<p className="text-sm text-muted-foreground mb-6 tracking-wide">
-								{formatDate(article.publishedAt)}
-							</p>
-						)}
+						<div className="flex items-center gap-4 mb-6">
+							<ArticleLikeButton
+								articleId={article.id}
+								initialLikeCount={article.likeCount}
+								initialIsLiked={article.isLiked}
+							/>
+							{article.publishedAt && (
+								<p className="text-sm text-muted-foreground tracking-wide">
+									{formatDate(article.publishedAt)}
+								</p>
+							)}
+						</div>
 
 						{imageUrls.map((url) => (
 							<div
