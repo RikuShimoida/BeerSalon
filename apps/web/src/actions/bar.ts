@@ -226,6 +226,15 @@ export async function getBarDetail(barId: string) {
 				where: {
 					isActive: true,
 				},
+				include: {
+					userCoupons: currentUserId
+						? {
+								where: {
+									userId: currentUserId,
+								},
+							}
+						: false,
+				},
 				orderBy: {
 					createdAt: "desc",
 				},
@@ -322,9 +331,17 @@ export async function getBarDetail(barId: string) {
 			barId: article.barId.toString(),
 		})),
 		coupons: bar.coupons.map((coupon) => ({
-			...coupon,
 			id: coupon.id.toString(),
 			barId: coupon.barId.toString(),
+			title: coupon.title,
+			description: coupon.description,
+			usageLimit: coupon.usageLimit,
+			usedCount: coupon.usedCount,
+			validFrom: coupon.validFrom,
+			validUntil: coupon.validUntil,
+			isObtained: Array.isArray(coupon.userCoupons)
+				? coupon.userCoupons.length > 0
+				: false,
 		})),
 		events: bar.barEvents.map((event) => ({
 			...event,

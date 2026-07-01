@@ -97,7 +97,11 @@ export async function createTestCoupon(
 	overrides: {
 		title?: string;
 		description?: string | null;
+		validFrom?: Date | null;
 		validUntil?: Date | null;
+		usageLimit?: number | null;
+		usedCount?: number;
+		isActive?: boolean;
 	} = {},
 ): Promise<{ id: bigint }> {
 	const suffix = faker.string.alphanumeric(8).toLowerCase();
@@ -111,7 +115,11 @@ export async function createTestCoupon(
 					: overrides.description,
 			discountType: "percentage",
 			discountValue: 10,
+			validFrom: overrides.validFrom ?? null,
 			validUntil: overrides.validUntil ?? null,
+			usageLimit: overrides.usageLimit ?? null,
+			usedCount: overrides.usedCount ?? 0,
+			isActive: overrides.isActive ?? true,
 		},
 	});
 	return { id: coupon.id };

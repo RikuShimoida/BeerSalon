@@ -363,6 +363,12 @@ UNIQUE制約: `country_id + name`
 | used_at       | timestamptz| NULLABLE                           | 使用日時            |
 | is_used       | boolean    | NOT NULL DEFAULT false             | 使用済みフラグ      |
 
+**UNIQUE制約**: `(user_id, coupon_id)`（1ユーザー1クーポンにつき1レコード）
+
+**二重取得の防止**: `(user_id, coupon_id)` に DB の UNIQUE 制約を張り、二重取得を DB レベルで担保する。ユーザー画面のクーポン取得アクション（`apps/web` の `obtainCoupon`）は、事前の存在チェック（UX フィードバック用）で取得済みを返しつつ、並行リクエスト（取得ボタン連打）による TOCTOU（存在チェックをすり抜けた並行 INSERT）は UNIQUE 制約違反（Prisma の `P2002`）を「既に取得済み」として catch することで、最終的に1レコードへ収束させる。
+
+**取得可否の判定（`obtainCoupon`）**: `bar_coupons.is_active=true` かつ有効期間内（`valid_from` が未来でなく `valid_until` が過去でない。いずれも NULL なら該当方向の制限なし）、かつ `usage_limit` が非 NULL の場合は `used_count < usage_limit` のときのみ取得できる。`used_count` は「利用回数」であり、取得（`user_coupons` への INSERT）ではインクリメントしない（利用＝消し込みフローは未実装のため）。
+
 ---
 
 ### 3-3. articles
