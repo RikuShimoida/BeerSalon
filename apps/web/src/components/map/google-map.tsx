@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import type { BarSummary } from "@/components/bar/bar-summary";
 import { CITY_COORDINATES } from "@/lib/constants/city-coordinates";
 import { type BarPin, toBarPins } from "@/lib/map/bar-pins";
+import { type LatLng, requestUserLocation } from "@/lib/map/user-location";
 
 interface GoogleMapProps {
 	city?: string;
@@ -18,31 +19,14 @@ interface GoogleMapProps {
 	defaultZoom?: number;
 }
 
-function MapContent({ pins }: { pins: BarPin[] }) {
+function MapContent({
+	pins,
+	userLocation,
+}: {
+	pins: BarPin[];
+	userLocation: LatLng | null;
+}) {
 	const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
-	const [userLocation, setUserLocation] = useState<{
-		lat: number;
-		lng: number;
-	} | null>(null);
-	const hasSetUserLocation = useRef(false);
-
-	useEffect(() => {
-		if (!hasSetUserLocation.current && navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					setUserLocation({
-						lat: position.coords.latitude,
-						lng: position.coords.longitude,
-					});
-					hasSetUserLocation.current = true;
-				},
-				(error) => {
-					console.warn("位置情報の取得に失敗しました:", error);
-					hasSetUserLocation.current = true;
-				},
-			);
-		}
-	}, []);
 
 	const selectedPin = pins.find((pin) => pin.id === selectedPinId) ?? null;
 
@@ -87,32 +71,24 @@ export function GoogleMap({ city, bars, defaultZoom = 12 }: GoogleMapProps) {
 		lat: 34.9756,
 		lng: 138.3833,
 	});
-	const [userLocation, setUserLocation] = useState<{
-		lat: number;
-		lng: number;
-	} | null>(null);
+	const [userLocation, setUserLocation] = useState<LatLng | null>(null);
 	const hasSetUserLocation = useRef(false);
 
 	useEffect(() => {
-		if (!hasSetUserLocation.current && navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					const newCenter = {
-						lat: position.coords.latitude,
-						lng: position.coords.longitude,
-					};
-					setUserLocation(newCenter);
-					if (!city) {
-						setCenter(newCenter);
-					}
-					hasSetUserLocation.current = true;
-				},
-				(error) => {
-					console.warn("位置情報の取得に失敗しました:", error);
-					hasSetUserLocation.current = true;
-				},
-			);
-		}
+		if (hasSetUserLocation.current) return;
+		requestUserLocation(
+			navigator.geolocation,
+			(location) => {
+				setUserLocation(location);
+				if (!city) {
+					setCenter(location);
+				}
+				hasSetUserLocation.current = true;
+			},
+			() => {
+				hasSetUserLocation.current = true;
+			},
+		);
 	}, [city]);
 
 	useEffect(() => {
@@ -153,7 +129,7 @@ export function GoogleMap({ city, bars, defaultZoom = 12 }: GoogleMapProps) {
 					gestureHandling="greedy"
 					disableDefaultUI={false}
 				>
-					<MapContent pins={pins} />
+					<MapContent pins={pins} userLocation={userLocation} />
 				</GoogleMapComponent>
 			</APIProvider>
 		</div>
