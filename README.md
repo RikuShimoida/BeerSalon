@@ -148,7 +148,7 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 | Secret 名 | 用途 |
 |-----------|------|
-| `SUPABASE_ACCESS_TOKEN` | Supabase CLI のアクセストークン（`supabase link` 用）。ダッシュボード → Account → Access Tokens で発行。dev / prod 共通（同一組織なら1つで足りる） |
+| `SUPABASE_ACCESS_TOKEN` | Supabase CLI のアクセストークン（`supabase link` 用）。ダッシュボード → Account → Access Tokens で発行。dev / prod 共通で1つ。**ただしトークンは組織スコープのため、dev プロジェクトは prod と同一 Supabase 組織に作成すること**（別組織に作るとこの1トークンでは dev を link できず、組織ごとに別トークンが必要になる） |
 | `SUPABASE_PROJECT_ID` | **prod（main 用）** プロジェクトの ref（`supabase link --project-ref` に渡す） |
 | `SUPABASE_DB_PASSWORD` | **prod（main 用）** リモート DB のパスワード（`supabase db push` 用） |
 | `SUPABASE_PROJECT_ID_DEV` | **dev（develop 用）** プロジェクトの ref |
