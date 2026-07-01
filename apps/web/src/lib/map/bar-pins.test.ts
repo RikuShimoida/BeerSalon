@@ -55,6 +55,15 @@ describe("toBarPins", () => {
 		expect(pins).toHaveLength(0);
 	});
 
+	it("空文字の緯度経度を持つ店舗はピンから除外する（0/0 に誤ってピンを立てない）", () => {
+		expect(
+			toBarPins([makeBar({ id: "1", latitude: "", longitude: "138.3833" })]),
+		).toHaveLength(0);
+		expect(
+			toBarPins([makeBar({ id: "2", latitude: "34.9756", longitude: "" })]),
+		).toHaveLength(0);
+	});
+
 	it("緯度経度あり/なしが混在しても、ありの店舗のみをピン化する", () => {
 		const pins = toBarPins([
 			makeBar({ id: "1", latitude: "34.9756", longitude: "138.3833" }),
