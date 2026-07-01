@@ -25,12 +25,38 @@ export async function getArticleDetail(articleId: string) {
 		return null;
 	}
 
-	// Why not: articles にカウンタカラムが無いため、count による集計でいいね総数を取得する。
-	const likeCount = await prisma.articleLike.count({
-		where: { articleId: article.id },
-	});
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
 
-	const isLiked = await checkIfUserLikedArticle(article.id);
+	const userProfile = user
+		? await prisma.userProfile.findUnique({
+				where: {
+					userAuthId: user.id,
+				},
+			})
+		: null;
+
+	// Why not: articles にカウンタカラムが無いため、count による集計でいいね総数を取得する。
+	// likeCount と isLiked は相互依存が無いため Promise.all で並列取得し DB 往復を削減する。
+	const [likeCount, likedRow] = await Promise.all([
+		prisma.articleLike.count({
+			where: { articleId: article.id },
+		}),
+		userProfile
+			? prisma.articleLike.findUnique({
+					where: {
+						articleId_userId: {
+							articleId: article.id,
+							userId: userProfile.id,
+						},
+					},
+				})
+			: Promise.resolve(null),
+	]);
+
+	const isLiked = likedRow !== null;
 
 	return {
 		...article,
@@ -107,36 +133,4 @@ export async function toggleArticleLike(articleId: bigint) {
 	revalidatePath("/articles/[articleId]", "page");
 
 	return !existingLike;
-}
-
-export async function checkIfUserLikedArticle(articleId: bigint) {
-	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
-
-	if (!user) {
-		return false;
-	}
-
-	const userProfile = await prisma.userProfile.findUnique({
-		where: {
-			userAuthId: user.id,
-		},
-	});
-
-	if (!userProfile) {
-		return false;
-	}
-
-	const like = await prisma.articleLike.findUnique({
-		where: {
-			articleId_userId: {
-				articleId,
-				userId: userProfile.id,
-			},
-		},
-	});
-
-	return like !== null;
 }
