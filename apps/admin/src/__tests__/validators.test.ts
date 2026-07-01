@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateLineUrl } from "@/lib/validators";
+import { validateCoordinates, validateLineUrl } from "@/lib/validators";
 
 describe("validateLineUrl", () => {
 	it("空文字列の場合はバリデーションを通過する", () => {
@@ -72,5 +72,128 @@ describe("validateLineUrl", () => {
 		const result = validateLineUrl("not-a-url");
 		expect(result.isValid).toBe(false);
 		expect(result.error).toContain("line.me");
+	});
+});
+
+describe("validateCoordinates", () => {
+	it("緯度・経度がともに未入力（空文字）の場合は通過し null に正規化する", () => {
+		expect(validateCoordinates("", "")).toEqual({
+			isValid: true,
+			latitude: null,
+			longitude: null,
+		});
+	});
+
+	it("緯度・経度がともに null の場合は通過し null に正規化する", () => {
+		expect(validateCoordinates(null, null)).toEqual({
+			isValid: true,
+			latitude: null,
+			longitude: null,
+		});
+	});
+
+	it("緯度・経度がともに undefined の場合は通過し null に正規化する", () => {
+		expect(validateCoordinates(undefined, undefined)).toEqual({
+			isValid: true,
+			latitude: null,
+			longitude: null,
+		});
+	});
+
+	it("有効な数値文字列を数値へ変換して返す", () => {
+		expect(validateCoordinates("35.0116", "135.7681")).toEqual({
+			isValid: true,
+			latitude: 35.0116,
+			longitude: 135.7681,
+		});
+	});
+
+	it("数値型の入力もそのまま受け付ける", () => {
+		expect(validateCoordinates(34.9756, 138.3828)).toEqual({
+			isValid: true,
+			latitude: 34.9756,
+			longitude: 138.3828,
+		});
+	});
+
+	it("緯度のみ入力・経度未入力でも通過する（片方だけ許容）", () => {
+		expect(validateCoordinates("35", "")).toEqual({
+			isValid: true,
+			latitude: 35,
+			longitude: null,
+		});
+	});
+
+	it("経度のみ入力・緯度未入力でも通過する（片方だけ許容）", () => {
+		expect(validateCoordinates("", "135")).toEqual({
+			isValid: true,
+			latitude: null,
+			longitude: 135,
+		});
+	});
+
+	it("緯度・経度の境界値（-90/90, -180/180）は通過する", () => {
+		expect(validateCoordinates("-90", "-180")).toEqual({
+			isValid: true,
+			latitude: -90,
+			longitude: -180,
+		});
+		expect(validateCoordinates("90", "180")).toEqual({
+			isValid: true,
+			latitude: 90,
+			longitude: 180,
+		});
+	});
+
+	it("緯度が範囲下限を下回る場合は失敗する", () => {
+		const result = validateCoordinates("-90.1", "0");
+		expect(result.isValid).toBe(false);
+		if (!result.isValid) {
+			expect(result.error).toContain("緯度");
+			expect(result.error).toContain("-90");
+		}
+	});
+
+	it("緯度が範囲上限を上回る場合は失敗する", () => {
+		const result = validateCoordinates("90.1", "0");
+		expect(result.isValid).toBe(false);
+		if (!result.isValid) {
+			expect(result.error).toContain("緯度");
+		}
+	});
+
+	it("経度が範囲下限を下回る場合は失敗する", () => {
+		const result = validateCoordinates("0", "-180.1");
+		expect(result.isValid).toBe(false);
+		if (!result.isValid) {
+			expect(result.error).toContain("経度");
+			expect(result.error).toContain("-180");
+		}
+	});
+
+	it("経度が範囲上限を上回る場合は失敗する", () => {
+		const result = validateCoordinates("0", "180.1");
+		expect(result.isValid).toBe(false);
+		if (!result.isValid) {
+			expect(result.error).toContain("経度");
+		}
+	});
+
+	it("緯度が数値に変換できない文字列の場合は失敗する", () => {
+		const result = validateCoordinates("北緯35度", "135");
+		expect(result.isValid).toBe(false);
+		if (!result.isValid) {
+			expect(result.error).toContain("緯度");
+			expect(result.error).toContain("数値");
+		}
+	});
+
+	it("経度が数値に変換できない文字列の場合は失敗する", () => {
+		const result = validateCoordinates("35", "abc");
+		expect(result.isValid).toBe(false);
+		if (!result.isValid) {
+			expect(result.error).toContain("経度");
+			expect(result.error).toContain("数値");
+		}
 	});
 });

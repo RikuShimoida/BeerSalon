@@ -52,6 +52,8 @@ export interface Bar {
 	city: string | null;
 	address_line1: string | null;
 	address_line2: string | null;
+	latitude: number | null;
+	longitude: number | null;
 	phone_number: string | null;
 	access: string | null;
 	website_url: string | null;
