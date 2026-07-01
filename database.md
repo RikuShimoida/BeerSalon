@@ -363,6 +363,10 @@ UNIQUE制約: `country_id + name`
 | used_at       | timestamptz| NULLABLE                           | 使用日時            |
 | is_used       | boolean    | NOT NULL DEFAULT false             | 使用済みフラグ      |
 
+**二重取得の防止**: `(user_id, coupon_id)` に DB の UNIQUE 制約は張っていない。ユーザー画面のクーポン取得アクション（`apps/web` の `obtainCoupon`）が、存在チェック → INSERT を1つのトランザクション内で行うことでアプリ側で二重取得を防ぐ。
+
+**取得可否の判定（`obtainCoupon`）**: `bar_coupons.is_active=true` かつ有効期間内（`valid_from` が未来でなく `valid_until` が過去でない。いずれも NULL なら該当方向の制限なし）、かつ `usage_limit` が非 NULL の場合は `used_count < usage_limit` のときのみ取得できる。`used_count` は「利用回数」であり、取得（`user_coupons` への INSERT）ではインクリメントしない（利用＝消し込みフローは未実装のため）。
+
 ---
 
 ### 3-3. articles
