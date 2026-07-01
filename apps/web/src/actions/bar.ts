@@ -106,6 +106,8 @@ export async function getBars(params?: {
 		prefecture: bar.prefecture,
 		city: bar.city,
 		imageUrl: bar.previewImageUrl || bar.barImages[0]?.imageUrl,
+		latitude: bar.latitude?.toString() ?? null,
+		longitude: bar.longitude?.toString() ?? null,
 	}));
 }
 

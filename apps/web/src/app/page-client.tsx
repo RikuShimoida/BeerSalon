@@ -2,7 +2,9 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getBars } from "@/actions/bar";
 import { BarList } from "@/components/bar/bar-list";
+import type { BarSummary } from "@/components/bar/bar-summary";
 import { FooterLinks } from "@/components/home/footer-links";
 import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
 import { PopularArticlesSection } from "@/components/home/popular-articles-section";
@@ -40,6 +42,35 @@ export function HomeClient() {
 			city: urlCity,
 		}));
 	}, [urlQuery, urlCity]);
+
+	// Why not: マップと店舗一覧が別々に getBars を呼ぶと、同一検索条件でも取得タイミングの
+	// ズレで表示がリンクしなくなる。親で一度だけ取得し、両者へ同じ結果を配ってデータソースを
+	// 一本化する。
+	const [bars, setBars] = useState<BarSummary[]>([]);
+	const [isBarsLoading, setIsBarsLoading] = useState(true);
+
+	const categoriesKey = searchParams.categories.join(",");
+
+	useEffect(() => {
+		let isCurrent = true;
+		const fetchBars = async () => {
+			setIsBarsLoading(true);
+			const result = await getBars({
+				q: searchParams.q,
+				city: searchParams.city,
+				categories: categoriesKey ? categoriesKey.split(",") : [],
+				origin: searchParams.origin,
+			});
+			if (!isCurrent) return;
+			setBars(result);
+			setIsBarsLoading(false);
+		};
+
+		fetchBars();
+		return () => {
+			isCurrent = false;
+		};
+	}, [searchParams.q, searchParams.city, categoriesKey, searchParams.origin]);
 
 	const handleSearch = (params: {
 		q: string;
@@ -209,15 +240,10 @@ export function HomeClient() {
 				/>
 
 				{/* 地図エリア */}
-				<GoogleMap city={searchParams.city} />
+				<GoogleMap city={searchParams.city} bars={bars} />
 
 				{/* 店舗一覧 */}
-				<BarList
-					q={searchParams.q}
-					city={searchParams.city}
-					categories={searchParams.categories}
-					origin={searchParams.origin}
-				/>
+				<BarList bars={bars} isLoading={isBarsLoading} />
 
 				{/* クラフトビールについて知る */}
 				<LearnAboutCraftBeerCard />

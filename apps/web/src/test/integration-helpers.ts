@@ -67,7 +67,13 @@ export async function createTestAuthUser(
 
 export async function createTestBar(
 	prisma: PrismaClient,
-	overrides: { name?: string; city?: string; prefecture?: string } = {},
+	overrides: {
+		name?: string;
+		city?: string;
+		prefecture?: string;
+		latitude?: number | null;
+		longitude?: number | null;
+	} = {},
 ): Promise<{ id: bigint; name: string }> {
 	const suffix = faker.string.alphanumeric(8).toLowerCase();
 	const name = overrides.name ?? `${INTEGRATION_TEST_PREFIX}bar-${suffix}`;
@@ -78,6 +84,8 @@ export async function createTestBar(
 			city: overrides.city ?? "渋谷区",
 			addressLine1: `${INTEGRATION_TEST_PREFIX}address-${suffix}`,
 			description: `${INTEGRATION_TEST_PREFIX}description`,
+			latitude: overrides.latitude ?? null,
+			longitude: overrides.longitude ?? null,
 		},
 	});
 	return { id: bar.id, name: bar.name };

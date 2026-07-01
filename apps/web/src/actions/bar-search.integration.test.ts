@@ -33,12 +33,16 @@ const uniqueCountryName = `it-country-${faker.string.alphanumeric(6).toLowerCase
 const uniqueRegionName = `it-region-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueKeyword = `it-kw-${faker.string.alphanumeric(6).toLowerCase()}`;
 
+const geoCity = `it-geocity-${faker.string.alphanumeric(6).toLowerCase()}`;
+
 let barOnlyCityId: bigint;
 let barOnlyCategoryId: bigint;
 let barOnlyCategory2Id: bigint;
 let barOnlyOriginId: bigint;
 let barAllMatchedId: bigint;
 let barKeywordInNameId: bigint;
+let barWithGeoId: bigint;
+let barWithoutGeoId: bigint;
 let createdCategoryId: bigint;
 let createdCategory2Id: bigint;
 let createdCountryId: bigint;
@@ -154,6 +158,21 @@ beforeAll(async () => {
 		name: `${INTEGRATION_TEST_PREFIX}bar-${uniqueKeyword}`,
 	});
 	barKeywordInNameId = barKeywordInName.id;
+
+	// 6) 緯度経度あり / なしの bar: マップピン描画用に getBars が座標を返すか検証する
+	const barWithGeo = await createTestBar(prisma, {
+		city: geoCity,
+		latitude: 35.1614,
+		longitude: 138.6764,
+	});
+	barWithGeoId = barWithGeo.id;
+
+	const barWithoutGeo = await createTestBar(prisma, {
+		city: geoCity,
+		latitude: null,
+		longitude: null,
+	});
+	barWithoutGeoId = barWithoutGeo.id;
 });
 
 afterAll(async () => {
@@ -302,5 +321,23 @@ describe("getBars (Integration)", () => {
 		const ids = result.map((bar) => bar.id);
 		expect(ids).not.toContain(barKeywordInNameId.toString());
 		expect(ids).not.toContain(barOnlyCityId.toString());
+	});
+
+	it("緯度経度が登録された bar は latitude/longitude を文字列で返す (マップピン用)", async () => {
+		const result = await getBars({ city: geoCity });
+		const withGeo = result.find((bar) => bar.id === barWithGeoId.toString());
+		expect(withGeo).toBeDefined();
+		expect(Number(withGeo?.latitude)).toBeCloseTo(35.1614, 4);
+		expect(Number(withGeo?.longitude)).toBeCloseTo(138.6764, 4);
+	});
+
+	it("緯度経度が未登録の bar は latitude/longitude が null だが一覧には含まれる", async () => {
+		const result = await getBars({ city: geoCity });
+		const withoutGeo = result.find(
+			(bar) => bar.id === barWithoutGeoId.toString(),
+		);
+		expect(withoutGeo).toBeDefined();
+		expect(withoutGeo?.latitude).toBeNull();
+		expect(withoutGeo?.longitude).toBeNull();
 	});
 });
