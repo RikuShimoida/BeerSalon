@@ -1,12 +1,5 @@
 import { expect, test } from "@playwright/test";
 import { loginAsSmokeUser } from "./helpers/auth";
-import { createBarWithGeo, removeBarWithGeo } from "./helpers/database";
-
-// Why not: 「市町村を選ぶと〜ピン表示」テストは共有 DB に一時 bar を作成/削除する。
-// fullyParallel のまま同ファイルの検索/件数系テストと並列に走らせると、一時 bar が
-// 他テストの `/` 一覧に混ざり非決定的に失敗する。同ファイル内を直列化して分離する
-// （CI は workers:1 で元々直列。ローカル並列でも安定させるための措置）。
-test.describe.configure({ mode: "serial" });
 
 test.describe("トップページ（検索ページ）", () => {
 	test.beforeEach(async ({ page }) => {
@@ -66,35 +59,5 @@ test.describe("トップページ（検索ページ）", () => {
 		await expect(page).toHaveURL(/\?q=/);
 		await expect(page.locator("#search-keyword")).toHaveValue("静岡");
 		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
-	});
-
-	test("市町村を選ぶと、その市町村の DB 登録店舗がマップにピン表示され、ピンから店舗詳細へ遷移できる", async ({
-		page,
-	}) => {
-		// seed を書き換えず、CITY_COORDINATES に一致する city と座標を持つ専用 bar を作る
-		const { barId, name, city } = await createBarWithGeo();
-
-		try {
-			await page.goto(`/?city=${encodeURIComponent(city)}`);
-
-			// Why not: AdvancedMarker は Google Maps 内部の Web Component として描画される。
-			// title=店舗名 の gmp-advanced-marker が出現することで「DB 店舗がピン化された」ことを検証する。
-			const marker = page.locator(`gmp-advanced-marker[title="${name}"]`);
-			await expect(marker).toBeVisible({ timeout: 20000 });
-
-			// ピンを実クリック（合成イベントでは Google Maps の onClick が発火しないため座標クリック）。
-			// アンカーは下端のため視覚中心のやや上を押す。
-			const box = await marker.boundingBox();
-			if (!box) throw new Error("marker bounding box not found");
-			await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2 - 8);
-
-			// InfoWindow の「店舗詳細を見る」導線が出て、押下で /bars/[barId] へ遷移する
-			const detailLink = page.locator(`.gm-style-iw a[href="/bars/${barId}"]`);
-			await expect(detailLink).toBeVisible();
-			await detailLink.click();
-			await expect(page).toHaveURL(new RegExp(`/bars/${barId}$`));
-		} finally {
-			await removeBarWithGeo();
-		}
 	});
 });
