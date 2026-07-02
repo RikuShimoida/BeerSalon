@@ -258,79 +258,86 @@ export async function PUT(
 		}
 
 		if (payment_method_ids !== undefined) {
-			const { error: deleteError } = await supabaseAdmin
-				.from("bar_payment_methods")
-				.delete()
-				.eq("bar_id", barId);
-
-			if (deleteError) {
+			if (!Array.isArray(payment_method_ids)) {
+				return NextResponse.json(
+					{ error: "支払い方法の指定が正しくありません" },
+					{ status: 400 },
+				);
 			}
 
-			if (Array.isArray(payment_method_ids) && payment_method_ids.length > 0) {
-				const paymentMethodsData = payment_method_ids.map((pmId: string) => ({
-					bar_id: parseInt(barId, 10),
-					payment_method_id: parseInt(pmId, 10),
-				}));
-
-				const { error: insertError } = await supabaseAdmin
-					.from("bar_payment_methods")
-					.insert(paymentMethodsData);
-
-				if (insertError) {
+			const normalizedIds: number[] = [];
+			for (const pmId of payment_method_ids) {
+				const id = Number(pmId);
+				if (!Number.isInteger(id)) {
 					return NextResponse.json(
-						{ error: "支払い方法の更新に失敗しました" },
-						{ status: 500 },
+						{ error: "支払い方法の指定が正しくありません" },
+						{ status: 400 },
 					);
 				}
+				if (!normalizedIds.includes(id)) {
+					normalizedIds.push(id);
+				}
+			}
+
+			// DELETE→INSERT を1トランザクションで実行する RPC に委譲し、
+			// INSERT 失敗時に既存データが消えたまま残る事故を防ぐ
+			const { error: syncError } = await supabaseAdmin.rpc(
+				"sync_bar_payment_methods",
+				{
+					p_bar_id: parseInt(barId, 10),
+					p_payment_method_ids: normalizedIds,
+				},
+			);
+
+			if (syncError) {
+				return NextResponse.json(
+					{ error: "支払い方法の更新に失敗しました" },
+					{ status: 500 },
+				);
 			}
 		}
 
 		if (opening_hours !== undefined) {
-			const { error: deleteError } = await supabaseAdmin
-				.from("bar_opening_hours")
-				.delete()
-				.eq("bar_id", barId);
-
-			if (deleteError) {
+			if (!Array.isArray(opening_hours)) {
+				return NextResponse.json(
+					{ error: "営業時間の指定が正しくありません" },
+					{ status: 400 },
+				);
 			}
 
-			if (Array.isArray(opening_hours) && opening_hours.length > 0) {
-				const now = new Date().toISOString();
-				interface OpeningHourInput {
-					day_of_week: number;
-					open_time: string;
-					close_time: string;
-					sort_order: number;
-					is_closed: boolean;
-				}
-				const openingHoursData = opening_hours
-					.filter(
-						(oh: OpeningHourInput) =>
-							oh.is_closed || (oh.open_time && oh.close_time),
-					)
-					.map((oh: OpeningHourInput) => ({
-						bar_id: parseInt(barId, 10),
-						day_of_week: oh.day_of_week,
-						open_time: oh.is_closed ? "00:00:00" : `${oh.open_time}:00`,
-						close_time: oh.is_closed ? "00:00:00" : `${oh.close_time}:00`,
-						sort_order: oh.sort_order,
-						is_closed: oh.is_closed,
-						created_at: now,
-						updated_at: now,
-					}));
+			interface OpeningHourInput {
+				day_of_week: number;
+				open_time: string;
+				close_time: string;
+				sort_order: number;
+				is_closed: boolean;
+			}
+			const openingHoursData = opening_hours
+				.filter(
+					(oh: OpeningHourInput) =>
+						oh.is_closed || (oh.open_time && oh.close_time),
+				)
+				.map((oh: OpeningHourInput) => ({
+					day_of_week: oh.day_of_week,
+					open_time: oh.is_closed ? "00:00:00" : `${oh.open_time}:00`,
+					close_time: oh.is_closed ? "00:00:00" : `${oh.close_time}:00`,
+					sort_order: oh.sort_order,
+					is_closed: oh.is_closed,
+				}));
 
-				if (openingHoursData.length > 0) {
-					const { error: insertError } = await supabaseAdmin
-						.from("bar_opening_hours")
-						.insert(openingHoursData);
+			const { error: syncError } = await supabaseAdmin.rpc(
+				"sync_bar_opening_hours",
+				{
+					p_bar_id: parseInt(barId, 10),
+					p_opening_hours: openingHoursData,
+				},
+			);
 
-					if (insertError) {
-						return NextResponse.json(
-							{ error: "営業時間の更新に失敗しました" },
-							{ status: 500 },
-						);
-					}
-				}
+			if (syncError) {
+				return NextResponse.json(
+					{ error: "営業時間の更新に失敗しました" },
+					{ status: 500 },
+				);
 			}
 		}
 

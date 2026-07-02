@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// 営業時間を登録
+		// 営業時間を登録（PUT と同じ sync RPC に寄せ、書き込み口を一本化する）
 		if (Array.isArray(opening_hours) && opening_hours.length > 0) {
 			const openingHoursData = opening_hours
 				.filter(
@@ -286,19 +286,19 @@ export async function POST(request: NextRequest) {
 						sort_order: number;
 						is_closed: boolean;
 					}) => ({
-						bar_id: bar.id,
 						day_of_week: oh.day_of_week,
 						open_time: oh.is_closed ? "00:00:00" : `${oh.open_time}:00`,
 						close_time: oh.is_closed ? "00:00:00" : `${oh.close_time}:00`,
 						sort_order: oh.sort_order,
 						is_closed: oh.is_closed,
-						created_at: now,
-						updated_at: now,
 					}),
 				);
 
 			if (openingHoursData.length > 0) {
-				await supabaseAdmin.from("bar_opening_hours").insert(openingHoursData);
+				await supabaseAdmin.rpc("sync_bar_opening_hours", {
+					p_bar_id: bar.id,
+					p_opening_hours: openingHoursData,
+				});
 			}
 		}
 
