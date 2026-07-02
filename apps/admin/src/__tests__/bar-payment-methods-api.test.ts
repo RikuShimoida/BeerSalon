@@ -17,19 +17,27 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 // URL バリデータは本テストの対象外なので常に valid を返すモックにし、
-// 子データ同期ロジックの検証に集中する
-vi.mock("@/lib/validators", () => ({
-	validateWebsiteUrl: () => ({ isValid: true }),
-	validateInstagramUrl: () => ({ isValid: true }),
-	validateXUrl: () => ({ isValid: true }),
-	validateFacebookUrl: () => ({ isValid: true }),
-	validateLineUrl: () => ({ isValid: true }),
-	validateCoordinates: () => ({
-		isValid: true,
-		latitude: null,
-		longitude: null,
-	}),
-}));
+// 子データ同期ロジックの検証に集中する。
+// 営業時間の要素バリデーション（validateOpeningHours）は検証対象そのものなので実装を使う。
+vi.mock("@/lib/validators", async () => {
+	const actual =
+		await vi.importActual<typeof import("@/lib/validators")>(
+			"@/lib/validators",
+		);
+	return {
+		validateWebsiteUrl: () => ({ isValid: true }),
+		validateInstagramUrl: () => ({ isValid: true }),
+		validateXUrl: () => ({ isValid: true }),
+		validateFacebookUrl: () => ({ isValid: true }),
+		validateLineUrl: () => ({ isValid: true }),
+		validateCoordinates: () => ({
+			isValid: true,
+			latitude: null,
+			longitude: null,
+		}),
+		validateOpeningHours: actual.validateOpeningHours,
+	};
+});
 
 import type { NextRequest } from "next/server";
 import { PUT } from "@/app/api/bars/[barId]/route";
@@ -300,6 +308,58 @@ describe("PUT /api/bars/[barId] 営業時間同期", () => {
 			createMockRequest({
 				name: "テストバー",
 				opening_hours: "invalid",
+			}),
+			{ params: Promise.resolve({ barId: "5" }) },
+		);
+
+		expect(response.status).toBe(400);
+		expect(mockSupabaseRpc).not.toHaveBeenCalledWith(
+			"sync_bar_opening_hours",
+			expect.anything(),
+		);
+	});
+
+	it("day_of_week が範囲外（7）の場合は 400 を返し RPC を呼ばない", async () => {
+		setupSupabaseMocks();
+
+		const response = await PUT(
+			createMockRequest({
+				name: "テストバー",
+				opening_hours: [
+					{
+						day_of_week: 7,
+						open_time: "17:00",
+						close_time: "23:00",
+						sort_order: 0,
+						is_closed: false,
+					},
+				],
+			}),
+			{ params: Promise.resolve({ barId: "5" }) },
+		);
+
+		expect(response.status).toBe(400);
+		expect(mockSupabaseRpc).not.toHaveBeenCalledWith(
+			"sync_bar_opening_hours",
+			expect.anything(),
+		);
+	});
+
+	it("時刻が不正形式（25:00）の場合は 400 を返し RPC を呼ばない", async () => {
+		setupSupabaseMocks();
+
+		const response = await PUT(
+			createMockRequest({
+				name: "テストバー",
+				opening_hours: [
+					{
+						day_of_week: 0,
+						open_time: "25:00",
+						close_time: "23:00",
+						sort_order: 0,
+						is_closed: false,
+					},
+				],
 			}),
 			{ params: Promise.resolve({ barId: "5" }) },
 		);

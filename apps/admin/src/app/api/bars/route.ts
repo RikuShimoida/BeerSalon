@@ -7,6 +7,7 @@ import {
 	validateFacebookUrl,
 	validateInstagramUrl,
 	validateLineUrl,
+	validateOpeningHours,
 	validateWebsiteUrl,
 	validateXUrl,
 } from "@/lib/validators";
@@ -212,6 +213,24 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		// 営業時間は店舗（bars）を作る前に検証する。作成後に 400 を返すと店舗だけ残るため。
+		if (opening_hours !== undefined) {
+			if (!Array.isArray(opening_hours)) {
+				return NextResponse.json(
+					{ error: "営業時間の指定が正しくありません" },
+					{ status: 400 },
+				);
+			}
+
+			const openingHoursValidation = validateOpeningHours(opening_hours);
+			if (!openingHoursValidation.isValid) {
+				return NextResponse.json(
+					{ error: openingHoursValidation.error },
+					{ status: 400 },
+				);
+			}
+		}
+
 		// バー作成
 		const now = new Date().toISOString();
 		const { data: bar, error: barError } = await supabaseAdmin
@@ -295,10 +314,28 @@ export async function POST(request: NextRequest) {
 				);
 
 			if (openingHoursData.length > 0) {
-				await supabaseAdmin.rpc("sync_bar_opening_hours", {
-					p_bar_id: bar.id,
-					p_opening_hours: openingHoursData,
-				});
+				// PUT 側と対称に RPC の error を拾う。握り潰すと営業時間の登録失敗が呼び出し側に伝わらないため。
+				// Why not「POST 全体の RPC 化（店舗作成含めた全体トランザクション化）」: 本 PR スコープ（子データ同期の原子化）外のため採らず、
+				// 既存データ消失防止に必要な RPC エラーの拾い上げのみ行う。
+				const { error: syncError } = await supabaseAdmin.rpc(
+					"sync_bar_opening_hours",
+					{
+						p_bar_id: bar.id,
+						p_opening_hours: openingHoursData,
+					},
+				);
+
+				if (syncError) {
+					// 店舗（bars）と admin_users は既に作成済み。作成済みの barId を返し、
+					// 「店舗は作成されたが営業時間の登録に失敗した」ことを呼び出し側へ伝える。
+					return NextResponse.json(
+						{
+							error: "店舗は作成されましたが営業時間の登録に失敗しました",
+							barId: bar.id,
+						},
+						{ status: 500 },
+					);
+				}
 			}
 		}
 

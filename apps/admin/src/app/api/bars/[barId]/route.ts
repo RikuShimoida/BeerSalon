@@ -7,6 +7,7 @@ import {
 	validateFacebookUrl,
 	validateInstagramUrl,
 	validateLineUrl,
+	validateOpeningHours,
 	validateWebsiteUrl,
 	validateXUrl,
 } from "@/lib/validators";
@@ -301,6 +302,15 @@ export async function PUT(
 			if (!Array.isArray(opening_hours)) {
 				return NextResponse.json(
 					{ error: "営業時間の指定が正しくありません" },
+					{ status: 400 },
+				);
+			}
+
+			// 不正値のまま sync RPC を呼んで既存データを消す事故を防ぐため、整形前に要素を検証する
+			const openingHoursValidation = validateOpeningHours(opening_hours);
+			if (!openingHoursValidation.isValid) {
+				return NextResponse.json(
+					{ error: openingHoursValidation.error },
 					{ status: 400 },
 				);
 			}
