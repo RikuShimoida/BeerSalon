@@ -5,13 +5,18 @@ import {
 	APIProvider,
 	Map as GoogleMapComponent,
 	InfoWindow,
+	useMap,
 } from "@vis.gl/react-google-maps";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { BarSummary } from "@/components/bar/bar-summary";
 import { CITY_COORDINATES } from "@/lib/constants/city-coordinates";
 import { type BarPin, toBarPins } from "@/lib/map/bar-pins";
+import { resolveMapView } from "@/lib/map/map-view";
 import { type LatLng, requestUserLocation } from "@/lib/map/user-location";
+
+// fitBounds で全ピンを内包表示する際、ピンが地図の端に貼り付かないよう余白を確保する。
+const FIT_BOUNDS_PADDING = 48;
 
 interface GoogleMapProps {
 	city?: string;
@@ -22,13 +27,45 @@ interface GoogleMapProps {
 function MapContent({
 	pins,
 	userLocation,
+	fallbackCenter,
+	fallbackZoom,
 }: {
 	pins: BarPin[];
 	userLocation: LatLng | null;
+	fallbackCenter: { lat: number; lng: number };
+	fallbackZoom: number;
 }) {
 	const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+	const map = useMap();
 
 	const selectedPin = pins.find((pin) => pin.id === selectedPinId) ?? null;
+
+	// Why not: center/zoom を <Map> の props で controlled にすると、市町村代表座標1点に固定され
+	// ピン群がビューポート外にはみ出す。fitBounds はブラウザ API のため useMap 経由で命令的に呼ぶ。
+	// pins の同一性ではなく座標並びの変化に反応させるため、依存キーを座標文字列に落とす。
+	const pinsKey = pins.map((pin) => `${pin.lat},${pin.lng}`).join("|");
+	const { lat: fallbackLat, lng: fallbackLng } = fallbackCenter;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: pinsKey が pins の座標変化を表すため pins 自体は依存に含めない
+	useEffect(() => {
+		if (!map) return;
+		const view = resolveMapView(pins);
+		if (view.type === "fit") {
+			const bounds = new google.maps.LatLngBounds();
+			for (const point of view.points) {
+				bounds.extend(point);
+			}
+			map.fitBounds(bounds, FIT_BOUNDS_PADDING);
+			return;
+		}
+		if (view.type === "center") {
+			map.setCenter(view.center);
+			map.setZoom(fallbackZoom);
+			return;
+		}
+		// ピン0件: ピンに合わせようがないため、市町村代表座標 or 現在地へ寄せる。
+		map.setCenter({ lat: fallbackLat, lng: fallbackLng });
+		map.setZoom(fallbackZoom);
+	}, [map, pinsKey, fallbackLat, fallbackLng, fallbackZoom]);
 
 	return (
 		<>
@@ -122,14 +159,19 @@ export function GoogleMap({ city, bars, defaultZoom = 12 }: GoogleMapProps) {
 		<div className="glass-card rounded-2xl overflow-hidden modern-shadow h-64 md:h-80">
 			<APIProvider apiKey={apiKey}>
 				<GoogleMapComponent
-					center={center}
-					zoom={defaultZoom}
+					defaultCenter={center}
+					defaultZoom={defaultZoom}
 					mapId="beer-salon-map"
 					className="w-full h-full"
 					gestureHandling="greedy"
 					disableDefaultUI={false}
 				>
-					<MapContent pins={pins} userLocation={userLocation} />
+					<MapContent
+						pins={pins}
+						userLocation={userLocation}
+						fallbackCenter={center}
+						fallbackZoom={defaultZoom}
+					/>
 				</GoogleMapComponent>
 			</APIProvider>
 		</div>
