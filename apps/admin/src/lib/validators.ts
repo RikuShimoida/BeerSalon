@@ -149,6 +149,75 @@ export function resolveArticlePublishing(
 	return { isValid: true, status, published_at: scheduledAt.toISOString() };
 }
 
+const OPENING_HOUR_TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * 営業時間配列（RPC 整形前の生入力）の各要素を検証する。
+ *
+ * `payment_method_ids` と同水準の入力バリデーションを営業時間にも設け、
+ * 不正値のまま sync RPC を呼んで既存データを消してしまう事故を防ぐ。
+ * 検証内容:
+ * - day_of_week: 0〜6 の整数
+ * - sort_order: 整数
+ * - is_closed: boolean
+ * - 時刻整形の対象となる行（非定休日かつ open_time/close_time が入っている行）は HH:MM 形式
+ *   Why not「全行の時刻を必須検証」: 定休日行や時刻未入力で除外される行は整形対象外（既存 filter と整合）のため、時刻検証もしない。
+ */
+export function validateOpeningHours(openingHours: unknown[]): {
+	isValid: boolean;
+	error?: string;
+} {
+	const error = "営業時間の指定が正しくありません";
+
+	for (const oh of openingHours) {
+		if (typeof oh !== "object" || oh === null) {
+			return { isValid: false, error };
+		}
+
+		const row = oh as {
+			day_of_week?: unknown;
+			open_time?: unknown;
+			close_time?: unknown;
+			sort_order?: unknown;
+			is_closed?: unknown;
+		};
+
+		if (typeof row.is_closed !== "boolean") {
+			return { isValid: false, error };
+		}
+
+		if (
+			typeof row.day_of_week !== "number" ||
+			!Number.isInteger(row.day_of_week) ||
+			row.day_of_week < 0 ||
+			row.day_of_week > 6
+		) {
+			return { isValid: false, error };
+		}
+
+		if (
+			typeof row.sort_order !== "number" ||
+			!Number.isInteger(row.sort_order)
+		) {
+			return { isValid: false, error };
+		}
+
+		// 時刻整形の対象となる行（非定休日かつ open_time/close_time が入っている行）のみ HH:MM 形式を検証する
+		if (row.is_closed !== true && row.open_time && row.close_time) {
+			if (
+				typeof row.open_time !== "string" ||
+				typeof row.close_time !== "string" ||
+				!OPENING_HOUR_TIME_PATTERN.test(row.open_time) ||
+				!OPENING_HOUR_TIME_PATTERN.test(row.close_time)
+			) {
+				return { isValid: false, error };
+			}
+		}
+	}
+
+	return { isValid: true };
+}
+
 export function validateWebsiteUrl(url: string | null | undefined): {
 	isValid: boolean;
 	error?: string;

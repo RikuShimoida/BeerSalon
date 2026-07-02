@@ -124,6 +124,8 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 **CASCADE削除**: 店舗削除時に関連する営業時間レコードも削除
 
+**書き込み（管理画面）**: 店舗登録（POST）・店舗更新（PUT）の営業時間は「当該 `bar_id` を全削除→整形済みレコードを再登録」で同期する。PostgREST（`supabaseAdmin`）は複数文を1トランザクションにまとめられないため、DELETE 成功後に INSERT が失敗すると営業時間が全消失したまま復元されない。これを防ぐため、DELETE+INSERT を単一トランザクション化する RPC `sync_bar_opening_hours(p_bar_id bigint, p_opening_hours jsonb)` に書き込みを一本化している（`open_time`/`close_time` への `:00` 付与・`is_closed` 反映などの整形は API 側で行い、整形済み jsonb 配列を RPC に渡す）。
+
 **使用例**:
 - 複数時間帯: 昼営業（11:00-14:00）+ 夜営業（17:00-23:00）を2レコードで表現
 - 定休日: `is_closed=true` のレコードで表現
@@ -568,6 +570,8 @@ UNIQUE制約: `country_id + name`
 **UNIQUE制約**: `bar_id + payment_method_id`
 
 **CASCADE削除**: 店舗削除時に関連する `bar_payment_methods` も削除される
+
+**書き込み（管理画面）**: 店舗編集（PUT）の支払い方法は「当該 `bar_id` を全削除→選択分を再登録」で同期する。営業時間と同様に PostgREST では DELETE+INSERT を1トランザクションにできないため、原子化した RPC `sync_bar_payment_methods(p_bar_id bigint, p_payment_method_ids bigint[])` に一本化している。INSERT 失敗時は DELETE ごとロールバックされ、既存の支払い方法が保持される。API 側で `payment_method_ids` の整数検証・重複除去を行い、RPC 内でも `DISTINCT` で UNIQUE 制約 `bar_id + payment_method_id` 違反を二重防御する。
 
 ---
 

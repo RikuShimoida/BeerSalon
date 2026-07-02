@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { validateCoordinates, validateLineUrl } from "@/lib/validators";
+import {
+	validateCoordinates,
+	validateLineUrl,
+	validateOpeningHours,
+} from "@/lib/validators";
 
 describe("validateLineUrl", () => {
 	it("空文字列の場合はバリデーションを通過する", () => {
@@ -195,5 +199,141 @@ describe("validateCoordinates", () => {
 			expect(result.error).toContain("経度");
 			expect(result.error).toContain("数値");
 		}
+	});
+});
+
+describe("validateOpeningHours", () => {
+	it("正常な非定休日の行を通過する", () => {
+		expect(
+			validateOpeningHours([
+				{
+					day_of_week: 0,
+					open_time: "17:00",
+					close_time: "23:00",
+					sort_order: 0,
+					is_closed: false,
+				},
+			]),
+		).toEqual({ isValid: true });
+	});
+
+	it("定休日の行は時刻検証をスキップして通過する", () => {
+		expect(
+			validateOpeningHours([
+				{
+					day_of_week: 1,
+					open_time: "",
+					close_time: "",
+					sort_order: 0,
+					is_closed: true,
+				},
+			]),
+		).toEqual({ isValid: true });
+	});
+
+	it("時刻未入力かつ非定休日の行は時刻検証の対象外で通過する", () => {
+		expect(
+			validateOpeningHours([
+				{
+					day_of_week: 2,
+					open_time: "",
+					close_time: "",
+					sort_order: 0,
+					is_closed: false,
+				},
+			]),
+		).toEqual({ isValid: true });
+	});
+
+	it("day_of_week が範囲外（7）の場合は失敗する", () => {
+		const result = validateOpeningHours([
+			{
+				day_of_week: 7,
+				open_time: "17:00",
+				close_time: "23:00",
+				sort_order: 0,
+				is_closed: false,
+			},
+		]);
+		expect(result.isValid).toBe(false);
+		expect(result.error).toBe("営業時間の指定が正しくありません");
+	});
+
+	it("day_of_week が整数でない場合は失敗する", () => {
+		expect(
+			validateOpeningHours([
+				{
+					day_of_week: 1.5,
+					open_time: "17:00",
+					close_time: "23:00",
+					sort_order: 0,
+					is_closed: false,
+				},
+			]).isValid,
+		).toBe(false);
+	});
+
+	it("sort_order が整数でない場合は失敗する", () => {
+		expect(
+			validateOpeningHours([
+				{
+					day_of_week: 0,
+					open_time: "17:00",
+					close_time: "23:00",
+					sort_order: 1.5,
+					is_closed: false,
+				},
+			]).isValid,
+		).toBe(false);
+	});
+
+	it("is_closed が boolean でない場合は失敗する", () => {
+		expect(
+			validateOpeningHours([
+				{
+					day_of_week: 0,
+					open_time: "17:00",
+					close_time: "23:00",
+					sort_order: 0,
+					is_closed: "false",
+				},
+			]).isValid,
+		).toBe(false);
+	});
+
+	it("open_time が不正形式（25:00）の場合は失敗する", () => {
+		expect(
+			validateOpeningHours([
+				{
+					day_of_week: 0,
+					open_time: "25:00",
+					close_time: "23:00",
+					sort_order: 0,
+					is_closed: false,
+				},
+			]).isValid,
+		).toBe(false);
+	});
+
+	it("close_time が不正形式（23:99）の場合は失敗する", () => {
+		expect(
+			validateOpeningHours([
+				{
+					day_of_week: 0,
+					open_time: "17:00",
+					close_time: "23:99",
+					sort_order: 0,
+					is_closed: false,
+				},
+			]).isValid,
+		).toBe(false);
+	});
+
+	it("要素がオブジェクトでない場合は失敗する", () => {
+		expect(validateOpeningHours(["invalid"]).isValid).toBe(false);
+	});
+
+	it("空配列は通過する", () => {
+		expect(validateOpeningHours([])).toEqual({ isValid: true });
 	});
 });
