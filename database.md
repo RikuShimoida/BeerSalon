@@ -369,7 +369,9 @@ UNIQUE制約: `country_id + name`
 
 **二重取得の防止**: `(user_id, coupon_id)` に DB の UNIQUE 制約を張り、二重取得を DB レベルで担保する。ユーザー画面のクーポン取得アクション（`apps/web` の `obtainCoupon`）は、事前の存在チェック（UX フィードバック用）で取得済みを返しつつ、並行リクエスト（取得ボタン連打）による TOCTOU（存在チェックをすり抜けた並行 INSERT）は UNIQUE 制約違反（Prisma の `P2002`）を「既に取得済み」として catch することで、最終的に1レコードへ収束させる。
 
-**取得可否の判定（`obtainCoupon`）**: `bar_coupons.is_active=true` かつ有効期間内（`valid_from` が未来でなく `valid_until` が過去でない。いずれも NULL なら該当方向の制限なし）、かつ `usage_limit` が非 NULL の場合は `used_count < usage_limit` のときのみ取得できる。`used_count` は「利用回数」であり、取得（`user_coupons` への INSERT）ではインクリメントしない（利用＝消し込みフローは未実装のため）。
+**取得可否の判定（`obtainCoupon`）**: `bar_coupons.is_active=true` かつ有効期間内（`valid_from` が未来でなく `valid_until` が過去でない。いずれも NULL なら該当方向の制限なし）、かつ `usage_limit` が非 NULL の場合は `used_count < usage_limit` のときのみ取得できる。`used_count` は「利用回数」であり、取得（`user_coupons` への INSERT）ではインクリメントしない。
+
+**利用（消し込み）の判定と書き込み（`redeemCoupon`）**: マイページ「持っているクーポン」タブ（`/mypage`）から本人が「クーポンを利用する」を押すと、取得済み `user_coupons` レコードを利用（消し込み）する。利用は `user_coupons.is_used=true` / `used_at=now()` への更新と `bar_coupons.used_count` の +1 インクリメントを同時に行う。取得ボタン連打などの並行リクエストで `used_count` が破綻しないよう、営業時間・支払い方法の同期と同じく DELETE/UPDATE の原子化を RPC に一本化する（RPC `use_user_coupon(p_user_coupon_id bigint, p_user_id uuid)`）。RPC は対象 `user_coupons` を `FOR UPDATE` でロックしてから検証・更新し、判別可能な文字列コード（`ok` / `already_used` / `expired` / `limit_reached` / `not_found`）を返す。利用可否は「本人の未利用レコードであること」「`bar_coupons.is_active=true`」「有効期間内」「`usage_limit` が非 NULL の場合は `used_count < usage_limit`」で判定する。他人が取得したクーポンは `p_user_id` の一致で弾かれ `not_found` を返す。利用（使用済みにする）はここまでを対象とし、利用の取り消し（再有効化）フローは未対応。
 
 ---
 
