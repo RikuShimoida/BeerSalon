@@ -43,6 +43,17 @@ describe("resolveMapView", () => {
 		});
 	});
 
+	it("同一座標のピンが2件でも一意に畳み込んで center にする（type: center）", () => {
+		const view = resolveMapView([
+			makePin({ id: "1", lat: 34.9756, lng: 138.3833 }),
+			makePin({ id: "2", lat: 34.9756, lng: 138.3833 }),
+		]);
+		expect(view).toEqual({
+			type: "center",
+			center: { lat: 34.9756, lng: 138.3833 },
+		});
+	});
+
 	it("1件→2件の境界: 2件目が加わると center から fit に切り替わる", () => {
 		const one = resolveMapView([makePin({ id: "1" })]);
 		expect(one.type).toBe("center");

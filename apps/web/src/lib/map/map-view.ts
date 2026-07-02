@@ -7,19 +7,29 @@ export type MapViewInstruction =
 	| { type: "center"; center: { lat: number; lng: number } }
 	| { type: "none" };
 
-// 単一ピンを fitBounds に渡すと極端にズームインするため、1件は center 指定に分岐する。
+// 単一ピンや全ピンが同一座標のケースを fitBounds に渡すと面積ゼロの bounds となり極端にズームインするため、
+// 座標を一意に畳み込んだ結果が1点なら center 指定に分岐する。
 export function resolveMapView(pins: BarPin[]): MapViewInstruction {
 	if (pins.length === 0) {
 		return { type: "none" };
 	}
-	if (pins.length === 1) {
+	const uniquePoints = Array.from(
+		new Map(
+			pins.map((pin) => [
+				`${pin.lat},${pin.lng}`,
+				{ lat: pin.lat, lng: pin.lng },
+			]),
+		).values(),
+	);
+	// Why not: 畳み込み後は必ず1件以上（pins が空でないため）なので、uniquePoints[0] は常に存在する。
+	if (uniquePoints.length === 1) {
 		return {
 			type: "center",
-			center: { lat: pins[0].lat, lng: pins[0].lng },
+			center: uniquePoints[0],
 		};
 	}
 	return {
 		type: "fit",
-		points: pins.map((pin) => ({ lat: pin.lat, lng: pin.lng })),
+		points: uniquePoints,
 	};
 }
