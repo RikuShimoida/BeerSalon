@@ -12,7 +12,7 @@ Issue 起点の実装ワークフローと E2E 動作確認を、Claude Code の
 | pr | `/bs-workflow:pr` | feature ブランチ作成 → コミット → プッシュ → PR 作成の Git 運用ルール |
 | pr-review | `/bs-workflow:pr-review <PR番号>` | PR 差分をアーキテクチャ観点でレビューし、結果を PR コメントに投稿する（コード修正はしない） |
 | merge | `/bs-workflow:merge <PR番号>` | CI 完了を見届けてから Merge commit 方式でマージし、リモート/ローカルのブランチを削除、対応 Issue をクローズ、司令塔ブランチを最新化 |
-| playwright | `/bs-workflow:playwright <PR番号>` | 起動済み localhost に対する Playwright MCP での E2E 観点動作確認 |
+| playwright | `/bs-workflow:playwright [PR番号（任意）]` | 起動済み localhost に対する Playwright MCP での E2E 観点動作確認（PR番号は任意。引数なしでも起動済み環境への動作確認として成立する） |
 
 スキルは名前空間付きで呼び出される（`/bs-workflow:<スキル名>`）。
 
