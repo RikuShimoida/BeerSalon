@@ -9,6 +9,11 @@
 # 二重起動を回避する。理解チェック用の claude.yml と、設計レビュー特化の本ファイルを
 # 権限・トリガーごと分離し、片方の変更が他方を壊さないようにする。
 #
+# 運用注意（逆方向の二重起動）: 1つのコメントに `@claude` と `@pr-review` を両方書くと、
+# claude.yml（`@claude` 一致）と本ファイル（`@pr-review` 一致）が両方起動し Actions 枠を
+# 二重消費する。claude.yml を無改変に保つため除外条件は入れていない（Issue #369 の
+# 「既存WFに差分がない」を満たすため）。両メンションの同時記載は避ける運用とする。
+#
 # Why-not: 認証は ANTHROPIC_API_KEY（従量課金）ではなく CLAUDE_CODE_OAUTH_TOKEN（サブスク連携）。
 # 既存 claude.yml / claude-code-review.yml と同じ登録済みトークンに揃え、Secrets を増やさない。
 name: Claude PR Review
@@ -53,9 +58,9 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
-          # Claude が PR の CI 結果を読めるようにする（pr-review のテスト観点で参照）
-          additional_permissions: |
-            actions: read
+          # Why-not: additional_permissions で actions: read を再指定しない。上の permissions
+          # ブロック（actions: read）で Claude は既に CI 結果を読めるため、additional_permissions
+          # 側の指定は冗長。二重指定を避けて権限の意図を1箇所に集約する。
 
           # ローカルの /pr-review スキルをそのまま起動する。PR番号はトリガー元イベントから解決する。
           prompt: '/pr-review ${{ github.event.issue.number || github.event.pull_request.number }}'
