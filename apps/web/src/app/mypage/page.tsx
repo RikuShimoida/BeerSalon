@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser, getUserCoupons, getUserPosts } from "@/actions/user";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
+import { MyCouponsList } from "@/components/mypage/my-coupons-list";
 import { LikeButton } from "@/components/post/like-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -153,53 +154,7 @@ export default async function MyPage() {
 						</TabsContent>
 
 						<TabsContent value="coupons" className="p-6">
-							{coupons.length === 0 ? (
-								<div className="p-8 text-center">
-									<p className="text-muted-foreground tracking-wide">
-										取得済みのクーポンはありません
-									</p>
-								</div>
-							) : (
-								<div className="divide-y divide-border/50">
-									{coupons.map((coupon) => (
-										<div
-											key={coupon.id}
-											className="p-4 hover:bg-primary/10 transition-all duration-300"
-										>
-											<div className="flex flex-col gap-2">
-												<div className="flex items-start justify-between">
-													<h2 className="text-lg font-semibold text-card-foreground tracking-tight">
-														{coupon.title}
-													</h2>
-													{coupon.isUsed && (
-														<span className="px-2 py-1 text-xs font-medium text-muted-foreground bg-muted/50 rounded-lg">
-															使用済み
-														</span>
-													)}
-												</div>
-
-												<p className="text-card-foreground tracking-wide">
-													{coupon.description}
-												</p>
-
-												<div className="text-sm text-muted-foreground tracking-wide">
-													<span className="font-medium">対象店舗：</span>
-													{coupon.barName}
-												</div>
-
-												{coupon.validUntil && (
-													<div className="text-sm text-muted-foreground tracking-wide">
-														<span className="font-medium">有効期限：</span>
-														{new Date(coupon.validUntil).toLocaleDateString(
-															"ja-JP",
-														)}
-													</div>
-												)}
-											</div>
-										</div>
-									))}
-								</div>
-							)}
+							<MyCouponsList coupons={coupons} />
 						</TabsContent>
 					</Tabs>
 				</div>

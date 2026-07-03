@@ -162,12 +162,17 @@ export async function getUserCoupons() {
 	});
 
 	return userCoupons.map((userCoupon) => ({
-		id: userCoupon.id,
+		id: userCoupon.id.toString(),
+		couponId: userCoupon.couponId.toString(),
 		title: userCoupon.coupon.title,
 		description: userCoupon.coupon.description ?? "",
 		barName: userCoupon.coupon.bar.name,
+		validFrom: userCoupon.coupon.validFrom,
 		validUntil: userCoupon.coupon.validUntil,
+		usageLimit: userCoupon.coupon.usageLimit,
+		usedCount: userCoupon.coupon.usedCount,
 		isUsed: userCoupon.isUsed,
+		usedAt: userCoupon.usedAt,
 		obtainedAt: userCoupon.obtainedAt,
 	}));
 }

@@ -96,6 +96,59 @@ export async function obtainCoupon(
 	return { ok: true };
 }
 
+export type RedeemCouponResult =
+	| { ok: true }
+	| {
+			ok: false;
+			reason: "already_used" | "expired" | "limit_reached" | "not_found";
+	  };
+
+export async function redeemCoupon(
+	userCouponId: string,
+): Promise<RedeemCouponResult> {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		throw new Error("Not authenticated");
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		throw new Error("User profile not found");
+	}
+
+	// Why not: 利用は「user_coupons の消し込み」と「bar_coupons.used_count のインクリメント」を
+	// 同時に行う必要があり、取得ボタン連打などの並行リクエストで used_count が破綻しないよう
+	// 対象行を FOR UPDATE でロックする。Prisma のインタラクティブトランザクションでも書けるが、
+	// 営業時間・支払い方法の同期と同じく原子化は RPC に一本化する。
+	const rows = await prisma.$queryRaw<Array<{ use_user_coupon: string }>>`
+		SELECT use_user_coupon(${BigInt(userCouponId)}::bigint, ${userProfile.id}::uuid)
+	`;
+
+	const code = rows[0]?.use_user_coupon;
+
+	switch (code) {
+		case "ok":
+			return { ok: true };
+		case "already_used":
+			return { ok: false, reason: "already_used" };
+		case "expired":
+			return { ok: false, reason: "expired" };
+		case "limit_reached":
+			return { ok: false, reason: "limit_reached" };
+		default:
+			return { ok: false, reason: "not_found" };
+	}
+}
+
 export async function hasObtainedCoupon(couponId: string): Promise<boolean> {
 	const supabase = await createClient();
 	const {
