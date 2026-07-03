@@ -1,0 +1,8 @@
+{
+  "name": "bs-workflow",
+  "version": "0.1.0",
+  "description": "Issue起点の実装ワークフロー（plan → pr → pr-review → merge）とE2E動作確認（playwright）をバンドルした汎用スキルプラグイン。特定プロジェクトのドメイン知識・固有インフラ値を含まない骨格として設計している。",
+  "author": {
+    "name": "Riku Shimoida"
+  }
+}
