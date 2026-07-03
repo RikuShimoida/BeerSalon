@@ -122,6 +122,24 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 ---
 
+## 🧩 開発ワークフロープラグイン（bs-workflow）
+
+Issue 起点の実装ワークフロー（`plan` → `pr` → `pr-review` → `merge`）と E2E 動作確認（`playwright`）を、
+Claude Code のプラグインとして `plugins/bs-workflow/` にバンドルしている。
+このプラグインはプロジェクト固有のドメイン知識・インフラ値を含まない**汎用スキルの骨格**であり、
+他プロジェクトへ持ち出して再利用できる（本リポジトリ `.claude/skills/` のプロジェクト特化スキルとは別物）。
+
+```bash
+# マニフェスト検証・ローカル読み込み
+claude plugin validate ./plugins/bs-workflow
+claude --plugin-dir ./plugins/bs-workflow
+# 読み込み後は /bs-workflow:plan などの名前空間付きで呼び出せる
+```
+
+詳細・収録スキル一覧は `plugins/bs-workflow/README.md` を参照。
+
+---
+
 ## 🌐 プレビュー環境（develop 追従）
 
 `develop` ブランチに push されると、GitHub Actions が Vercel に自動デプロイし、以下の固定 URL を最新ビルドに付け替える。
