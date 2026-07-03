@@ -33,6 +33,22 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		// セルフサーブ登録直後（承認前）はログインさせない。パスワード検証後に判定することで、
+		// 存在しない ID との区別（列挙）を避けつつ、承認待ちであることだけを本人に伝える。
+		if (user.approval_status === "pending") {
+			return NextResponse.json(
+				{ error: "アカウントは審査中です。承認までお待ちください。" },
+				{ status: 403 },
+			);
+		}
+
+		if (user.approval_status === "rejected") {
+			return NextResponse.json(
+				{ error: "このアカウントは登録が承認されませんでした。" },
+				{ status: 403 },
+			);
+		}
+
 		const token = await createToken(user);
 
 		await setAuthCookie(token);

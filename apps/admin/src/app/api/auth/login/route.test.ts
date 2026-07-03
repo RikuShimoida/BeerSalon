@@ -101,6 +101,60 @@ describe("POST /api/auth/login", () => {
 		expect(body.error).toBe("店舗IDまたはパスワードが正しくありません");
 	});
 
+	it("承認待ち（approval_status=pending）の場合 403 を返し、setAuthCookie は呼ばれない", async () => {
+		mockSupabaseSingle({
+			data: {
+				id: "user-1",
+				bar_manage_id: "pending-bar",
+				password_hash: "hashed-password",
+				name: "審査中オーナー",
+				role: "bar_owner",
+				bar_id: 1,
+				approval_status: "pending",
+			},
+			error: null,
+		});
+		mockVerifyPassword.mockResolvedValue(true);
+
+		const response = await POST(
+			createMockRequest({
+				barManageId: "pending-bar",
+				password: "Test1234!@#",
+			}),
+		);
+		const body = await response.json();
+
+		expect(response.status).toBe(403);
+		expect(body.error).toContain("審査中");
+		expect(mockSetAuthCookie).not.toHaveBeenCalled();
+	});
+
+	it("却下済み（approval_status=rejected）の場合 403 を返す", async () => {
+		mockSupabaseSingle({
+			data: {
+				id: "user-1",
+				bar_manage_id: "rejected-bar",
+				password_hash: "hashed-password",
+				name: "却下オーナー",
+				role: "bar_owner",
+				bar_id: 1,
+				approval_status: "rejected",
+			},
+			error: null,
+		});
+		mockVerifyPassword.mockResolvedValue(true);
+
+		const response = await POST(
+			createMockRequest({
+				barManageId: "rejected-bar",
+				password: "Test1234!@#",
+			}),
+		);
+
+		expect(response.status).toBe(403);
+		expect(mockSetAuthCookie).not.toHaveBeenCalled();
+	});
+
 	it("正しい認証情報の場合 200 と user 情報を返し、setAuthCookie が呼ばれる", async () => {
 		mockSupabaseSingle({
 			data: {
@@ -110,6 +164,7 @@ describe("POST /api/auth/login", () => {
 				name: "テストオーナー",
 				role: "bar_owner",
 				bar_id: 1,
+				approval_status: "approved",
 			},
 			error: null,
 		});

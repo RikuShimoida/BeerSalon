@@ -423,7 +423,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 ### 3-0. 共通ルール
 
 - ドメイン: `https://admin.beersalon.com`（想定）
-- 未ログインでアクセス可能なページ: `/login` のみ
+- 未ログインでアクセス可能なページ: `/login` と `/bars/register`（店舗セルフサーブ登録）
 - それ以外はすべてログイン必須（未ログイン時は `/login` へリダイレクト）
 - 認証方式: カスタムJWT認証（jose + bcryptjs）。Supabase Auth は不使用
 - ログイン後の共通レイアウト:
@@ -442,9 +442,38 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - 店舗ID（テキストボックス）
   - パスワード（テキストボックス、8文字以上）
   - ログインボタン
+  - 「店舗登録はこちら」リンク → `/bars/register`
 - ログイン後遷移先:
   - `admin` → `/bars`（店舗管理ページ）
   - `bar_owner` → `/bars/[barId]`（自店舗の詳細ページ）
+- 振る舞い:
+  - 承認待ち（`admin_users.approval_status='pending'`）のアカウントはログイン不可。パスワード検証後に「アカウントは審査中です。承認までお待ちください。」を表示する（403）
+  - 却下（`rejected`）のアカウントも同様にログイン不可
+
+#### 3-1-2. 店舗セルフサーブ登録ページ
+
+- Path: `/bars/register`
+- 認証: 不要（未ログインの店舗オーナーが申し込む公開ページ）
+  - ログイン済みでアクセスした場合は権限に応じたページ（`admin` → `/bars`、`bar_owner` → `/bars/[barId]`）へリダイレクト
+- 役割:
+  - 店舗オーナー自身が店舗登録を申し込む（admin の手動作成 `/bars/new` に依存しないセルフサーブ導線）
+  - 申し込みで `bars`（`is_active=false`）と `admin_users`（`role='bar_owner'`, `approval_status='pending'`）を作成する
+  - 悪用・冷やかし対策として admin 承認制（半セルフサーブ）。承認まではログイン不可・ユーザー画面非表示
+- UI 要素（Phase 1 相当のみ。店舗名・住所・営業時間などの Phase 2 項目は承認後に本人が `/bars/[barId]/edit` で入力する）:
+  - 店舗ID（テキストボックス、スラッグ形式。重複時はエラー）
+  - パスワード（テキストボックス、8文字以上）
+  - 管理者メールアドレス
+  - 管理者電話番号
+  - 「登録を申し込む」ボタン
+  - 「ログインに戻る」リンク → `/login`
+- 振る舞い:
+  - 送信成功時: 「お申し込みを受け付けました（審査中）」の完了画面を表示し、`/login` への導線を出す（自動ログインはしない）
+  - `bar_manage_id` が既存と重複する場合はエラーを表示して作成しない
+  - API: `POST /api/bars/register`（未認証で叩ける公開エンドポイント）。既存の `POST /api/bars`（admin 専用・Phase 2 含む）とは分離
+- 承認フロー:
+  - admin が `/bars`（店舗管理ページ）の「審査中の店舗」セクションから「承認する」を押すと、`admin_users.approval_status='approved'`・`bars.is_active=true` に更新され、当該オーナーがログイン可能・ユーザー画面に公開される
+  - API: `POST /api/bars/[barId]/approve`（admin 専用）
+  - ※却下（rejected）UI・承認通知メール・登録直後の課金（#335 Stripe Checkout）連携は本スコープ外（別 Issue）
 
 ### 3-2. 店舗管理（admin専用）
 
@@ -457,6 +486,9 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - 新規店舗登録への導線
 - UI 要素:
   - 店舗登録ボタン → `/bars/new`
+  - 「審査中の店舗」セクション（セルフサーブ登録された未承認店舗が存在する場合のみ表示）
+    - 各行に店舗ID・連絡先を表示し、「承認する」ボタンで承認（`POST /api/bars/[barId]/approve`）
+    - 取得元: `GET /api/bars/pending`（admin 専用。承認前は `is_active=false` のため通常の `GET /api/bars` には出ない）
   - 店舗カード一覧（店舗名、プレビュー画像）
   - 各カード → `/bars/[barId]`
 
