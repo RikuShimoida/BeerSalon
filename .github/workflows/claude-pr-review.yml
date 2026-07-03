@@ -1,0 +1,70 @@
+# ローカル自作の /pr-review スキル（system-architect による設計md整合特化のPRレビュー）を
+# GitHub Actions 上でも起動できるようにする。PR/コメントに `@pr-review` と書くと、
+# claude-code-action が `.claude/skills/pr-review` を実行し、レビュー結果をPRコメントに投稿する。
+#
+# Why-not: 既存 claude.yml（`@claude` 汎用メンション用）に相乗りさせない。claude.yml 冒頭の
+# 設計判断どおり「同一 `@claude` トリガーの二重起動」を避けるのが目的だが、本ファイルは
+# トリガー語を `@claude` を部分文字列として含まない `@pr-review` にすることで、
+# claude.yml の `contains(body, '@claude')` に一切マッチさせず、claude.yml を無改変のまま
+# 二重起動を回避する。理解チェック用の claude.yml と、設計レビュー特化の本ファイルを
+# 権限・トリガーごと分離し、片方の変更が他方を壊さないようにする。
+#
+# Why-not: 認証は ANTHROPIC_API_KEY（従量課金）ではなく CLAUDE_CODE_OAUTH_TOKEN（サブスク連携）。
+# 既存 claude.yml / claude-code-review.yml と同じ登録済みトークンに揃え、Secrets を増やさない。
+name: Claude PR Review
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  claude-pr-review:
+    # Why-not: `@claude` ではなく `@pr-review` で判定する。`@claude` は claude.yml が拾うため、
+    # 二重起動を避ける。また issue_comment はPRにもIssueにもPRにも発火するが、PR以外の
+    # Issue コメントでは pr-review（PR番号前提）が成立しないため、`issue.pull_request` の
+    # 存在でPRコメントに限定する。
+    if: |
+      (github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request != null &&
+        contains(github.event.comment.body, '@pr-review')) ||
+      (github.event_name == 'pull_request_review_comment' &&
+        contains(github.event.comment.body, '@pr-review'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Why-not: pull-requests は read ではなく write。/pr-review は `gh pr comment` で
+      # レビュー結果をPRに投稿するため書き込みが要る。ただしコード変更・マージはしないため
+      # contents は read に留める（Action からの push を発生させない）。
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read # Required for Claude to read CI results on PRs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude PR Review
+        id: claude-pr-review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # Claude が PR の CI 結果を読めるようにする（pr-review のテスト観点で参照）
+          additional_permissions: |
+            actions: read
+
+          # ローカルの /pr-review スキルをそのまま起動する。PR番号はトリガー元イベントから解決する。
+          prompt: '/pr-review ${{ github.event.issue.number || github.event.pull_request.number }}'
+
+          # Why-not: --max-turns は未指定（デフォルト）にせず明示する。pr-review は
+          # 「gh pr view / gh pr diff で情報取得 → レビュー生成 → gh pr comment で投稿」の
+          # 数ターンで完結するレビュー専用フロー（実装のような多ターンは不要）。
+          # 15 で余裕を持たせつつ暴走を抑える。初回実機検証のログで過不足があれば調整する。
+          # allowed-tools は pr-review が使う gh コマンド群に限定し、コード改変系を渡さない。
+          claude_args: |
+            --max-turns 15
+            --allowed-tools "Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr comment:*),Read,Glob,Grep"
