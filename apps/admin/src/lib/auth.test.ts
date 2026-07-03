@@ -44,6 +44,7 @@ describe("createToken / verifyToken", () => {
 		password_hash: "irrelevant-for-token",
 		contact_email: null,
 		contact_phone: null,
+		approval_status: "approved" as const,
 		is_active: true,
 		created_at: "2024-01-01T00:00:00Z",
 		updated_at: "2024-01-01T00:00:00Z",

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
@@ -121,6 +122,15 @@ export default function LoginPage() {
 						</button>
 					</div>
 				</form>
+
+				<div className="text-center">
+					<Link
+						href="/bars/register"
+						className="text-sm text-gray-600 hover:underline"
+					>
+						店舗登録はこちら
+					</Link>
+				</div>
 			</div>
 		</div>
 	);

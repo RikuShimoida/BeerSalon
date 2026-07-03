@@ -675,6 +675,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 | bar_id          | bigint     | NULLABLE, FK → bars(id)         | 紐づく店舗ID（bar_ownerは必須、adminはNULL）|
 | contact_email   | text       | NULLABLE                         | 店舗管理者メールアドレス（請求書送付用）|
 | contact_phone   | text       | NULLABLE                         | 店舗管理者電話番号（トラブル時連絡用）|
+| approval_status | text       | NOT NULL DEFAULT 'approved' CHECK (in 'pending'/'approved'/'rejected') | セルフサーブ登録の承認状態 |
 | is_active       | boolean    | NOT NULL DEFAULT true            | アカウント有効フラグ        |
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
@@ -686,6 +687,15 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 **運用ルール**:
 - 1店舗 = 1アカウント（店舗スタッフ全員で `bar_manage_id` とパスワードを共有してログイン）
 - 店舗登録時に `admin_users` レコードも自動作成される
+
+**承認ステータス（`approval_status`）**:
+- 店舗登録の経路により初期値が異なる:
+  - admin 手動作成（`POST /api/bars` / `/bars/new`）: 従来どおり承認不要。列は `DEFAULT 'approved'` で作成される
+  - 店舗セルフサーブ登録（`POST /api/bars/register` / `/bars/register`）: `'pending'`（審査中）で作成し、あわせて `bars.is_active=false` にして承認まで非公開にする
+- ログイン API（`POST /api/auth/login`）は `approval_status='pending'`/`'rejected'` のアカウントを 403 で弾く（`'approved'` のみログイン可能）
+- admin が承認（`POST /api/bars/[barId]/approve`）すると `approval_status='approved'`・`bars.is_active=true` に更新され、ログイン可能・ユーザー画面に公開される
+- 既存レコードは `DEFAULT 'approved'` により後方互換（既存 admin/bar_owner のログインに影響しない）
+- `'rejected'`（却下）値は予約済みだが、却下操作の UI は本スコープ外（別 Issue）
 
 **権限**:
 - `bar_owner`: 自店舗（`bar_id` で紐づく店舗）の全データを編集可能
