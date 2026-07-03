@@ -42,6 +42,19 @@ export async function POST(
 			);
 		}
 
+		// 既に承認済みなら冪等に成功扱い（二重承認や再クリックで状態を壊さない）。
+		if (adminUser.approval_status === "approved") {
+			return NextResponse.json({ barId: barIdNum, approvalStatus: "approved" });
+		}
+
+		// 却下済みアカウントの承認は本フローの対象外（別途の却下解除は未実装）。
+		if (adminUser.approval_status !== "pending") {
+			return NextResponse.json(
+				{ error: "このアカウントは承認できる状態ではありません" },
+				{ status: 409 },
+			);
+		}
+
 		const { error: updateAdminError } = await supabaseAdmin
 			.from("admin_users")
 			.update({

@@ -103,11 +103,18 @@ export async function POST(request: NextRequest) {
 			});
 
 		if (adminUserError) {
-			// admin_users 作成失敗時は店舗もロールバック（論理削除）。既存 POST /api/bars と対称。
-			await supabaseAdmin
-				.from("bars")
-				.update({ is_active: false })
-				.eq("id", bar.id);
+			// Why not is_active=false へのロールバック: bars は既に is_active=false で作成しているため
+			// 状態が変わらず孤児行が残る。作成直後で参照も無いため物理 delete で確実に取り消す。
+			await supabaseAdmin.from("bars").delete().eq("id", bar.id);
+
+			// 事前チェックをすり抜けた並行登録（TOCTOU）は UNIQUE 制約違反で弾かれる。
+			// これを 500 ではなく「既に使用されています」の 400 に変換して最終的に1件へ収束させる。
+			if (adminUserError.code === "23505") {
+				return NextResponse.json(
+					{ error: "この店舗IDは既に使用されています" },
+					{ status: 400 },
+				);
+			}
 
 			return NextResponse.json(
 				{ error: "店舗アカウントの作成に失敗しました" },

@@ -125,4 +125,32 @@ describe("POST /api/bars/[barId]/approve", () => {
 		const response = await POST(createMockRequest(), createParams("42"));
 		expect(response.status).toBe(404);
 	});
+
+	it("既に承認済み（approved）の場合は冪等に 200 を返し、更新は行わない", async () => {
+		mockGetCurrentUser.mockResolvedValue({ id: "admin-1", role: "admin" });
+		const { adminUpdate, barUpdate } = setupSupabaseMocks({
+			adminUser: { id: "admin-user-1", approval_status: "approved" },
+		});
+
+		const response = await POST(createMockRequest(), createParams("42"));
+		const json = await response.json();
+
+		expect(response.status).toBe(200);
+		expect(json.approvalStatus).toBe("approved");
+		expect(adminUpdate).not.toHaveBeenCalled();
+		expect(barUpdate).not.toHaveBeenCalled();
+	});
+
+	it("却下済み（rejected）の場合は 409 を返し、更新は行わない", async () => {
+		mockGetCurrentUser.mockResolvedValue({ id: "admin-1", role: "admin" });
+		const { adminUpdate, barUpdate } = setupSupabaseMocks({
+			adminUser: { id: "admin-user-1", approval_status: "rejected" },
+		});
+
+		const response = await POST(createMockRequest(), createParams("42"));
+
+		expect(response.status).toBe(409);
+		expect(adminUpdate).not.toHaveBeenCalled();
+		expect(barUpdate).not.toHaveBeenCalled();
+	});
 });

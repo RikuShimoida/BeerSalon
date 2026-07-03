@@ -50,17 +50,17 @@ function setupSupabaseMocks(overrides?: {
 	});
 	const barSelect = vi.fn().mockReturnValue({ single: barSingle });
 	const barInsert = vi.fn().mockReturnValue({ select: barSelect });
-	const barUpdateEq = vi.fn().mockResolvedValue({ error: null });
-	const barUpdate = vi.fn().mockReturnValue({ eq: barUpdateEq });
+	const barDeleteEq = vi.fn().mockResolvedValue({ error: null });
+	const barDelete = vi.fn().mockReturnValue({ eq: barDeleteEq });
 
 	mockSupabaseFrom.mockImplementation((table: string) => {
-		if (table === "bars") return { insert: barInsert, update: barUpdate };
+		if (table === "bars") return { insert: barInsert, delete: barDelete };
 		if (table === "admin_users")
 			return { select: adminSelect, insert: adminInsert };
 		throw new Error(`unexpected table: ${table}`);
 	});
 
-	return { barInsert, adminInsert, barUpdate };
+	return { barInsert, adminInsert, barDelete };
 }
 
 const validBody = {
@@ -152,16 +152,28 @@ describe("POST /api/bars/register", () => {
 		expect(barInsert).not.toHaveBeenCalled();
 	});
 
-	it("admin_users の作成に失敗した場合は 500 を返し、作成済みの bars をロールバックする", async () => {
-		const { barUpdate } = setupSupabaseMocks({
+	it("admin_users の作成に失敗した場合は 500 を返し、作成済みの bars を物理削除でロールバックする", async () => {
+		const { barDelete } = setupSupabaseMocks({
 			adminInsertError: { message: "insert failed" },
 		});
 
 		const response = await POST(createMockRequest(validBody));
 
 		expect(response.status).toBe(500);
-		expect(barUpdate).toHaveBeenCalledWith(
-			expect.objectContaining({ is_active: false }),
-		);
+		// is_active=false の bars を残さず物理削除する（孤児行を作らない）
+		expect(barDelete).toHaveBeenCalled();
+	});
+
+	it("並行登録で admin_users insert が UNIQUE 違反（23505）の場合は 400 に変換し、bars をロールバックする", async () => {
+		const { barDelete } = setupSupabaseMocks({
+			adminInsertError: { code: "23505", message: "duplicate key" },
+		});
+
+		const response = await POST(createMockRequest(validBody));
+		const json = await response.json();
+
+		expect(response.status).toBe(400);
+		expect(json.error).toContain("既に使用されています");
+		expect(barDelete).toHaveBeenCalled();
 	});
 });
