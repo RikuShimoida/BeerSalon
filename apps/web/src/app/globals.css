@@ -37,12 +37,15 @@
 	--color-popover: var(--popover);
 	--color-card-foreground: var(--card-foreground);
 	--color-card: var(--card);
+	--color-surface-panel: var(--surface-panel);
+	--color-surface-control: var(--surface-control);
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
 }
 
+/* THEME:START (このブロックは pnpm theme <name> で src/styles/themes/<name>.css の内容に差し替わる。手編集する場合は themes/current.css も揃えること) */
 :root {
 	--radius: 1rem;
 	--background: 35 25% 92%;
@@ -76,7 +79,10 @@
 	--sidebar-accent-foreground: 30 15% 20%;
 	--sidebar-border: 35 15% 82%;
 	--sidebar-ring: 30 75% 45%;
+	--surface-panel: #f0e68c;
+	--surface-control: #ffffff;
 }
+/* THEME:END */
 
 .dark {
 	--background: oklch(0.145 0 0);

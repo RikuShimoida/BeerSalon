@@ -89,10 +89,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 	};
 
 	return (
-		<div
-			className="p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in"
-			style={{ backgroundColor: "#f0e68c" }}
-		>
+		<div className="p-6 md:p-8 rounded-2xl modern-shadow animate-fade-in bg-surface-panel">
 			<div className="mb-4">
 				<label
 					htmlFor="search-keyword"
@@ -111,8 +108,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 								handleKeywordSearch();
 							}
 						}}
-						className="glass-input flex-1 px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
-						style={{ backgroundColor: "#ffffff" }}
+						className="flex-1 px-4 py-3 rounded-xl bg-surface-control backdrop-blur-sm border border-border/30 text-card-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
 					/>
 					<button
 						type="button"
@@ -137,8 +133,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 						id="city"
 						value={selectedCity}
 						onChange={(e) => handleCityChange(e.target.value)}
-						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
-						style={{ backgroundColor: "#ffffff" }}
+						className="w-full px-4 py-3 rounded-xl bg-surface-control backdrop-blur-sm border border-border/30 text-card-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
 					>
 						<option value="">全て</option>
 						{SHIZUOKA_CITIES.map((city) => (
@@ -165,7 +160,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 									className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
 										isSelected
 											? "bg-primary text-primary-foreground"
-											: "bg-white text-card-foreground hover:opacity-80"
+											: "bg-surface-control text-card-foreground hover:opacity-80"
 									}`}
 								>
 									{isSelected ? `✓ ${category}` : category}
@@ -186,8 +181,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 						id="origin"
 						value={selectedOrigin}
 						onChange={(e) => handleOriginChange(e.target.value)}
-						className="glass-input w-full px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
-						style={{ backgroundColor: "#ffffff" }}
+						className="w-full px-4 py-3 rounded-xl bg-surface-control backdrop-blur-sm border border-border/30 text-card-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
 					>
 						<option value="">全て</option>
 						{Object.entries(origins).map(([country, regions]) => (
