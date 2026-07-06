@@ -1,0 +1,110 @@
+<svg width="375" height="812" viewBox="0 0 375 812" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="e-header" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6b35"/>
+      <stop offset="100%" stop-color="#ffb199"/>
+    </linearGradient>
+    <linearGradient id="e-map" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd97d"/>
+      <stop offset="55%" stop-color="#ff9a5a"/>
+      <stop offset="100%" stop-color="#ff6b35"/>
+    </linearGradient>
+    <clipPath id="e-frame">
+      <rect x="0" y="0" width="375" height="812" rx="36"/>
+    </clipPath>
+  </defs>
+
+  <rect x="0" y="0" width="375" height="812" rx="36" fill="#fff7ee"/>
+
+  <g clip-path="url(#e-frame)">
+    <!-- Header -->
+    <rect x="0" y="0" width="375" height="88" fill="url(#e-header)"/>
+    <circle cx="335" cy="30" r="14" fill="#ffe8b0" opacity="0.8"/>
+    <text x="22" y="52" font-family="'Hiragino Sans', sans-serif" font-size="22" font-weight="700" fill="#ffffff">Beer Salon</text>
+    <circle cx="303" cy="44" r="16" fill="#ffffff" opacity="0.2"/>
+    <text x="303" y="50" font-size="15" text-anchor="middle" fill="#ffffff">🔔</text>
+    <circle cx="345" cy="44" r="16" fill="#ffffff" opacity="0.2"/>
+    <text x="345" y="50" font-size="15" text-anchor="middle" fill="#ffffff">👤</text>
+
+    <!-- Search bar -->
+    <rect x="20" y="104" width="335" height="46" rx="23" fill="#ffffff" stroke="#ffd7b5" stroke-width="1.5"/>
+    <text x="42" y="132" font-size="14" fill="#a0522d">🔍 エリア・ビールを検索</text>
+
+    <!-- City chips -->
+    <g font-family="'Hiragino Sans', sans-serif" font-size="12">
+      <rect x="20" y="162" width="66" height="30" rx="15" fill="#ff6b35"/>
+      <text x="53" y="181" text-anchor="middle" fill="#ffffff" font-weight="700">静岡市</text>
+      <rect x="94" y="162" width="60" height="30" rx="15" fill="#ffffff" stroke="#ffd7b5"/>
+      <text x="124" y="181" text-anchor="middle" fill="#a0522d">富士市</text>
+      <rect x="162" y="162" width="60" height="30" rx="15" fill="#ffffff" stroke="#ffd7b5"/>
+      <text x="192" y="181" text-anchor="middle" fill="#a0522d">沼津市</text>
+      <rect x="230" y="162" width="66" height="30" rx="15" fill="#ffffff" stroke="#ffd7b5"/>
+      <text x="263" y="181" text-anchor="middle" fill="#a0522d">浜松市</text>
+      <rect x="304" y="162" width="60" height="30" rx="15" fill="#ffffff" stroke="#ffd7b5"/>
+      <text x="334" y="181" text-anchor="middle" fill="#a0522d">熱海市</text>
+    </g>
+
+    <!-- Category chips -->
+    <g font-family="'Hiragino Sans', sans-serif" font-size="12" fill="#c1440e">
+      <rect x="20" y="200" width="58" height="28" rx="14" fill="#ffe8d6"/>
+      <text x="49" y="218" text-anchor="middle">IPA</text>
+      <rect x="84" y="200" width="80" height="28" rx="14" fill="#ffe8d6"/>
+      <text x="124" y="218" text-anchor="middle">ピルスナー</text>
+      <rect x="170" y="200" width="70" height="28" rx="14" fill="#ffe8d6"/>
+      <text x="205" y="218" text-anchor="middle">スタウト</text>
+      <rect x="246" y="200" width="72" height="28" rx="14" fill="#ffe8d6"/>
+      <text x="282" y="218" text-anchor="middle">みかんエール</text>
+    </g>
+
+    <!-- Map area: 富士山と夕焼け -->
+    <rect x="20" y="244" width="335" height="196" rx="20" fill="url(#e-map)"/>
+    <circle cx="300" cy="290" r="26" fill="#fff2c9" opacity="0.9"/>
+    <path d="M120,410 L175,300 L200,335 L235,270 L300,410 Z" fill="#8a5a44" opacity="0.85"/>
+    <path d="M215,300 L235,270 L255,300 Z" fill="#ffffff" opacity="0.9"/>
+    <path d="M20,415 Q100,395 190,414 T355,405 L355,440 L20,440 Z" fill="#ffffff" opacity="0.25"/>
+    <circle cx="90" cy="360" r="9" fill="#ffffff" stroke="#c1440e" stroke-width="2"/>
+    <circle cx="150" cy="380" r="9" fill="#ffffff" stroke="#c1440e" stroke-width="2"/>
+    <text x="20" y="270" font-size="11" fill="#ffffff" opacity="0.95">富士山 × 夕焼けビュー</text>
+
+    <!-- Store list heading -->
+    <text x="20" y="472" font-family="'Hiragino Sans', sans-serif" font-size="15" font-weight="700" fill="#c1440e">近くのお店</text>
+
+    <!-- Store card 1 -->
+    <rect x="20" y="486" width="335" height="118" rx="20" fill="#ffffff" stroke="#ffe4cc"/>
+    <rect x="36" y="500" width="42" height="42" rx="10" fill="#ffd97d"/>
+    <rect x="82" y="500" width="42" height="42" rx="10" fill="#ff9a5a"/>
+    <rect x="36" y="546" width="42" height="42" rx="10" fill="#ff6b35"/>
+    <rect x="82" y="546" width="42" height="42" rx="10" fill="#ffb199"/>
+    <text x="138" y="514" font-family="'Hiragino Sans', sans-serif" font-size="15" font-weight="700" fill="#a0522d">富士山麓ブルワリー</text>
+    <text x="138" y="536" font-size="12" fill="#b97a52">静岡県 富士市</text>
+    <rect x="138" y="548" width="88" height="22" rx="11" fill="#ffe8d6"/>
+    <text x="182" y="563" font-size="10" text-anchor="middle" fill="#c1440e">三ケ日みかんエール</text>
+
+    <!-- Store card 2 -->
+    <rect x="20" y="614" width="335" height="118" rx="20" fill="#ffffff" stroke="#ffe4cc"/>
+    <rect x="36" y="628" width="42" height="42" rx="10" fill="#ff9a5a"/>
+    <rect x="82" y="628" width="42" height="42" rx="10" fill="#ffd97d"/>
+    <rect x="36" y="674" width="42" height="42" rx="10" fill="#ffb199"/>
+    <rect x="82" y="674" width="42" height="42" rx="10" fill="#ff6b35"/>
+    <text x="138" y="642" font-family="'Hiragino Sans', sans-serif" font-size="15" font-weight="700" fill="#a0522d">沼津港サンセットタップ</text>
+    <text x="138" y="664" font-size="12" fill="#b97a52">静岡県 沼津市</text>
+    <rect x="138" y="676" width="72" height="22" rx="11" fill="#ffe8d6"/>
+    <text x="174" y="691" font-size="10" text-anchor="middle" fill="#c1440e">駿河湾ラガー</text>
+
+    <!-- Footer -->
+    <rect x="0" y="746" width="375" height="66" fill="#ffffff"/>
+    <line x1="0" y1="746" x2="375" y2="746" stroke="#ffe4cc"/>
+    <g font-family="'Hiragino Sans', sans-serif" font-size="10" fill="#b97a52" text-anchor="middle">
+      <text x="55" y="772" font-size="16">★</text>
+      <text x="55" y="792">お気に入り</text>
+      <text x="150" y="772" font-size="16" fill="#ff6b35">📜</text>
+      <text x="150" y="792" fill="#ff6b35" font-weight="700">タイムライン</text>
+      <text x="230" y="772" font-size="16">＋</text>
+      <text x="230" y="792">投稿</text>
+      <text x="320" y="772" font-size="16">🕒</text>
+      <text x="320" y="792">履歴</text>
+    </g>
+  </g>
+
+  <rect x="1" y="1" width="373" height="810" rx="35" fill="none" stroke="#ff6b35" stroke-width="2"/>
+</svg>
