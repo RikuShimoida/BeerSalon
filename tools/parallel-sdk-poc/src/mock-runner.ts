@@ -65,7 +65,7 @@ export function createMockRunner(config: MockRunnerConfig = {}): AgentRunner & {
 			await Promise.resolve();
 
 			const branch = `feature/${issue.number}-mock`;
-			const worktreePath = `.claude/worktrees/${branch.replace("/", "-")}`;
+			const worktreePath = `.claude/worktrees/${branch.replaceAll("/", "-")}`;
 
 			const shouldFail = attempt <= (failUntil[issue.number] ?? 0);
 

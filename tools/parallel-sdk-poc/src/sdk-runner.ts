@@ -69,7 +69,7 @@ export function createSdkRunner(repoRoot: string): AgentRunner {
 	return {
 		async runImplementation(issue: IssueInput): Promise<ImplementationResult> {
 			const branch = `feature/${issue.number}-sdk-poc`;
-			const worktreePath = `.claude/worktrees/${branch.replace("/", "-")}`;
+			const worktreePath = `.claude/worktrees/${branch.replaceAll("/", "-")}`;
 			try {
 				const text = await collectResult(
 					`Issue #${issue.number}「${issue.title}」を /impl の Phase 1 手順で実装してください。` +
