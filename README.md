@@ -178,6 +178,14 @@ claude --plugin-dir ./plugins/bs-workflow
 
 > 過去に、この自動適用が存在せずリモート DB へマイグレーションが一切適用されていなかったため、プロフィール画像アップロード時にバケットが無く「画像のアップロードに失敗しました」が発生した経緯がある（Issue #313）。この仕組みはその再発防止のためのもの。
 
+### アプリ実行時の Supabase 接続先（Vercel 環境変数）の分離
+
+上記 `migrate.yml` は「マイグレーションの適用先」を分離するものだが、**アプリが実行時に接続する Supabase プロジェクトは Vercel の環境変数（`NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` / `DATABASE_URL` / `DIRECT_URL`）で決まる**。この2つは別レイヤーなので、両方を分離しないと「マイグレーションは dev に流れるのにアプリは prod を見る」というズレが起きる。
+
+- **Preview 環境変数（`beer-salon` / `beer-salon-admin` の各 Vercel プロジェクト）は dev プロジェクト（ref: `utwrpxokugqgyrntbpfw`）を指すこと**。Production 環境変数は prod（ref: `srgecvsxybsqyyhjnzsc`）を指すこと。
+- `DATABASE_URL`（ポート 6543）/ `DIRECT_URL`（ポート 5432）は上記「接続文字列の注意」のとおり、両方とも **`aws-1` の Session pooler**（`postgresql://postgres.<ref>:<pw>@aws-1-ap-northeast-1.pooler.supabase.com:<port>/postgres`）を使う。`db.<ref>.supabase.co` 直結や `aws-0` は使わない。
+- 過去に admin/web の Preview がいずれも prod を指しており、develop プレビューでの管理画面操作が本番 DB に直撃する状態だった（Issue #382）。上記のとおり Preview を dev に是正済み。環境変数変更は再デプロイ（`deploy.yml` 経由 = develop push）で初めて実ビルドに反映される点に注意。
+
 ### トラブルシュート
 
 - **片肺で alias が古いまま残る場合**
