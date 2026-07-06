@@ -223,6 +223,7 @@ git worktree add .claude/worktrees/<branch> origin/develop -b <branch>
 | Playwright config | baseURL/webServer.url 固定解除の改修が必要（②） |
 | `scripts/e2e-setup.sh` | 現行維持（DB名 `postgres` 固定、冪等seed）。物理分離は採らない |
 | Supabase Redirect URL 許可リスト | ポートプールを exact 列挙で事前登録（②） |
+| `/parallel` 司令塔ロジックの SDK 化 PoC | `tools/parallel-sdk-poc/`（Issue #373）。司令塔の決定論部分（適格判定・並列/直列制御・リトライ・集約）を Claude Agent SDK 前提の TS コードで再実装できるか検証済み。**結論: 現時点では本格移行しない**（比較評価・判断材料は `docs/parallel-sdk-poc.md`）。SDK 上で worktree 分離（`query()` の `cwd` 指定）が成立することは確認済み |
 
 ---
 

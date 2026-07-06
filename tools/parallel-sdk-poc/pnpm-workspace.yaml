@@ -1,0 +1,5 @@
+# Issue #373 PoC を独立 workspace として切り出す。
+# 親（apps/*, packages/* を束ねる beersalon-monorepo）の workspace に吸い込まれると
+# PoC の依存が親側に混入するため、ここで境界を張って完全隔離する。
+# メンバーは自分自身（このディレクトリ）のみ。
+packages: []
