@@ -8,10 +8,7 @@ export async function Header() {
 	const unreadCount = await getUnreadNotificationCount();
 
 	return (
-		<header
-			className="fixed top-0 left-0 right-0 backdrop-blur-xl border-b border-border/20 z-50 modern-shadow"
-			style={{ backgroundColor: "#f0e68c" }}
-		>
+		<header className="fixed top-0 left-0 right-0 bg-surface-panel backdrop-blur-xl border-b border-border/20 z-50 modern-shadow">
 			<div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 				<Link
 					href="/"
@@ -30,7 +27,7 @@ export async function Header() {
 				<div className="flex items-center gap-2">
 					<Link
 						href="/notifications"
-						className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300 relative"
+						className="p-2.5 text-foreground bg-surface-control hover:bg-surface-control/80 rounded-full transition-all duration-300 relative"
 						aria-label="通知"
 						data-testid="notification-icon"
 					>
@@ -47,7 +44,7 @@ export async function Header() {
 
 					<Link
 						href="/mypage"
-						className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300"
+						className="p-2.5 text-foreground bg-surface-control hover:bg-surface-control/80 rounded-full transition-all duration-300"
 						aria-label="マイページ"
 					>
 						<User className="w-5 h-5" />
@@ -56,7 +53,7 @@ export async function Header() {
 					<form action={logout}>
 						<button
 							type="submit"
-							className="p-2.5 text-foreground bg-white hover:bg-white/80 rounded-full transition-all duration-300"
+							className="p-2.5 text-foreground bg-surface-control hover:bg-surface-control/80 rounded-full transition-all duration-300"
 							aria-label="ログアウト"
 						>
 							<LogOut className="w-5 h-5" />

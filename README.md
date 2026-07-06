@@ -140,6 +140,26 @@ claude --plugin-dir ./plugins/bs-workflow
 
 ---
 
+## 🎨 配色テーマの切替（ユーザー画面 / apps/web）
+
+ユーザー画面の配色を「テーマ」単位で差し替えられる（方式③: ビルド時・開発者切替。実行時のユーザー向けトグルは対象外）。目的は、デザインを変えても**容易に前へ戻せる**こと。
+
+```bash
+# 現行（ライトなアンバー・クリーム基調 = 巻き戻し先）に戻す
+pnpm --filter @beersalon/web theme current
+
+# #383 案A（ダークブラウン × アンバーゴールド）に切り替える
+pnpm --filter @beersalon/web theme amber-dark
+```
+
+- テーマ本体は `apps/web/src/styles/themes/<name>.css`（各ファイルが `:root { ... }` を1つ持つ）。
+- `pnpm theme <name>` は `apps/web/src/app/globals.css` 内の `/* THEME:START */` 〜 `/* THEME:END */` で囲まれた `:root` ブロックを、指定テーマの内容へ差し替える。反映は `pnpm dev` の再ビルド / ブラウザリロードで行われる。
+- 切替が一貫して追従するのは、共通ヘッダー / フッターの帯・検索フォームのカード・入力欄・チップ・アイコン背景で使う `--surface-panel`（帯・カード）/ `--surface-control`（白い操作面）の2トークン。以前はこれらが `#f0e68c` / `#ffffff` / `bg-white` としてハードコードされ、テーマ切替から取り残されていた（#388 で「戻せない」と判明した直接原因）。
+- **新しいテーマを足すときは `themes/` に CSS を1つ追加するだけ**でよい（`current.css` を複製して値を変える）。手で `globals.css` の `:root` を直接編集した場合は、巻き戻し先である `themes/current.css` も同じ内容に揃えること（UT `apply-theme.test.ts` が両者の一致を検査する）。
+- **既知の制約（本 Issue #389 のスコープ外）**: `globals.css` の既存 HSL トークン（`--background` / `--primary` 等）は `hsl()` ラップされておらず、`bg-background` / `bg-primary` などは現状レンダリング上は無色（透明）で機能していない。そのため `amber-dark` でも「帯・操作面（`--surface-*`）」以外の面はダーク化しない。全画面のダークテーマ化・実行時テーマトグル（next-themes 等）は別 Issue で扱う。本 Issue のトークン化がその前提基盤になる。
+
+---
+
 ## 🌐 プレビュー環境（develop 追従）
 
 `develop` ブランチに push されると、GitHub Actions が Vercel に自動デプロイし、以下の固定 URL を最新ビルドに付け替える。
