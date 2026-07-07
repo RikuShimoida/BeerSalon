@@ -31,10 +31,10 @@ export function PopularArticlesSection({
 					<Link
 						key={article.id}
 						href={`/articles/${article.id}`}
-						className="group block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+						className="group block bg-[#241a0c] border border-[#4a3620] rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
 					>
 						{article.imageUrl ? (
-							<div className="relative h-48 bg-gray-200">
+							<div className="relative h-48 bg-[#3d2b17]">
 								<Image
 									src={article.imageUrl}
 									alt={article.title}
@@ -43,16 +43,16 @@ export function PopularArticlesSection({
 								/>
 							</div>
 						) : (
-							<div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-								<span className="text-gray-400 text-sm">No Image</span>
+							<div className="h-48 bg-gradient-to-br from-[#3d2b17] to-[#241a0c] flex items-center justify-center">
+								<span className="text-[#c4a878] text-sm">No Image</span>
 							</div>
 						)}
 						<div className="p-4">
-							<h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-amber-600 transition-colors">
+							<h3 className="font-bold text-lg mb-2 line-clamp-2 text-[#f5e9d4] group-hover:text-amber-400 transition-colors">
 								{article.title}
 							</h3>
-							<p className="text-sm text-gray-600 mb-2">{article.barName}</p>
-							<div className="flex items-center justify-between text-sm text-gray-500">
+							<p className="text-sm text-[#c4a878] mb-2">{article.barName}</p>
+							<div className="flex items-center justify-between text-sm text-[#c4a878]">
 								<time dateTime={article.publishedAt}>
 									{new Date(article.publishedAt).toLocaleDateString("ja-JP", {
 										year: "numeric",

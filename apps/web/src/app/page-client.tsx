@@ -228,52 +228,54 @@ export function HomeClient() {
 	];
 
 	return (
-		<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-			<div className="flex flex-col gap-8 md:gap-12">
-				{/* 検索セクション */}
-				{/* Why not: 制御 input の value を毎レンダリング上書きすると入力中のIME変換が
+		<div className="top-amber-dark min-h-screen px-4 py-8 md:py-12">
+			<div className="max-w-7xl mx-auto">
+				<div className="flex flex-col gap-8 md:gap-12">
+					{/* 検索セクション */}
+					{/* Why not: 制御 input の value を毎レンダリング上書きすると入力中のIME変換が
 				    途切れるため、URL の q/city が変わったときだけ key で再マウントして初期値を反映する。 */}
-				<SearchForm
-					key={`${urlQuery}|${urlCity}`}
-					initialValues={searchParams}
-					onSearch={handleSearch}
-				/>
+					<SearchForm
+						key={`${urlQuery}|${urlCity}`}
+						initialValues={searchParams}
+						onSearch={handleSearch}
+					/>
 
-				{/* 地図エリア */}
-				<GoogleMap city={searchParams.city} bars={bars} />
+					{/* 地図エリア */}
+					<GoogleMap city={searchParams.city} bars={bars} />
 
-				{/* 店舗一覧 */}
-				<BarList bars={bars} isLoading={isBarsLoading} />
+					{/* 店舗一覧 */}
+					<BarList bars={bars} isLoading={isBarsLoading} />
 
-				{/* クラフトビールについて知る */}
-				<LearnAboutCraftBeerCard />
+					{/* クラフトビールについて知る */}
+					<LearnAboutCraftBeerCard />
 
-				{/* 先月いいねの多かった記事 */}
-				<PopularArticlesSection articles={mockPopularArticles} />
+					{/* 先月いいねの多かった記事 */}
+					<PopularArticlesSection articles={mockPopularArticles} />
 
-				{/* 人気なお店で探す */}
-				<PopularBarsSection title="人気なお店で探す" bars={mockPopularBars} />
+					{/* 人気なお店で探す */}
+					<PopularBarsSection title="人気なお店で探す" bars={mockPopularBars} />
 
-				{/* 人気な市町村で探す */}
-				<PopularCitiesSection
-					title="人気な市町村で探す"
-					cities={mockPopularCities}
-				/>
+					{/* 人気な市町村で探す */}
+					<PopularCitiesSection
+						title="人気な市町村で探す"
+						cities={mockPopularCities}
+					/>
 
-				{/* 人気なカテゴリのビールで探す */}
-				<PopularCategoriesSection
-					title="人気なカテゴリのビールで探す"
-					categories={mockPopularCategories}
-				/>
+					{/* 人気なカテゴリのビールで探す */}
+					<PopularCategoriesSection
+						title="人気なカテゴリのビールで探す"
+						categories={mockPopularCategories}
+					/>
 
-				{/* 人気なビールの産地で探す */}
-				<PopularRegionsSection
-					title="人気なビールの産地で探す"
-					regions={mockPopularRegions}
-				/>
+					{/* 人気なビールの産地で探す */}
+					<PopularRegionsSection
+						title="人気なビールの産地で探す"
+						regions={mockPopularRegions}
+					/>
 
-				{/* 利用規約エリア */}
-				<FooterLinks />
+					{/* 利用規約エリア */}
+					<FooterLinks />
+				</div>
 			</div>
 		</div>
 	);
