@@ -28,7 +28,7 @@ export function PopularBarsSection({ title, bars }: PopularBarsSectionProps) {
 			case 3:
 				return "bg-amber-700 text-white";
 			default:
-				return "bg-gray-300 text-gray-700";
+				return "bg-[#3d2b17] text-[#c4a878]";
 		}
 	};
 

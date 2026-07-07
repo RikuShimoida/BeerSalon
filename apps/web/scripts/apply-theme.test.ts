@@ -103,3 +103,37 @@ describe("テーマファイルと globals.css の整合", () => {
 		expect(themes).toContain("amber-dark");
 	});
 });
+
+describe("トップページ限定ダークスコープ（#388 案A）", () => {
+	const globalsCss = readFileSync(globalsPath, "utf8");
+
+	it("globals.css にトップ限定スコープ .top-amber-dark が定義されている", () => {
+		expect(globalsCss).toContain(".top-amber-dark");
+	});
+
+	it("スコープ定義は THEME:START〜THEME:END の外にあり、テーマ切替ブロックを侵さない", () => {
+		const startIdx = globalsCss.indexOf("/* THEME:START");
+		const endIdx = globalsCss.indexOf("/* THEME:END */");
+		const themeBlock = globalsCss.slice(startIdx, endIdx);
+		// Why not スコープを :root(THEMEブロック)内に置く: そこへ書くと apply-theme が
+		// 差し替え対象にしてテーマ切替で消える。スコープは THEME ブロックの外に置く。
+		expect(themeBlock).not.toContain(".top-amber-dark");
+	});
+
+	it("スコープ内で surface トークンを案Aのダーク値へ上書きしている", () => {
+		const scopeIdx = globalsCss.indexOf(".top-amber-dark {");
+		const scopeEnd = globalsCss.indexOf("}", scopeIdx);
+		const scopeBlock = globalsCss.slice(scopeIdx, scopeEnd);
+		expect(scopeBlock).toContain("--surface-panel: #2a1c0e;");
+		expect(scopeBlock).toContain("--surface-control: #3d2b17;");
+	});
+
+	it("THEME ブロック（:root）は現行 current のライト値のまま（全画面ダーク化していない）", () => {
+		const startIdx = globalsCss.indexOf("/* THEME:START");
+		const endIdx = globalsCss.indexOf("/* THEME:END */");
+		const themeBlock = globalsCss.slice(startIdx, endIdx);
+		// current のライト基調（帯=クリーム / 操作面=白）が :root に維持されていること
+		expect(themeBlock).toContain("--surface-panel: #f0e68c;");
+		expect(themeBlock).toContain("--surface-control: #ffffff;");
+	});
+});
