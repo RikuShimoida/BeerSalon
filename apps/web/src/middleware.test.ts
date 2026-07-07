@@ -181,3 +181,49 @@ describe("web middleware: 未認証時の保護ルートアクセス", () => {
 		expect(response.headers.get("location")).toContain("/signup/profile");
 	});
 });
+
+describe("web middleware: 認証バックエンド到達不可時のフォールバック", () => {
+	beforeEach(() => {
+		mockGetUser.mockReset();
+		mockFrom.mockReset();
+	});
+
+	it("getUser() が例外を投げても middleware はクラッシュせず、保護ルートは /login へリダイレクトされる", async () => {
+		mockGetUser.mockRejectedValue(new Error("fetch failed"));
+
+		const request = createMockRequest("/");
+		const response = await middleware(request);
+
+		expect(response.status).toBe(307);
+		expect(response.headers.get("location")).toContain("/login");
+	});
+
+	it("getUser() が例外を投げても /login 自体は表示できる（リダイレクトされない）", async () => {
+		mockGetUser.mockRejectedValue(new Error("fetch failed"));
+
+		const request = createMockRequest("/login");
+		const response = await middleware(request);
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("location")).toBeNull();
+	});
+
+	it("認証済みでも user_profiles 照会が例外を投げた場合はクラッシュせず通常表示を優先する", async () => {
+		mockGetUser.mockResolvedValue({
+			data: { user: { id: "user-1" } },
+		});
+		mockFrom.mockReturnValue({
+			select: () => ({
+				eq: () => ({
+					single: () => Promise.reject(new Error("fetch failed")),
+				}),
+			}),
+		});
+
+		const request = createMockRequest("/");
+		const response = await middleware(request);
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("location")).toBeNull();
+	});
+});
