@@ -263,7 +263,14 @@ export default function BarNewForm() {
 							{ method: "POST", body: imageFormData },
 						);
 						if (!imageResponse.ok) {
-							uploadErrors.push("プレビュー画像");
+							// Why not: 店舗登録は admin 専用画面のため、API が admin に返す detail をそのまま表示して原因を追いやすくする
+							const detail = await imageResponse
+								.json()
+								.then((d) => d.detail as string | undefined)
+								.catch(() => undefined);
+							uploadErrors.push(
+								detail ? `プレビュー画像 (${detail})` : "プレビュー画像",
+							);
 						}
 					} catch {
 						uploadErrors.push("プレビュー画像");

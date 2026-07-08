@@ -97,10 +97,13 @@ export async function POST(
 			});
 
 		if (uploadError) {
-			// Why not: 詳細をレスポンスに載せると外部の bar_owner に内部情報が露出するため、真因はサーバーログにのみ残す
+			// Why not: 詳細を全ユーザーに返すと外部の bar_owner に内部情報が露出するため、内部の admin にのみ返す
 			console.error("[preview-image] storage upload failed:", uploadError);
 			return NextResponse.json(
-				{ error: "画像のアップロードに失敗しました" },
+				{
+					error: "画像のアップロードに失敗しました",
+					...(user.role === "admin" ? { detail: uploadError.message } : {}),
+				},
 				{ status: 500 },
 			);
 		}
@@ -121,7 +124,10 @@ export async function POST(
 		if (updateError) {
 			console.error("[preview-image] db update failed:", updateError);
 			return NextResponse.json(
-				{ error: "データベースの更新に失敗しました" },
+				{
+					error: "データベースの更新に失敗しました",
+					...(user.role === "admin" ? { detail: updateError.message } : {}),
+				},
 				{ status: 500 },
 			);
 		}

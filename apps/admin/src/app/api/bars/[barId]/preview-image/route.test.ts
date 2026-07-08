@@ -159,7 +159,7 @@ describe("POST /api/bars/:barId/preview-image", () => {
 		expect(body.error).toBe("画像形式はJPEG、PNG、WebPのみ対応しています");
 	});
 
-	it("Storage アップロード失敗時、500 を返し実エラーはサーバーログにのみ出す（detailは返さない）", async () => {
+	it("Storage アップロード失敗時、admin には detail を返しログにも出す", async () => {
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		setupSupabase({
 			uploadResult: {
@@ -173,8 +173,8 @@ describe("POST /api/bars/:barId/preview-image", () => {
 
 		expect(response.status).toBe(500);
 		expect(body.error).toBe("画像のアップロードに失敗しました");
-		// Why not: 内部情報の外部露出を防ぐため detail はクライアントに返さない
-		expect(body.detail).toBeUndefined();
+		// Why not: admin は内部ユーザーのため詳細を返して原因追跡を容易にする
+		expect(body.detail).toBe("new row violates row-level security policy");
 		expect(consoleSpy).toHaveBeenCalledWith(
 			"[preview-image] storage upload failed:",
 			{ message: "new row violates row-level security policy" },
@@ -183,7 +183,35 @@ describe("POST /api/bars/:barId/preview-image", () => {
 		consoleSpy.mockRestore();
 	});
 
-	it("DB更新失敗時、500 を返し実エラーはサーバーログにのみ出す（detailは返さない）", async () => {
+	it("Storage アップロード失敗時、bar_owner には detail を返さない（ログには出す）", async () => {
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		mockGetCurrentUser.mockResolvedValue({
+			id: "owner-1",
+			barManageId: "fuji-beer",
+			name: "オーナー",
+			role: "bar_owner" as const,
+			barId: 1,
+		});
+		setupSupabase({
+			uploadResult: {
+				data: null,
+				error: { message: "new row violates row-level security policy" },
+			},
+		});
+
+		const response = await POST(createRequest(validFile()), createParams());
+		const body = await response.json();
+
+		expect(response.status).toBe(500);
+		expect(body.error).toBe("画像のアップロードに失敗しました");
+		// Why not: 外部ユーザーへの内部情報露出を防ぐため detail は返さない
+		expect(body.detail).toBeUndefined();
+		expect(consoleSpy).toHaveBeenCalled();
+
+		consoleSpy.mockRestore();
+	});
+
+	it("DB更新失敗時、admin には detail を返しログにも出す", async () => {
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		setupSupabase({ updateError: { message: "column does not exist" } });
 
@@ -192,7 +220,7 @@ describe("POST /api/bars/:barId/preview-image", () => {
 
 		expect(response.status).toBe(500);
 		expect(body.error).toBe("データベースの更新に失敗しました");
-		expect(body.detail).toBeUndefined();
+		expect(body.detail).toBe("column does not exist");
 		expect(consoleSpy).toHaveBeenCalledWith(
 			"[preview-image] db update failed:",
 			{
