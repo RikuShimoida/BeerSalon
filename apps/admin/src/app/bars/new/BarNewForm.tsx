@@ -263,7 +263,13 @@ export default function BarNewForm() {
 							{ method: "POST", body: imageFormData },
 						);
 						if (!imageResponse.ok) {
-							uploadErrors.push("プレビュー画像");
+							const detail = await imageResponse
+								.json()
+								.then((d) => d.detail as string | undefined)
+								.catch(() => undefined);
+							uploadErrors.push(
+								detail ? `プレビュー画像 (${detail})` : "プレビュー画像",
+							);
 						}
 					} catch {
 						uploadErrors.push("プレビュー画像");
@@ -290,8 +296,9 @@ export default function BarNewForm() {
 					setError(
 						`店舗は登録されましたが、以下のアップロードに失敗しました: ${uploadErrors.join(", ")}。編集画面から再度アップロードしてください。`,
 					);
+					// Why not: 一覧へ戻すと画像欠落が「No Image」に埋もれて気付けないため、再アップロード可能な編集画面へ誘導する
 					setTimeout(() => {
-						router.push("/bars");
+						router.push(`/bars/${responseData.id}/edit`);
 						router.refresh();
 					}, REDIRECT_DELAY_MS);
 					return;
