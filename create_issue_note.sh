@@ -140,7 +140,22 @@ esac
 
 echo ""
 
-# 2. 対象システム名
+# 2. 環境名
+env_options=("ローカル" "プレビュー" "本番" "全環境")
+select_option "★環境名を選択してください:" "${env_options[@]}"
+env_choice="$REPLY_CHOICE"
+selected_env="$REPLY_LABEL"
+
+case $env_choice in
+    1) env_text="ローカル環境" ;;
+    2) env_text="プレビュー環境" ;;
+    3) env_text="本番環境" ;;
+    4) env_text="全環境（ローカル・プレビュー・本番）" ;;
+esac
+
+echo ""
+
+# 3. 対象システム名
 system_options=("ユーザー画面" "管理画面" "両方")
 select_option "★対象システム名を選択してください:" "${system_options[@]}"
 system_choice="$REPLY_CHOICE"
@@ -154,47 +169,47 @@ esac
 
 echo ""
 
-# 3. 対象ページ名
+# 4. 対象ページ名
 read_required "★対象ページ名を入力してください: "
 page_name="$REPLY_VALUE"
 echo ""
 
-# 4. 対象機能名
+# 5. 対象機能名
 read_required "★対象機能名を入力してください: "
 feature_name="$REPLY_VALUE"
 echo ""
 
-# 5. 課題
+# 6. 課題
 read_multiline_required "★課題を入力してください:"
 issue="$REPLY_VALUE"
 echo ""
 
-# 6. 期待する状態
+# 7. 期待する状態
 read_multiline_required "★期待する状態を入力してください:"
 expected="$REPLY_VALUE"
 echo ""
 
-# 7. なぜそれをやるのか？
+# 8. なぜそれをやるのか？
 read_multiline_required "★なぜそれをやるのか？を入力してください:"
 reason="$REPLY_VALUE"
 echo ""
 
-# 8. やらないこと（オプション）
+# 9. やらないこと（オプション）
 read_multiline "やらないことを入力してください（オプション）:" "true"
 not_do="$REPLY_VALUE"
 echo ""
 
-# 9. 受入条件
+# 10. 受入条件
 read_multiline_required "★受入条件を入力してください:"
 acceptance="$REPLY_VALUE"
 echo ""
 
-# 10. 前提条件（オプション）
+# 11. 前提条件（オプション）
 read_multiline "前提条件を入力してください（オプション）:" "true"
 prerequisites="$REPLY_VALUE"
 echo ""
 
-# 11. 補足（オプション）
+# 12. 補足（オプション）
 read_multiline "補足（考えられる原因など）を入力してください（オプション）:" "true"
 notes="$REPLY_VALUE"
 echo ""
@@ -205,6 +220,7 @@ echo -e "${GREEN}入力内容の確認${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo -e "${BLUE}課題No:${NC} ${issue_no}"
 echo -e "${BLUE}対応種別:${NC} ${selected_type}"
+echo -e "${BLUE}環境名:${NC} ${env_text}"
 echo -e "${BLUE}対象システム:${NC} ${system_text}"
 echo -e "${BLUE}対象ページ:${NC} ${page_name}"
 echo -e "${BLUE}対象機能:${NC} ${feature_name}"
@@ -257,6 +273,7 @@ fi
     echo ""
     echo "## 基本情報"
     echo "- **対応種別**: ${selected_type}"
+    echo "- **環境名**: ${env_text}"
     echo "- **対象システム**: ${system_text}"
     echo "- **対象ページ**: ${page_name}"
     echo "- **対象機能**: ${feature_name}"
