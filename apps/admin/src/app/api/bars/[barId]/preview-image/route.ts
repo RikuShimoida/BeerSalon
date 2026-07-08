@@ -97,13 +97,10 @@ export async function POST(
 			});
 
 		if (uploadError) {
-			// Why not: 握りつぶすと本番/プレビューでの失敗原因が追えないため、実エラーをログとレスポンスに残す
+			// Why not: 詳細をレスポンスに載せると外部の bar_owner に内部情報が露出するため、真因はサーバーログにのみ残す
 			console.error("[preview-image] storage upload failed:", uploadError);
 			return NextResponse.json(
-				{
-					error: "画像のアップロードに失敗しました",
-					detail: uploadError.message,
-				},
+				{ error: "画像のアップロードに失敗しました" },
 				{ status: 500 },
 			);
 		}
@@ -124,10 +121,7 @@ export async function POST(
 		if (updateError) {
 			console.error("[preview-image] db update failed:", updateError);
 			return NextResponse.json(
-				{
-					error: "データベースの更新に失敗しました",
-					detail: updateError.message,
-				},
+				{ error: "データベースの更新に失敗しました" },
 				{ status: 500 },
 			);
 		}
@@ -138,10 +132,7 @@ export async function POST(
 	} catch (error) {
 		console.error("[preview-image] unexpected error:", error);
 		return NextResponse.json(
-			{
-				error: "画像のアップロードに失敗しました",
-				detail: error instanceof Error ? error.message : String(error),
-			},
+			{ error: "画像のアップロードに失敗しました" },
 			{ status: 500 },
 		);
 	}
@@ -206,16 +197,18 @@ export async function DELETE(
 			.eq("id", barId);
 
 		if (updateError) {
+			console.error("[preview-image] delete db update failed:", updateError);
 			return NextResponse.json(
-				{ error: "データベ��スの更新に失敗しま���た" },
+				{ error: "データベースの更新に失敗しました" },
 				{ status: 500 },
 			);
 		}
 
 		return NextResponse.json({ success: true });
-	} catch (_error) {
+	} catch (error) {
+		console.error("[preview-image] delete unexpected error:", error);
 		return NextResponse.json(
-			{ error: "画像の削除��失敗しました" },
+			{ error: "画像の削除に失敗しました" },
 			{ status: 500 },
 		);
 	}

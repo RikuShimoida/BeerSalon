@@ -263,13 +263,7 @@ export default function BarNewForm() {
 							{ method: "POST", body: imageFormData },
 						);
 						if (!imageResponse.ok) {
-							const detail = await imageResponse
-								.json()
-								.then((d) => d.detail as string | undefined)
-								.catch(() => undefined);
-							uploadErrors.push(
-								detail ? `プレビュー画像 (${detail})` : "プレビュー画像",
-							);
+							uploadErrors.push("プレビュー画像");
 						}
 					} catch {
 						uploadErrors.push("プレビュー画像");

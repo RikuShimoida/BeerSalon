@@ -159,7 +159,7 @@ describe("POST /api/bars/:barId/preview-image", () => {
 		expect(body.error).toBe("画像形式はJPEG、PNG、WebPのみ対応しています");
 	});
 
-	it("Storage アップロード失敗時、500 と実エラー detail を返す", async () => {
+	it("Storage アップロード失敗時、500 を返し実エラーはサーバーログにのみ出す（detailは返さない）", async () => {
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		setupSupabase({
 			uploadResult: {
@@ -173,13 +173,17 @@ describe("POST /api/bars/:barId/preview-image", () => {
 
 		expect(response.status).toBe(500);
 		expect(body.error).toBe("画像のアップロードに失敗しました");
-		expect(body.detail).toBe("new row violates row-level security policy");
-		expect(consoleSpy).toHaveBeenCalled();
+		// Why not: 内部情報の外部露出を防ぐため detail はクライアントに返さない
+		expect(body.detail).toBeUndefined();
+		expect(consoleSpy).toHaveBeenCalledWith(
+			"[preview-image] storage upload failed:",
+			{ message: "new row violates row-level security policy" },
+		);
 
 		consoleSpy.mockRestore();
 	});
 
-	it("DB更新失敗時、500 と実エラー detail を返す", async () => {
+	it("DB更新失敗時、500 を返し実エラーはサーバーログにのみ出す（detailは返さない）", async () => {
 		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 		setupSupabase({ updateError: { message: "column does not exist" } });
 
@@ -188,10 +192,30 @@ describe("POST /api/bars/:barId/preview-image", () => {
 
 		expect(response.status).toBe(500);
 		expect(body.error).toBe("データベースの更新に失敗しました");
-		expect(body.detail).toBe("column does not exist");
-		expect(consoleSpy).toHaveBeenCalled();
+		expect(body.detail).toBeUndefined();
+		expect(consoleSpy).toHaveBeenCalledWith(
+			"[preview-image] db update failed:",
+			{
+				message: "column does not exist",
+			},
+		);
 
 		consoleSpy.mockRestore();
+	});
+
+	it("既存画像がある場合、旧ファイルを削除してから新規アップロードする", async () => {
+		const { storageChain } = setupSupabase({
+			existingPreviewUrl:
+				"https://example.supabase.co/storage/v1/object/public/bar-preview-images/bars/1/preview_old.png",
+		});
+
+		const response = await POST(createRequest(validFile()), createParams());
+
+		expect(response.status).toBe(200);
+		expect(storageChain.remove).toHaveBeenCalledWith([
+			"bars/1/preview_old.png",
+		]);
+		expect(storageChain.upload).toHaveBeenCalled();
 	});
 
 	it("正常時、公開URLを返し bars.preview_image_url を更新する", async () => {
