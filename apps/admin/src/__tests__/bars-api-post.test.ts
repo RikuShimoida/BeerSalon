@@ -208,3 +208,62 @@ describe("POST /api/bars 営業時間同期", () => {
 		});
 	});
 });
+
+describe("POST /api/bars 定休日補足（regular_holiday）保存", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockGetCurrentUser.mockResolvedValue({ id: "admin-1", role: "admin" });
+	});
+
+	it("regular_holiday を渡すと bars の insert に regular_holiday が渡る", async () => {
+		const { barInsert } = setupSupabaseMocks();
+
+		const response = await POST(
+			createMockRequest({
+				...validPhase1,
+				name: "テストバー",
+				regular_holiday: "不定休 / 第2・第4月曜定休",
+			}),
+		);
+
+		expect(response.status).toBe(201);
+		expect(barInsert).toHaveBeenCalledWith(
+			expect.objectContaining({
+				regular_holiday: "不定休 / 第2・第4月曜定休",
+			}),
+		);
+	});
+
+	it("regular_holiday が空文字の場合は null で insert される", async () => {
+		const { barInsert } = setupSupabaseMocks();
+
+		const response = await POST(
+			createMockRequest({
+				...validPhase1,
+				name: "テストバー",
+				regular_holiday: "",
+			}),
+		);
+
+		expect(response.status).toBe(201);
+		expect(barInsert).toHaveBeenCalledWith(
+			expect.objectContaining({ regular_holiday: null }),
+		);
+	});
+
+	it("regular_holiday を渡さない場合は null で insert される", async () => {
+		const { barInsert } = setupSupabaseMocks();
+
+		const response = await POST(
+			createMockRequest({
+				...validPhase1,
+				name: "テストバー",
+			}),
+		);
+
+		expect(response.status).toBe(201);
+		expect(barInsert).toHaveBeenCalledWith(
+			expect.objectContaining({ regular_holiday: null }),
+		);
+	});
+});

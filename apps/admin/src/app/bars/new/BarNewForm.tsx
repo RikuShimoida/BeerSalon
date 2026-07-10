@@ -79,6 +79,8 @@ export default function BarNewForm() {
 		})),
 	);
 
+	const [regularHoliday, setRegularHoliday] = useState("");
+
 	const handlePhase1Change = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setPhase1({ ...phase1, [e.target.name]: e.target.value });
 	};
@@ -251,6 +253,7 @@ export default function BarNewForm() {
 					...phase1,
 					...phase2,
 					prefecture: phase2.prefecture || SHIZUOKA_PREFECTURE,
+					regular_holiday: regularHoliday.trim() || null,
 					opening_hours: filteredOpeningHours,
 				}),
 			});
@@ -510,6 +513,8 @@ export default function BarNewForm() {
 						value={openingHours}
 						onChange={setOpeningHours}
 						errors={openingHoursErrors}
+						regularHoliday={regularHoliday}
+						onRegularHolidayChange={setRegularHoliday}
 					/>
 
 					<div>

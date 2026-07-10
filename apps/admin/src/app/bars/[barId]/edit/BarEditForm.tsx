@@ -73,6 +73,8 @@ export default function BarEditForm({ barId }: { barId: string }) {
 		})),
 	);
 
+	const [regularHoliday, setRegularHoliday] = useState("");
+
 	// Payment methods
 	const [paymentMethodOptions, setPaymentMethodOptions] = useState<
 		PaymentMethodOption[]
@@ -118,6 +120,7 @@ export default function BarEditForm({ barId }: { barId: string }) {
 			const data = await response.json();
 			setBar(data);
 			setPreviewImageUrl(data.preview_image_url || null);
+			setRegularHoliday(data.regular_holiday ?? "");
 			setFormData({
 				name: data.name || "",
 				description: data.description || "",
@@ -371,6 +374,7 @@ export default function BarEditForm({ barId }: { barId: string }) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					...formData,
+					regular_holiday: regularHoliday.trim() || null,
 					payment_method_ids: selectedPaymentMethodIds,
 					opening_hours: filteredOpeningHours,
 				}),
@@ -561,6 +565,8 @@ export default function BarEditForm({ barId }: { barId: string }) {
 					value={openingHours}
 					onChange={setOpeningHours}
 					errors={openingHoursErrors}
+					regularHoliday={regularHoliday}
+					onRegularHolidayChange={setRegularHoliday}
 				/>
 
 				<div>
