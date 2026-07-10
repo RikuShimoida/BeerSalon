@@ -117,6 +117,23 @@ describe("PUT /api/bars/[barId] 定休日補足（regular_holiday）保存", () 
 		);
 	});
 
+	it("regular_holiday が空文字の場合は null で update される", async () => {
+		const { barUpdate } = setupSupabaseMocks();
+
+		const response = await PUT(
+			createMockRequest({
+				name: "テストバー",
+				regular_holiday: "",
+			}),
+			{ params: Promise.resolve({ barId: "5" }) },
+		);
+
+		expect(response.status).toBe(200);
+		expect(barUpdate).toHaveBeenCalledWith(
+			expect.objectContaining({ regular_holiday: null }),
+		);
+	});
+
 	it("regular_holiday に null を渡すと null で update される（クリア）", async () => {
 		const { barUpdate } = setupSupabaseMocks();
 

@@ -247,7 +247,7 @@ export async function PUT(
 				facebook_url: facebook_url || null,
 				line_url: line_url || null,
 				description: description || null,
-				regular_holiday: regular_holiday ?? null,
+				regular_holiday: regular_holiday || null,
 			})
 			.eq("id", barId)
 			.select()
