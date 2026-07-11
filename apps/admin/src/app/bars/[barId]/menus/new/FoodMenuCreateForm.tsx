@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { type FormEvent, useState } from "react";
+import { uploadMenuImage } from "@/lib/menu-image-upload";
 
 interface FoodMenuCreateFormProps {
 	barId: string;
@@ -13,6 +14,7 @@ export default function FoodMenuCreateForm({ barId }: FoodMenuCreateFormProps) {
 	const [success, setSuccess] = useState(false);
 
 	const [name, setName] = useState("");
+	const [price, setPrice] = useState("");
 	const [description, setDescription] = useState("");
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [imagePreview, setImagePreview] = useState("");
@@ -31,6 +33,7 @@ export default function FoodMenuCreateForm({ barId }: FoodMenuCreateFormProps) {
 
 	const resetForm = () => {
 		setName("");
+		setPrice("");
 		setDescription("");
 		setImageFile(null);
 		setImagePreview("");
@@ -52,19 +55,18 @@ export default function FoodMenuCreateForm({ barId }: FoodMenuCreateFormProps) {
 			let imageUrl: string | null = null;
 
 			if (imageFile) {
-				const formData = new FormData();
-				formData.append("file", imageFile);
-				formData.append("type", "food-menu");
+				const uploadResult = await uploadMenuImage(
+					barId,
+					imageFile,
+					"food-menu",
+				);
 
-				const uploadRes = await fetch(`/api/bars/${barId}/media`, {
-					method: "POST",
-					body: formData,
-				});
-
-				if (uploadRes.ok) {
-					const uploadData = await uploadRes.json();
-					imageUrl = uploadData.url || null;
+				if (!uploadResult.ok) {
+					setError(uploadResult.error);
+					return;
 				}
+
+				imageUrl = uploadResult.url;
 			}
 
 			const res = await fetch(`/api/bars/${barId}/menus/foods`, {
@@ -72,6 +74,7 @@ export default function FoodMenuCreateForm({ barId }: FoodMenuCreateFormProps) {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					name: name.trim(),
+					price: price ? parseInt(price, 10) : null,
 					description: description.trim() || null,
 					image_url: imageUrl,
 				}),
@@ -121,6 +124,24 @@ export default function FoodMenuCreateForm({ barId }: FoodMenuCreateFormProps) {
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					placeholder="自家製ソーセージ盛り合わせ"
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-sm"
+				/>
+			</div>
+
+			<div>
+				<label
+					htmlFor="food-price"
+					className="block text-sm font-medium text-gray-700"
+				>
+					価格（円）
+				</label>
+				<input
+					type="number"
+					id="food-price"
+					min={0}
+					value={price}
+					onChange={(e) => setPrice(e.target.value)}
+					placeholder="500"
 					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-sm"
 				/>
 			</div>

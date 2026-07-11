@@ -3,9 +3,11 @@ import { getCurrentUser, hashPassword } from "@/lib/auth";
 import { SHIZUOKA_PREFECTURE } from "@/lib/shizuoka-cities";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
+	validateCoordinates,
 	validateFacebookUrl,
 	validateInstagramUrl,
 	validateLineUrl,
+	validateOpeningHours,
 	validateWebsiteUrl,
 	validateXUrl,
 } from "@/lib/validators";
@@ -81,6 +83,8 @@ export async function POST(request: NextRequest) {
 			city,
 			address_line1,
 			address_line2,
+			latitude,
+			longitude,
 			phone_number,
 			access,
 			website_url,
@@ -89,6 +93,7 @@ export async function POST(request: NextRequest) {
 			facebook_url,
 			line_url,
 			description,
+			regular_holiday,
 			opening_hours,
 		} = body;
 
@@ -201,6 +206,32 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
+		const coordinatesValidation = validateCoordinates(latitude, longitude);
+		if (!coordinatesValidation.isValid) {
+			return NextResponse.json(
+				{ error: coordinatesValidation.error },
+				{ status: 400 },
+			);
+		}
+
+		// 営業時間は店舗（bars）を作る前に検証する。作成後に 400 を返すと店舗だけ残るため。
+		if (opening_hours !== undefined) {
+			if (!Array.isArray(opening_hours)) {
+				return NextResponse.json(
+					{ error: "営業時間の指定が正しくありません" },
+					{ status: 400 },
+				);
+			}
+
+			const openingHoursValidation = validateOpeningHours(opening_hours);
+			if (!openingHoursValidation.isValid) {
+				return NextResponse.json(
+					{ error: openingHoursValidation.error },
+					{ status: 400 },
+				);
+			}
+		}
+
 		// バー作成
 		const now = new Date().toISOString();
 		const { data: bar, error: barError } = await supabaseAdmin
@@ -211,6 +242,8 @@ export async function POST(request: NextRequest) {
 				city: city || "",
 				address_line1: address_line1 || "",
 				address_line2: address_line2 || null,
+				latitude: coordinatesValidation.latitude,
+				longitude: coordinatesValidation.longitude,
 				phone_number: phone_number || null,
 				access: access || null,
 				website_url: website_url || null,
@@ -219,6 +252,7 @@ export async function POST(request: NextRequest) {
 				facebook_url: facebook_url || null,
 				line_url: line_url || null,
 				description: description || null,
+				regular_holiday: regular_holiday || null,
 				updated_at: now,
 			})
 			.select()
@@ -258,7 +292,7 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// 営業時間を登録
+		// 営業時間を登録（PUT と同じ sync RPC に寄せ、書き込み口を一本化する）
 		if (Array.isArray(opening_hours) && opening_hours.length > 0) {
 			const openingHoursData = opening_hours
 				.filter(
@@ -273,19 +307,37 @@ export async function POST(request: NextRequest) {
 						sort_order: number;
 						is_closed: boolean;
 					}) => ({
-						bar_id: bar.id,
 						day_of_week: oh.day_of_week,
 						open_time: oh.is_closed ? "00:00:00" : `${oh.open_time}:00`,
 						close_time: oh.is_closed ? "00:00:00" : `${oh.close_time}:00`,
 						sort_order: oh.sort_order,
 						is_closed: oh.is_closed,
-						created_at: now,
-						updated_at: now,
 					}),
 				);
 
 			if (openingHoursData.length > 0) {
-				await supabaseAdmin.from("bar_opening_hours").insert(openingHoursData);
+				// PUT 側と対称に RPC の error を拾う。握り潰すと営業時間の登録失敗が呼び出し側に伝わらないため。
+				// Why not「POST 全体の RPC 化（店舗作成含めた全体トランザクション化）」: 本 PR スコープ（子データ同期の原子化）外のため採らず、
+				// 既存データ消失防止に必要な RPC エラーの拾い上げのみ行う。
+				const { error: syncError } = await supabaseAdmin.rpc(
+					"sync_bar_opening_hours",
+					{
+						p_bar_id: bar.id,
+						p_opening_hours: openingHoursData,
+					},
+				);
+
+				if (syncError) {
+					// 店舗（bars）と admin_users は既に作成済み。作成済みの barId を返し、
+					// 「店舗は作成されたが営業時間の登録に失敗した」ことを呼び出し側へ伝える。
+					return NextResponse.json(
+						{
+							error: "店舗は作成されましたが営業時間の登録に失敗しました",
+							barId: bar.id,
+						},
+						{ status: 500 },
+					);
+				}
 			}
 		}
 

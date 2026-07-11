@@ -4,18 +4,25 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 export async function getBars(params?: {
+	q?: string;
 	city?: string;
-	category?: string;
+	categories?: string[];
 	origin?: string;
 }) {
 	const where: {
 		isActive: boolean;
 		city?: string;
+		OR?: Array<{
+			name?: { contains: string; mode: "insensitive" };
+			description?: { contains: string; mode: "insensitive" };
+		}>;
 		beerMenus?: {
 			some: {
 				beer: {
 					beerCategory?: {
-						name: string;
+						name: {
+							in: string[];
+						};
 					};
 					region?: {
 						country: {
@@ -30,20 +37,32 @@ export async function getBars(params?: {
 		isActive: true,
 	};
 
+	const keyword = params?.q?.trim();
+	if (keyword) {
+		where.OR = [
+			{ name: { contains: keyword, mode: "insensitive" } },
+			{ description: { contains: keyword, mode: "insensitive" } },
+		];
+	}
+
 	if (params?.city) {
 		where.city = params.city;
 	}
 
-	if (params?.category || params?.origin) {
+	const hasCategories = (params?.categories?.length ?? 0) > 0;
+
+	if (hasCategories || params?.origin) {
 		where.beerMenus = {
 			some: {
 				beer: {},
 			},
 		};
 
-		if (params?.category) {
+		if (hasCategories && params?.categories) {
 			where.beerMenus.some.beer.beerCategory = {
-				name: params.category,
+				name: {
+					in: params.categories,
+				},
 			};
 		}
 
@@ -87,6 +106,8 @@ export async function getBars(params?: {
 		prefecture: bar.prefecture,
 		city: bar.city,
 		imageUrl: bar.previewImageUrl || bar.barImages[0]?.imageUrl,
+		latitude: bar.latitude?.toString() ?? null,
+		longitude: bar.longitude?.toString() ?? null,
 	}));
 }
 
@@ -205,6 +226,15 @@ export async function getBarDetail(barId: string) {
 				where: {
 					isActive: true,
 				},
+				include: {
+					userCoupons: currentUserId
+						? {
+								where: {
+									userId: currentUserId,
+								},
+							}
+						: false,
+				},
 				orderBy: {
 					createdAt: "desc",
 				},
@@ -301,9 +331,17 @@ export async function getBarDetail(barId: string) {
 			barId: article.barId.toString(),
 		})),
 		coupons: bar.coupons.map((coupon) => ({
-			...coupon,
 			id: coupon.id.toString(),
 			barId: coupon.barId.toString(),
+			title: coupon.title,
+			description: coupon.description,
+			usageLimit: coupon.usageLimit,
+			usedCount: coupon.usedCount,
+			validFrom: coupon.validFrom,
+			validUntil: coupon.validUntil,
+			isObtained: Array.isArray(coupon.userCoupons)
+				? coupon.userCoupons.length > 0
+				: false,
 		})),
 		events: bar.barEvents.map((event) => ({
 			...event,

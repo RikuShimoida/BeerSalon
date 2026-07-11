@@ -1,14 +1,8 @@
 name: Claude Code Review
 
+# Why not pull_request: 個人開発では Pro 枠を push 毎に重複消費し、レビューはローカル /pr-review（設計md整合に特化）と二重化するため自動発火を止める。チーム開発化したら pull_request トリガーへ戻す。
 on:
-  pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+  workflow_dispatch:
 
 jobs:
   claude-review:

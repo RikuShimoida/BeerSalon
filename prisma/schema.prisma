@@ -270,6 +270,7 @@ model UserCoupon {
   coupon     BarCoupon   @relation(fields: [couponId], references: [id])
   user       UserProfile @relation(fields: [userId], references: [id])
 
+  @@unique([userId, couponId])
   @@map("user_coupons")
 }
 

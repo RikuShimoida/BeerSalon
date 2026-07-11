@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
+import type { ArticleStatus } from "@/lib/validators";
+import ArticleStatusField from "../ArticleStatusField";
 
 interface ArticleCreateFormProps {
 	barId: string;
@@ -15,6 +17,8 @@ interface ImageItem {
 export default function ArticleCreateForm({ barId }: ArticleCreateFormProps) {
 	const [title, setTitle] = useState("");
 	const [body, setBody] = useState("");
+	const [status, setStatus] = useState<ArticleStatus>("published");
+	const [publishedAt, setPublishedAt] = useState("");
 	const [images, setImages] = useState<ImageItem[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
@@ -95,6 +99,11 @@ export default function ArticleCreateForm({ barId }: ArticleCreateFormProps) {
 					image_url: uploadedUrls[0] || null,
 					image_url_2: uploadedUrls[1] || null,
 					image_url_3: uploadedUrls[2] || null,
+					status,
+					published_at:
+						status === "scheduled" && publishedAt
+							? new Date(publishedAt).toISOString()
+							: null,
 				}),
 			});
 
@@ -106,6 +115,8 @@ export default function ArticleCreateForm({ barId }: ArticleCreateFormProps) {
 
 			setTitle("");
 			setBody("");
+			setStatus("published");
+			setPublishedAt("");
 			for (const img of images) {
 				URL.revokeObjectURL(img.preview);
 			}
@@ -166,6 +177,13 @@ export default function ArticleCreateForm({ barId }: ArticleCreateFormProps) {
 				/>
 			</div>
 
+			<ArticleStatusField
+				status={status}
+				onStatusChange={setStatus}
+				publishedAt={publishedAt}
+				onPublishedAtChange={setPublishedAt}
+			/>
+
 			<div>
 				<label
 					htmlFor="article-create-images"
@@ -220,7 +238,13 @@ export default function ArticleCreateForm({ barId }: ArticleCreateFormProps) {
 					disabled={loading}
 					className="w-full px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					{loading ? "投稿中..." : "投稿する"}
+					{loading
+						? "保存中..."
+						: status === "draft"
+							? "下書き保存"
+							: status === "scheduled"
+								? "予約する"
+								: "投稿する"}
 				</button>
 			</div>
 		</form>

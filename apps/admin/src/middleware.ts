@@ -3,7 +3,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
 
-const publicPaths = ["/login"];
+// /bars/register は未ログインの店舗オーナーがセルフサーブ登録するための公開ページ。
+// /bars/[barId] や /bars/new（いずれもログイン必須）より前に startsWith で判定するため、
+// より具体的なプレフィックスとして publicPaths に含める。
+const publicPaths = ["/login", "/bars/register"];
 
 const MUTATION_METHODS = ["POST", "PUT", "DELETE", "PATCH"];
 
@@ -13,7 +16,11 @@ export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
 	if (publicPaths.some((path) => pathname.startsWith(path))) {
-		if (pathname.startsWith("/login")) {
+		// /login と /bars/register はどちらもログイン済みなら本来のホームへ戻す（誤ってフォームを見せない）。
+		if (
+			pathname.startsWith("/login") ||
+			pathname.startsWith("/bars/register")
+		) {
 			const token = request.cookies.get("admin-token")?.value;
 			if (token) {
 				const payload = await verifyToken(token);
@@ -38,6 +45,10 @@ export async function middleware(request: NextRequest) {
 
 	if (pathname.startsWith("/api/")) {
 		if (pathname.startsWith("/api/auth/")) {
+			return NextResponse.next();
+		}
+		// セルフサーブ登録は未認証で叩ける公開エンドポイント。
+		if (pathname === "/api/bars/register") {
 			return NextResponse.next();
 		}
 		if (pathname === "/api/payment-methods") {

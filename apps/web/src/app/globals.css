@@ -37,12 +37,15 @@
 	--color-popover: var(--popover);
 	--color-card-foreground: var(--card-foreground);
 	--color-card: var(--card);
+	--color-surface-panel: var(--surface-panel);
+	--color-surface-control: var(--surface-control);
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
 }
 
+/* THEME:START (このブロックは pnpm theme <name> で src/styles/themes/<name>.css の内容に差し替わる。手編集する場合は themes/current.css も揃えること) */
 :root {
 	--radius: 1rem;
 	--background: 35 25% 92%;
@@ -76,7 +79,10 @@
 	--sidebar-accent-foreground: 30 15% 20%;
 	--sidebar-border: 35 15% 82%;
 	--sidebar-ring: 30 75% 45%;
+	--surface-panel: #e2d6bf;
+	--surface-control: #ffffff;
 }
+/* THEME:END */
 
 .dark {
 	--background: oklch(0.145 0 0);
@@ -119,6 +125,45 @@
 	body {
 		@apply bg-background text-foreground;
 	}
+}
+
+/*
+ * トップページ（/）限定の案A（Amber Taproom / ダーク基調）スコープ。
+ * Why not :root ごとダーク化: globals.css の既存 HSL トークン（--background / --card / --card-foreground 等）は
+ * @theme inline で hsl() ラップされておらず bg-card / text-foreground 等は透明で機能していない。
+ * これを :root で有効化すると web 全体（他14ページ・共通ヘッダー/フッター）へダークが芋づる波及し、
+ * Issue #388 が明示的にスコープ外とした「全画面ダーク化」になる。よってトップの最上位ラッパに付与した
+ * .top-amber-dark の配下だけで、実 CSS 値の背景・面・テキスト色を当ててダーク化を閉じ込める。
+ */
+.top-amber-dark {
+	/* 案A: ダークブラウン基調の本文背景とアンバー寄りのテキスト */
+	background-color: #1a1206;
+	color: #f5e9d4;
+
+	/* 帯（検索カード）＝ダークブラウン、操作面（入力欄・チップ）＝一段明るいブラウン。
+	   surface トークンはスコープ内で上書きし、テーマ切替(current)の他画面には影響させない。 */
+	--surface-panel: #2a1c0e;
+	--surface-control: #3d2b17;
+}
+
+/* 透明で機能していない壊れトークン依存クラスを、スコープ配下で実色に置換する。 */
+.top-amber-dark .bg-card {
+	background-color: #241a0c;
+}
+.top-amber-dark .text-card-foreground {
+	color: #f5e9d4;
+}
+.top-amber-dark .text-foreground {
+	color: #f5e9d4;
+}
+.top-amber-dark .text-muted-foreground {
+	color: #c4a878;
+}
+.top-amber-dark .bg-muted {
+	background-color: #3d2b17;
+}
+.top-amber-dark .border-border {
+	border-color: #4a3620;
 }
 
 @layer utilities {

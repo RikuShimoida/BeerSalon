@@ -62,13 +62,16 @@ describe("SignUpForm", () => {
 			expect(passwordInput).toHaveAttribute("id", "password");
 		});
 
-		it("プレースホルダーが正しく表示される", () => {
+		it("メールアドレス・パスワード欄にプレースホルダーが表示されない", () => {
 			render(<SignUpForm />);
 
-			expect(
-				screen.getByPlaceholderText("example@mail.com"),
-			).toBeInTheDocument();
-			expect(screen.getByPlaceholderText("••••••••")).toBeInTheDocument();
+			const emailInput = screen.getByRole("textbox", {
+				name: "メールアドレス",
+			});
+			const passwordInput = screen.getByLabelText("パスワード");
+
+			expect(emailInput).not.toHaveAttribute("placeholder");
+			expect(passwordInput).not.toHaveAttribute("placeholder");
 		});
 
 		it("送信ボタンが表示される", () => {
@@ -81,9 +84,7 @@ describe("SignUpForm", () => {
 			render(<SignUpForm />);
 
 			expect(
-				screen.getByText(
-					"8文字以上、大文字・小文字・数字・記号を含めてください",
-				),
+				screen.getByText("8文字以上、大文字・小文字・数字を含めてください"),
 			).toBeInTheDocument();
 		});
 	});

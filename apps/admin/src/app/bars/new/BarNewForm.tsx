@@ -10,6 +10,7 @@ import {
 	SHIZUOKA_PREFECTURE,
 } from "@/lib/shizuoka-cities";
 import {
+	validateCoordinates,
 	validateFacebookUrl,
 	validateInstagramUrl,
 	validateLineUrl,
@@ -53,6 +54,8 @@ export default function BarNewForm() {
 		city: "",
 		address_line1: "",
 		address_line2: "",
+		latitude: "",
+		longitude: "",
 		website_url: "",
 		instagram_url: "",
 		x_url: "",
@@ -75,6 +78,8 @@ export default function BarNewForm() {
 			is_closed: false,
 		})),
 	);
+
+	const [regularHoliday, setRegularHoliday] = useState("");
 
 	const handlePhase1Change = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setPhase1({ ...phase1, [e.target.name]: e.target.value });
@@ -220,6 +225,15 @@ export default function BarNewForm() {
 			}
 		}
 
+		const coordinatesResult = validateCoordinates(
+			phase2.latitude,
+			phase2.longitude,
+		);
+		if (!coordinatesResult.isValid) {
+			setError(coordinatesResult.error);
+			return;
+		}
+
 		if (!validateOpeningHours()) {
 			setError("営業時間の入力に誤りがあります");
 			return;
@@ -239,6 +253,7 @@ export default function BarNewForm() {
 					...phase1,
 					...phase2,
 					prefecture: phase2.prefecture || SHIZUOKA_PREFECTURE,
+					regular_holiday: regularHoliday.trim() || null,
 					opening_hours: filteredOpeningHours,
 				}),
 			});
@@ -263,7 +278,14 @@ export default function BarNewForm() {
 							{ method: "POST", body: imageFormData },
 						);
 						if (!imageResponse.ok) {
-							uploadErrors.push("プレビュー画像");
+							// Why not: 店舗登録は admin 専用画面のため、API が admin に返す detail をそのまま表示して原因を追いやすくする
+							const detail = await imageResponse
+								.json()
+								.then((d) => d.detail as string | undefined)
+								.catch(() => undefined);
+							uploadErrors.push(
+								detail ? `プレビュー画像 (${detail})` : "プレビュー画像",
+							);
 						}
 					} catch {
 						uploadErrors.push("プレビュー画像");
@@ -290,8 +312,9 @@ export default function BarNewForm() {
 					setError(
 						`店舗は登録されましたが、以下のアップロードに失敗しました: ${uploadErrors.join(", ")}。編集画面から再度アップロードしてください。`,
 					);
+					// Why not: 一覧へ戻すと画像欠落が「No Image」に埋もれて気付けないため、再アップロード可能な編集画面へ誘導する
 					setTimeout(() => {
-						router.push("/bars");
+						router.push(`/bars/${responseData.id}/edit`);
 						router.refresh();
 					}, REDIRECT_DELAY_MS);
 					return;
@@ -490,6 +513,8 @@ export default function BarNewForm() {
 						value={openingHours}
 						onChange={setOpeningHours}
 						errors={openingHoursErrors}
+						regularHoliday={regularHoliday}
+						onRegularHolidayChange={setRegularHoliday}
 					/>
 
 					<div>
@@ -604,6 +629,50 @@ export default function BarNewForm() {
 							placeholder="建物名・部屋番号"
 							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
 						/>
+					</div>
+
+					<div>
+						<label
+							htmlFor="latitude"
+							className="block text-sm font-medium text-gray-700"
+						>
+							緯度
+						</label>
+						<input
+							type="number"
+							step="any"
+							id="latitude"
+							name="latitude"
+							value={phase2.latitude}
+							onChange={handlePhase2Change}
+							placeholder="35.0116"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
+						/>
+						<p className="mt-1 text-sm text-gray-500">
+							-90〜90（マップ表示用・任意）
+						</p>
+					</div>
+
+					<div>
+						<label
+							htmlFor="longitude"
+							className="block text-sm font-medium text-gray-700"
+						>
+							経度
+						</label>
+						<input
+							type="number"
+							step="any"
+							id="longitude"
+							name="longitude"
+							value={phase2.longitude}
+							onChange={handlePhase2Change}
+							placeholder="135.7681"
+							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
+						/>
+						<p className="mt-1 text-sm text-gray-500">
+							-180〜180（マップ表示用・任意）
+						</p>
 					</div>
 
 					<div>

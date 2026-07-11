@@ -162,12 +162,17 @@ export async function getUserCoupons() {
 	});
 
 	return userCoupons.map((userCoupon) => ({
-		id: userCoupon.id,
+		id: userCoupon.id.toString(),
+		couponId: userCoupon.couponId.toString(),
 		title: userCoupon.coupon.title,
 		description: userCoupon.coupon.description ?? "",
 		barName: userCoupon.coupon.bar.name,
+		validFrom: userCoupon.coupon.validFrom,
 		validUntil: userCoupon.coupon.validUntil,
+		usageLimit: userCoupon.coupon.usageLimit,
+		usedCount: userCoupon.coupon.usedCount,
 		isUsed: userCoupon.isUsed,
+		usedAt: userCoupon.usedAt,
 		obtainedAt: userCoupon.obtainedAt,
 	}));
 }
@@ -329,6 +334,19 @@ export async function followUser(targetUserId: string) {
 			followeeId: targetUserId,
 		},
 	});
+
+	// 自己フォローは UI 上発生しないが、post_liked が自分の投稿を除外しているのと同様に防御する
+	if (targetUserId !== userProfile.id) {
+		await prisma.notification.create({
+			data: {
+				userId: targetUserId,
+				type: "followed",
+				title: "フォロー",
+				message: `${userProfile.nickname}さんにフォローされました`,
+				linkUrl: `/users/${userProfile.id}`,
+			},
+		});
+	}
 }
 
 export async function unfollowUser(targetUserId: string) {

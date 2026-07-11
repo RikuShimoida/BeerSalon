@@ -1,6 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
+import {
+	notifyFavoriteUsersOfNewArticle,
+	shouldNotifyNewArticle,
+} from "@/lib/article-notification";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { resolveArticlePublishing } from "@/lib/validators";
 
 export async function GET(
 	_request: NextRequest,
@@ -68,6 +73,8 @@ export async function POST(
 			image_url,
 			image_url_2,
 			image_url_3,
+			status,
+			published_at,
 		} = body;
 
 		if (!title || !articleBody) {
@@ -77,7 +84,15 @@ export async function POST(
 			);
 		}
 
-		const now = new Date().toISOString();
+		// status 未指定時は published（公開）として扱い、登録時の既存挙動を踏襲する
+		const publishing = resolveArticlePublishing(
+			status ?? "published",
+			published_at,
+			new Date(),
+		);
+		if (!publishing.isValid) {
+			return NextResponse.json({ error: publishing.error }, { status: 400 });
+		}
 
 		const { data, error } = await supabaseAdmin
 			.from("articles")
@@ -88,8 +103,8 @@ export async function POST(
 				image_url: image_url || null,
 				image_url_2: image_url_2 || null,
 				image_url_3: image_url_3 || null,
-				status: "published",
-				published_at: now,
+				status: publishing.status,
+				published_at: publishing.published_at,
 			})
 			.select()
 			.single();
@@ -99,6 +114,24 @@ export async function POST(
 				{ error: "Failed to create article" },
 				{ status: 500 },
 			);
+		}
+
+		// 新規作成では保存前ステータスが存在しないため null を渡す
+		// 通知は記事保存の副次処理。失敗しても記事は保存済みのため、
+		// 外側 catch に巻き込んで 500 を返さずログ記録に留めて 201 を返す
+		if (shouldNotifyNewArticle(null, publishing.status)) {
+			try {
+				await notifyFavoriteUsersOfNewArticle({
+					barId: parseInt(barId, 10),
+					articleId: data.id,
+					articleTitle: title,
+				});
+			} catch (notifyError) {
+				console.error(
+					"Failed to send new_article notifications after article create",
+					notifyError,
+				);
+			}
 		}
 
 		return NextResponse.json({ article: data }, { status: 201 });

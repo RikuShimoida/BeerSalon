@@ -1,39 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getBars } from "@/actions/bar";
 import { BarCard } from "./bar-card";
 import { BarCardSkeleton } from "./bar-card-skeleton";
+import type { BarSummary } from "./bar-summary";
 
 interface BarListProps {
-	city?: string;
-	category?: string;
-	origin?: string;
+	bars: BarSummary[];
+	isLoading: boolean;
 }
 
-export function BarList({ city, category, origin }: BarListProps) {
-	const [bars, setBars] = useState<
-		Array<{
-			id: string;
-			name: string;
-			prefecture: string;
-			city: string;
-			imageUrl?: string;
-		}>
-	>([]);
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		const fetchBars = async () => {
-			setIsLoading(true);
-			const result = await getBars({ city, category, origin });
-			setBars(result);
-			setIsLoading(false);
-		};
-
-		fetchBars();
-	}, [city, category, origin]);
-
+export function BarList({ bars, isLoading }: BarListProps) {
 	if (isLoading) {
 		return (
 			<div className="animate-fade-in">
@@ -65,7 +41,14 @@ export function BarList({ city, category, origin }: BarListProps) {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{bars.map((bar) => (
-					<BarCard key={bar.id} {...bar} />
+					<BarCard
+						key={bar.id}
+						id={bar.id}
+						name={bar.name}
+						prefecture={bar.prefecture}
+						city={bar.city}
+						imageUrl={bar.imageUrl}
+					/>
 				))}
 			</div>
 

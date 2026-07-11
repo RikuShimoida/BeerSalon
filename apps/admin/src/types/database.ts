@@ -7,6 +7,7 @@ export interface AdminUser {
 	bar_id: number | null;
 	contact_email: string | null;
 	contact_phone: string | null;
+	approval_status: "pending" | "approved" | "rejected";
 	is_active: boolean;
 	created_at: string;
 	updated_at: string;
@@ -52,6 +53,8 @@ export interface Bar {
 	city: string | null;
 	address_line1: string | null;
 	address_line2: string | null;
+	latitude: number | null;
+	longitude: number | null;
 	phone_number: string | null;
 	access: string | null;
 	website_url: string | null;
@@ -60,6 +63,7 @@ export interface Bar {
 	facebook_url: string | null;
 	line_url: string | null;
 	description: string | null;
+	regular_holiday: string | null;
 	preview_image_url: string | null;
 	is_active: boolean;
 	created_at: string;

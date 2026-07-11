@@ -63,7 +63,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | phone_number    | text       | NULLABLE                         | 電話番号（タップで発信）               |
 | opening_time   | time       | NULLABLE                          | 17:00                               |
 | ending_time   | time       | NULLABLE                           | 24:00                               |
-| regular_holiday | text       | NULLABLE                         | 定休日                                  |
+| regular_holiday | text       | NULLABLE                         | 不定休など曜日で表せない休業の補足テキスト。管理画面の営業時間ブロックで入力（POST/PUT で `bars.regular_holiday` に保存）。ユーザー画面の店舗詳細「基本情報」タブで曜日別営業時間と併記表示する |
 | access          | text       | NULLABLE                         | 交通手段・最寄駅など                    |
 | website_url     | text       | NULLABLE                         | 店舗公式サイト URL                      |
 | instagram_url   | text       | NULLABLE                         | Instagram URL                           |
@@ -123,6 +123,8 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 **インデックス**: `bar_id + day_of_week`
 
 **CASCADE削除**: 店舗削除時に関連する営業時間レコードも削除
+
+**書き込み（管理画面）**: 店舗登録（POST）・店舗更新（PUT）の営業時間は「当該 `bar_id` を全削除→整形済みレコードを再登録」で同期する。PostgREST（`supabaseAdmin`）は複数文を1トランザクションにまとめられないため、DELETE 成功後に INSERT が失敗すると営業時間が全消失したまま復元されない。これを防ぐため、DELETE+INSERT を単一トランザクション化する RPC `sync_bar_opening_hours(p_bar_id bigint, p_opening_hours jsonb)` に書き込みを一本化している（`open_time`/`close_time` への `:00` 付与・`is_closed` 反映などの整形は API 側で行い、整形済み jsonb 配列を RPC に渡す）。
 
 **使用例**:
 - 複数時間帯: 昼営業（11:00-14:00）+ 夜営業（17:00-23:00）を2レコードで表現
@@ -363,6 +365,14 @@ UNIQUE制約: `country_id + name`
 | used_at       | timestamptz| NULLABLE                           | 使用日時            |
 | is_used       | boolean    | NOT NULL DEFAULT false             | 使用済みフラグ      |
 
+**UNIQUE制約**: `(user_id, coupon_id)`（1ユーザー1クーポンにつき1レコード）
+
+**二重取得の防止**: `(user_id, coupon_id)` に DB の UNIQUE 制約を張り、二重取得を DB レベルで担保する。ユーザー画面のクーポン取得アクション（`apps/web` の `obtainCoupon`）は、事前の存在チェック（UX フィードバック用）で取得済みを返しつつ、並行リクエスト（取得ボタン連打）による TOCTOU（存在チェックをすり抜けた並行 INSERT）は UNIQUE 制約違反（Prisma の `P2002`）を「既に取得済み」として catch することで、最終的に1レコードへ収束させる。
+
+**取得可否の判定（`obtainCoupon`）**: `bar_coupons.is_active=true` かつ有効期間内（`valid_from` が未来でなく `valid_until` が過去でない。いずれも NULL なら該当方向の制限なし）、かつ `usage_limit` が非 NULL の場合は `used_count < usage_limit` のときのみ取得できる。`used_count` は「利用回数」であり、取得（`user_coupons` への INSERT）ではインクリメントしない。
+
+**利用（消し込み）の判定と書き込み（`redeemCoupon`）**: マイページ「持っているクーポン」タブ（`/mypage`）から本人が「クーポンを利用する」を押すと、取得済み `user_coupons` レコードを利用（消し込み）する。利用は `user_coupons.is_used=true` / `used_at=now()` への更新と `bar_coupons.used_count` の +1 インクリメントを同時に行う。取得ボタン連打などの並行リクエストで `used_count` が破綻しないよう、営業時間・支払い方法の同期と同じく DELETE/UPDATE の原子化を RPC に一本化する（RPC `use_user_coupon(p_user_coupon_id bigint, p_user_id uuid)`）。RPC は対象 `user_coupons` を `FOR UPDATE` でロックしてから検証・更新し、判別可能な文字列コード（`ok` / `already_used` / `expired` / `limit_reached` / `not_found`）を返す。利用可否は「本人の未利用レコードであること」「`bar_coupons.is_active=true`」「有効期間内」「`usage_limit` が非 NULL の場合は `used_count < usage_limit`」で判定する。他人が取得したクーポンは `p_user_id` の一致で弾かれ `not_found` を返す。利用（使用済みにする）はここまでを対象とし、利用の取り消し（再有効化）フローは未対応。
+
 ---
 
 ### 3-3. articles
@@ -563,6 +573,8 @@ UNIQUE制約: `country_id + name`
 
 **CASCADE削除**: 店舗削除時に関連する `bar_payment_methods` も削除される
 
+**書き込み（管理画面）**: 店舗編集（PUT）の支払い方法は「当該 `bar_id` を全削除→選択分を再登録」で同期する。営業時間と同様に PostgREST では DELETE+INSERT を1トランザクションにできないため、原子化した RPC `sync_bar_payment_methods(p_bar_id bigint, p_payment_method_ids bigint[])` に一本化している。INSERT 失敗時は DELETE ごとロールバックされ、既存の支払い方法が保持される。API 側で `payment_method_ids` の整数検証・重複除去を行い、RPC 内でも `DISTINCT` で UNIQUE 制約 `bar_id + payment_method_id` 違反を二重防御する。
+
 ---
 
 ## 6. 閲覧履歴・通知
@@ -604,6 +616,14 @@ UNIQUE制約: `country_id + name`
 | link_url      | text       | NULLABLE                             | 遷移先URL（投稿/店舗/記事など）           |
 | is_read       | boolean    | NOT NULL DEFAULT false               | 既読フラグ                                 |
 | created_at    | timestamptz| NOT NULL DEFAULT now()               | 作成日時                                   |
+
+**生成される `type` と発火タイミング**:
+
+| type          | 発火タイミング                                                                 | title      | message 例                                  | link_url 例           |
+|---------------|--------------------------------------------------------------------------------|------------|---------------------------------------------|-----------------------|
+| `post_liked`  | 自分の投稿に他ユーザーがいいねしたとき（`apps/web` の `togglePostLike`）。自分の投稿への自己いいねは除外 | いいね     | `${ニックネーム}さんがあなたの投稿にいいねしました` | `/timeline`           |
+| `followed`    | 他ユーザーにフォローされたとき（`apps/web` の `followUser`）。自己フォローは除外。フォロー解除では生成しない | フォロー   | `${ニックネーム}さんにフォローされました`        | `/users/[userId]`（フォローした側のアプリ内ユーザーID `user_profiles.id`） |
+| `new_article` | お気に入り登録した店舗が記事を公開したとき（`apps/admin` の記事 POST / PUT で status が published へ遷移した瞬間）。配信対象は `favorite_bars` 経由で解決。published のまま再保存した場合は二重通知防止のため生成しない。予約公開（scheduled→published）を実行するバッチは未実装のため、scheduled は通知対象外 | 新着記事   | `${店舗名}が新しい記事「${記事タイトル}」を公開しました` | `/articles/[articleId]` |
 
 ---
 
@@ -655,6 +675,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 | bar_id          | bigint     | NULLABLE, FK → bars(id)         | 紐づく店舗ID（bar_ownerは必須、adminはNULL）|
 | contact_email   | text       | NULLABLE                         | 店舗管理者メールアドレス（請求書送付用）|
 | contact_phone   | text       | NULLABLE                         | 店舗管理者電話番号（トラブル時連絡用）|
+| approval_status | text       | NOT NULL DEFAULT 'approved' CHECK (in 'pending'/'approved'/'rejected') | セルフサーブ登録の承認状態 |
 | is_active       | boolean    | NOT NULL DEFAULT true            | アカウント有効フラグ        |
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
@@ -666,6 +687,15 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 **運用ルール**:
 - 1店舗 = 1アカウント（店舗スタッフ全員で `bar_manage_id` とパスワードを共有してログイン）
 - 店舗登録時に `admin_users` レコードも自動作成される
+
+**承認ステータス（`approval_status`）**:
+- 店舗登録の経路により初期値が異なる:
+  - admin 手動作成（`POST /api/bars` / `/bars/new`）: 従来どおり承認不要。列は `DEFAULT 'approved'` で作成される
+  - 店舗セルフサーブ登録（`POST /api/bars/register` / `/bars/register`）: `'pending'`（審査中）で作成し、あわせて `bars.is_active=false` にして承認まで非公開にする
+- ログイン API（`POST /api/auth/login`）は `approval_status='pending'`/`'rejected'` のアカウントを 403 で弾く（`'approved'` のみログイン可能）
+- admin が承認（`POST /api/bars/[barId]/approve`）すると `approval_status='approved'`・`bars.is_active=true` に更新され、ログイン可能・ユーザー画面に公開される
+- 既存レコードは `DEFAULT 'approved'` により後方互換（既存 admin/bar_owner のログインに影響しない）
+- `'rejected'`（却下）値は予約済みだが、却下操作の UI は本スコープ外（別 Issue）
 
 **権限**:
 - `bar_owner`: 自店舗（`bar_id` で紐づく店舗）の全データを編集可能

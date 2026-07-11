@@ -1,0 +1,22 @@
+{
+  "name": "parallel-sdk-poc",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Issue #373 調査PoC: /parallel 司令塔ロジックを Claude Agent SDK で手続き的に再実装する検証。ルート pnpm workspace(apps/*, packages/*) には含めず隔離する。",
+  "scripts": {
+    "poc": "tsx src/main.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.77"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

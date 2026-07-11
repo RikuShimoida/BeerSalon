@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { uploadMenuImage } from "@/lib/menu-image-upload";
 import type { BarFoodMenu } from "@/types/database";
 
 interface FoodMenuFormProps {
@@ -18,9 +20,13 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 		name: "",
 		price: "",
 		description: "",
-		image_url: "",
 		is_active: true,
 	});
+	// 保存対象の画像URL。既存値を初期表示し、差し替え時はアップロード後のURLで上書き、
+	// 削除時は null にする。
+	const [imageUrl, setImageUrl] = useState<string | null>(null);
+	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [imagePreview, setImagePreview] = useState("");
 
 	const fetchMenu = useCallback(async () => {
 		try {
@@ -38,13 +44,32 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 				name: menu.name,
 				price: menu.price?.toString() || "",
 				description: menu.description || "",
-				image_url: menu.image_url || "",
 				is_active: menu.is_active,
 			});
+			setImageUrl(menu.image_url || null);
+			setImagePreview(menu.image_url || "");
 		} catch (_error) {
 			setError("フードメニューの取得に失敗しました");
 		}
 	}, [barId, menuId]);
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			setImageFile(file);
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setImagePreview(reader.result as string);
+			};
+			reader.readAsDataURL(file);
+		}
+	};
+
+	const handleImageRemove = () => {
+		setImageFile(null);
+		setImageUrl(null);
+		setImagePreview("");
+	};
 
 	useEffect(() => {
 		if (menuId) {
@@ -58,6 +83,23 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 		setError("");
 
 		try {
+			let nextImageUrl: string | null = imageUrl;
+
+			if (imageFile) {
+				const uploadResult = await uploadMenuImage(
+					barId,
+					imageFile,
+					"food-menu",
+				);
+
+				if (!uploadResult.ok) {
+					setError(uploadResult.error);
+					return;
+				}
+
+				nextImageUrl = uploadResult.url;
+			}
+
 			const url = menuId
 				? `/api/bars/${barId}/menus/foods/${menuId}`
 				: `/api/bars/${barId}/menus/foods`;
@@ -73,7 +115,7 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 					name: formData.name,
 					price: formData.price ? parseInt(formData.price, 10) : null,
 					description: formData.description || null,
-					image_url: formData.image_url || null,
+					image_url: nextImageUrl,
 					is_active: formData.is_active,
 				}),
 			});
@@ -172,20 +214,38 @@ export default function FoodMenuForm({ barId, menuId }: FoodMenuFormProps) {
 
 			<div>
 				<label
-					htmlFor="image_url"
+					htmlFor="food-image"
 					className="block text-sm font-medium text-gray-700"
 				>
-					画像URL
+					画像
 				</label>
 				<input
-					type="url"
-					id="image_url"
-					name="image_url"
-					value={formData.image_url}
-					onChange={handleChange}
-					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-					placeholder="https://example.com/image.jpg"
+					type="file"
+					id="food-image"
+					accept="image/*"
+					onChange={handleImageChange}
+					className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
 				/>
+				{imagePreview && (
+					<div className="mt-2 flex items-start gap-3">
+						<div className="relative w-40 h-40">
+							<Image
+								src={imagePreview}
+								alt="プレビュー"
+								fill
+								unoptimized
+								className="object-cover rounded-md border border-gray-200"
+							/>
+						</div>
+						<button
+							type="button"
+							onClick={handleImageRemove}
+							className="text-sm text-red-500 hover:text-red-700 transition-colors underline"
+						>
+							画像を削除
+						</button>
+					</div>
+				)}
 			</div>
 
 			<div className="flex items-center">

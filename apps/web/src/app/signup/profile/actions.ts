@@ -16,6 +16,9 @@ export async function saveProfileToSession(
 	_prevState: FormState | undefined,
 	formData: FormData,
 ): Promise<FormState | undefined> {
+	// Why not try/catch 全体で囲む: redirect() は NEXT_REDIRECT 例外を throw して動くため、
+	// 副作用処理を try で囲むと redirect 例外まで捕捉され、確認ページへ遷移できなくなる。
+	// 副作用は try で囲み、redirect() は try の外で呼ぶ。
 	try {
 		const profileImage = formData.get("profileImage") as File | null;
 
@@ -44,11 +47,8 @@ export async function saveProfileToSession(
 			bio: formData.get("bio") as string | undefined,
 		};
 
-		console.log("[saveProfileToSession] Validating profile data");
-
 		const result = profileSchema.safeParse(data);
 		if (!result.success) {
-			console.error("[saveProfileToSession] Validation error:", result.error);
 			return {
 				error: result.error.issues[0].message,
 			};
@@ -62,14 +62,12 @@ export async function saveProfileToSession(
 		} = await supabase.auth.getUser();
 
 		if (authError) {
-			console.error("[saveProfileToSession] Auth error:", authError);
 			return {
 				error: `認証エラーが発生しました: ${authError.message}`,
 			};
 		}
 
 		if (!user) {
-			console.warn("[saveProfileToSession] No user found");
 			return {
 				error: "認証が必要です",
 			};
@@ -89,14 +87,12 @@ export async function saveProfileToSession(
 				});
 
 			if (uploadError) {
-				console.error("[saveProfileToSession] Upload error:", uploadError);
 				return {
 					error: "画像のアップロードに失敗しました。もう一度お試しください。",
 				};
 			}
 
 			imagePath = filePath;
-			console.log("[saveProfileToSession] Image uploaded:", filePath);
 		}
 
 		const cookieStore = await cookies();
@@ -119,18 +115,11 @@ export async function saveProfileToSession(
 			maxAge: 60 * 10, // 10分
 			path: "/",
 		});
-
-		console.log("[saveProfileToSession] Redirecting to confirm page");
-		redirect("/signup/confirm");
-	} catch (error) {
-		console.error("[saveProfileToSession] Unexpected error:", error);
-
-		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-			throw error;
-		}
-
+	} catch (_error) {
 		return {
 			error: "予期しないエラーが発生しました。もう一度お試しください。",
 		};
 	}
+
+	redirect("/signup/confirm");
 }

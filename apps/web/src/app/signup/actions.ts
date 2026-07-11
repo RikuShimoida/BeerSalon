@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 import { signUpSchema } from "@/lib/validations/auth";
 
@@ -23,12 +24,13 @@ export async function signUp(
 	}
 
 	const supabase = await createClient();
+	const siteUrl = await getSiteUrl();
 
 	const { data, error } = await supabase.auth.signUp({
 		email,
 		password,
 		options: {
-			emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?next=/signup/profile`,
+			emailRedirectTo: `${siteUrl}/auth/callback?next=/signup/profile`,
 		},
 	});
 

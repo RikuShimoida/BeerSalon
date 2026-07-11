@@ -2,7 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticleDetail } from "@/actions/article";
+import { ArticleLikeButton } from "@/components/article/like-button";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
+import { getArticleImageUrls } from "./article-images";
 
 export default async function ArticlePage({
 	params,
@@ -23,6 +25,8 @@ export default async function ArticlePage({
 		return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
 	};
 
+	const imageUrls = getArticleImageUrls(article);
+
 	return (
 		<AuthenticatedLayout>
 			<div className="max-w-4xl mx-auto px-4 py-6">
@@ -39,22 +43,32 @@ export default async function ArticlePage({
 							{article.title}
 						</h1>
 
-						{article.publishedAt && (
-							<p className="text-sm text-muted-foreground mb-6 tracking-wide">
-								{formatDate(article.publishedAt)}
-							</p>
-						)}
+						<div className="flex items-center gap-4 mb-6">
+							<ArticleLikeButton
+								articleId={article.id}
+								initialLikeCount={article.likeCount}
+								initialIsLiked={article.isLiked}
+							/>
+							{article.publishedAt && (
+								<p className="text-sm text-muted-foreground tracking-wide">
+									{formatDate(article.publishedAt)}
+								</p>
+							)}
+						</div>
 
-						{article.imageUrl && (
-							<div className="relative w-full h-96 mb-6 rounded-xl overflow-hidden bg-muted/30">
+						{imageUrls.map((url) => (
+							<div
+								key={url}
+								className="relative w-full h-96 mb-6 rounded-xl overflow-hidden bg-muted/30"
+							>
 								<Image
-									src={article.imageUrl}
+									src={url}
 									alt={article.title}
 									fill
 									className="object-cover"
 								/>
 							</div>
-						)}
+						))}
 
 						<div className="prose prose-lg max-w-none">
 							<p className="text-card-foreground whitespace-pre-wrap tracking-wide leading-relaxed">

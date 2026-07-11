@@ -10,10 +10,7 @@ export function Footer() {
 	const isActive = (path: string) => pathname === path;
 
 	return (
-		<footer
-			className="fixed bottom-0 left-0 right-0 backdrop-blur-xl border-t border-border/20 z-50 modern-shadow"
-			style={{ backgroundColor: "#f0e68c" }}
-		>
+		<footer className="fixed bottom-0 left-0 right-0 bg-surface-panel backdrop-blur-xl border-t border-border/20 z-50 modern-shadow">
 			<div className="max-w-7xl mx-auto px-4">
 				<nav className="flex items-center justify-around h-16">
 					<Link
@@ -23,8 +20,8 @@ export function Footer() {
 						<div
 							className={`p-2 rounded-full transition-all duration-300 ${
 								isActive("/favorites/bars")
-									? "bg-white scale-110"
-									: "bg-white/80 hover:bg-white hover:scale-105"
+									? "bg-surface-control scale-110"
+									: "bg-surface-control/80 hover:bg-surface-control hover:scale-105"
 							}`}
 						>
 							<Star
@@ -43,8 +40,8 @@ export function Footer() {
 						<div
 							className={`p-2 rounded-full transition-all duration-300 ${
 								isActive("/timeline")
-									? "bg-white scale-110"
-									: "bg-white/80 hover:bg-white hover:scale-105"
+									? "bg-surface-control scale-110"
+									: "bg-surface-control/80 hover:bg-surface-control hover:scale-105"
 							}`}
 						>
 							<FileText
@@ -63,8 +60,8 @@ export function Footer() {
 						<div
 							className={`p-2 rounded-full transition-all duration-300 ${
 								isActive("/posts/new")
-									? "bg-white scale-110"
-									: "bg-white/80 hover:bg-white hover:scale-105"
+									? "bg-surface-control scale-110"
+									: "bg-surface-control/80 hover:bg-surface-control hover:scale-105"
 							}`}
 						>
 							<PlusCircle
@@ -83,8 +80,8 @@ export function Footer() {
 						<div
 							className={`p-2 rounded-full transition-all duration-300 ${
 								isActive("/history/bars")
-									? "bg-white scale-110"
-									: "bg-white/80 hover:bg-white hover:scale-105"
+									? "bg-surface-control scale-110"
+									: "bg-surface-control/80 hover:bg-surface-control hover:scale-105"
 							}`}
 						>
 							<Clock

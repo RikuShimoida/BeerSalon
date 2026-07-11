@@ -129,12 +129,11 @@ export function TopTab({ bar }: TopTabProps) {
 					) : (
 						<p className="text-gray-900">
 							{formatTime(bar.openingTime)} - {formatTime(bar.endingTime)}
-							{bar.regularHoliday && (
-								<>
-									<br />
-									定休日: {bar.regularHoliday}
-								</>
-							)}
+						</p>
+					)}
+					{bar.regularHoliday && (
+						<p className="text-gray-900 whitespace-pre-line mt-1">
+							定休日: {bar.regularHoliday}
 						</p>
 					)}
 				</div>

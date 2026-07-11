@@ -7,129 +7,95 @@ import {
 	InfoWindow,
 	useMap,
 } from "@vis.gl/react-google-maps";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import type { BarSummary } from "@/components/bar/bar-summary";
 import { CITY_COORDINATES } from "@/lib/constants/city-coordinates";
+import { type BarPin, toBarPins } from "@/lib/map/bar-pins";
+import { resolveMapView } from "@/lib/map/map-view";
+import { type LatLng, requestUserLocation } from "@/lib/map/user-location";
 
-interface PlaceResult {
-	place_id: string;
-	name: string;
-	geometry?: {
-		location?: google.maps.LatLng;
-	};
-	formatted_address?: string;
-	vicinity?: string;
-}
+// fitBounds で全ピンを内包表示する際、ピンが地図の端に貼り付かないよう余白を確保する。
+const FIT_BOUNDS_PADDING = 48;
 
 interface GoogleMapProps {
 	city?: string;
+	bars: BarSummary[];
 	defaultZoom?: number;
 }
 
-function MapContent({ city }: { city?: string }) {
+function MapContent({
+	pins,
+	userLocation,
+	fallbackCenter,
+	fallbackZoom,
+}: {
+	pins: BarPin[];
+	userLocation: LatLng | null;
+	fallbackCenter: { lat: number; lng: number };
+	fallbackZoom: number;
+}) {
+	const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
 	const map = useMap();
-	const [places, setPlaces] = useState<PlaceResult[]>([]);
-	const [selectedPlace, setSelectedPlace] = useState<PlaceResult | null>(null);
-	const [center, setCenter] = useState<{ lat: number; lng: number }>({
-		lat: 34.9756,
-		lng: 138.3833,
-	});
-	const [userLocation, setUserLocation] = useState<{
-		lat: number;
-		lng: number;
-	} | null>(null);
-	const hasSetUserLocation = useRef(false);
-	const hasSearched = useRef(false);
 
+	const selectedPin = pins.find((pin) => pin.id === selectedPinId) ?? null;
+
+	// Why not: center/zoom を <Map> の props で controlled にすると、市町村代表座標1点に固定され
+	// ピン群がビューポート外にはみ出す。fitBounds はブラウザ API のため useMap 経由で命令的に呼ぶ。
+	// pins の同一性ではなく座標並びの変化に反応させるため、依存キーを座標文字列に落とす。
+	const pinsKey = pins.map((pin) => `${pin.lat},${pin.lng}`).join("|");
+	const { lat: fallbackLat, lng: fallbackLng } = fallbackCenter;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: pinsKey が pins の座標変化を表すため pins 自体は依存に含めない
 	useEffect(() => {
-		if (!hasSetUserLocation.current && navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					const newCenter = {
-						lat: position.coords.latitude,
-						lng: position.coords.longitude,
-					};
-					setUserLocation(newCenter);
-					if (!city) {
-						setCenter(newCenter);
-					}
-					hasSetUserLocation.current = true;
-				},
-				(error) => {
-					console.warn("位置情報の取得に失敗しました:", error);
-					hasSetUserLocation.current = true;
-				},
-			);
-		}
-	}, [city]);
-
-	useEffect(() => {
-		if (city && CITY_COORDINATES[city]) {
-			setCenter(CITY_COORDINATES[city]);
-			hasSearched.current = false;
-		} else if (!city && userLocation) {
-			setCenter(userLocation);
-			hasSearched.current = false;
-		}
-	}, [city, userLocation]);
-
-	useEffect(() => {
-		if (!map || hasSearched.current) return;
-
-		const service = new google.maps.places.PlacesService(map);
-		const searchLocation =
-			city && CITY_COORDINATES[city]
-				? CITY_COORDINATES[city]
-				: userLocation || center;
-
-		const request: google.maps.places.PlaceSearchRequest = {
-			location: new google.maps.LatLng(searchLocation.lat, searchLocation.lng),
-			radius: 50000,
-			keyword: "クラフトビール",
-		};
-
-		service.nearbySearch(request, (results, status) => {
-			if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-				setPlaces(results as PlaceResult[]);
-				hasSearched.current = true;
-			} else {
-				console.warn("Places API search failed:", status);
-				setPlaces([]);
+		if (!map) return;
+		const view = resolveMapView(pins);
+		if (view.type === "fit") {
+			const bounds = new google.maps.LatLngBounds();
+			for (const point of view.points) {
+				bounds.extend(point);
 			}
-		});
-	}, [map, city, userLocation, center]);
+			map.fitBounds(bounds, FIT_BOUNDS_PADDING);
+			return;
+		}
+		if (view.type === "center") {
+			map.setCenter(view.center);
+			map.setZoom(fallbackZoom);
+			return;
+		}
+		// ピン0件: ピンに合わせようがないため、市町村代表座標 or 現在地へ寄せる。
+		map.setCenter({ lat: fallbackLat, lng: fallbackLng });
+		map.setZoom(fallbackZoom);
+	}, [map, pinsKey, fallbackLat, fallbackLng, fallbackZoom]);
 
 	return (
 		<>
 			{userLocation && (
 				<AdvancedMarker position={userLocation} title="現在地" />
 			)}
-			{places.map((place) => {
-				const lat = place.geometry?.location?.lat();
-				const lng = place.geometry?.location?.lng();
-				if (!lat || !lng) return null;
-
-				return (
-					<AdvancedMarker
-						key={place.place_id}
-						position={{ lat, lng }}
-						title={place.name}
-						onClick={() => setSelectedPlace(place)}
-					/>
-				);
-			})}
-			{selectedPlace?.geometry?.location && (
+			{pins.map((pin) => (
+				<AdvancedMarker
+					key={pin.id}
+					position={{ lat: pin.lat, lng: pin.lng }}
+					title={pin.name}
+					onClick={() => setSelectedPinId(pin.id)}
+				/>
+			))}
+			{selectedPin && (
 				<InfoWindow
-					position={{
-						lat: selectedPlace.geometry.location.lat(),
-						lng: selectedPlace.geometry.location.lng(),
-					}}
-					onCloseClick={() => setSelectedPlace(null)}
+					position={{ lat: selectedPin.lat, lng: selectedPin.lng }}
+					onCloseClick={() => setSelectedPinId(null)}
 				>
 					<div className="p-2">
-						<h3 className="font-bold text-base mb-1">{selectedPlace.name}</h3>
+						<h3 className="font-bold text-base mb-1">{selectedPin.name}</h3>
 						<p className="text-xs text-gray-600 mb-2">
-							{selectedPlace.vicinity || selectedPlace.formatted_address}
+							{selectedPin.prefecture} {selectedPin.city}
 						</p>
+						<Link
+							href={`/bars/${selectedPin.id}`}
+							className="text-xs font-semibold text-blue-600 underline"
+						>
+							店舗詳細を見る
+						</Link>
 					</div>
 				</InfoWindow>
 			)}
@@ -137,37 +103,29 @@ function MapContent({ city }: { city?: string }) {
 	);
 }
 
-export function GoogleMap({ city, defaultZoom = 12 }: GoogleMapProps) {
+export function GoogleMap({ city, bars, defaultZoom = 12 }: GoogleMapProps) {
 	const [center, setCenter] = useState<{ lat: number; lng: number }>({
 		lat: 34.9756,
 		lng: 138.3833,
 	});
-	const [userLocation, setUserLocation] = useState<{
-		lat: number;
-		lng: number;
-	} | null>(null);
+	const [userLocation, setUserLocation] = useState<LatLng | null>(null);
 	const hasSetUserLocation = useRef(false);
 
 	useEffect(() => {
-		if (!hasSetUserLocation.current && navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					const newCenter = {
-						lat: position.coords.latitude,
-						lng: position.coords.longitude,
-					};
-					setUserLocation(newCenter);
-					if (!city) {
-						setCenter(newCenter);
-					}
-					hasSetUserLocation.current = true;
-				},
-				(error) => {
-					console.warn("位置情報の取得に失敗しました:", error);
-					hasSetUserLocation.current = true;
-				},
-			);
-		}
+		if (hasSetUserLocation.current) return;
+		requestUserLocation(
+			navigator.geolocation,
+			(location) => {
+				setUserLocation(location);
+				if (!city) {
+					setCenter(location);
+				}
+				hasSetUserLocation.current = true;
+			},
+			() => {
+				hasSetUserLocation.current = true;
+			},
+		);
 	}, [city]);
 
 	useEffect(() => {
@@ -195,18 +153,25 @@ export function GoogleMap({ city, defaultZoom = 12 }: GoogleMapProps) {
 		);
 	}
 
+	const pins = toBarPins(bars);
+
 	return (
 		<div className="glass-card rounded-2xl overflow-hidden modern-shadow h-64 md:h-80">
-			<APIProvider apiKey={apiKey} libraries={["places"]}>
+			<APIProvider apiKey={apiKey}>
 				<GoogleMapComponent
-					center={center}
-					zoom={defaultZoom}
+					defaultCenter={center}
+					defaultZoom={defaultZoom}
 					mapId="beer-salon-map"
 					className="w-full h-full"
 					gestureHandling="greedy"
 					disableDefaultUI={false}
 				>
-					<MapContent city={city} />
+					<MapContent
+						pins={pins}
+						userLocation={userLocation}
+						fallbackCenter={center}
+						fallbackZoom={defaultZoom}
+					/>
 				</GoogleMapComponent>
 			</APIProvider>
 		</div>

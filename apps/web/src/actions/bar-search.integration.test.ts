@@ -28,14 +28,23 @@ const prisma = new PrismaClient({
 // 検証用に固有名を使う (既存 seed の bar と混在しても it- prefix で安全に絞り込める)
 const uniqueCity = `it-city-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueCategoryName = `it-cat-${faker.string.alphanumeric(6).toLowerCase()}`;
+const uniqueCategoryName2 = `it-cat2-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueCountryName = `it-country-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueRegionName = `it-region-${faker.string.alphanumeric(6).toLowerCase()}`;
+const uniqueKeyword = `it-kw-${faker.string.alphanumeric(6).toLowerCase()}`;
+
+const geoCity = `it-geocity-${faker.string.alphanumeric(6).toLowerCase()}`;
 
 let barOnlyCityId: bigint;
 let barOnlyCategoryId: bigint;
+let barOnlyCategory2Id: bigint;
 let barOnlyOriginId: bigint;
 let barAllMatchedId: bigint;
+let barKeywordInNameId: bigint;
+let barWithGeoId: bigint;
+let barWithoutGeoId: bigint;
 let createdCategoryId: bigint;
+let createdCategory2Id: bigint;
 let createdCountryId: bigint;
 let createdRegionId: bigint;
 let createdBreweryId: bigint;
@@ -49,6 +58,11 @@ beforeAll(async () => {
 		data: { name: uniqueCategoryName },
 	});
 	createdCategoryId = cat.id;
+
+	const cat2 = await prisma.beerCategory.create({
+		data: { name: uniqueCategoryName2 },
+	});
+	createdCategory2Id = cat2.id;
 
 	const country = await prisma.country.create({
 		data: { name: uniqueCountryName },
@@ -109,6 +123,21 @@ beforeAll(async () => {
 		data: { barId: barOnlyOriginId, beerId: beer2.id },
 	});
 
+	// 3-2) category2 のみ一致: ビールメニュー (category=uniqueCategoryName2), city は異なる
+	const barOnlyCategory2 = await createTestBar(prisma);
+	barOnlyCategory2Id = barOnlyCategory2.id;
+	const beerCat2 = await prisma.beer.create({
+		data: {
+			name: `it-beer-cat2-${faker.string.alphanumeric(6).toLowerCase()}`,
+			beerCategoryId: cat2.id,
+			breweryId: brewery.id,
+			regionId: null,
+		},
+	});
+	await prisma.barBeerMenu.create({
+		data: { barId: barOnlyCategory2Id, beerId: beerCat2.id },
+	});
+
 	// 4) city + category + origin すべて一致
 	const barAllMatched = await createTestBar(prisma, { city: uniqueCity });
 	barAllMatchedId = barAllMatched.id;
@@ -123,6 +152,27 @@ beforeAll(async () => {
 	await prisma.barBeerMenu.create({
 		data: { barId: barAllMatched.id, beerId: beer3.id },
 	});
+
+	// 5) フリーワード一致: 店名に uniqueKeyword を含む bar (city / category / origin はデフォルト)
+	const barKeywordInName = await createTestBar(prisma, {
+		name: `${INTEGRATION_TEST_PREFIX}bar-${uniqueKeyword}`,
+	});
+	barKeywordInNameId = barKeywordInName.id;
+
+	// 6) 緯度経度あり / なしの bar: マップピン描画用に getBars が座標を返すか検証する
+	const barWithGeo = await createTestBar(prisma, {
+		city: geoCity,
+		latitude: 35.1614,
+		longitude: 138.6764,
+	});
+	barWithGeoId = barWithGeo.id;
+
+	const barWithoutGeo = await createTestBar(prisma, {
+		city: geoCity,
+		latitude: null,
+		longitude: null,
+	});
+	barWithoutGeoId = barWithoutGeo.id;
 });
 
 afterAll(async () => {
@@ -136,7 +186,9 @@ afterAll(async () => {
 	await prisma.brewery.deleteMany({ where: { id: createdBreweryId } });
 	await prisma.region.deleteMany({ where: { id: createdRegionId } });
 	await prisma.country.deleteMany({ where: { id: createdCountryId } });
-	await prisma.beerCategory.deleteMany({ where: { id: createdCategoryId } });
+	await prisma.beerCategory.deleteMany({
+		where: { id: { in: [createdCategoryId, createdCategory2Id] } },
+	});
 
 	await prisma.$disconnect();
 });
@@ -155,8 +207,8 @@ describe("getBars (Integration)", () => {
 		expect(ids).not.toContain(barOnlyOriginId.toString());
 	});
 
-	it("category 単独フィルタはそのカテゴリのビールを提供する bar のみ返す", async () => {
-		const result = await getBars({ category: uniqueCategoryName });
+	it("categories 単一指定はそのカテゴリのビールを提供する bar のみ返す", async () => {
+		const result = await getBars({ categories: [uniqueCategoryName] });
 		const ids = result.map((bar) => bar.id);
 		expect(ids).toEqual(
 			expect.arrayContaining([
@@ -165,6 +217,50 @@ describe("getBars (Integration)", () => {
 			]),
 		);
 		expect(ids).not.toContain(barOnlyCityId.toString());
+		expect(ids).not.toContain(barOnlyCategory2Id.toString());
+		expect(ids).not.toContain(barOnlyOriginId.toString());
+	});
+
+	it("categories 複数指定はいずれかのカテゴリを提供する bar をすべて返す (OR)", async () => {
+		const result = await getBars({
+			categories: [uniqueCategoryName, uniqueCategoryName2],
+		});
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toEqual(
+			expect.arrayContaining([
+				barOnlyCategoryId.toString(),
+				barOnlyCategory2Id.toString(),
+				barAllMatchedId.toString(),
+			]),
+		);
+		expect(ids).not.toContain(barOnlyCityId.toString());
+		expect(ids).not.toContain(barOnlyOriginId.toString());
+	});
+
+	it("categories 空配列はカテゴリで絞り込まず city 一致 bar も含めて返す", async () => {
+		const result = await getBars({ categories: [] });
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toEqual(
+			expect.arrayContaining([
+				barOnlyCityId.toString(),
+				barOnlyCategoryId.toString(),
+				barOnlyCategory2Id.toString(),
+				barOnlyOriginId.toString(),
+				barAllMatchedId.toString(),
+			]),
+		);
+	});
+
+	it("city + categories 複数指定は city と (いずれかのカテゴリ) の AND を満たす bar のみ返す", async () => {
+		const result = await getBars({
+			city: uniqueCity,
+			categories: [uniqueCategoryName, uniqueCategoryName2],
+		});
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toContain(barAllMatchedId.toString());
+		expect(ids).not.toContain(barOnlyCityId.toString());
+		expect(ids).not.toContain(barOnlyCategoryId.toString());
+		expect(ids).not.toContain(barOnlyCategory2Id.toString());
 		expect(ids).not.toContain(barOnlyOriginId.toString());
 	});
 
@@ -186,7 +282,7 @@ describe("getBars (Integration)", () => {
 	it("city + category + origin の AND 複合フィルタは 3 条件すべてを満たす bar のみ返す", async () => {
 		const result = await getBars({
 			city: uniqueCity,
-			category: uniqueCategoryName,
+			categories: [uniqueCategoryName],
 			origin: `${uniqueCountryName}/${uniqueRegionName}`,
 		});
 		const ids = result.map((bar) => bar.id);
@@ -194,5 +290,54 @@ describe("getBars (Integration)", () => {
 		expect(ids).not.toContain(barOnlyCityId.toString());
 		expect(ids).not.toContain(barOnlyCategoryId.toString());
 		expect(ids).not.toContain(barOnlyOriginId.toString());
+	});
+
+	it("q フリーワードは店名に一致する bar を返す", async () => {
+		const result = await getBars({ q: uniqueKeyword });
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toContain(barKeywordInNameId.toString());
+		expect(ids).not.toContain(barOnlyCityId.toString());
+		expect(ids).not.toContain(barOnlyCategoryId.toString());
+	});
+
+	it("q フリーワードは大文字小文字を区別しない (insensitive)", async () => {
+		const result = await getBars({ q: uniqueKeyword.toUpperCase() });
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toContain(barKeywordInNameId.toString());
+	});
+
+	it("q + city は両方を満たす bar のみ返す (AND 結合)", async () => {
+		// barKeywordInName は city がデフォルト (uniqueCity ではない) のため、
+		// uniqueCity との AND では除外される。
+		const result = await getBars({ q: uniqueKeyword, city: uniqueCity });
+		const ids = result.map((bar) => bar.id);
+		expect(ids).not.toContain(barKeywordInNameId.toString());
+	});
+
+	it("どの bar にも一致しない q は空配列を返す", async () => {
+		const result = await getBars({
+			q: `it-nomatch-${faker.string.alphanumeric(10).toLowerCase()}`,
+		});
+		const ids = result.map((bar) => bar.id);
+		expect(ids).not.toContain(barKeywordInNameId.toString());
+		expect(ids).not.toContain(barOnlyCityId.toString());
+	});
+
+	it("緯度経度が登録された bar は latitude/longitude を文字列で返す (マップピン用)", async () => {
+		const result = await getBars({ city: geoCity });
+		const withGeo = result.find((bar) => bar.id === barWithGeoId.toString());
+		expect(withGeo).toBeDefined();
+		expect(Number(withGeo?.latitude)).toBeCloseTo(35.1614, 4);
+		expect(Number(withGeo?.longitude)).toBeCloseTo(138.6764, 4);
+	});
+
+	it("緯度経度が未登録の bar は latitude/longitude が null だが一覧には含まれる", async () => {
+		const result = await getBars({ city: geoCity });
+		const withoutGeo = result.find(
+			(bar) => bar.id === barWithoutGeoId.toString(),
+		);
+		expect(withoutGeo).toBeDefined();
+		expect(withoutGeo?.latitude).toBeNull();
+		expect(withoutGeo?.longitude).toBeNull();
 	});
 });

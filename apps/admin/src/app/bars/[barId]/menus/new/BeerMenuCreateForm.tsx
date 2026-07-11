@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { uploadMenuImage } from "@/lib/menu-image-upload";
 import type { BeerCategory, Country, Region } from "@/types/database";
 
 interface SizeRow {
@@ -154,6 +155,11 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 			return;
 		}
 
+		if (!beerCategoryId) {
+			setError("ビールカテゴリを選択してください");
+			return;
+		}
+
 		const validSizes = sizes.filter((s) => s.sizeName.trim());
 		if (validSizes.length === 0) {
 			setError("サイズを1つ以上入力してください");
@@ -166,19 +172,18 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 			let imageUrl: string | null = null;
 
 			if (imageFile) {
-				const formData = new FormData();
-				formData.append("file", imageFile);
-				formData.append("type", "beer-menu");
+				const uploadResult = await uploadMenuImage(
+					barId,
+					imageFile,
+					"beer-menu",
+				);
 
-				const uploadRes = await fetch(`/api/bars/${barId}/media`, {
-					method: "POST",
-					body: formData,
-				});
-
-				if (uploadRes.ok) {
-					const uploadData = await uploadRes.json();
-					imageUrl = uploadData.url || null;
+				if (!uploadResult.ok) {
+					setError(uploadResult.error);
+					return;
 				}
+
+				imageUrl = uploadResult.url;
 			}
 
 			const res = await fetch(`/api/bars/${barId}/menus/beers`, {
@@ -253,7 +258,7 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 					htmlFor="beer-category"
 					className="block text-sm font-medium text-gray-700"
 				>
-					ビールカテゴリ
+					ビールカテゴリ <span className="text-red-500">*</span>
 				</label>
 				<select
 					id="beer-category"

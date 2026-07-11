@@ -1,0 +1,94 @@
+# ローカル自作の /impl スキル（Issue起点の実装フロー）を GitHub Actions 上でも起動できるようにする。
+# Issue に `@impl` とコメントすると、claude-code-action が Issue 内容に沿って実装し、
+# develop ベースの PR を作成する（マージはしない）。#369 で確立した「ローカルスキルを Action に
+# prompt で直渡しする」パターンの第2弾。
+#
+# Why-not: 既存 claude.yml（`@claude`）/ claude-pr-review.yml（`@pr-review`）に相乗りさせない。
+# トリガー語を `@impl` にすることで、`@claude` も `@pr-review` も部分文字列として含まないため、
+# 両ファイルの `contains(body, ...)` に一切マッチせず、既存2WFを無改変のまま二重起動を回避する。
+# また `@impl` は /loop-issues が使う `ready` ラベルとも別語で、ローカルの半自動ループとも棲み分ける。
+#
+# 運用注意（逆方向の二重起動）: 1つのコメントに `@claude` と `@impl` を両方書くと claude.yml と
+# 本ファイルが両方起動する。既存WFを無改変に保つため除外条件は入れていない。両メンションの
+# 同時記載は避ける運用とする（claude-pr-review.yml と同じ方針）。
+#
+# Why-not: 認証は ANTHROPIC_API_KEY（従量課金）ではなく CLAUDE_CODE_OAUTH_TOKEN（サブスク連携）。
+# 既存 claude.yml / claude-pr-review.yml と同じ登録済みトークンに揃え、Secrets を増やさない。
+#
+# Why-not: /impl スキル本体（.claude/skills/impl/SKILL.md）は改変しない。/impl は worktree 前提
+# （司令塔 develop clean・git worktree add・pnpm install・承認3択・司令塔フェーズでの pr-review/qa 委譲）
+# だが、Actions のエフェメラルな単一チェックアウト環境ではこれらが成立しない。スキルを Actions 用に
+# 分岐させるとローカル運用を壊すリスクがあるため、スキルは触らず、Actions 固有の上書き指示は
+# 下の prompt 側に閉じ込める（worktree/承認3択/司令塔フェーズ/understand をスキップし、単一
+# チェックアウト上で実装 → PR 作成で停止、マージはしない）。
+name: Claude Impl
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-impl:
+    # Why-not: `@claude` / `@pr-review` ではなく `@impl` で判定する（二重起動回避）。
+    # また issue_comment は Issue にも PR にも発火するが、/impl は Issue 起点の実装フローのため、
+    # `issue.pull_request == null` で Issue コメントに限定する（PR コメントでは起動しない）。
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request == null &&
+      contains(github.event.comment.body, '@impl')
+    runs-on: ubuntu-latest
+    permissions:
+      # Why-not: contents は read ではなく write。/impl は実装したコードを feature ブランチに
+      # commit / push するため書き込みが要る（pr-review とはここが決定的に異なる）。
+      contents: write
+      # Why-not: pull-requests も write。実装後に `gh pr create` で develop ベースの PR を作るため。
+      # ただし PR の作成までに留め、自動マージはしない（allowed-tools / prompt から排除）。
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read # Required for Claude to read CI results on PRs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Why-not: fetch-depth: 1 ではなく 0。develop からブランチを切って push するため、
+          # 浅いクローンだと develop の履歴が無く base 解決・push でこける。全履歴を取得する。
+          fetch-depth: 0
+
+      - name: Run Claude Impl
+        id: claude-impl
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # ローカルの /impl スキルを起動する。Issue 番号はトリガー元 Issue から解決する。
+          # Actions 環境では worktree 運用が成立しないため、prompt 末尾で明示的に上書きする:
+          # - worktree を作らず、この単一チェックアウト上で develop からブランチを切って実装する
+          # - 承認3択（review-fix / マージ / あとで決める）・司令塔フェーズ（pr-review/qa 委譲）・
+          #   /understand の自動発動はスキップする（対話前提の手順で、Actions では走らせない）
+          # - 実装 → テスト → 品質チェック → commit → push → PR 作成（develop ベース）で停止する
+          # - PR は作成のみ。自動マージはしない
+          prompt: |
+            /impl ${{ github.event.issue.number }}
+
+            この実行は GitHub Actions 上のエフェメラルな単一チェックアウト環境です。
+            ローカル前提の手順を以下のとおり上書きしてください（/impl スキルの該当手順より優先）:
+            - worktree は作らないでください（git worktree add / 環境ファイルコピー / pnpm install の
+              worktree 初期化はスキップ）。この単一チェックアウト上で develop からブランチを切り、
+              そのブランチ上で実装してください。
+            - Phase 2-2-2 の司令塔フェーズ（pr-review スキル委譲・qa-engineer 委譲・共有DB依存の
+              IT/E2E 消化）は実行しないでください。
+            - Phase 2-2-2 の承認3択（AskUserQuestion）は出さないでください（対話できない環境のため）。
+            - Phase 2-4 の /understand 自動発動はスキップしてください。
+            - ゴールは develop ベースの PR を作成するところまでです。PR は作成のみで、
+              自動マージは絶対にしないでください。
+
+          # Why-not: --max-turns は未指定（デフォルト）にせず明示する。/impl は「実装 → テスト →
+          # 品質チェック → commit → push → PR 作成」の多ターンフローで、pr-review の 15 では足りない。
+          # 50 を初期値に置き、初回実機検証のログで過不足があれば調整する。
+          # Why-not: --allowed-tools は pr-review のような gh 限定にしない。/impl は実装・テスト・
+          # 品質チェック・Git 操作を伴うため、Edit/Write と Bash（実装コマンド全般）を許可する。
+          # ただし PR 作成までに留め、マージ系コマンド（gh pr merge）は与えない。
+          claude_args: |
+            --max-turns 50
+            --allowed-tools "Bash,Edit,Write,Read,Glob,Grep"

@@ -9,6 +9,16 @@ const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm"];
 const BUCKET_NAME = "bar-media";
 
+// スライダー用は bar_images に紐づく店舗メディアだが、メニュー画像は
+// bar_beer_menus / bar_food_menus の単一 image_url として保存される別物。
+// type で分岐し、メニュー画像は bar_images へ INSERT せず公開URLのみ返す。
+const MENU_MEDIA_TYPES = ["beer-menu", "food-menu"] as const;
+type MenuMediaType = (typeof MENU_MEDIA_TYPES)[number];
+
+function isMenuMediaType(value: string | null): value is MenuMediaType {
+	return MENU_MEDIA_TYPES.includes(value as MenuMediaType);
+}
+
 const MIME_TO_EXTENSION: Record<string, string> = {
 	"image/jpeg": "jpg",
 	"image/png": "png",
@@ -91,27 +101,42 @@ export async function POST(
 			);
 		}
 
-		const { data: existingMedia } = await supabaseAdmin
-			.from("bar_images")
-			.select("id, sort_order")
-			.eq("bar_id", barId)
-			.eq("image_type", "slider");
-
-		if (existingMedia && existingMedia.length >= MAX_MEDIA_COUNT) {
-			return NextResponse.json(
-				{ error: "スライダー用メディアは最大5枚までです" },
-				{ status: 400 },
-			);
-		}
-
 		const formData = await request.formData();
 		const file = formData.get("file") as File;
+		const uploadType = formData.get("type");
+		const mediaUploadType = typeof uploadType === "string" ? uploadType : null;
 
 		if (!file) {
 			return NextResponse.json(
 				{ error: "ファイルが選択されていません" },
 				{ status: 400 },
 			);
+		}
+
+		const isMenuMedia = isMenuMediaType(mediaUploadType);
+
+		// スライダー枠の5枚制限はメニュー画像には適用しない。
+		// メニュー画像は bar_images とは別テーブルの単一 image_url に保存されるため。
+		// Why not: 枚数チェックと後段の nextSortOrder で同一 SELECT を二度走らせない。
+		//          スライダー経路でのみ一度だけ取得し、両方で使い回す。
+		let existingSliderMedia: { id: number; sort_order: number }[] | null = null;
+		if (!isMenuMedia) {
+			const { data } = await supabaseAdmin
+				.from("bar_images")
+				.select("id, sort_order")
+				.eq("bar_id", barId)
+				.eq("image_type", "slider");
+			existingSliderMedia = data;
+
+			if (
+				existingSliderMedia &&
+				existingSliderMedia.length >= MAX_MEDIA_COUNT
+			) {
+				return NextResponse.json(
+					{ error: "スライダー用メディアは最大5枚までです" },
+					{ status: 400 },
+				);
+			}
 		}
 
 		const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
@@ -139,7 +164,8 @@ export async function POST(
 		const timestamp = Date.now();
 		const extension = MIME_TO_EXTENSION[file.type] || "bin";
 		const mediaType = isImage ? "image" : "video";
-		const fileName = `bars/${barId}/slider_${timestamp}.${extension}`;
+		const filePrefix = isMenuMedia ? mediaUploadType : "slider";
+		const fileName = `bars/${barId}/${filePrefix}_${timestamp}.${extension}`;
 
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
@@ -164,11 +190,15 @@ export async function POST(
 
 		const mediaUrl = publicUrlData.publicUrl;
 
+		// メニュー画像は bar_images へ INSERT せず、公開URLのみ返す。
+		// 呼び出し側（メニュー登録/編集フォーム）が image_url として保存する。
+		if (isMenuMedia) {
+			return NextResponse.json({ url: mediaUrl });
+		}
+
 		const nextSortOrder =
-			existingMedia && existingMedia.length > 0
-				? Math.max(
-						...existingMedia.map((m: { sort_order: number }) => m.sort_order),
-					) + 1
+			existingSliderMedia && existingSliderMedia.length > 0
+				? Math.max(...existingSliderMedia.map((m) => m.sort_order)) + 1
 				: 0;
 
 		const { data: newMedia, error: insertError } = await supabaseAdmin

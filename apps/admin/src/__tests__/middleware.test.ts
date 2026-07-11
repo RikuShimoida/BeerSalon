@@ -99,3 +99,41 @@ describe("middleware: /login redirect for authenticated users", () => {
 		expect(response.headers.get("location")).toBeNull();
 	});
 });
+
+describe("middleware: セルフサーブ登録の公開パス", () => {
+	it("未ログインで /bars/register にアクセスした場合、そのまま表示される（/login へ飛ばされない）", async () => {
+		const request = createMockRequest("/bars/register");
+		const response = await middleware(request);
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("location")).toBeNull();
+	});
+
+	it("ログイン済み admin が /bars/register にアクセスした場合、/bars へリダイレクトされる", async () => {
+		mockVerifyToken.mockResolvedValue({ role: "admin", barId: null });
+
+		const request = createMockRequest("/bars/register", {
+			"admin-token": "valid-admin-token",
+		});
+		const response = await middleware(request);
+
+		expect(response.status).toBe(307);
+		expect(response.headers.get("location")).toContain("/bars");
+	});
+
+	it("未ログインで /api/bars/register にアクセスした場合、/login へリダイレクトされない（公開API）", async () => {
+		const request = createMockRequest("/api/bars/register", {}, "POST");
+		const response = await middleware(request);
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("location")).toBeNull();
+	});
+
+	it("未ログインで /api/bars（一般API）にアクセスした場合、/login へリダイレクトされる", async () => {
+		const request = createMockRequest("/api/bars");
+		const response = await middleware(request);
+
+		expect(response.status).toBe(307);
+		expect(response.headers.get("location")).toContain("/login");
+	});
+});

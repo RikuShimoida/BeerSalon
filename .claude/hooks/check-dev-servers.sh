@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# implementスキル実行前にdev:web(3000)とdev:admin(3001)が起動済みか確認する
+# implスキル実行前にdev:web(3000)とdev:admin(3001)が起動済みか確認する
 
 WEB_UP=false
 ADMIN_UP=false

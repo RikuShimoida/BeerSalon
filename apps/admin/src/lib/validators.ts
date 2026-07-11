@@ -79,6 +79,145 @@ export function validateLineUrl(url: string | null | undefined): {
 	return { isValid: true };
 }
 
+export type ArticleStatus = "draft" | "published" | "scheduled";
+
+export const ARTICLE_STATUSES: ArticleStatus[] = [
+	"draft",
+	"published",
+	"scheduled",
+];
+
+export function isArticleStatus(value: unknown): value is ArticleStatus {
+	return (
+		typeof value === "string" && (ARTICLE_STATUSES as string[]).includes(value)
+	);
+}
+
+/**
+ * 記事の status / published_at を保存値へ正規化する。
+ *
+ * - draft: 公開日時は持たない（null）
+ * - published: 指定された published_at を尊重し、無ければ now（登録時の既存挙動を踏襲）
+ * - scheduled: published_at 必須かつ未来日時のみ許容
+ *
+ * `now` は呼び出し側から渡してテスト容易性を確保する。
+ */
+export function resolveArticlePublishing(
+	status: unknown,
+	publishedAtInput: string | null | undefined,
+	now: Date,
+):
+	| { isValid: true; status: ArticleStatus; published_at: string | null }
+	| { isValid: false; error: string } {
+	if (!isArticleStatus(status)) {
+		return {
+			isValid: false,
+			error:
+				"status は draft / published / scheduled のいずれかを指定してください",
+		};
+	}
+
+	if (status === "draft") {
+		return { isValid: true, status, published_at: null };
+	}
+
+	if (status === "published") {
+		const publishedAt = publishedAtInput
+			? new Date(publishedAtInput).toISOString()
+			: now.toISOString();
+		return { isValid: true, status, published_at: publishedAt };
+	}
+
+	if (!publishedAtInput) {
+		return {
+			isValid: false,
+			error: "予約公開には公開日時を指定してください",
+		};
+	}
+
+	const scheduledAt = new Date(publishedAtInput);
+	if (Number.isNaN(scheduledAt.getTime())) {
+		return { isValid: false, error: "公開日時の形式が正しくありません" };
+	}
+	if (scheduledAt.getTime() <= now.getTime()) {
+		return {
+			isValid: false,
+			error: "予約公開の公開日時は未来の日時を指定してください",
+		};
+	}
+
+	return { isValid: true, status, published_at: scheduledAt.toISOString() };
+}
+
+const OPENING_HOUR_TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/**
+ * 営業時間配列（RPC 整形前の生入力）の各要素を検証する。
+ *
+ * `payment_method_ids` と同水準の入力バリデーションを営業時間にも設け、
+ * 不正値のまま sync RPC を呼んで既存データを消してしまう事故を防ぐ。
+ * 検証内容:
+ * - day_of_week: 0〜6 の整数
+ * - sort_order: 整数
+ * - is_closed: boolean
+ * - 時刻整形の対象となる行（非定休日かつ open_time/close_time が入っている行）は HH:MM 形式
+ *   Why not「全行の時刻を必須検証」: 定休日行や時刻未入力で除外される行は整形対象外（既存 filter と整合）のため、時刻検証もしない。
+ */
+export function validateOpeningHours(openingHours: unknown[]): {
+	isValid: boolean;
+	error?: string;
+} {
+	const error = "営業時間の指定が正しくありません";
+
+	for (const oh of openingHours) {
+		if (typeof oh !== "object" || oh === null) {
+			return { isValid: false, error };
+		}
+
+		const row = oh as {
+			day_of_week?: unknown;
+			open_time?: unknown;
+			close_time?: unknown;
+			sort_order?: unknown;
+			is_closed?: unknown;
+		};
+
+		if (typeof row.is_closed !== "boolean") {
+			return { isValid: false, error };
+		}
+
+		if (
+			typeof row.day_of_week !== "number" ||
+			!Number.isInteger(row.day_of_week) ||
+			row.day_of_week < 0 ||
+			row.day_of_week > 6
+		) {
+			return { isValid: false, error };
+		}
+
+		if (
+			typeof row.sort_order !== "number" ||
+			!Number.isInteger(row.sort_order)
+		) {
+			return { isValid: false, error };
+		}
+
+		// 時刻整形の対象となる行（非定休日かつ open_time/close_time が入っている行）のみ HH:MM 形式を検証する
+		if (row.is_closed !== true && row.open_time && row.close_time) {
+			if (
+				typeof row.open_time !== "string" ||
+				typeof row.close_time !== "string" ||
+				!OPENING_HOUR_TIME_PATTERN.test(row.open_time) ||
+				!OPENING_HOUR_TIME_PATTERN.test(row.close_time)
+			) {
+				return { isValid: false, error };
+			}
+		}
+	}
+
+	return { isValid: true };
+}
+
 export function validateWebsiteUrl(url: string | null | undefined): {
 	isValid: boolean;
 	error?: string;
@@ -97,4 +236,60 @@ export function validateWebsiteUrl(url: string | null | undefined): {
 	}
 
 	return { isValid: true };
+}
+
+function validateCoordinate(
+	value: string | number | null | undefined,
+	min: number,
+	max: number,
+	label: string,
+): { isValid: boolean; error?: string; value: number | null } {
+	if (value === null || value === undefined || value === "") {
+		return { isValid: true, value: null };
+	}
+
+	const parsed = typeof value === "number" ? value : Number(value);
+	if (Number.isNaN(parsed)) {
+		return {
+			isValid: false,
+			error: `${label}は数値で入力してください`,
+			value: null,
+		};
+	}
+
+	if (parsed < min || parsed > max) {
+		return {
+			isValid: false,
+			error: `${label}は${min}〜${max}の範囲で入力してください`,
+			value: null,
+		};
+	}
+
+	return { isValid: true, value: parsed };
+}
+
+/**
+ * 緯度・経度を検証し、保存用の数値（未入力は null）へ正規化する。
+ *
+ * 緯度・経度はそれぞれ独立した任意項目とする。
+ * Why not「両方揃える」制約: 他の Phase 2 項目（住所・SNS 等）が各々独立して任意入力である流儀に合わせ、
+ * 片方だけの入力も許容する。
+ */
+export function validateCoordinates(
+	latitude: string | number | null | undefined,
+	longitude: string | number | null | undefined,
+):
+	| { isValid: true; latitude: number | null; longitude: number | null }
+	| { isValid: false; error: string } {
+	const lat = validateCoordinate(latitude, -90, 90, "緯度");
+	if (!lat.isValid) {
+		return { isValid: false, error: lat.error as string };
+	}
+
+	const lng = validateCoordinate(longitude, -180, 180, "経度");
+	if (!lng.isValid) {
+		return { isValid: false, error: lng.error as string };
+	}
+
+	return { isValid: true, latitude: lat.value, longitude: lng.value };
 }

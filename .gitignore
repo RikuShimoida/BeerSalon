@@ -63,8 +63,23 @@ playwright/.cache/
 # images (design reference)
 /images/
 
+# mock (UI 確認用の使い捨て成果物。仕様合意のローカル参照用で、リポジトリ本体には含めない)
+/mock/
+
+# sales materials (営業資料。製品コードではない事業資料のためローカル保管・Git管理外)
+/sales-materials/
+
 # claude code runtime locks
 .claude/scheduled_tasks.lock
 
+# claude code worktrees (並列開発スキルが develop 起点で作成する作業ツリー。メインチェックアウトに含めない)
+.claude/worktrees/
+
 # claude code subagent personal memory (not shared across team)
 .claude/agent-memory/
+
+# PR review screenshots (use GitHub uploaded image on PR comments instead)
+docs/screenshots/
+
+# issue notes (作業ログ — Issue作成済みのためGit管理外とする)
+issue_note.txt

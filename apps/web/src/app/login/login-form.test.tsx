@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LoginForm } from "./login-form";
 
 // next/navigationのモック
@@ -10,6 +10,15 @@ vi.mock("next/navigation", () => ({
 		replace: vi.fn(),
 		prefetch: vi.fn(),
 	})),
+}));
+
+// sonnerのモック
+const mockToastSuccess = vi.fn();
+vi.mock("sonner", () => ({
+	toast: {
+		success: (...args: unknown[]) => mockToastSuccess(...args),
+		error: vi.fn(),
+	},
 }));
 
 // useActionStateのモック
@@ -63,13 +72,16 @@ describe("LoginForm", () => {
 			expect(passwordInput).toHaveAttribute("id", "password");
 		});
 
-		it("プレースホルダーが正しく表示される", () => {
+		it("メールアドレス・パスワード入力欄にplaceholder属性が設定されていない", () => {
 			render(<LoginForm />);
 
-			expect(
-				screen.getByPlaceholderText("example@mail.com"),
-			).toBeInTheDocument();
-			expect(screen.getByPlaceholderText("••••••••")).toBeInTheDocument();
+			const emailInput = screen.getByRole("textbox", {
+				name: "メールアドレス",
+			});
+			const passwordInput = screen.getByLabelText("パスワード");
+
+			expect(emailInput).not.toHaveAttribute("placeholder");
+			expect(passwordInput).not.toHaveAttribute("placeholder");
 		});
 
 		it("送信ボタンが表示される", () => {
@@ -121,13 +133,13 @@ describe("LoginForm", () => {
 			expect(signupLink).toHaveAttribute("href", "/signup");
 		});
 
-		it("「パスワードをお忘れの方」リンクが/password/resetへ遷移する", () => {
+		it("「パスワードをお忘れの方」リンクが/password/forgotへ遷移する", () => {
 			render(<LoginForm />);
 
 			const resetLink = screen.getByRole("link", {
 				name: "パスワードをお忘れの方",
 			});
-			expect(resetLink).toHaveAttribute("href", "/password/reset");
+			expect(resetLink).toHaveAttribute("href", "/password/forgot");
 		});
 	});
 
@@ -177,6 +189,40 @@ describe("LoginForm", () => {
 			expect(
 				screen.queryByText(/メールアドレスまたはパスワード/),
 			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("正常系 - パスワード再設定完了トースト", () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it("resetSuccess=true のとき遅延後にtoast.successが呼ばれる", () => {
+			render(<LoginForm resetSuccess={true} />);
+
+			// Why not 即時呼び出し: setTimeout(..., 100) でラップされているため、タイマー進行が必要。
+			expect(mockToastSuccess).not.toHaveBeenCalled();
+			act(() => {
+				vi.advanceTimersByTime(150);
+			});
+
+			expect(mockToastSuccess).toHaveBeenCalledWith(
+				expect.stringContaining("パスワードを再設定しました"),
+			);
+		});
+
+		it("resetSuccess=false のときtoast.successは呼ばれない", () => {
+			render(<LoginForm resetSuccess={false} />);
+
+			act(() => {
+				vi.advanceTimersByTime(150);
+			});
+
+			expect(mockToastSuccess).not.toHaveBeenCalled();
 		});
 	});
 

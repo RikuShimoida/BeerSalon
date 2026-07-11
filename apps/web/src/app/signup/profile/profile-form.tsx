@@ -12,6 +12,14 @@ export function ProfileForm() {
 	);
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const [bioLength, setBioLength] = useState(0);
+	const [year, setYear] = useState("");
+	const [month, setMonth] = useState("");
+	const [day, setDay] = useState("");
+
+	const birthday =
+		year && month && day
+			? `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+			: "";
 
 	const currentYear = new Date().getFullYear();
 	const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
@@ -51,7 +59,6 @@ export function ProfileForm() {
 						type="text"
 						id="lastName"
 						name="lastName"
-						placeholder="下井田"
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 						required
 					/>
@@ -68,7 +75,6 @@ export function ProfileForm() {
 						type="text"
 						id="firstName"
 						name="firstName"
-						placeholder="陸"
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 						required
 					/>
@@ -86,7 +92,6 @@ export function ProfileForm() {
 					type="text"
 					id="nickname"
 					name="nickname"
-					placeholder="りく"
 					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
 					required
 				/>
@@ -102,42 +107,48 @@ export function ProfileForm() {
 				<div className="grid grid-cols-3 gap-2">
 					<select
 						name="year"
+						value={year}
+						onChange={(e) => setYear(e.target.value)}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
 						<option value="">年</option>
-						{years.map((year) => (
-							<option key={year} value={year}>
-								{year}
+						{years.map((y) => (
+							<option key={y} value={y}>
+								{y}
 							</option>
 						))}
 					</select>
 					<select
 						name="month"
+						value={month}
+						onChange={(e) => setMonth(e.target.value)}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
 						<option value="">月</option>
-						{months.map((month) => (
-							<option key={month} value={month}>
-								{month}
+						{months.map((m) => (
+							<option key={m} value={m}>
+								{m}
 							</option>
 						))}
 					</select>
 					<select
 						name="day"
+						value={day}
+						onChange={(e) => setDay(e.target.value)}
 						className="glass-input px-4 py-3 rounded-xl text-card-foreground focus:outline-none transition-all duration-300"
 						required
 					>
 						<option value="">日</option>
-						{days.map((day) => (
-							<option key={day} value={day}>
-								{day}
+						{days.map((d) => (
+							<option key={d} value={d}>
+								{d}
 							</option>
 						))}
 					</select>
 				</div>
-				<input type="hidden" name="birthday" id="birthday" />
+				<input type="hidden" name="birthday" id="birthday" value={birthday} />
 			</div>
 
 			<div className="flex flex-col gap-2">
@@ -226,7 +237,6 @@ export function ProfileForm() {
 				<textarea
 					id="bio"
 					name="bio"
-					placeholder="自己紹介やビールの好みを入力してください"
 					maxLength={500}
 					rows={4}
 					onChange={(e) => setBioLength(e.target.value.length)}
@@ -247,24 +257,6 @@ export function ProfileForm() {
 				type="submit"
 				disabled={isPending}
 				className="w-full px-4 py-3 text-primary-foreground gradient-primary rounded-xl font-medium hover:shadow-lg hover:scale-105 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-all duration-300 shadow-md"
-				onClick={(e) => {
-					const form = e.currentTarget.form;
-					if (form) {
-						const year = (form.elements.namedItem("year") as HTMLSelectElement)
-							.value;
-						const month = (
-							form.elements.namedItem("month") as HTMLSelectElement
-						).value;
-						const day = (form.elements.namedItem("day") as HTMLSelectElement)
-							.value;
-						const birthdayInput = form.elements.namedItem(
-							"birthday",
-						) as HTMLInputElement;
-						if (year && month && day) {
-							birthdayInput.value = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-						}
-					}
-				}}
 			>
 				{isPending ? "確認中..." : "登録内容を確認"}
 			</button>

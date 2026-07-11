@@ -1,53 +1,54 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
+import { toast } from "sonner";
+import { FormError } from "@/components/form/form-error";
+import { TextField } from "@/components/form/text-field";
 import { login } from "./actions";
 
-export function LoginForm() {
+type Props = {
+	resetSuccess?: boolean;
+};
+
+export function LoginForm({ resetSuccess = false }: Props) {
 	const [state, formAction, isPending] = useActionState(login, undefined);
+	const hasShownResetToastRef = useRef(false);
+
+	useEffect(() => {
+		// Why not 即時呼び出し: Sonner Toaster の初期マウント前に toast を呼ぶと表示されない問題への対処。
+		// <Toaster /> が layout.tsx に配置されているが、初回 useEffect 実行タイミングと Toaster の
+		// React フックライフサイクル登録のレース条件があるため、微小遅延で確実にマウント後に呼び出す。
+		if (resetSuccess && !hasShownResetToastRef.current) {
+			hasShownResetToastRef.current = true;
+			const timer = setTimeout(() => {
+				toast.success(
+					"パスワードを再設定しました。新しいパスワードでログインしてください",
+				);
+			}, 100);
+			return () => clearTimeout(timer);
+		}
+	}, [resetSuccess]);
 
 	return (
 		<form action={formAction} className="flex flex-col gap-4 w-full">
-			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="email"
-					className="text-sm font-medium text-card-foreground tracking-wide"
-				>
-					メールアドレス
-				</label>
-				<input
-					type="email"
-					id="email"
-					name="email"
-					placeholder="example@mail.com"
-					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
-					required
-				/>
-			</div>
+			<TextField
+				id="email"
+				name="email"
+				label="メールアドレス"
+				type="email"
+				required
+			/>
 
-			<div className="flex flex-col gap-2">
-				<label
-					htmlFor="password"
-					className="text-sm font-medium text-card-foreground tracking-wide"
-				>
-					パスワード
-				</label>
-				<input
-					type="password"
-					id="password"
-					name="password"
-					placeholder="••••••••"
-					className="glass-input px-4 py-3 rounded-xl text-card-foreground placeholder:text-muted-foreground focus:outline-none transition-all duration-300"
-					required
-				/>
-			</div>
+			<TextField
+				id="password"
+				name="password"
+				label="パスワード"
+				type="password"
+				required
+			/>
 
-			{state?.error && (
-				<div className="p-3 text-sm text-destructive bg-destructive/10 rounded-xl border border-destructive/20">
-					{state.error}
-				</div>
-			)}
+			{state?.error && <FormError>{state.error}</FormError>}
 
 			<button
 				type="submit"
@@ -65,7 +66,7 @@ export function LoginForm() {
 					新規登録はこちら
 				</Link>
 				<Link
-					href="/password/reset"
+					href="/password/forgot"
 					className="text-muted-foreground hover:text-foreground hover:underline tracking-wide transition-colors duration-300"
 				>
 					パスワードをお忘れの方

@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getBars } from "@/actions/bar";
 import { BarList } from "@/components/bar/bar-list";
+import type { BarSummary } from "@/components/bar/bar-summary";
 import { FooterLinks } from "@/components/home/footer-links";
 import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
 import { PopularArticlesSection } from "@/components/home/popular-articles-section";
@@ -11,24 +14,79 @@ import { PopularCitiesSection } from "@/components/home/popular-cities-section";
 import { PopularRegionsSection } from "@/components/home/popular-regions-section";
 import { GoogleMap } from "@/components/map/google-map";
 import { SearchForm } from "@/components/search/search-form";
+import {
+	buildSearchQueryString,
+	parseSearchParams,
+} from "@/lib/search/query-params";
 
 export function HomeClient() {
+	const router = useRouter();
+	const urlSearchParams = useSearchParams();
+	const urlQuery = urlSearchParams.get("q") ?? "";
+	const urlCity = urlSearchParams.get("city") ?? "";
+
 	const [searchParams, setSearchParams] = useState<{
+		q: string;
 		city: string;
-		category: string;
+		categories: string[];
 		origin: string;
-	}>({
-		city: "",
-		category: "",
-		origin: "",
-	});
+	}>(() => parseSearchParams(urlSearchParams));
+
+	// Why not: useState 初期化関数は初回マウントのみ実行されるため、ブラウザバック等で
+	// URL だけが変わるケースに追従できない。URL を真実の源とし、URL の q/city が変わったら
+	// state を同期する。
+	useEffect(() => {
+		setSearchParams((prev) => ({
+			...prev,
+			q: urlQuery,
+			city: urlCity,
+		}));
+	}, [urlQuery, urlCity]);
+
+	// Why not: マップと店舗一覧が別々に getBars を呼ぶと、同一検索条件でも取得タイミングの
+	// ズレで表示がリンクしなくなる。親で一度だけ取得し、両者へ同じ結果を配ってデータソースを
+	// 一本化する。
+	const [bars, setBars] = useState<BarSummary[]>([]);
+	const [isBarsLoading, setIsBarsLoading] = useState(true);
+
+	const categoriesKey = searchParams.categories.join(",");
+
+	useEffect(() => {
+		let isCurrent = true;
+		const fetchBars = async () => {
+			setIsBarsLoading(true);
+			const result = await getBars({
+				q: searchParams.q,
+				city: searchParams.city,
+				categories: categoriesKey ? categoriesKey.split(",") : [],
+				origin: searchParams.origin,
+			});
+			if (!isCurrent) return;
+			setBars(result);
+			setIsBarsLoading(false);
+		};
+
+		fetchBars();
+		return () => {
+			isCurrent = false;
+		};
+	}, [searchParams.q, searchParams.city, categoriesKey, searchParams.origin]);
 
 	const handleSearch = (params: {
+		q: string;
 		city: string;
-		category: string;
+		categories: string[];
 		origin: string;
 	}) => {
 		setSearchParams(params);
+
+		const queryString = buildSearchQueryString({
+			q: params.q,
+			city: params.city,
+		});
+		router.replace(queryString ? `/?${queryString}` : "/", {
+			scroll: false,
+		});
 	};
 
 	const mockPopularArticles = [
@@ -170,50 +228,54 @@ export function HomeClient() {
 	];
 
 	return (
-		<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-			<div className="flex flex-col gap-8 md:gap-12">
-				{/* 検索セクション */}
-				<SearchForm onSearch={handleSearch} />
+		<div className="top-amber-dark min-h-screen px-4 py-8 md:py-12">
+			<div className="max-w-7xl mx-auto">
+				<div className="flex flex-col gap-8 md:gap-12">
+					{/* 検索セクション */}
+					{/* Why not: 制御 input の value を毎レンダリング上書きすると入力中のIME変換が
+				    途切れるため、URL の q/city が変わったときだけ key で再マウントして初期値を反映する。 */}
+					<SearchForm
+						key={`${urlQuery}|${urlCity}`}
+						initialValues={searchParams}
+						onSearch={handleSearch}
+					/>
 
-				{/* 地図エリア */}
-				<GoogleMap city={searchParams.city} />
+					{/* 地図エリア */}
+					<GoogleMap city={searchParams.city} bars={bars} />
 
-				{/* 店舗一覧 */}
-				<BarList
-					city={searchParams.city}
-					category={searchParams.category}
-					origin={searchParams.origin}
-				/>
+					{/* 店舗一覧 */}
+					<BarList bars={bars} isLoading={isBarsLoading} />
 
-				{/* クラフトビールについて知る */}
-				<LearnAboutCraftBeerCard />
+					{/* クラフトビールについて知る */}
+					<LearnAboutCraftBeerCard />
 
-				{/* 先月いいねの多かった記事 */}
-				<PopularArticlesSection articles={mockPopularArticles} />
+					{/* 先月いいねの多かった記事 */}
+					<PopularArticlesSection articles={mockPopularArticles} />
 
-				{/* 人気なお店で探す */}
-				<PopularBarsSection title="人気なお店で探す" bars={mockPopularBars} />
+					{/* 人気なお店で探す */}
+					<PopularBarsSection title="人気なお店で探す" bars={mockPopularBars} />
 
-				{/* 人気な市町村で探す */}
-				<PopularCitiesSection
-					title="人気な市町村で探す"
-					cities={mockPopularCities}
-				/>
+					{/* 人気な市町村で探す */}
+					<PopularCitiesSection
+						title="人気な市町村で探す"
+						cities={mockPopularCities}
+					/>
 
-				{/* 人気なカテゴリのビールで探す */}
-				<PopularCategoriesSection
-					title="人気なカテゴリのビールで探す"
-					categories={mockPopularCategories}
-				/>
+					{/* 人気なカテゴリのビールで探す */}
+					<PopularCategoriesSection
+						title="人気なカテゴリのビールで探す"
+						categories={mockPopularCategories}
+					/>
 
-				{/* 人気なビールの産地で探す */}
-				<PopularRegionsSection
-					title="人気なビールの産地で探す"
-					regions={mockPopularRegions}
-				/>
+					{/* 人気なビールの産地で探す */}
+					<PopularRegionsSection
+						title="人気なビールの産地で探す"
+						regions={mockPopularRegions}
+					/>
 
-				{/* 利用規約エリア */}
-				<FooterLinks />
+					{/* 利用規約エリア */}
+					<FooterLinks />
+				</div>
 			</div>
 		</div>
 	);
