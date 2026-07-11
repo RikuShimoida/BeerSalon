@@ -1,5 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { decodeJwtRole } from "../jwt-role";
+
+// Why not: service_role 以外のキー（例: anon キーの貼り間違い）を渡すと Storage 書き込みが
+//          RLS で 403 失敗する（#392/#403）。createAdminClient() は呼び出しごとに走るため
+//          毎回警告するとノイズになる。モジュールロード時に1回だけ role を検証し、
+//          JWT形式で service_role でない場合のみ起動時に警告する（admin 側の実装と揃える）
+const serviceRoleKeyRole = decodeJwtRole(
+	process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+);
+if (serviceRoleKeyRole && serviceRoleKeyRole !== "service_role") {
+	console.error(
+		`[supabase] SUPABASE_SERVICE_ROLE_KEY is not a service_role key (role="${serviceRoleKeyRole}"). Admin writes such as Storage uploads will fail with RLS violations. Check the environment variable.`,
+	);
+}
 
 export async function createClient() {
 	const cookieStore = await cookies();
