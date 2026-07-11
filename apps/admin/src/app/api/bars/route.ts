@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
 			facebook_url,
 			line_url,
 			description,
+			regular_holiday,
 			opening_hours,
 		} = body;
 
@@ -251,6 +252,7 @@ export async function POST(request: NextRequest) {
 				facebook_url: facebook_url || null,
 				line_url: line_url || null,
 				description: description || null,
+				regular_holiday: regular_holiday || null,
 				updated_at: now,
 			})
 			.select()

@@ -63,7 +63,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | phone_number    | text       | NULLABLE                         | 電話番号（タップで発信）               |
 | opening_time   | time       | NULLABLE                          | 17:00                               |
 | ending_time   | time       | NULLABLE                           | 24:00                               |
-| regular_holiday | text       | NULLABLE                         | 定休日                                  |
+| regular_holiday | text       | NULLABLE                         | 不定休など曜日で表せない休業の補足テキスト。管理画面の営業時間ブロックで入力（POST/PUT で `bars.regular_holiday` に保存）。ユーザー画面の店舗詳細「基本情報」タブで曜日別営業時間と併記表示する |
 | access          | text       | NULLABLE                         | 交通手段・最寄駅など                    |
 | website_url     | text       | NULLABLE                         | 店舗公式サイト URL                      |
 | instagram_url   | text       | NULLABLE                         | Instagram URL                           |

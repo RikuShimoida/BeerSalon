@@ -63,6 +63,7 @@ export interface Bar {
 	facebook_url: string | null;
 	line_url: string | null;
 	description: string | null;
+	regular_holiday: string | null;
 	preview_image_url: string | null;
 	is_active: boolean;
 	created_at: string;

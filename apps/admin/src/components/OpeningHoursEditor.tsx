@@ -12,6 +12,8 @@ interface OpeningHoursEditorProps {
 	value: OpeningHourInput[];
 	onChange: (hours: OpeningHourInput[]) => void;
 	errors?: { [key: string]: string };
+	regularHoliday: string;
+	onRegularHolidayChange: (v: string) => void;
 }
 
 const DAY_NAMES = [
@@ -28,6 +30,8 @@ export default function OpeningHoursEditor({
 	value,
 	onChange,
 	errors = {},
+	regularHoliday,
+	onRegularHolidayChange,
 }: OpeningHoursEditorProps) {
 	const getDayHours = (day: number): OpeningHourInput[] => {
 		return value
@@ -197,6 +201,26 @@ export default function OpeningHoursEditor({
 					</div>
 				);
 			})}
+
+			<div>
+				<label
+					htmlFor="regular_holiday"
+					className="block text-sm font-medium text-gray-700"
+				>
+					定休日・休業に関する補足（任意）
+				</label>
+				<textarea
+					id="regular_holiday"
+					rows={2}
+					value={regularHoliday}
+					onChange={(e) => onRegularHolidayChange(e.target.value)}
+					placeholder="例）不定休 / 第2・第4月曜定休 / 年末年始休業 / 祝日は営業"
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+				/>
+				<p className="mt-1 text-xs text-gray-500">
+					毎週決まった曜日が定休日の場合は上の各曜日で「定休日」を選択してください。隔週・不定休・祝日など曜日で表せない休みはこちらに記入してください。
+				</p>
+			</div>
 		</div>
 	);
 }
