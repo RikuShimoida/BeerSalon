@@ -55,7 +55,7 @@ describe("replaceThemeBlock", () => {
 	});
 
 	it("current → amber-dark → current で元の内容に戻る", () => {
-		const currentBlock = ":root {\n  --surface-panel: #f0e68c;\n}";
+		const currentBlock = ":root {\n  --surface-panel: #e2d6bf;\n}";
 		const darkBlock = ":root {\n  --surface-panel: #2a1c0e;\n}";
 		const toDark = replaceThemeBlock(base, darkBlock);
 		const backToCurrent = replaceThemeBlock(toDark, currentBlock);
@@ -92,8 +92,8 @@ describe("テーマファイルと globals.css の整合", () => {
 		const applied = replaceThemeBlock(globalsCss, darkBlock);
 		expect(applied).toContain("--surface-panel: #2a1c0e;");
 		expect(applied).toContain("--surface-control: #3d2b17;");
-		// current 固有の白帯・白操作面は消えている
-		expect(applied).not.toContain("--surface-panel: #f0e68c;");
+		// current 固有の帯色・白操作面は消えている
+		expect(applied).not.toContain("--surface-panel: #e2d6bf;");
 		expect(applied).not.toContain("--surface-control: #ffffff;");
 	});
 
@@ -132,8 +132,8 @@ describe("トップページ限定ダークスコープ（#388 案A）", () => {
 		const startIdx = globalsCss.indexOf("/* THEME:START");
 		const endIdx = globalsCss.indexOf("/* THEME:END */");
 		const themeBlock = globalsCss.slice(startIdx, endIdx);
-		// current のライト基調（帯=クリーム / 操作面=白）が :root に維持されていること
-		expect(themeBlock).toContain("--surface-panel: #f0e68c;");
+		// current のライト基調（帯=ウォームサンド / 操作面=白）が :root に維持されていること
+		expect(themeBlock).toContain("--surface-panel: #e2d6bf;");
 		expect(themeBlock).toContain("--surface-control: #ffffff;");
 	});
 });

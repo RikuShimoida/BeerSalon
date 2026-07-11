@@ -154,7 +154,7 @@ pnpm --filter @beersalon/web theme amber-dark
 
 - テーマ本体は `apps/web/src/styles/themes/<name>.css`（各ファイルが `:root { ... }` を1つ持つ）。
 - `pnpm theme <name>` は `apps/web/src/app/globals.css` 内の `/* THEME:START */` 〜 `/* THEME:END */` で囲まれた `:root` ブロックを、指定テーマの内容へ差し替える。反映は `pnpm dev` の再ビルド / ブラウザリロードで行われる。
-- 切替が一貫して追従するのは、共通ヘッダー / フッターの帯・検索フォームのカード・入力欄・チップ・アイコン背景で使う `--surface-panel`（帯・カード）/ `--surface-control`（白い操作面）の2トークン。以前はこれらが `#f0e68c` / `#ffffff` / `bg-white` としてハードコードされ、テーマ切替から取り残されていた（#388 で「戻せない」と判明した直接原因）。
+- 切替が一貫して追従するのは、共通ヘッダー / フッターの帯・検索フォームのカード・入力欄・チップ・アイコン背景で使う `--surface-panel`（帯・カード）/ `--surface-control`（白い操作面）の2トークン。以前はこれらが `#f0e68c` / `#ffffff` / `bg-white` としてハードコードされ、テーマ切替から取り残されていた（#388 で「戻せない」と判明した直接原因）。現行 current の帯色は `--surface-panel: #e2d6bf`（ウォームサンド。#414 で、以前の明るい黄色 `#f0e68c` がメインコンテンツと合わず幼い印象だったのを落ち着いた色味へ変更）。
 - **新しいテーマを足すときは `themes/` に CSS を1つ追加するだけ**でよい（`current.css` を複製して値を変える）。手で `globals.css` の `:root` を直接編集した場合は、巻き戻し先である `themes/current.css` も同じ内容に揃えること（UT `apply-theme.test.ts` が両者の一致を検査する）。
 - **既知の制約**: `globals.css` の既存 HSL トークン（`--background` / `--primary` 等）は `hsl()` ラップされておらず、`bg-background` / `bg-primary` などは現状レンダリング上は無色（透明）で機能していない。そのため `theme amber-dark`（ビルド時切替）でも「帯・操作面（`--surface-*`）」以外の面はダーク化しない。全画面のダークテーマ化・実行時テーマトグル（next-themes 等）は別 Issue で扱う。
 
@@ -164,7 +164,7 @@ pnpm --filter @beersalon/web theme amber-dark
 
 - 実装は `globals.css` の `.top-amber-dark` スコープと、`page-client.tsx` の最上位ラッパへのクラス付与。トップの本文背景・検索カード・入力欄・チップ・店舗カード・各「人気で探す」セクションがこのスコープ配下でダーク化される。
 - **なぜ `:root` ごとダーク化しないか**: 上記の既知の制約どおり `bg-card` / `text-foreground` 等は透明で機能しておらず、`:root` を有効化すると web 全体（他ページ・共通ヘッダー/フッター）へダークが芋づる波及する。#388 のスコープはトップページの見た目に限定のため、`.top-amber-dark` 配下だけに閉じ込めている。
-- **スコープ外**: 共通ヘッダー / フッターの帯（`--surface-panel` = クリーム）と、トップ以外の14ページはライト基調のまま。全画面ダーク化は別 Issue。
+- **スコープ外**: 共通ヘッダー / フッターの帯（`--surface-panel` = ウォームサンド `#e2d6bf`）と、トップ以外の14ページはライト基調のまま。全画面ダーク化は別 Issue。
 - スコープが `THEME:START`〜`THEME:END` の外にあること・`:root` が current のライト値のままであることは UT `apply-theme.test.ts` が検査する。
 
 ---
