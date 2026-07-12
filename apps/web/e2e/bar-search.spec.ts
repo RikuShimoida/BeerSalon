@@ -16,17 +16,39 @@ test.describe("トップページ（検索ページ）", () => {
 		await expect(barListHeading).toBeVisible();
 	});
 
-	test("?city= の直リンクアクセスで該当市町村の店舗のみ表示される", async ({
+	test("?city= の直リンクアクセスで該当市町村の店舗のみ表示され、セレクトにも反映される", async ({
 		page,
 	}) => {
 		// seed.e2e.sql: 100001=静岡市 / 100002=渋谷区
 		await page.goto("/?city=静岡市");
 
-		// Why not: #city セレクトの value 復元は検証しない。SHIZUOKA_CITIES は区まで含む
-		// 粒度（例: "静岡市（葵区）"）で、seed の city="静岡市"（区なし）に一致する option が
-		// 存在せず value が反映されないため。URL→ステート→一覧反映という本質は一覧の絞り込みで担保する。
+		// Issue #419: 以前は SHIZUOKA_CITIES が区付き（例: "静岡市（葵区）"）で、
+		// seed の city="静岡市"（区なし）に一致する option が無く value が復元できなかった。
+		// マスタを区なしへ統一したので、セレクトへの value 反映も検証する。
+		await expect(page.locator("#city")).toHaveValue("静岡市");
 		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
 		await expect(page.getByText("E2Eテストバー東京")).toHaveCount(0);
+	});
+
+	test("市町村セレクトで静岡市を選ぶと該当店舗のみ表示される（Issue #419）", async ({
+		page,
+	}) => {
+		await page.goto("/");
+
+		// Issue #419 の核心: 政令市を区なしで選べること。選択が bars.city="静岡市" に一致する。
+		await page.selectOption("#city", "静岡市");
+
+		// 一覧の絞り込み反映を待ってから URL を検証する（onSearch → router.push は非同期のため）
+		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
+		await expect(page.getByText("E2Eテストバー東京")).toHaveCount(0);
+		await expect(page).toHaveURL(
+			/city=%E9%9D%99%E5%B2%A1%E5%B8%82|city=静岡市/,
+		);
+
+		// フィルターの選択肢に区付き表記が残っていないこと（逆戻り防止）
+		await expect(
+			page.locator("#city option", { hasText: "静岡市（" }),
+		).toHaveCount(0);
 	});
 
 	test("フリーワード検索で一覧が更新され URL に ?q= が反映される", async ({
