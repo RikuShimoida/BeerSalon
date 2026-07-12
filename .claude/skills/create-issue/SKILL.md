@@ -34,6 +34,7 @@ when_to_use: 「Issue作成」「create-issue」などの発言時、課題No �
 2. Evernote MCP の `get_note`（引数 `noteId=<GUID>`）でノートのタイトル・本文（ENML）を取得する
 3. 取得に失敗した場合（GUID 不正・アクセス不可など）はエラーメッセージを表示して終了する
 4. この経路では `issue_note.txt` は参照しない（入力ソースはノート本文）
+5. ここで取り出したノート GUID は、Issue 作成後のタグ付け替え（Phase 4-1）の対象として保持しておく
 
 > **`WebFetch` は使わない**: Evernote 共有リンクは `accounts.evernote.com` の認証リダイレクトに飛ぶため、`WebFetch` では本文を取得できない。ノート本文の取得は必ず Evernote MCP の `get_note` を使う。
 
@@ -82,6 +83,8 @@ Issue 本文の各項目を埋めるための材料として、設計ドキュ�
 
 ### Phase 4: Issue作成（ユーザー承認必須）
 
+#### Phase 4-0: Issue の作成
+
 1. 作成するIssue本文をユーザーに提示する
 2. **ユーザーが「OK」と回答するまで Issue を作成してはならない**
 3. OK後、`gh issue create` コマンドでIssueを作成する
@@ -94,6 +97,27 @@ EOF
 ```
 
 4. 作成されたIssue URLを報告する
+
+#### Phase 4-1: 元ノートのタグ付け替え（Evernote 経路のみ・自動実行）
+
+**このステップは Evernote 経路（Phase 1-B を通った場合）のみ実行する。課題No経路（Phase 1-A）では実行しない。**
+
+`gh issue create` が成功したら（Issue URL が返ってきたら）、ユーザー確認なしで、Phase 1-B で保持したノート GUID の元ノートに対してタグを付け替える。
+
+1. `search_tags` で `未解決` と `解決済み` のタグ GUID を解決する
+   - `update_note_tags` はタグ名ではなく **タグ GUID** で `tagIdsToAdd` / `tagIdsToRemove` を受け取るため、名前→GUID の解決が必要。
+   - `解決済み` タグは既存のものを使う（新規作成はしない）。
+2. `update_note_tags` を実行する
+   - `noteIds`: 元ノート GUID（Phase 1-B で保持したもの）
+   - `tagIdsToAdd`: `解決済み` の GUID
+   - `tagIdsToRemove`: `未解決` の GUID
+   - `update_note_tags` は冪等（付与済み・未付与のタグは silently skip される）ため、元ノートに `未解決` が付いていない場合は除去は何も起きず、`解決済み` の付与のみが行われる。
+
+**実行順序と失敗時の振る舞い（厳守）**:
+
+- タグ付け替えは **Issue 作成成功後にのみ** 行う。`gh issue create` が失敗した場合はタグを一切触らない（Issue 化されていない下書きが「解決済み」になる事故を防ぐ）。
+- タグ付け替え自体が失敗した場合は、**Issue 作成の成功は打ち消さず**、「Issue は作成済み・タグ付け替えに失敗」と明示して報告する。
+- 完了報告に「元ノートのタグを『未解決』→『解決済み』に更新しました」の旨を1行含める（Evernote 経路時のみ）。
 
 ### Phase 5: セッション名の提示（Issue作成成功後）
 
@@ -114,3 +138,6 @@ Issue作成に成功したら、報告の最後に **`/rename` コマンドを�
 - 課題情報を推測で補完すること（不明点は「未確定事項」に記載する）。Evernote 経路で本文から「対応種別」が判別できない場合も推測で決めず、ユーザーに確認すること
 - Evernote 共有リンクの本文取得を `WebFetch` で試みること（認証リダイレクトで取得できない。必ず Evernote MCP の `get_note` を使う）
 - 設計ドキュメント（routing.md / wireframe.md / database.md / README.md）を更新・同期すること（本スキルは参照のみ。同期は sync-docs の役割）
+- 課題No経路（Phase 1-A）で元ノートのタグを付け替えること（タグ付け替えは Evernote 経路の Phase 4-1 のみ）
+- Issue 作成が失敗しているのに元ノートのタグを付け替えること（タグ付け替えは `gh issue create` 成功後のみ）
+- `解決済み` タグを新規作成すること（既存タグを使う。存在しなければ付け替えをスキップして報告する）
