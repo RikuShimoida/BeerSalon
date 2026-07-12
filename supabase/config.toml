@@ -213,14 +213,15 @@ otp_expiry = 3600
 
 # Use a production-ready SMTP server
 # ローカルは Mailpit で送信を捕捉するため有効化しない（dev/prod は各ダッシュボードで設定する。README「認証メールの配信設定」参照）。
-# 独自SMTP は Resend を採用。送信元は noreply@beersalon.com（独自ドメイン・SPF/DKIM 登録済み）。
+# 独自SMTP は Resend を採用予定。送信元ドメインは未定（当初想定の beersalon.com は第三者保有で使えない。
+# 取得可能な独自ドメインを確定してから <取得したドメイン> を差し替える）。
 # [auth.email.smtp]
 # enabled = true
 # host = "smtp.resend.com"
 # port = 587
 # user = "resend"
 # pass = "env(RESEND_API_KEY)"
-# admin_email = "noreply@beersalon.com"
+# admin_email = "noreply@<取得したドメイン>"
 # sender_name = "Beer Salon"
 
 # Uncomment to customize email template
