@@ -35,20 +35,22 @@ test.describe("トップページ（検索ページ）", () => {
 	}) => {
 		await page.goto("/");
 
-		// Issue #419 の核心: 政令市を区なしで選べること。選択が bars.city="静岡市" に一致する。
-		await page.selectOption("#city", "静岡市");
-
-		// 一覧の絞り込み反映を待ってから URL を検証する（onSearch → router.push は非同期のため）
-		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
-		await expect(page.getByText("E2Eテストバー東京")).toHaveCount(0);
-		await expect(page).toHaveURL(
-			/city=%E9%9D%99%E5%B2%A1%E5%B8%82|city=静岡市/,
-		);
-
-		// フィルターの選択肢に区付き表記が残っていないこと（逆戻り防止）
+		// フィルターの選択肢に区付き表記が残っていないこと（逆戻り防止）。
+		// DB アクセス不要な確定的検証なので、絞り込み操作の前に済ませる。
 		await expect(
 			page.locator("#city option", { hasText: "静岡市（" }),
 		).toHaveCount(0);
+
+		// Issue #419 の核心: 政令市を区なしで選べること。選択が bars.city="静岡市" に一致する。
+		await page.selectOption("#city", "静岡市");
+
+		// URL 反映（= 絞り込みリクエスト発火）を先に待ってから一覧を検証する。
+		// onSearch → router.push は非同期で、待たずに一覧を見ると絞り込み前の状態を拾いうる。
+		await expect(page).toHaveURL(
+			/city=%E9%9D%99%E5%B2%A1%E5%B8%82|city=静岡市/,
+		);
+		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
+		await expect(page.getByText("E2Eテストバー東京")).toHaveCount(0);
 	});
 
 	test("フリーワード検索で一覧が更新され URL に ?q= が反映される", async ({
