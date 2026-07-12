@@ -6,7 +6,7 @@ function makePin(overrides: Partial<BarPin>): BarPin {
 	return {
 		id: "1",
 		name: "テストバー",
-		city: "静岡市（葵区）",
+		city: "静岡市",
 		prefecture: "静岡県",
 		lat: 34.9756,
 		lng: 138.3833,

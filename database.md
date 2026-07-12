@@ -55,7 +55,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | id              | bigserial  | PK                               | 店舗ID                                  |
 | name            | text       | NOT NULL                         | 店舗名                                  |
 | prefecture      | text       | NOT NULL                         | 都道府県                                |
-| city            | text       | NOT NULL                         | 市区町村                                |
+| city            | text       | NOT NULL                         | 市区町村。ユーザー画面の市町村フィルターと完全一致（`where.city = city`）で突き合わせるため、管理画面の登録・検索フィルターの選択肢と同一マスタ（`@beersalon/shared` の `SHIZUOKA_MUNICIPALITIES`）に揃える。政令市は区なし粒度（例:「静岡市」）で保存する（区付き「静岡市（葵区）」等は使わない。Issue #419）|
 | address_line1   | text       | NOT NULL                         | 住所1                                   |
 | address_line2   | text       | NULLABLE                         | 建物名・部屋番号など                    |
 | latitude        | numeric(10,7) | NULLABLE                      | 緯度（Google Maps 表示用）             |
