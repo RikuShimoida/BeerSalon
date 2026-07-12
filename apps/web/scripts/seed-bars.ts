@@ -1,3 +1,4 @@
+import { SHIZUOKA_MUNICIPALITIES } from "@beersalon/shared";
 import { prisma } from "../src/lib/prisma";
 
 type BeerCategoryName =
@@ -15,33 +16,10 @@ const beerCategoryNames: BeerCategoryName[] = [
 	"ペールエール",
 ];
 
-const cities = [
-	"静岡市（葵区）",
-	"熱海市",
-	"伊東市",
-	"下田市",
-	"伊豆市",
-	"沼津市",
-	"三島市",
-	"裾野市",
-	"御殿場市",
-	"富士市",
-	"富士宮市",
-	"静岡市（清水区）",
-	"静岡市（駿河区）",
-	"焼津市",
-	"藤枝市",
-	"島田市",
-	"牧之原市",
-	"掛川市",
-	"菊川市",
-	"御前崎市",
-	"袋井市",
-	"磐田市",
-	"浜松市（中央区）",
-	"浜松市（浜名区）",
-	"湖西市",
-];
+// Why not: seed 独自の市町村リストを持たない。区付き（「静岡市（葵区）」等）で
+// bars.city を生成すると、区なしの市町村フィルターと一致せず Issue #419 を再生産する。
+// 検索・登録と同一マスタ（@beersalon/shared）を使い、区なし粒度で揃える。
+const cities = [...SHIZUOKA_MUNICIPALITIES];
 
 const regionsByCountry = {
 	日本: ["静岡", "東京", "神奈川", "北海道", "大阪", "京都", "愛知"],
@@ -197,7 +175,7 @@ async function main() {
 		const barName =
 			i === 0
 				? "クラフトビアバー 静岡"
-				: `${barNames[barNameIndex]} ${city.replace("市", "").replace("（", "").replace("）", "")} ${i + 1}号店`;
+				: `${barNames[barNameIndex]} ${city.replace("市", "")} ${i + 1}号店`;
 
 		const breweryName =
 			i === 0
@@ -259,7 +237,7 @@ async function main() {
 		const access =
 			i === 0
 				? "JR静岡駅北口から徒歩5分"
-				: `JR${city.replace("市", "").replace("（", "").replace("）", "")}駅から徒歩${(i % 15) + 1}分`;
+				: `JR${city.replace("市", "")}駅から徒歩${(i % 15) + 1}分`;
 
 		const websiteUrl =
 			i === 0
