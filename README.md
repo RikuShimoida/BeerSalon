@@ -258,20 +258,22 @@ pnpm --filter @beersalon/web theme amber-dark
    - 許可外オリジンへのリダイレクトはブロックされ、メール内リンクが無効化される。
 3. **Supabase ダッシュボード → Project Settings → Authentication → SMTP（独自SMTP = Resend。dev/prod 両プロジェクトに設定する）**
    - 無料枠のデフォルト SMTP（`noreply@mail.app.supabase.io`）は送信レート（config.toml では 1時間2通）・到達率が低く「たまに届かない」状態になる。これを回避するため独自SMTP（**Resend**）に切り替える。
-   - 送信元は **`noreply@beersalon.com`**（独自ドメイン。SPF/DKIM を DNS に登録する）。
-   - **手順（dev / prod の各プロジェクトで同じ設定を行う。取り違えないこと）**:
-     1. Resend でアカウントを作成し、**Domains** に `beersalon.com` を追加する。表示される SPF（`TXT`）・DKIM（`TXT`）・（任意で）DMARC レコードを、`beersalon.com` の DNS に登録して Verified 状態にする。
+   - **前提（未確定・ブロッカー）**: 独自SMTP には**自分が DNS を編集できる独自ドメイン**が必要（SPF/DKIM を登録して到達率を担保するため）。当初想定した `beersalon.com` は**第三者（ドメイン転売業者 Domain Asset Holdings, LLC）が保有しており取得・DNS 編集ができない**ため使えない。**送信元ドメインは未定**であり、まず以下のいずれかを決める必要がある:
+     - 取得可能な別ドメインを取る（例: `beersalon.jp` / `beer-salon.app` / `craftbeersalon.com` 等。空き状況を確認して年額数千円で取得）→ 送信元を `noreply@<取得したドメイン>` にする（**本命**）
+     - ドメイン取得までの暫定として Resend の共有ドメイン（`onboarding@resend.dev`）で送る（DNS 不要ですぐ動くが到達率は独自ドメインに劣る。動作確認・暫定運用向け）
+   - **手順（ドメイン確定後。dev / prod の各プロジェクトで同じ設定を行う。取り違えないこと）**:
+     1. Resend でアカウントを作成し、**Domains** に**取得した独自ドメイン**を追加する。表示される SPF（`TXT`）・DKIM（`TXT`）・Return-Path 用 `CNAME`・（任意で）DMARC など、**画面に出るレコードをすべて**そのドメインの DNS に登録して Verified 状態にする。
      2. Resend の **API Keys** で送信用 API キーを発行する（`RESEND_API_KEY`）。
      3. Supabase ダッシュボード → **Project Settings → Authentication → SMTP Settings** で「Enable Custom SMTP」を ON にし、以下を設定する:
         - Host: `smtp.resend.com`
         - Port: `587`
         - Username: `resend`
         - Password: 発行した `RESEND_API_KEY`
-        - Sender email: `noreply@beersalon.com`
+        - Sender email: `noreply@<取得したドメイン>`
         - Sender name: `Beer Salon`
      4. あわせて **Authentication → Rate Limits** の "Emails sent per hour" を、デフォルトSMTP前提の低い値から実運用に耐える値へ引き上げる（config.toml のローカル値 `[auth.rate_limit] email_sent = 2` は Mailpit ローカル用であり、リモートには反映されない）。
    - **これは `apps/web` の全認証メール（`/signup` の確認メール・`/password/forgot`/`/password/reset` の再設定メール）に共通で効く**（すべて同一の Supabase Auth SMTP を経由するため、SMTP を切り替えれば両方が同時に改善する）。
-   - **検証**: preview（dev プロジェクト）で新規登録し、メールが届くことを確認する。加えて Supabase ダッシュボード → **Logs → Auth Logs** で送信ログの `mail_from` が `noreply@beersalon.com`（= デフォルトの `noreply@mail.app.supabase.io` ではない）になっていることを確認する。
+   - **検証**: preview（dev プロジェクト）で新規登録し、メールが届くことを確認する。加えて Supabase ダッシュボード → **Logs → Auth Logs** で送信ログの `mail_from` が**設定した独自ドメインの送信元**（= デフォルトの `noreply@mail.app.supabase.io` ではない）になっていることを確認する。
    - **注意**: `supabase/config.toml` の `[auth.email.smtp]` はコメントアウトのままでよい（ローカルは Mailpit を使うため。config.toml は `supabase db push` の対象外で、この SMTP 設定はダッシュボードでの手動設定でのみ有効になる）。
 4. **Vercel → 環境変数 `NEXT_PUBLIC_SITE_URL`**
    - production では必ず設定する（Host Header Injection 対策。`apps/web/src/lib/site-url.ts` の `getSiteUrl()` が最優先で参照する）。
