@@ -72,9 +72,11 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | line_url        | text       | NULLABLE                         | LINE URL                                |
 | description     | text       | NULLABLE                         | PR文                                    |
 | preview_image_url | text     | NULLABLE                         | 一覧表示用プレビュー画像URL             |
-| is_active       | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ                            |
+| is_active       | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ（後述の3用途を兼ねる）     |
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                                |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                                |
+
+**`is_active=false` の用途**: 「非掲載」「セルフサーブ登録直後の審査中（`admin_users.approval_status='pending'` と対）」に加え、**admin による店舗の論理削除**にも使う。管理画面の店舗詳細ページ（`/bars/[barId]`）の「店舗を削除」ボタン（admin のみ）から `DELETE /api/bars/[barId]` で `is_active=false` に更新する。物理削除はせず、削除した店舗もログとして残す。削除された店舗は管理画面の一覧（`GET /api/bars` は `is_active=true` で絞り込み）・ユーザー画面の検索（`getBars()` は `isActive:true` で絞り込み）から非表示になる。削除は admin 限定で、bar_owner が API を直接叩いても 403。
 
 ---
 

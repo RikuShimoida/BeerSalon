@@ -376,14 +376,16 @@ export async function DELETE(
 			);
 		}
 
-		const { barId } = await params;
-
-		if (!canAccessBar(user, barId)) {
+		// 店舗本体の削除はシステム管理者のみ。誤って運用中店舗を消すと
+		// オーナーに影響が及ぶため、自店舗を持つ bar_owner にも許可しない
+		if (user.role !== "admin") {
 			return NextResponse.json(
 				{ error: "アクセス権限がありません" },
 				{ status: 403 },
 			);
 		}
+
+		const { barId } = await params;
 
 		const { error } = await supabaseAdmin
 			.from("bars")

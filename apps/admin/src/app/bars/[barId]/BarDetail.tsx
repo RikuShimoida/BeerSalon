@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Bar, BarImage, BarOpeningHour } from "@/types/database";
 
@@ -49,6 +50,67 @@ function PaymentManagementCard({ barId }: { barId: string }) {
 				</p>
 			</button>
 			{error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+		</div>
+	);
+}
+
+function DeleteBarModal({
+	barName,
+	onCancel,
+	onConfirm,
+	deleting,
+	error,
+}: {
+	barName: string;
+	onCancel: () => void;
+	onConfirm: () => void;
+	deleting: boolean;
+	error: string;
+}) {
+	const [confirmName, setConfirmName] = useState("");
+	const nameMatches = confirmName === barName;
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+			<div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+				<h2 className="text-lg font-bold text-gray-900">店舗を削除</h2>
+				<p className="mt-2 text-sm text-gray-600">
+					この操作は店舗をユーザー画面・管理画面から非表示にします。運用中の店舗の場合、オーナーに影響します。
+				</p>
+				<label
+					htmlFor="delete-bar-confirm"
+					className="mt-4 block text-sm text-gray-700"
+				>
+					削除するには店舗名「{barName}」を入力してください
+				</label>
+				<input
+					id="delete-bar-confirm"
+					type="text"
+					value={confirmName}
+					onChange={(e) => setConfirmName(e.target.value)}
+					disabled={deleting}
+					className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none disabled:opacity-50"
+				/>
+				{error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+				<div className="mt-6 flex justify-end gap-3">
+					<button
+						type="button"
+						onClick={onCancel}
+						disabled={deleting}
+						className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+					>
+						キャンセル
+					</button>
+					<button
+						type="button"
+						onClick={onConfirm}
+						disabled={!nameMatches || deleting}
+						className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-50 disabled:hover:bg-red-600"
+					>
+						{deleting ? "削除中..." : "削除する"}
+					</button>
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -103,11 +165,38 @@ function formatOpeningHours(hours: BarOpeningHour[]): string[] {
 }
 
 export default function BarDetail({ barId, userRole }: BarDetailProps) {
+	const router = useRouter();
 	const [bar, setBar] = useState<Bar | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
 	const [currentSlide, setCurrentSlide] = useState(0);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [deleting, setDeleting] = useState(false);
+	const [deleteError, setDeleteError] = useState("");
 	const scrollRef = useRef<HTMLDivElement>(null);
+
+	const handleDelete = useCallback(async () => {
+		setDeleting(true);
+		setDeleteError("");
+
+		try {
+			const response = await fetch(`/api/bars/${barId}`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				const data = await response.json().catch(() => ({}));
+				setDeleteError(data.error || "店舗の削除に失敗しました");
+				return;
+			}
+
+			router.push("/bars");
+		} catch (_error) {
+			setDeleteError("店舗の削除に失敗しました");
+		} finally {
+			setDeleting(false);
+		}
+	}, [barId, router]);
 
 	const handleScroll = useCallback(() => {
 		if (!scrollRef.current) return;
@@ -221,13 +310,37 @@ export default function BarDetail({ barId, userRole }: BarDetailProps) {
 			{/* Header */}
 			<div className="flex items-center justify-between mb-6">
 				<h1 className="text-2xl font-bold text-gray-900">{bar.name}</h1>
-				<Link
-					href={`/bars/${barId}/edit`}
-					className="px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800"
-				>
-					編集
-				</Link>
+				<div className="flex items-center gap-2">
+					<Link
+						href={`/bars/${barId}/edit`}
+						className="px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800"
+					>
+						編集
+					</Link>
+					{userRole === "admin" && (
+						<button
+							type="button"
+							onClick={() => {
+								setDeleteError("");
+								setShowDeleteModal(true);
+							}}
+							className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
+						>
+							店舗を削除
+						</button>
+					)}
+				</div>
 			</div>
+
+			{showDeleteModal && (
+				<DeleteBarModal
+					barName={bar.name}
+					deleting={deleting}
+					error={deleteError}
+					onCancel={() => setShowDeleteModal(false)}
+					onConfirm={handleDelete}
+				/>
+			)}
 
 			{/* Store info card */}
 			<section className="border border-gray-200 rounded-lg p-6 mb-8 space-y-4">
