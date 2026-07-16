@@ -39,6 +39,7 @@ export default function BeerMenuForm({
 		return [{ id: 0, sizeName: "", price: "" }];
 	});
 
+	const [abv, setAbv] = useState(menu?.beer?.abv?.toString() ?? "");
 	const [description, setDescription] = useState(menu?.description ?? "");
 	// 保存対象の画像URL。既存値を初期表示し、差し替え時はアップロード後のURLで上書き、
 	// 削除時は null にする。
@@ -127,6 +128,7 @@ export default function BeerMenuForm({
 					description: description.trim() || null,
 					image_url: nextImageUrl,
 					is_active: isActive,
+					abv: abv.trim() ? Number(abv) : null,
 					sizes: validSizes.map((s, i) => ({
 						size_name: s.sizeName.trim(),
 						price: s.price ? Number(s.price) : null,
@@ -187,6 +189,26 @@ export default function BeerMenuForm({
 					</dl>
 				</div>
 			)}
+
+			<div>
+				<label
+					htmlFor="beer-abv"
+					className="block text-sm font-medium text-gray-700"
+				>
+					アルコール度数（%）
+				</label>
+				<input
+					type="number"
+					id="beer-abv"
+					value={abv}
+					onChange={(e) => setAbv(e.target.value)}
+					placeholder="5.5"
+					min="0"
+					max="99.99"
+					step="0.01"
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+				/>
+			</div>
 
 			<fieldset>
 				<legend className="block text-sm font-medium text-gray-700 mb-2">

@@ -245,7 +245,7 @@ UNIQUE制約: `country_id + name`
 | beer_category_id | bigint     | NOT NULL, FK → beer_categories(id) | カテゴリ                     |
 | brewery_id       | bigint     | NULLABLE, FK → breweries(id)       | 醸造所                       |
 | region_id        | bigint     | NULLABLE, FK → regions(id)         | 地域ID（産地）              |
-| abv              | numeric(4,2)| NULLABLE                          | アルコール度数              |
+| abv              | numeric(4,2)| NULLABLE                          | アルコール度数（ABV, %）。管理画面のビールメニュー登録（`POST /api/bars/[barId]/menus/beers`）で `beers` INSERT 時に保存し、編集（`PUT /api/bars/[barId]/menus/beers/[menuId]`）で `bar_beer_menus` 更新後に関連 `beers` を UPDATE して同期する。任意入力（未入力は null）、範囲 0〜99.99 のバリデーションあり（範囲外・非数値は 400）。ユーザー画面・管理画面のメニュー詳細で表示 |
 | ibu              | integer    | NULLABLE                           | IBU                         |
 | description      | text       | NULLABLE                           | 説明文                      |
 | image_url        | text       | NULLABLE                           | サムネイル画像              |

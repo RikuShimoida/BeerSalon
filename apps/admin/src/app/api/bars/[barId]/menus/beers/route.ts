@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
+import { normalizeAbv } from "@/lib/beer-abv";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function GET(
@@ -77,6 +78,7 @@ export async function POST(
 			beer_category_id,
 			region_id,
 			brewery_name,
+			abv,
 			sizes,
 			description,
 			image_url,
@@ -94,6 +96,11 @@ export async function POST(
 				{ error: "ビールカテゴリを選択してください" },
 				{ status: 400 },
 			);
+		}
+
+		const abvResult = normalizeAbv(abv);
+		if (!abvResult.ok) {
+			return NextResponse.json({ error: abvResult.error }, { status: 400 });
 		}
 
 		let breweryId: number | null = null;
@@ -133,6 +140,7 @@ export async function POST(
 				beer_category_id,
 				brewery_id: breweryId,
 				region_id: region_id || null,
+				abv: abvResult.value,
 				description,
 				image_url,
 			})
