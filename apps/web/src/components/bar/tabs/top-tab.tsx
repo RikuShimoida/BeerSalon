@@ -211,13 +211,10 @@ export function TopTab({ bar }: TopTabProps) {
 							href={bar.instagramUrl}
 							target="_blank"
 							rel="nofollow noopener"
-							className="inline-flex items-center gap-2 text-gray-700 hover:text-pink-600 transition-colors"
+							className="inline-flex items-center text-gray-700 hover:text-pink-600 transition-colors"
 							aria-label="Instagramで見る"
 						>
 							<Instagram className="w-6 h-6" />
-							<span className="text-sm">
-								@{bar.instagramUrl.split("/").filter(Boolean).pop()}
-							</span>
 						</a>
 					</div>
 				)}
@@ -231,13 +228,10 @@ export function TopTab({ bar }: TopTabProps) {
 							href={bar.xUrl}
 							target="_blank"
 							rel="nofollow noopener"
-							className="inline-flex items-center gap-2 text-gray-700 hover:text-black transition-colors"
+							className="inline-flex items-center text-gray-700 hover:text-black transition-colors"
 							aria-label="Xで見る"
 						>
 							<XIcon className="w-6 h-6" />
-							<span className="text-sm">
-								@{bar.xUrl.split("/").filter(Boolean).pop()}
-							</span>
 						</a>
 					</div>
 				)}
@@ -251,13 +245,10 @@ export function TopTab({ bar }: TopTabProps) {
 							href={bar.facebookUrl}
 							target="_blank"
 							rel="nofollow noopener"
-							className="inline-flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors"
+							className="inline-flex items-center text-gray-700 hover:text-blue-600 transition-colors"
 							aria-label="Facebookで見る"
 						>
 							<FacebookIcon className="w-6 h-6" />
-							<span className="text-sm">
-								@{bar.facebookUrl.split("/").filter(Boolean).pop()}
-							</span>
 						</a>
 					</div>
 				)}
@@ -269,13 +260,10 @@ export function TopTab({ bar }: TopTabProps) {
 							href={bar.lineUrl}
 							target="_blank"
 							rel="nofollow noopener"
-							className="inline-flex items-center gap-2 text-gray-700 hover:text-[#06C755] transition-colors"
+							className="inline-flex items-center text-gray-700 hover:text-[#06C755] transition-colors"
 							aria-label="LINEで見る"
 						>
 							<LineIcon className="w-6 h-6" />
-							<span className="text-sm">
-								@{bar.lineUrl.split("/").filter(Boolean).pop()}
-							</span>
 						</a>
 					</div>
 				)}
