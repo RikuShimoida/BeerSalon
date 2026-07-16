@@ -153,6 +153,15 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | created_at  | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
 
+**初期マスタデータ**:
+1. IPA
+2. ピルスナー
+3. スタウト
+4. ヴァイツェン
+5. ペールエール
+
+マイグレーション（`20260715000000_seed_beer_categories.sql`）で `ON CONFLICT (name) DO NOTHING` により冪等投入する（Issue #428）。従来 `beer_categories` はローカル専用の `seed.e2e.sql` にしか投入経路が無く、`migrate.yml`（`supabase db push` ＝マイグレーションのみ適用）では preview / production の remote DB に届かず、管理画面のメニュー登録でビールカテゴリのプルダウンが空になっていた。`payment_methods` と同じくマイグレーション内 INSERT に一本化して全環境へ届かせる。投入するカテゴリはユーザー画面の検索フォーム（`apps/web` の `BEER_CATEGORIES`）と語彙を揃える（検索側と登録側の語彙がズレるとヒットしないため）。
+
 ---
 
 ### 2-4. countries
