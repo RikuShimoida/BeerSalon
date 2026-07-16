@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
+import { normalizeAbv } from "@/lib/beer-abv";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function GET(
@@ -76,7 +77,12 @@ export async function PUT(
 		}
 
 		const body = await request.json();
-		const { description, image_url, is_active, sizes } = body;
+		const { description, image_url, is_active, abv, sizes } = body;
+
+		const abvResult = normalizeAbv(abv);
+		if (!abvResult.ok) {
+			return NextResponse.json({ error: abvResult.error }, { status: 400 });
+		}
 
 		const { data: menu, error } = await supabaseAdmin
 			.from("bar_beer_menus")
@@ -96,6 +102,25 @@ export async function PUT(
 				{ error: "Failed to update beer menu" },
 				{ status: 500 },
 			);
+		}
+
+		// abv は beers（ビールマスタ）側のカラム。bar_beer_menus 更新後、
+		// 紐づく beers レコードのアルコール度数を同期更新する。
+		if (abv !== undefined && menu.beer_id) {
+			const { error: beerError } = await supabaseAdmin
+				.from("beers")
+				.update({
+					abv: abvResult.value,
+					updated_at: new Date().toISOString(),
+				})
+				.eq("id", menu.beer_id);
+
+			if (beerError) {
+				return NextResponse.json(
+					{ error: "アルコール度数の更新に失敗しました" },
+					{ status: 500 },
+				);
+			}
 		}
 
 		if (sizes && Array.isArray(sizes)) {

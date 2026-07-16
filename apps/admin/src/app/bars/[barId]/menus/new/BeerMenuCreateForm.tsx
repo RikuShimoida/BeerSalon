@@ -35,6 +35,7 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 	const [countryId, setCountryId] = useState("");
 	const [regionId, setRegionId] = useState("");
 	const [breweryName, setBreweryName] = useState("");
+	const [abv, setAbv] = useState("");
 	const sizeIdCounter = useRef(1);
 	const [sizes, setSizes] = useState<SizeRow[]>([
 		{ id: 0, sizeName: "", price: "" },
@@ -138,6 +139,7 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 		setCountryId("");
 		setRegionId("");
 		setBreweryName("");
+		setAbv("");
 		sizeIdCounter.current = 1;
 		setSizes([{ id: 0, sizeName: "", price: "" }]);
 		setDescription("");
@@ -195,6 +197,7 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 					country_id: countryId ? Number(countryId) : null,
 					region_id: regionId ? Number(regionId) : null,
 					brewery_name: breweryName.trim() || null,
+					abv: abv.trim() ? Number(abv) : null,
 					sizes: validSizes.map((s, i) => ({
 						size_name: s.sizeName.trim(),
 						price: s.price ? Number(s.price) : null,
@@ -335,6 +338,26 @@ export default function BeerMenuCreateForm({ barId }: BeerMenuCreateFormProps) {
 					value={breweryName}
 					onChange={(e) => setBreweryName(e.target.value)}
 					placeholder="ベアードブルーイング"
+					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-sm"
+				/>
+			</div>
+
+			<div>
+				<label
+					htmlFor="beer-abv"
+					className="block text-sm font-medium text-gray-700"
+				>
+					アルコール度数（%）
+				</label>
+				<input
+					type="number"
+					id="beer-abv"
+					value={abv}
+					onChange={(e) => setAbv(e.target.value)}
+					placeholder="5.5"
+					min="0"
+					max="99.99"
+					step="0.01"
 					className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-sm"
 				/>
 			</div>
