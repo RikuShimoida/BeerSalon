@@ -181,6 +181,10 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
 
+**初期マスタデータ**: アメリカ / ベルギー / ドイツ / イギリス / チェコ / アイルランド / 日本 / オーストラリア / ニュージーランド / オランダ の10件。
+
+マイグレーション（`20260716000000_seed_countries_regions.sql`）で `ON CONFLICT (name) DO NOTHING` により冪等投入する（Issue #432）。従来 `countries` / `regions` はローカル専用の `seed.sql` にしか投入経路が無く、`migrate.yml`（`supabase db push` ＝マイグレーションのみ適用）では preview / production の remote DB に届かず、管理画面のビールメニュー登録で国・産地のプルダウンが空になっていた（産地はユーザー画面の検索フィルタ `getBeerRegions` とも連動するため検索側にも波及する）。`beer_categories`（#428）と同型の欠陥のため、同じくマイグレーション内 INSERT に一本化して全環境へ届かせる。投入内容は `seed.sql` の現行値を踏襲する（ローカル seed 側の INSERT も自己完結性のため残す）。
+
 ---
 
 ### 2-5. regions
@@ -202,6 +206,8 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
 
 UNIQUE制約: `country_id + name`
+
+**初期マスタデータ**: 各国の代表的ビール産地（例: 日本＝静岡 / 長野 / 北海道 / 東京 / 大阪 / 横浜、アメリカ＝カリフォルニア / オレゴン / コロラド / ワシントン ほか）。`countries` と同じマイグレーション（`20260716000000_seed_countries_regions.sql`）で投入する。`country_id` はハードコードせず `CROSS JOIN countries c WHERE c.name = '<国名>'` のサブクエリで動的解決し、`ON CONFLICT (country_id, name) DO NOTHING` で冪等投入する（Issue #432。詳細は `countries` を参照）。
 
 ---
 
