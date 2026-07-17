@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&amp;family=Zen+Old+Mincho:wght@400;600;700;900&amp;family=Shippori+Mincho:wght@500;600;700&amp;family=Archivo:wght@500;600;700;800&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #d9d2c6; font-family: "Zen Kaku Gothic New", sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { opacity: 0.85; }
+  .canvas-scroll::-webkit-scrollbar { width: 7px; height: 7px; }
+  .canvas-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,.18); border-radius: 10px; }
+  @keyframes floaty { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-5px);} }
+</style>
+</helmet>
+
+<div style="min-height:100vh; padding:64px 56px 120px; background:radial-gradient(circle at 20% 0%, #e4ddd0 0%, #d2cabb 60%, #c8bfae 100%);">
+
+  <!-- ============ TURN 12 : HISTORY ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">閲覧履歴</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        最近見た店舗を日付でグルーピング。サムネイル＋店名＋所在地の軽量リスト。モバイル <a href="#12a" style="color:#a6702a; font-weight:700;">12a</a> / PC <a href="#12b" style="color:#a6702a; font-weight:700;">12b</a>。
+    </div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 12a MOBILE -->
+      <div id="12a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">12a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">閲覧履歴 — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <div style="position:sticky; top:0; z-index:5; padding:34px 20px 14px; background:rgba(21,16,10,.9); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; gap:10px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:20px; font-weight:900; color:#f5e9d4;">閲覧履歴</h2>
+            </div>
+
+            <div style="padding:16px 20px 8px; font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; color:#9c8763; text-transform:uppercase;">Today</div>
+            <div style="display:flex; flex-direction:column;">
+              <a href="#12a" style="display:flex; gap:13px; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(224,163,65,.08);">
+                <div style="flex:0 0 60px; width:60px; height:60px; border-radius:12px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 8px,#31240f 8px,#31240f 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">クラフトビアバー 静岡</div><div style="font-size:12px; color:#a08a64; margin-top:3px;">静岡県 静岡市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+              <a href="#12a" style="display:flex; gap:13px; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(224,163,65,.08);">
+                <div style="flex:0 0 60px; width:60px; height:60px; border-radius:12px; background:repeating-linear-gradient(120deg,#352718,#352718 8px,#2c1f11 8px,#2c1f11 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">ブルワリータップ 浜松</div><div style="font-size:12px; color:#a08a64; margin-top:3px;">静岡県 浜松市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+
+            <div style="padding:16px 20px 8px; font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; color:#9c8763; text-transform:uppercase;">This Week</div>
+            <div style="display:flex; flex-direction:column;">
+              <a href="#12a" style="display:flex; gap:13px; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(224,163,65,.08);">
+                <div style="flex:0 0 60px; width:60px; height:60px; border-radius:12px; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 8px,#332510 8px,#332510 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">ビアホール 沼津</div><div style="font-size:12px; color:#a08a64; margin-top:3px;">静岡県 沼津市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+              <a href="#12a" style="display:flex; gap:13px; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(224,163,65,.08);">
+                <div style="flex:0 0 60px; width:60px; height:60px; border-radius:12px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 8px,#31240f 8px,#31240f 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">タップスタンド 三島</div><div style="font-size:12px; color:#a08a64; margin-top:3px;">静岡県 三島市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+              <a href="#12a" style="display:flex; gap:13px; align-items:center; padding:12px 20px; border-bottom:1px solid rgba(224,163,65,.08);">
+                <div style="flex:0 0 60px; width:60px; height:60px; border-radius:12px; background:repeating-linear-gradient(120deg,#352718,#352718 8px,#2c1f11 8px,#2c1f11 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">クラフトルーム 富士</div><div style="font-size:12px; color:#a08a64; margin-top:3px;">静岡県 富士市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12b PC -->
+      <div id="12b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">12b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">閲覧履歴 — PC</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:baseline; gap:2px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:20px; color:#f3e7d2;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:18px; color:#e0a341;">Salon</span></div>
+            <span style="font-size:14px; color:#9c8763;">閲覧履歴</span>
+          </header>
+
+          <div style="padding:28px 32px 36px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:22px; font-weight:900; color:#f5e9d4;">閲覧履歴</h2>
+            </div>
+
+            <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; color:#9c8763; text-transform:uppercase; margin-bottom:12px;">Today</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
+              <a href="#12b" style="display:flex; gap:14px; align-items:center; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:14px; padding:12px 14px;">
+                <div style="flex:0 0 56px; width:56px; height:56px; border-radius:10px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 8px,#31240f 8px,#31240f 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#f3e7d2;">クラフトビアバー 静岡</div><div style="font-size:12px; color:#a08a64; margin-top:2px;">静岡県 静岡市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+              <a href="#12b" style="display:flex; gap:14px; align-items:center; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:14px; padding:12px 14px;">
+                <div style="flex:0 0 56px; width:56px; height:56px; border-radius:10px; background:repeating-linear-gradient(120deg,#352718,#352718 8px,#2c1f11 8px,#2c1f11 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#f3e7d2;">ブルワリータップ 浜松</div><div style="font-size:12px; color:#a08a64; margin-top:2px;">静岡県 浜松市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+
+            <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; color:#9c8763; text-transform:uppercase; margin-bottom:12px;">This Week</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <a href="#12b" style="display:flex; gap:14px; align-items:center; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:14px; padding:12px 14px;">
+                <div style="flex:0 0 56px; width:56px; height:56px; border-radius:10px; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 8px,#332510 8px,#332510 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#f3e7d2;">ビアホール 沼津</div><div style="font-size:12px; color:#a08a64; margin-top:2px;">静岡県 沼津市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+              <a href="#12b" style="display:flex; gap:14px; align-items:center; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:14px; padding:12px 14px;">
+                <div style="flex:0 0 56px; width:56px; height:56px; border-radius:10px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 8px,#31240f 8px,#31240f 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#f3e7d2;">タップスタンド 三島</div><div style="font-size:12px; color:#a08a64; margin-top:2px;">静岡県 三島市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+              <a href="#12b" style="display:flex; gap:14px; align-items:center; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:14px; padding:12px 14px;">
+                <div style="flex:0 0 56px; width:56px; height:56px; border-radius:10px; background:repeating-linear-gradient(120deg,#352718,#352718 8px,#2c1f11 8px,#2c1f11 16px);"></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#f3e7d2;">クラフトルーム 富士</div><div style="font-size:12px; color:#a08a64; margin-top:2px;">静岡県 富士市</div></div>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 11 : AUTH ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">ログイン / 新規登録</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        ログイン前レイアウト。中央フォームカード＋世界観の伝わるヒーロー。PCはブランドビジュアルとのスプリット。ログイン(モバイル) <a href="#11a" style="color:#a6702a; font-weight:700;">11a</a> / 新規登録(モバイル) <a href="#11b" style="color:#a6702a; font-weight:700;">11b</a> / ログイン(PC) <a href="#11c" style="color:#a6702a; font-weight:700;">11c</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 11a LOGIN MOBILE -->
+      <div id="11a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">11a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">ログイン — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div style="position:relative; width:100%; height:100%; border-radius:34px; overflow:hidden; background:#15100a; display:flex; flex-direction:column;">
+            <!-- top hero -->
+            <div style="height:280px; position:relative; background:repeating-linear-gradient(120deg,#2c2013,#2c2013 16px,#241a0e 16px,#241a0e 32px); flex:0 0 280px;">
+              <div style="position:absolute; inset:0; background:linear-gradient(180deg,rgba(21,16,10,.3),rgba(21,16,10,1));"></div>
+              <div style="position:absolute; top:-40px; left:-30px; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle,rgba(224,163,65,.28),transparent 70%);"></div>
+              <div style="position:absolute; bottom:34px; left:26px; right:26px;">
+                <div style="display:flex; align-items:baseline; gap:3px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:34px; color:#f5e9d4;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:30px; color:#e0a341;">Salon</span></div>
+                <p style="font-family:'Zen Old Mincho',serif; font-size:14px; color:#c9b48c; margin-top:8px;">クラフトビールで、街とつながる。</p>
+              </div>
+            </div>
+
+            <div style="flex:1; padding:28px 26px; display:flex; flex-direction:column;">
+              <div style="display:flex; flex-direction:column; gap:16px;">
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; margin-bottom:8px;">メールアドレス</label>
+                  <div style="height:50px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; display:flex; align-items:center; padding:0 15px; font-size:14px; color:#e6d3ac;"><br></div>
+                </div>
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; margin-bottom:8px;">パスワード</label>
+                  <div style="height:50px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; display:flex; align-items:center; justify-content:space-between; padding:0 15px; font-size:14px; color:#e6d3ac;"><span style="letter-spacing:3px;"><br></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+                </div>
+              </div>
+              <button style="margin-top:22px; height:52px; border:none; border-radius:14px; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:15px; cursor:pointer;">ログイン</button>
+              <div style="text-align:center; margin-top:18px; display:flex; flex-direction:column; gap:10px;">
+                <a href="#11b" style="font-size:13.5px; color:#e0a341;">新規登録はこちら</a>
+                <a href="#11a" style="font-size:13px; color:#9c8763;">パスワードをお忘れの方</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11b SIGNUP MOBILE -->
+      <div id="11b" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">11b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">新規登録 — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <div style="padding:44px 26px 20px;">
+              <div style="display:flex; align-items:baseline; gap:2px; margin-bottom:6px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:22px; color:#f5e9d4;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:20px; color:#e0a341;">Salon</span></div>
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:24px; font-weight:900; color:#f5e9d4; margin-top:10px;">新規登録</h2>
+              <p style="font-size:12.5px; color:#9c8763; margin-top:6px;"><span style="color: rgb(201, 180, 140); font-family: &quot;Zen Old Mincho&quot;, serif; font-size: 14px;">クラフトビールで、街とつながる。</span></p>
+            </div>
+
+            <div style="padding:0 26px 26px; display:flex; flex-direction:column; gap:18px;">
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; margin-bottom:8px;">メールアドレス</label>
+                <div style="height:50px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; display:flex; align-items:center; padding:0 15px; font-size:14px; color:#e6d3ac;"><br></div>
+              </div>
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; margin-bottom:8px;">パスワード</label>
+                <div style="height:50px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; display:flex; align-items:center; padding:0 15px; font-size:14px; color:#e6d3ac; letter-spacing:3px;"><br></div>
+                <!-- strength meter -->
+                <div style="display:flex; gap:5px; margin-top:10px;"><span style="flex:1; height:4px; border-radius:2px; background:#e0a341;"></span><span style="flex:1; height:4px; border-radius:2px; background:#e0a341;"></span><span style="flex:1; height:4px; border-radius:2px; background:#e0a341;"></span><span style="flex:1; height:4px; border-radius:2px; background:#3a2b18;"></span></div>
+                <p style="font-size:11px; color:#9c8763; margin-top:8px;">8文字以上、大文字・小文字・数字を含めてください</p>
+              </div>
+
+              <button style="height:52px; border:none; border-radius:14px; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:15px; cursor:pointer;">登録する</button>
+
+              <div style="display:flex; align-items:center; gap:12px; margin:2px 0;"><span style="flex:1; height:1px; background:rgba(224,163,65,.15);"></span><span style="font-size:11px; color:#9c8763;">または</span><span style="flex:1; height:1px; background:rgba(224,163,65,.15);"></span></div>
+
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <button style="height:48px; border:1px solid rgba(224,163,65,.22); border-radius:12px; background:#241a0e; color:#e6d3ac; font-weight:600; font-size:13.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;"><span style="font-family:'Archivo',sans-serif; font-weight:800; color:#e0a341;">G</span>Googleで登録</button>
+                <button style="height:48px; border:1px solid rgba(224,163,65,.22); border-radius:12px; background:#241a0e; color:#e6d3ac; font-weight:600; font-size:13.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#e6d3ac"><path d="M18.9 2H22l-7 8 8.2 12h-6.4l-5-6.6L5.9 22H2.8l7.5-8.6L2.4 2h6.6l4.5 6zm-1.1 18h1.7L7.3 3.8H5.5z"></path></svg>Xで登録</button>
+              </div>
+
+              <a href="#11a" style="text-align:center; font-size:13px; color:#9c8763; margin-top:2px;">すでにアカウントをお持ちの方</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11c LOGIN PC SPLIT -->
+      <div id="11c" style="display:flex; flex-direction:column; gap:18px; width:820px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">11c</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">ログイン — PC（スプリット）</div>
+        </div>
+
+        <div style="width:820px; height:540px; border-radius:22px; overflow:hidden; display:flex; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <!-- brand side -->
+          <div style="flex:0 0 400px; position:relative; background:repeating-linear-gradient(120deg,#2c2013,#2c2013 18px,#241a0e 18px,#241a0e 36px);">
+            <div style="position:absolute; inset:0; background:linear-gradient(160deg,rgba(21,16,10,.35),rgba(21,16,10,.92));"></div>
+            <div style="position:absolute; top:-60px; left:-40px; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle,rgba(224,163,65,.24),transparent 70%);"></div>
+            <div style="position:absolute; top:34px; left:36px; display:flex; align-items:baseline; gap:3px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:26px; color:#f5e9d4;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:23px; color:#e0a341;">Salon</span></div>
+            <div style="position:absolute; bottom:44px; left:36px; right:36px;">
+              <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.24em; color:#c79241; text-transform:uppercase; margin-bottom:12px;">Shizuoka Craft Beer</div>
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:30px; font-weight:900; line-height:1.4; color:#f5e9d4;">今夜の一杯を、<br>この街で見つける。</h2>
+            </div>
+          </div>
+          <!-- form side -->
+          <div style="flex:1; background:#15100a; padding:48px 48px; display:flex; flex-direction:column; justify-content:center;">
+            <h3 style="font-family:'Zen Old Mincho',serif; font-size:24px; font-weight:900; color:#f5e9d4;">おかえりなさい</h3>
+            <p style="font-size:13px; color:#9c8763; margin-top:6px; margin-bottom:26px;">アカウントにログインしてください。</p>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; margin-bottom:8px;">メールアドレス</label>
+                <div style="height:50px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; display:flex; align-items:center; padding:0 15px; font-size:14px; color:#e6d3ac;"><br></div>
+              </div>
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; margin-bottom:8px;">パスワード</label>
+                <div style="height:50px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; display:flex; align-items:center; justify-content:space-between; padding:0 15px; font-size:14px; color:#e6d3ac;"><span style="letter-spacing:3px;"><br></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+              </div>
+            </div>
+            <button style="margin-top:24px; height:52px; border:none; border-radius:14px; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:15px; cursor:pointer;">ログイン</button>
+            <div style="display:flex; justify-content:space-between; margin-top:18px;">
+              <a href="#11b" style="font-size:13px; color:#e0a341;">新規登録はこちら</a>
+              <a href="#11c" style="font-size:13px; color:#9c8763;">パスワードをお忘れの方</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 10 : FAVORITES ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">お気に入りバー一覧</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        店舗カードリスト＋★解除トグル。モバイルは1カラム、PCは3カラムグリッド。空状態も設計。モバイル <a href="#10a" style="color:#a6702a; font-weight:700;">10a</a> / PC <a href="#10b" style="color:#a6702a; font-weight:700;">10b</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 10a MOBILE -->
+      <div id="10a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">10a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">お気に入り — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <div style="position:sticky; top:0; z-index:5; padding:34px 20px 14px; background:rgba(21,16,10,.9); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; gap:10px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:20px; font-weight:900; color:#f5e9d4;">お気に入りバー</h2>
+              <span style="margin-left:auto; font-size:12px; color:#9c8763;">5件</span>
+            </div>
+
+            <div style="padding:18px 20px; display:flex; flex-direction:column; gap:14px;">
+              <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12); position:relative;">
+                <div style="height:120px; position:relative; background:repeating-linear-gradient(115deg,#3a2b18,#3a2b18 11px,#332512 11px,#332512 22px);">
+                  <button style="position:absolute; top:10px; right:10px; width:34px; height:34px; border:none; border-radius:50%; background:rgba(15,11,6,.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></button>
+                </div>
+                <div style="padding:13px 15px;"><div style="font-weight:700; font-size:15px; color:#f3e7d2;">クラフトビアバー 静岡</div><div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 静岡市</div></div>
+              </div>
+              <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12); position:relative;">
+                <div style="height:120px; position:relative; background:repeating-linear-gradient(115deg,#35281a,#35281a 11px,#2e2214 11px,#2e2214 22px);">
+                  <button style="position:absolute; top:10px; right:10px; width:34px; height:34px; border:none; border-radius:50%; background:rgba(15,11,6,.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></button>
+                </div>
+                <div style="padding:13px 15px;"><div style="font-weight:700; font-size:15px; color:#f3e7d2;">ブルワリータップ 浜松</div><div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 浜松市</div></div>
+              </div>
+              <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12); position:relative;">
+                <div style="height:120px; position:relative; background:repeating-linear-gradient(115deg,#3d2e1a,#3d2e1a 11px,#332510 11px,#332510 22px);">
+                  <button style="position:absolute; top:10px; right:10px; width:34px; height:34px; border:none; border-radius:50%; background:rgba(15,11,6,.6); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></button>
+                </div>
+                <div style="padding:13px 15px;"><div style="font-weight:700; font-size:15px; color:#f3e7d2;">ビアホール 沼津</div><div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 沼津市</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10b PC -->
+      <div id="10b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">10b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">お気に入り — PC（＋空状態）</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:baseline; gap:2px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:20px; color:#f3e7d2;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:18px; color:#e0a341;">Salon</span></div>
+            <span style="font-size:14px; color:#9c8763;">お気に入りバー</span>
+          </header>
+
+          <div style="padding:28px 32px 20px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:22px; font-weight:900; color:#f5e9d4;">お気に入りバー</h2>
+              <span style="margin-left:auto; font-size:13px; color:#9c8763;">5件</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+              <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+                <div style="height:120px; position:relative; background:repeating-linear-gradient(115deg,#3a2b18,#3a2b18 11px,#332512 11px,#332512 22px);"><button style="position:absolute; top:10px; right:10px; width:34px; height:34px; border:none; border-radius:50%; background:rgba(15,11,6,.6); display:flex; align-items:center; justify-content:center; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></button></div>
+                <div style="padding:13px 15px;"><div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">クラフトビアバー 静岡</div><div style="font-size:12px; color:#a08a64; margin-top:3px;">静岡県 静岡市</div></div>
+              </div>
+              <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+                <div style="height:120px; position:relative; background:repeating-linear-gradient(115deg,#35281a,#35281a 11px,#2e2214 11px,#2e2214 22px);"><button style="position:absolute; top:10px; right:10px; width:34px; height:34px; border:none; border-radius:50%; background:rgba(15,11,6,.6); display:flex; align-items:center; justify-content:center; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></button></div>
+                <div style="padding:13px 15px;"><div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">ブルワリータップ 浜松</div><div style="font-size:12px; color:#a08a64; margin-top:3px;">静岡県 浜松市</div></div>
+              </div>
+              <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+                <div style="height:120px; position:relative; background:repeating-linear-gradient(115deg,#3d2e1a,#3d2e1a 11px,#332510 11px,#332510 22px);"><button style="position:absolute; top:10px; right:10px; width:34px; height:34px; border:none; border-radius:50%; background:rgba(15,11,6,.6); display:flex; align-items:center; justify-content:center; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></button></div>
+                <div style="padding:13px 15px;"><div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">ビアホール 沼津</div><div style="font-size:12px; color:#a08a64; margin-top:3px;">静岡県 沼津市</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- empty state -->
+          <div style="margin:8px 32px 32px; padding:36px; border:1px dashed rgba(224,163,65,.2); border-radius:18px; background:#120d07; text-align:center;">
+            <div style="font-family:'Archivo',monospace; font-size:10px; letter-spacing:.16em; color:#8a6d3f; text-transform:uppercase; margin-bottom:14px;">Empty State</div>
+            <div style="width:56px; height:56px; margin:0 auto 14px; border-radius:50%; background:#241a0e; display:flex; align-items:center; justify-content:center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6d5732" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></div>
+            <div style="font-family:'Zen Old Mincho',serif; font-size:16px; color:#d9c4a0;">まだお気に入りがありません</div>
+            <p style="font-size:13px; color:#9c8763; margin-top:6px;">気になるお店を★で保存すると、ここに並びます。</p>
+            <button style="margin-top:16px; border:none; cursor:pointer; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:13.5px; padding:11px 22px; border-radius:12px;">お店をさがす</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 9 : ARTICLE ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">記事ページ</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        店舗名ラベル＋大きな見出し、いいね、投稿日、画像（最大3枚）、本文、関連店舗ボタン＋シェア。読み物としての可読性重視。モバイル <a href="#9a" style="color:#a6702a; font-weight:700;">9a</a> / PC <a href="#9b" style="color:#a6702a; font-weight:700;">9b</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 9a MOBILE -->
+      <div id="9a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">9a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">記事 — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <div style="position:sticky; top:0; z-index:5; padding:34px 20px 12px; background:rgba(21,16,10,.85); backdrop-filter:blur(14px); display:flex; align-items:center; justify-content:space-between;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f3e7d2" stroke-width="2.2"><path d="M15 18l-6-6 6-6"></path></svg>
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#c9b48c" stroke-width="1.9"><path d="M4 12v8h16v-8M12 3v13M7 8l5-5 5 5"></path></svg>
+            </div>
+
+            <div style="padding:8px 22px 24px;">
+              <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.16em; color:#e0a341; text-transform:uppercase;">クラフトビアバー 静岡</div>
+              <h1 style="font-family:'Zen Old Mincho',serif; font-size:26px; font-weight:900; line-height:1.4; color:#f5e9d4; margin-top:10px;">新しいIPAが入荷しました。ホップの香りが最高です</h1>
+              <div style="display:flex; align-items:center; gap:14px; margin-top:14px;">
+                <span style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:#e0483a;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#e0483a" stroke="#e0483a" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg>42</span>
+                <span style="font-size:12px; color:#9c8763;">2025年12月15日</span>
+              </div>
+
+              <div style="margin:18px 0; border-radius:16px; overflow:hidden; height:220px; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 13px,#31240f 13px,#31240f 26px);"><span style="position:absolute; bottom:8px; left:8px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.5); padding:3px 7px; border-radius:5px;">記事画像</span></div>
+
+              <div style="font-family:'Zen Old Mincho',serif; font-size:15px; color:#e6d3ac; line-height:2;">
+                <p style="margin-bottom:16px;">この度、待望のウエストコーストIPAが樽で入荷しました。柑橘とパイナップルを思わせる華やかなアロマ、しっかりとした苦味のバランスが自慢の一杯です。</p>
+                <p style="margin-bottom:16px;">地元・静岡のブルワリーと協業し、この季節ならではのフレッシュホップを贅沢に使用しています。数量限定ですので、ぜひお早めに。</p>
+                <p>相性の良いフードもご用意しております。スタッフ一同、心よりお待ちしております。</p>
+              </div>
+
+              <a href="#9a" style="display:flex; align-items:center; justify-content:space-between; margin-top:24px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:14px; padding:14px 16px;">
+                <div style="display:flex; align-items:center; gap:12px;"><div style="width:44px; height:44px; border-radius:10px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 8px,#31240f 8px,#31240f 16px);"></div><div><div style="font-weight:700; font-size:14px; color:#f3e7d2;">クラフトビアバー 静岡</div><div style="font-size:11.5px; color:#9c8763;">静岡市葵区</div></div></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9b PC -->
+      <div id="9b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">9b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">記事 — PC</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:12px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9b48c" stroke-width="2"><path d="M15 18l-6-6 6-6"></path></svg><span style="font-size:13px; color:#c9b48c;">記事一覧に戻る</span></div>
+            <div style="display:flex; align-items:baseline; gap:2px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:20px; color:#f3e7d2;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:18px; color:#e0a341;">Salon</span></div>
+          </header>
+
+          <!-- hero -->
+          <div style="position:relative; height:340px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 16px,#31240f 16px,#31240f 32px);">
+            <div style="position:absolute; inset:0; background:linear-gradient(180deg,transparent 30%,rgba(15,11,6,.96) 100%);"></div>
+            <div style="position:absolute; bottom:28px; left:0; right:0; text-align:center; padding:0 60px;">
+              <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.18em; color:#e0a341; text-transform:uppercase; margin-bottom:12px;">クラフトビアバー 静岡</div>
+              <h1 style="font-family:'Zen Old Mincho',serif; font-size:36px; font-weight:900; line-height:1.35; color:#f5e9d4;">新しいIPAが入荷しました。<br>ホップの香りが最高です</h1>
+            </div>
+          </div>
+
+          <div style="max-width:660px; margin:0 auto; padding:28px 32px 40px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:20px; border-bottom:1px solid rgba(224,163,65,.14);">
+              <span style="font-size:13px; color:#9c8763;">2025年12月15日</span>
+              <div style="display:flex; gap:12px;">
+                <span style="display:flex; align-items:center; gap:7px; font-size:13px; color:#e0483a; background:rgba(224,72,58,.1); padding:8px 15px; border-radius:999px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#e0483a" stroke="#e0483a" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg>42</span>
+                <span style="display:flex; align-items:center; gap:7px; font-size:13px; color:#c9b48c; border:1px solid rgba(224,163,65,.2); padding:8px 15px; border-radius:999px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9b48c" stroke-width="1.9"><path d="M4 12v8h16v-8M12 3v13M7 8l5-5 5 5"></path></svg>シェア</span>
+              </div>
+            </div>
+
+            <div style="font-family:'Zen Old Mincho',serif; font-size:16.5px; color:#e6d3ac; line-height:2.1; padding-top:22px;">
+              <p style="margin-bottom:20px;">この度、待望のウエストコーストIPAが樽で入荷しました。柑橘とパイナップルを思わせる華やかなアロマ、しっかりとした苦味のバランスが自慢の一杯です。</p>
+              <p style="margin-bottom:20px;">地元・静岡のブルワリーと協業し、この季節ならではのフレッシュホップを贅沢に使用しています。数量限定ですので、ぜひお早めにご来店ください。</p>
+              <div style="margin:24px 0; border-radius:14px; overflow:hidden; height:280px; position:relative; background:repeating-linear-gradient(120deg,#352718,#352718 14px,#2c1f11 14px,#2c1f11 28px);"><span style="position:absolute; bottom:8px; left:8px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.5); padding:3px 7px; border-radius:5px;">記事画像</span></div>
+              <p>相性の良いフードもご用意しております。スタッフ一同、心よりお待ちしております。</p>
+            </div>
+
+            <a href="#9b" style="display:flex; align-items:center; justify-content:space-between; margin-top:30px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:16px; padding:18px 20px;">
+              <div style="display:flex; align-items:center; gap:14px;"><div style="width:54px; height:54px; border-radius:12px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 9px,#31240f 9px,#31240f 18px);"></div><div><div style="font-family:'Archivo',sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; color:#c79241;">この記事のお店</div><div style="font-weight:700; font-size:16px; color:#f3e7d2; margin-top:3px;">クラフトビアバー 静岡</div><div style="font-size:12px; color:#9c8763;">静岡市葵区常磐町</div></div></div>
+              <span style="display:flex; align-items:center; gap:7px; font-size:13px; font-weight:700; color:#20160a; background:linear-gradient(135deg,#e0a341,#c47f28); padding:10px 18px; border-radius:10px;">店舗を見る <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="2.6"><path d="M9 6l6 6-6 6"></path></svg></span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 8 : NOTIFICATIONS ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">通知</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        種類別アイコン＋タイトル＋補足＋日時。未読は左のアンバーバーで識別。日付でグルーピング。モバイル <a href="#8a" style="color:#a6702a; font-weight:700;">8a</a> / PC <a href="#8b" style="color:#a6702a; font-weight:700;">8b</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 8a MOBILE -->
+      <div id="8a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">8a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">通知 — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <div style="position:sticky; top:0; z-index:5; padding:34px 20px 14px; background:rgba(21,16,10,.9); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:20px; font-weight:900; color:#f5e9d4;">通知</h2>
+              <span style="font-size:12px; color:#e0a341;">すべて既読にする</span>
+            </div>
+
+            <div style="padding:14px 20px 8px; font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; color:#9c8763; text-transform:uppercase;">Today</div>
+            <div style="display:flex; flex-direction:column;">
+              <!-- like unread -->
+              <div style="display:flex; gap:13px; padding:14px 20px; background:rgba(224,163,65,.05); border-left:3px solid #e0a341;">
+                <div style="flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:rgba(224,72,58,.15); display:flex; align-items:center; justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="#e0483a" stroke="#e0483a" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:13.5px; color:#f3e7d2; line-height:1.5;"><strong>まゆ</strong> さんがあなたの投稿にいいねしました</p><span style="font-size:11px; color:#9c8763;">10分前</span></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2" style="align-self:center;"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+              <!-- follow unread -->
+              <div style="display:flex; gap:13px; padding:14px 20px; background:rgba(224,163,65,.05); border-left:3px solid #e0a341;">
+                <div style="flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:rgba(224,163,65,.15); display:flex; align-items:center; justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:13.5px; color:#f3e7d2; line-height:1.5;"><strong>たける</strong> さんがあなたをフォローしました</p><span style="font-size:11px; color:#9c8763;">1時間前</span></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2" style="align-self:center;"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+              <!-- coupon read -->
+              <div style="display:flex; gap:13px; padding:14px 20px; border-left:3px solid transparent;">
+                <div style="flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:#241a0e; display:flex; align-items:center; justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.7"><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6M2 8a2 2 0 012-2h16a2 2 0 012 2v2H2z"></path><path d="M12 6v14"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:13.5px; color:#d9c4a0; line-height:1.5;">クラフトビアバー 静岡 の新しいクーポンが届きました</p><span style="font-size:11px; color:#9c8763;">3時間前</span></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2" style="align-self:center;"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+            </div>
+
+            <div style="padding:14px 20px 8px; font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; color:#9c8763; text-transform:uppercase;">Yesterday</div>
+            <div style="display:flex; flex-direction:column;">
+              <div style="display:flex; gap:13px; padding:14px 20px; border-left:3px solid transparent;">
+                <div style="flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:#241a0e; display:flex; align-items:center; justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.7"><path d="M4 4h16v13H8l-4 4z"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:13.5px; color:#d9c4a0; line-height:1.5;">ブルワリータップ 浜松 が新しい記事を投稿しました</p><span style="font-size:11px; color:#9c8763;">昨日 18:20</span></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2" style="align-self:center;"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+              <div style="display:flex; gap:13px; padding:14px 20px; border-left:3px solid transparent;">
+                <div style="flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:rgba(224,72,58,.12); display:flex; align-items:center; justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="#c0413a" stroke="#c0413a" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:13.5px; color:#d9c4a0; line-height:1.5;"><strong>ゆか</strong> さん他3名があなたの投稿にいいねしました</p><span style="font-size:11px; color:#9c8763;">昨日 12:05</span></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2" style="align-self:center;"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8b PC -->
+      <div id="8b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">8b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">通知 — PC</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:baseline; gap:2px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:20px; color:#f3e7d2;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:18px; color:#e0a341;">Salon</span></div>
+            <span style="font-size:14px; color:#9c8763;">通知</span>
+          </header>
+
+          <div style="max-width:640px; margin:0 auto; padding:28px 32px 36px;">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;">
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:22px; font-weight:900; color:#f5e9d4;">通知</h2>
+              <span style="font-size:13px; color:#e0a341;">すべて既読にする</span>
+            </div>
+
+            <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; color:#9c8763; text-transform:uppercase; padding:14px 0 8px;">Today</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; gap:15px; align-items:center; padding:14px 16px; background:rgba(224,163,65,.06); border:1px solid rgba(224,163,65,.14); border-radius:14px;">
+                <div style="flex:0 0 42px; width:42px; height:42px; border-radius:50%; background:rgba(224,72,58,.15); display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="#e0483a" stroke="#e0483a" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:14px; color:#f3e7d2;"><strong>まゆ</strong> さんがあなたの投稿にいいねしました</p><span style="font-size:11.5px; color:#9c8763;">10分前</span></div>
+                <span style="width:8px; height:8px; border-radius:50%; background:#e0a341;"></span>
+              </div>
+              <div style="display:flex; gap:15px; align-items:center; padding:14px 16px; background:rgba(224,163,65,.06); border:1px solid rgba(224,163,65,.14); border-radius:14px;">
+                <div style="flex:0 0 42px; width:42px; height:42px; border-radius:50%; background:rgba(224,163,65,.15); display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:14px; color:#f3e7d2;"><strong>たける</strong> さんがあなたをフォローしました</p><span style="font-size:11.5px; color:#9c8763;">1時間前</span></div>
+                <span style="width:8px; height:8px; border-radius:50%; background:#e0a341;"></span>
+              </div>
+              <div style="display:flex; gap:15px; align-items:center; padding:14px 16px; border:1px solid rgba(224,163,65,.08); border-radius:14px;">
+                <div style="flex:0 0 42px; width:42px; height:42px; border-radius:50%; background:#241a0e; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.7"><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6M2 8a2 2 0 012-2h16a2 2 0 012 2v2H2z"></path><path d="M12 6v14"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:14px; color:#d9c4a0;">クラフトビアバー 静岡 の新しいクーポンが届きました</p><span style="font-size:11.5px; color:#9c8763;">3時間前</span></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+            </div>
+
+            <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.14em; color:#9c8763; text-transform:uppercase; padding:20px 0 8px;">Yesterday</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; gap:15px; align-items:center; padding:14px 16px; border:1px solid rgba(224,163,65,.08); border-radius:14px;">
+                <div style="flex:0 0 42px; width:42px; height:42px; border-radius:50%; background:#241a0e; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.7"><path d="M4 4h16v13H8l-4 4z"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:14px; color:#d9c4a0;">ブルワリータップ 浜松 が新しい記事を投稿しました</p><span style="font-size:11.5px; color:#9c8763;">昨日 18:20</span></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+              <div style="display:flex; gap:15px; align-items:center; padding:14px 16px; border:1px solid rgba(224,163,65,.08); border-radius:14px;">
+                <div style="flex:0 0 42px; width:42px; height:42px; border-radius:50%; background:rgba(224,72,58,.12); display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="#c0413a" stroke="#c0413a" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg></div>
+                <div style="flex:1;"><p style="font-size:14px; color:#d9c4a0;"><strong>ゆか</strong> さん他3名があなたの投稿にいいねしました</p><span style="font-size:11.5px; color:#9c8763;">昨日 12:05</span></div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6d5d42" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 7 : POST CREATE ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">投稿を作成</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        店舗選択 → 写真（最大4枚）→ 本文 → タグ。写真アップロードを主役に。モバイル <a href="#7a" style="color:#a6702a; font-weight:700;">7a</a> / PC <a href="#7b" style="color:#a6702a; font-weight:700;">7b</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 7a MOBILE -->
+      <div id="7a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">7a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">投稿作成 — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <div style="position:sticky; top:0; z-index:5; padding:34px 20px 14px; background:rgba(21,16,10,.92); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:12px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9b48c" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"></path></svg><span style="font-size:16px; font-weight:700; color:#f5e9d4;">投稿を作成</span></div>
+              <button style="border:none; cursor:pointer; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:13px; padding:8px 16px; border-radius:10px;">投稿する</button>
+            </div>
+
+            <div style="padding:20px; display:flex; flex-direction:column; gap:22px;">
+              <!-- store -->
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; letter-spacing:.06em; margin-bottom:8px;">お店を選択</label>
+                <div style="display:flex; align-items:center; gap:10px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; padding:12px 14px;">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span style="flex:1; font-size:14px; color:#f3e7d2;">クラフトビアバー 静岡</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg>
+                </div>
+              </div>
+
+              <!-- photos -->
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; letter-spacing:.06em; margin-bottom:8px;">写真（最大4枚）</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px;">
+                  <div style="aspect-ratio:1; border-radius:12px; position:relative; overflow:hidden; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 8px,#31240f 8px,#31240f 16px);"><div style="position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:50%; background:rgba(15,11,6,.7); display:flex; align-items:center; justify-content:center;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f3e7d2" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"></path></svg></div></div>
+                  <div style="aspect-ratio:1; border-radius:12px; position:relative; overflow:hidden; background:repeating-linear-gradient(120deg,#352718,#352718 8px,#2c1f11 8px,#2c1f11 16px);"><div style="position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:50%; background:rgba(15,11,6,.7); display:flex; align-items:center; justify-content:center;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f3e7d2" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"></path></svg></div></div>
+                  <div style="aspect-ratio:1; border-radius:12px; border:1.5px dashed rgba(224,163,65,.35); background:#1a130b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><path d="M12 5v14M5 12h14"></path></svg><span style="font-size:9px; color:#9c8763;">追加</span></div>
+                  <div style="aspect-ratio:1; border-radius:12px; border:1.5px dashed rgba(224,163,65,.2); background:#1a130b;"></div>
+                </div>
+              </div>
+
+              <!-- body -->
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; letter-spacing:.06em; margin-bottom:8px;">本文</label>
+                <div style="background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; padding:14px; min-height:120px;">
+                  <p style="font-size:14px; color:#e6d3ac; line-height:1.7;">駿河ベイIPA、香りが最高だった。<span style="color:#5f5138;">今日の一杯を記録しよう…</span></p>
+                </div>
+              </div>
+
+              <!-- tags -->
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; letter-spacing:.06em; margin-bottom:8px;">タグ</label>
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                  <span style="display:flex; align-items:center; gap:5px; font-size:12.5px; color:#20160a; background:#e0a341; font-weight:700; padding:6px 12px; border-radius:999px;">#IPA <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+                  <span style="display:flex; align-items:center; gap:5px; font-size:12.5px; color:#20160a; background:#e0a341; font-weight:700; padding:6px 12px; border-radius:999px;">#静岡 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+                  <span style="font-size:12.5px; color:#c9b48c; border:1px dashed rgba(224,163,65,.35); padding:6px 12px; border-radius:999px;">+ タグを追加</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7b PC -->
+      <div id="7b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">7b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">投稿作成 — PC</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:12px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9b48c" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18"></path></svg><span style="font-family:'Zen Old Mincho',serif; font-size:17px; font-weight:700; color:#f5e9d4;">投稿を作成</span></div>
+            <div style="display:flex; gap:10px;"><button style="border:1px solid rgba(224,163,65,.25); cursor:pointer; background:transparent; color:#c9b48c; font-weight:700; font-size:13px; padding:9px 18px; border-radius:10px;">キャンセル</button><button style="border:none; cursor:pointer; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:13px; padding:9px 20px; border-radius:10px;">投稿する</button></div>
+          </header>
+
+          <div style="display:flex; gap:32px; padding:32px;">
+            <!-- photos left -->
+            <div style="flex:0 0 380px;">
+              <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; letter-spacing:.06em; margin-bottom:10px;">写真（最大4枚）</label>
+              <div style="aspect-ratio:4/3; border-radius:16px; overflow:hidden; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 12px,#31240f 12px,#31240f 24px);"><div style="position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; background:rgba(15,11,6,.7); display:flex; align-items:center; justify-content:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f3e7d2" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"></path></svg></div></div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px;">
+                <div style="aspect-ratio:1; border-radius:10px; background:repeating-linear-gradient(120deg,#352718,#352718 8px,#2c1f11 8px,#2c1f11 16px);"></div>
+                <div style="aspect-ratio:1; border-radius:10px; border:1.5px dashed rgba(224,163,65,.35); background:#1a130b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><path d="M12 5v14M5 12h14"></path></svg></div>
+                <div style="aspect-ratio:1; border-radius:10px; border:1.5px dashed rgba(224,163,65,.2); background:#1a130b;"></div>
+              </div>
+            </div>
+
+            <!-- fields right -->
+            <div style="flex:1; display:flex; flex-direction:column; gap:22px;">
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; letter-spacing:.06em; margin-bottom:8px;">お店を選択</label>
+                <div style="display:flex; align-items:center; gap:10px; background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; padding:13px 15px;">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span style="flex:1; font-size:14px; color:#f3e7d2;">クラフトビアバー 静岡</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg>
+                </div>
+              </div>
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; letter-spacing:.06em; margin-bottom:8px;">本文</label>
+                <div style="background:#241a0e; border:1px solid rgba(224,163,65,.25); border-radius:12px; padding:15px; min-height:150px;">
+                  <p style="font-size:14px; color:#e6d3ac; line-height:1.8;">駿河ベイIPA、香りが最高だった。ホップ好きは絶対好きなやつ。<span style="color:#5f5138;">今日の一杯を記録しよう…</span></p>
+                </div>
+              </div>
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:700; color:#c9b48c; letter-spacing:.06em; margin-bottom:8px;">タグ</label>
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                  <span style="display:flex; align-items:center; gap:5px; font-size:12.5px; color:#20160a; background:#e0a341; font-weight:700; padding:7px 13px; border-radius:999px;">#IPA <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+                  <span style="display:flex; align-items:center; gap:5px; font-size:12.5px; color:#20160a; background:#e0a341; font-weight:700; padding:7px 13px; border-radius:999px;">#静岡 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="3"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
+                  <span style="font-size:12.5px; color:#c9b48c; border:1px dashed rgba(224,163,65,.35); padding:7px 13px; border-radius:999px;">+ タグを追加</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 6 : MYPAGE ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">マイページ</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        プロフィールヘッダー＋フォロー数、投稿グリッドと持っているクーポン。モバイル <a href="#6a" style="color:#a6702a; font-weight:700;">6a</a> / PC <a href="#6b" style="color:#a6702a; font-weight:700;">6b</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 6a MOBILE -->
+      <div id="6a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">6a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">マイページ — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <!-- profile band -->
+            <div style="padding:44px 22px 22px; background:linear-gradient(180deg,#241a0e 0%,#15100a 100%); position:relative; overflow:hidden;">
+              <div style="position:absolute; top:-50px; right:-30px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(224,163,65,.16),transparent 70%);"></div>
+              <div style="position:relative; display:flex; align-items:center; gap:16px;">
+                <div style="width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#e0a341,#8a5a2a); border:2px solid rgba(224,163,65,.4);"></div>
+                <div style="flex:1;">
+                  <div style="font-family:'Zen Old Mincho',serif; font-size:20px; font-weight:900; color:#f5e9d4;">りく</div>
+                  <div style="font-size:12px; color:#b39a76; margin-top:2px;">IPA党。静岡のクラフトを巡る。</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:28px; margin-top:18px;">
+                <div><span style="font-weight:800; font-size:17px; color:#f3e7d2;">48</span><span style="font-size:12px; color:#9c8763; margin-left:5px;">投稿</span></div>
+                <div><span style="font-weight:800; font-size:17px; color:#f3e7d2;">126</span><span style="font-size:12px; color:#9c8763; margin-left:5px;">フォロー</span></div>
+                <div><span style="font-weight:800; font-size:17px; color:#f3e7d2;">203</span><span style="font-size:12px; color:#9c8763; margin-left:5px;">フォロワー</span></div>
+              </div>
+              <button style="margin-top:16px; width:100%; height:42px; border:1px solid rgba(224,163,65,.3); border-radius:12px; background:#241a0e; color:#e0a341; font-weight:700; font-size:13.5px; cursor:pointer;">プロフィールを編集</button>
+            </div>
+
+            <!-- tabs -->
+            <div style="position:sticky; top:0; z-index:4; display:flex; background:rgba(21,16,10,.95); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16);">
+              <span style="flex:1; text-align:center; font-size:14px; font-weight:700; color:#e0a341; padding:14px 0; border-bottom:2px solid #e0a341;">投稿</span>
+              <span style="flex:1; text-align:center; font-size:14px; color:#9c8763; padding:14px 0;">持っているクーポン</span>
+            </div>
+
+            <!-- post grid -->
+            <div style="padding:4px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px;">
+              <div style="aspect-ratio:1; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 10px,#31240f 10px,#31240f 20px);"></div>
+              <div style="aspect-ratio:1; background:repeating-linear-gradient(120deg,#352718,#352718 10px,#2c1f11 10px,#2c1f11 20px);"></div>
+              <div style="aspect-ratio:1; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 10px,#332510 10px,#332510 20px);"></div>
+              <div style="aspect-ratio:1; background:repeating-linear-gradient(120deg,#352718,#352718 10px,#2c1f11 10px,#2c1f11 20px);"></div>
+              <div style="aspect-ratio:1; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 10px,#332510 10px,#332510 20px);"></div>
+              <div style="aspect-ratio:1; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 10px,#31240f 10px,#31240f 20px);"></div>
+              <div style="aspect-ratio:1; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 10px,#332510 10px,#332510 20px);"></div>
+              <div style="aspect-ratio:1; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 10px,#31240f 10px,#31240f 20px);"></div>
+              <div style="aspect-ratio:1; background:repeating-linear-gradient(120deg,#352718,#352718 10px,#2c1f11 10px,#2c1f11 20px);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6b PC -->
+      <div id="6b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">6b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">マイページ — PC（クーポンタブ）</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:baseline; gap:2px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:20px; color:#f3e7d2;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:18px; color:#e0a341;">Salon</span></div>
+            <span style="font-size:14px; color:#9c8763;">マイページ</span>
+          </header>
+
+          <!-- profile band -->
+          <div style="padding:32px 40px; background:linear-gradient(180deg,#241a0e,#15100a); position:relative; overflow:hidden; display:flex; align-items:center; gap:24px;">
+            <div style="position:absolute; top:-60px; right:40px; width:280px; height:280px; border-radius:50%; background:radial-gradient(circle,rgba(224,163,65,.14),transparent 70%);"></div>
+            <div style="position:relative; width:96px; height:96px; border-radius:50%; background:linear-gradient(135deg,#e0a341,#8a5a2a); border:2px solid rgba(224,163,65,.4);"></div>
+            <div style="position:relative; flex:1;">
+              <div style="font-family:'Zen Old Mincho',serif; font-size:26px; font-weight:900; color:#f5e9d4;">りく</div>
+              <div style="font-size:13px; color:#b39a76; margin-top:4px;">IPA党。静岡のクラフトを巡る。</div>
+              <div style="display:flex; gap:32px; margin-top:14px;">
+                <div><span style="font-weight:800; font-size:18px; color:#f3e7d2;">48</span><span style="font-size:12.5px; color:#9c8763; margin-left:6px;">投稿</span></div>
+                <div><span style="font-weight:800; font-size:18px; color:#f3e7d2;">126</span><span style="font-size:12.5px; color:#9c8763; margin-left:6px;">フォロー</span></div>
+                <div><span style="font-weight:800; font-size:18px; color:#f3e7d2;">203</span><span style="font-size:12.5px; color:#9c8763; margin-left:6px;">フォロワー</span></div>
+              </div>
+            </div>
+            <button style="position:relative; height:44px; padding:0 20px; border:1px solid rgba(224,163,65,.3); border-radius:12px; background:#241a0e; color:#e0a341; font-weight:700; font-size:13.5px; cursor:pointer;">プロフィールを編集</button>
+          </div>
+
+          <div style="display:flex; gap:30px; padding:0 40px; background:rgba(21,16,10,.95); border-bottom:1px solid rgba(224,163,65,.16);">
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">投稿</span>
+            <span style="font-size:14px; font-weight:700; color:#e0a341; padding:16px 0; border-bottom:2px solid #e0a341;">持っているクーポン</span>
+          </div>
+
+          <!-- coupons -->
+          <div style="padding:28px 40px 36px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div style="display:flex; border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.18);">
+              <div style="flex:0 0 90px; background:linear-gradient(160deg,#e0a341,#a5691f); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border-right:2px dashed rgba(15,11,6,.3);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="1.8"><path d="M17 11h1a3 3 0 010 6h-1M9 12v6M5 8h12v9a4 4 0 01-4 4H9a4 4 0 01-4-4z"></path></svg><span style="font-family:'Archivo',sans-serif; font-size:9px; font-weight:800; color:#20160a; letter-spacing:.1em;">COUPON</span></div>
+              <div style="flex:1; padding:14px 16px;">
+                <div style="font-weight:700; font-size:14.5px; color:#f3e7d2;">1杯目 半額</div>
+                <div style="font-size:12px; color:#b39a76; margin-top:3px;">クラフトビアバー 静岡</div>
+                <div style="font-size:11px; color:#9c8763; margin-top:6px;">有効期限 2026/08/31</div>
+                <button style="margin-top:10px; width:100%; height:38px; border:none; border-radius:10px; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:13px; cursor:pointer;">クーポンを利用する</button>
+              </div>
+            </div>
+            <div style="display:flex; border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.1); opacity:.6;">
+              <div style="flex:0 0 90px; background:#3a2b18; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border-right:2px dashed rgba(15,11,6,.3);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.8"><path d="M17 11h1a3 3 0 010 6h-1M9 12v6M5 8h12v9a4 4 0 01-4 4H9a4 4 0 01-4-4z"></path></svg></div>
+              <div style="flex:1; padding:14px 16px;">
+                <div style="font-weight:700; font-size:14.5px; color:#d9c4a0;">おつまみ1品サービス</div>
+                <div style="font-size:12px; color:#9c8763; margin-top:3px;">ブルワリータップ 浜松</div>
+                <div style="font-size:11px; color:#8a7355; margin-top:6px;">2026/06/30 まで</div>
+                <div style="margin-top:10px; height:38px; border-radius:10px; background:#2c2013; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; color:#8a7355;">使用済み</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 5 : TIMELINE ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">タイムライン</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        写真主役のフィード。ユーザー → 写真 → 本文 → 店舗リンク＋タグ → いいね/コメント。PCは中央1カラム＋右にトレンド。モバイル <a href="#5a" style="color:#a6702a; font-weight:700;">5a</a> / PC <a href="#5b" style="color:#a6702a; font-weight:700;">5b</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 5a MOBILE -->
+      <div id="5a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">5a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">タイムライン — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <div style="position:sticky; top:0; z-index:5; padding:34px 20px 14px; background:rgba(21,16,10,.9); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:20px; font-weight:900; color:#f5e9d4;">タイムライン</h2>
+              <div style="display:flex; gap:8px; font-size:12.5px;"><span style="color:#20160a; background:#e0a341; font-weight:700; padding:6px 13px; border-radius:999px;">フォロー中</span><span style="color:#c9b48c; padding:6px 13px;">みんな</span></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column;">
+              <!-- post 1 -->
+              <div style="padding:16px 20px; border-bottom:1px solid rgba(224,163,65,.1);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#e0a341,#8a5a2a);"></div>
+                  <div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#f3e7d2;">りく</div><div style="font-size:11px; color:#9c8763;">2時間前</div></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#9c8763"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
+                </div>
+                <div style="display:grid; grid-template-columns:2fr 1fr; gap:4px; margin:12px 0; border-radius:14px; overflow:hidden; height:220px;">
+                  <div style="position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 12px,#31240f 12px,#31240f 24px);"><span style="position:absolute; bottom:6px; left:6px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.5); padding:2px 6px; border-radius:4px;">投稿写真</span></div>
+                  <div style="display:flex; flex-direction:column; gap:4px;"><div style="flex:1; background:repeating-linear-gradient(120deg,#352718,#352718 10px,#2c1f11 10px,#2c1f11 20px);"></div><div style="flex:1; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 10px,#332510 10px,#332510 20px);"></div></div>
+                </div>
+                <p style="font-size:13.5px; color:#e6d3ac; line-height:1.7;">駿河ベイIPA、香りが最高だった。ホップ好きは絶対好きなやつ🍺</p>
+                <a href="#5a" style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:12.5px; color:#e0a341; background:#241a0e; border:1px solid rgba(224,163,65,.2); padding:6px 12px; border-radius:999px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>クラフトビアバー 静岡</a>
+                <div style="display:flex; gap:6px; margin-top:10px;"><span style="font-size:11px; color:#c79241;">#IPA</span><span style="font-size:11px; color:#c79241;">#静岡</span><span style="font-size:11px; color:#c79241;">#クラフトビール</span></div>
+                <div style="display:flex; gap:22px; margin-top:12px;">
+                  <span style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e0483a;"><svg width="18" height="18" viewBox="0 0 24 24" fill="#e0483a" stroke="#e0483a" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg>24</span>
+                  <span style="display:flex; align-items:center; gap:6px; font-size:13px; color:#9c8763;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-9 8 9 9 0 01-4-.9L3 20l1.4-4a8.4 8.4 0 01-1-4 8.5 8.5 0 018.5-8.5 8.5 8.5 0 019 8z"></path></svg>5</span>
+                </div>
+              </div>
+
+              <!-- post 2 -->
+              <div style="padding:16px 20px; border-bottom:1px solid rgba(224,163,65,.1);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#8a5a2a,#5a3818);"></div>
+                  <div style="flex:1;"><div style="font-weight:700; font-size:14px; color:#f3e7d2;">まゆ</div><div style="font-size:11px; color:#9c8763;">5時間前</div></div>
+                </div>
+                <div style="margin:12px 0; border-radius:14px; overflow:hidden; height:200px; position:relative; background:repeating-linear-gradient(120deg,#352718,#352718 12px,#2c1f11 12px,#2c1f11 24px);"><span style="position:absolute; bottom:6px; left:6px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.5); padding:2px 6px; border-radius:4px;">投稿写真</span></div>
+                <p style="font-size:13.5px; color:#e6d3ac; line-height:1.7;">スタウトとチーズのペアリング、想像以上に合う。</p>
+                <a href="#5a" style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:12.5px; color:#e0a341; background:#241a0e; border:1px solid rgba(224,163,65,.2); padding:6px 12px; border-radius:999px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>ブルワリータップ 浜松</a>
+                <div style="display:flex; gap:22px; margin-top:12px;">
+                  <span style="display:flex; align-items:center; gap:6px; font-size:13px; color:#9c8763;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.6"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg>18</span>
+                  <span style="display:flex; align-items:center; gap:6px; font-size:13px; color:#9c8763;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-9 8 9 9 0 01-4-.9L3 20l1.4-4a8.4 8.4 0 01-1-4 8.5 8.5 0 018.5-8.5 8.5 8.5 0 019 8z"></path></svg>2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5b PC -->
+      <div id="5b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">5b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">タイムライン — PC</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:baseline; gap:2px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:20px; color:#f3e7d2;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:18px; color:#e0a341;">Salon</span></div>
+            <h2 style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#f5e9d4;">タイムライン</h2>
+          </header>
+
+          <div style="display:flex; gap:24px; padding:28px 32px 36px;">
+            <!-- feed -->
+            <div style="flex:1; display:flex; flex-direction:column; gap:18px;">
+              <div style="display:flex; gap:10px;"><span style="font-size:13px; color:#20160a; background:#e0a341; font-weight:700; padding:8px 16px; border-radius:999px;">フォロー中</span><span style="font-size:13px; color:#c9b48c; padding:8px 16px;">みんな</span></div>
+
+              <div style="background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:18px; padding:18px;">
+                <div style="display:flex; align-items:center; gap:11px;">
+                  <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#e0a341,#8a5a2a);"></div>
+                  <div style="flex:1;"><div style="font-weight:700; font-size:15px; color:#f3e7d2;">りく</div><div style="font-size:11.5px; color:#9c8763;">2時間前 · クラフトビアバー 静岡</div></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#9c8763"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
+                </div>
+                <div style="display:grid; grid-template-columns:2fr 1fr; gap:5px; margin:14px 0; border-radius:14px; overflow:hidden; height:280px;">
+                  <div style="position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 13px,#31240f 13px,#31240f 26px);"><span style="position:absolute; bottom:8px; left:8px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.5); padding:3px 7px; border-radius:5px;">投稿写真</span></div>
+                  <div style="display:flex; flex-direction:column; gap:5px;"><div style="flex:1; background:repeating-linear-gradient(120deg,#352718,#352718 11px,#2c1f11 11px,#2c1f11 22px);"></div><div style="flex:1; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 11px,#332510 11px,#332510 22px);"></div></div>
+                </div>
+                <p style="font-size:14px; color:#e6d3ac; line-height:1.75;">駿河ベイIPA、香りが最高だった。ホップ好きは絶対好きなやつ🍺 カウンターで一杯、最高の締め。</p>
+                <div style="display:flex; gap:8px; margin-top:12px;"><span style="font-size:11.5px; color:#c79241;">#IPA</span><span style="font-size:11.5px; color:#c79241;">#静岡</span><span style="font-size:11.5px; color:#c79241;">#クラフトビール</span></div>
+                <div style="display:flex; gap:26px; margin-top:14px; padding-top:14px; border-top:1px solid rgba(224,163,65,.1);">
+                  <span style="display:flex; align-items:center; gap:7px; font-size:13.5px; color:#e0483a;"><svg width="19" height="19" viewBox="0 0 24 24" fill="#e0483a" stroke="#e0483a" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg>24</span>
+                  <span style="display:flex; align-items:center; gap:7px; font-size:13.5px; color:#9c8763;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-9 8 9 9 0 01-4-.9L3 20l1.4-4a8.4 8.4 0 01-1-4 8.5 8.5 0 018.5-8.5 8.5 8.5 0 019 8z"></path></svg>5</span>
+                  <span style="display:flex; align-items:center; gap:7px; font-size:13.5px; color:#9c8763;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.8"><path d="M4 12v8h16v-8M12 3v13M7 8l5-5 5 5"></path></svg>シェア</span>
+                </div>
+              </div>
+
+              <div style="background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:18px; padding:18px;">
+                <div style="display:flex; align-items:center; gap:11px;">
+                  <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#8a5a2a,#5a3818);"></div>
+                  <div style="flex:1;"><div style="font-weight:700; font-size:15px; color:#f3e7d2;">まゆ</div><div style="font-size:11.5px; color:#9c8763;">5時間前 · ブルワリータップ 浜松</div></div>
+                </div>
+                <div style="margin:14px 0; border-radius:14px; overflow:hidden; height:260px; position:relative; background:repeating-linear-gradient(120deg,#352718,#352718 13px,#2c1f11 13px,#2c1f11 26px);"><span style="position:absolute; bottom:8px; left:8px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.5); padding:3px 7px; border-radius:5px;">投稿写真</span></div>
+                <p style="font-size:14px; color:#e6d3ac; line-height:1.75;">スタウトとチーズのペアリング、想像以上に合う。</p>
+                <div style="display:flex; gap:26px; margin-top:14px; padding-top:14px; border-top:1px solid rgba(224,163,65,.1);">
+                  <span style="display:flex; align-items:center; gap:7px; font-size:13.5px; color:#9c8763;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.6"><path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 00-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 000-7.8z"></path></svg>18</span>
+                  <span style="display:flex; align-items:center; gap:7px; font-size:13.5px; color:#9c8763;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-9 8 9 9 0 01-4-.9L3 20l1.4-4a8.4 8.4 0 01-1-4 8.5 8.5 0 018.5-8.5 8.5 8.5 0 019 8z"></path></svg>2</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- trends -->
+            <div style="flex:0 0 240px; display:flex; flex-direction:column; gap:16px;">
+              <div style="background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:16px;">
+                <h3 style="font-family:'Zen Old Mincho',serif; font-size:15px; font-weight:700; color:#f5e9d4; margin-bottom:12px;">人気のタグ</h3>
+                <div style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#e0a341;">#IPA</span><span style="color:#9c8763;">128</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#e0a341;">#静岡クラフト</span><span style="color:#9c8763;">94</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#e0a341;">#スタウト</span><span style="color:#9c8763;">61</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#e0a341;">#ペアリング</span><span style="color:#9c8763;">47</span></div>
+                </div>
+              </div>
+              <div style="background:linear-gradient(160deg,#e0a341,#a5691f); border-radius:16px; padding:16px;">
+                <div style="font-family:'Zen Old Mincho',serif; font-size:15px; font-weight:700; color:#20160a;">あなたの一杯を共有</div>
+                <p style="font-size:12px; color:#3a2810; line-height:1.6; margin-top:6px;">飲んだビールを投稿してタイムラインに載せよう。</p>
+                <button style="margin-top:12px; border:none; cursor:pointer; background:#20160a; color:#e0a341; font-weight:700; font-size:13px; padding:9px 16px; border-radius:10px; display:flex; align-items:center; gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg>投稿する</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 4 : MENU TAB ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">店舗詳細 — メニュータブ</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        Beers（写真・ビール名・説明・醸造所・産地）と Meals を分けて。ビールはタップ配列を意識した縦カード。モバイル <a href="#4a" style="color:#a6702a; font-weight:700;">4a</a> / PC <a href="#4b" style="color:#a6702a; font-weight:700;">4b</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 4a MOBILE -->
+      <div id="4a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">4a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">メニュー — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <!-- compact header -->
+            <div style="position:sticky; top:0; z-index:5; padding:34px 20px 12px; background:rgba(21,16,10,.95); backdrop-filter:blur(14px); display:flex; align-items:center; gap:12px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f3e7d2" stroke-width="2.2"><path d="M15 18l-6-6 6-6"></path></svg>
+              <div><div style="font-family:'Zen Old Mincho',serif; font-size:16px; font-weight:700; color:#f5e9d4;">クラフトビアバー 静岡</div></div>
+            </div>
+            <!-- tabs -->
+            <div class="canvas-scroll" style="position:sticky; top:66px; z-index:4; display:flex; gap:22px; padding:0 20px; background:rgba(21,16,10,.95); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16); overflow-x:auto;">
+              <span style="font-size:14px; color:#9c8763; padding:8px 0 12px; white-space:nowrap;">基本情報</span>
+              <span style="font-size:14px; font-weight:700; color:#e0a341; padding:8px 0 12px; border-bottom:2px solid #e0a341; white-space:nowrap;">メニュー</span>
+              <span style="font-size:14px; color:#9c8763; padding:8px 0 12px; white-space:nowrap;">投稿</span>
+              <span style="font-size:14px; color:#9c8763; padding:8px 0 12px; white-space:nowrap;">お店から</span>
+              <span style="font-size:14px; color:#9c8763; padding:8px 0 12px; white-space:nowrap;">クーポン</span>
+            </div>
+
+            <div style="padding:22px 20px 24px;">
+              <!-- Beers heading -->
+              <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:22px; letter-spacing:.04em; color:#e0a341;">Beers</span>
+                <span style="flex:1; height:1px; background:rgba(224,163,65,.2);"></span>
+                <span style="font-size:12px; color:#9c8763;">On Tap 12</span>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:14px;">
+                <div style="display:flex; gap:14px; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:12px;">
+                  <div style="flex:0 0 76px; width:76px; height:96px; border-radius:10px; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 8px,#31240f 8px,#31240f 16px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                  <div style="flex:1;">
+                    <div style="font-weight:700; font-size:15px; color:#f3e7d2;">駿河ベイIPA</div>
+                    <div style="font-size:11.5px; color:#e0a341; margin-top:2px;">West Coast IPA · ABV 6.5%</div>
+                    <p style="font-size:12px; color:#b39a76; line-height:1.6; margin-top:6px;">柑橘とパインの華やかなホップ香。苦味しっかりの定番。</p>
+                    <div style="display:flex; gap:6px; margin-top:8px; font-size:10.5px; color:#9c8763;"><span>🏭 ベアードブルーイング</span><span>· 静岡</span></div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:14px; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:12px;">
+                  <div style="flex:0 0 76px; width:76px; height:96px; border-radius:10px; position:relative; background:repeating-linear-gradient(120deg,#352718,#352718 8px,#2c1f11 8px,#2c1f11 16px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                  <div style="flex:1;">
+                    <div style="font-weight:700; font-size:15px; color:#f3e7d2;">安倍川スタウト</div>
+                    <div style="font-size:11.5px; color:#e0a341; margin-top:2px;">Imperial Stout · ABV 8.0%</div>
+                    <p style="font-size:12px; color:#b39a76; line-height:1.6; margin-top:6px;">焙煎モルトのコーヒー様の香り。濃厚でクリーミー。</p>
+                    <div style="display:flex; gap:6px; margin-top:8px; font-size:10.5px; color:#9c8763;"><span>🏭 志太泉ブルワリー</span><span>· 静岡</span></div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:14px; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:12px;">
+                  <div style="flex:0 0 76px; width:76px; height:96px; border-radius:10px; position:relative; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 8px,#332510 8px,#332510 16px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                  <div style="flex:1;">
+                    <div style="font-weight:700; font-size:15px; color:#f3e7d2;">富士山ヴァイツェン</div>
+                    <div style="font-size:11.5px; color:#e0a341; margin-top:2px;">Hefeweizen · ABV 5.2%</div>
+                    <p style="font-size:12px; color:#b39a76; line-height:1.6; margin-top:6px;">バナナとクローブの香り。飲みやすい小麦ビール。</p>
+                    <div style="display:flex; gap:6px; margin-top:8px; font-size:10.5px; color:#9c8763;"><span>🏭 御殿場高原ビール</span><span>· 静岡</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Meals heading -->
+              <div style="display:flex; align-items:center; gap:12px; margin:26px 0 16px;">
+                <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:22px; letter-spacing:.04em; color:#e0a341;">Meals</span>
+                <span style="flex:1; height:1px; background:rgba(224,163,65,.2);"></span>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div style="border-radius:14px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+                  <div style="height:90px; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 8px,#31240f 8px,#31240f 16px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                  <div style="padding:10px 12px;"><div style="font-weight:700; font-size:13px; color:#f3e7d2;">自家製ソーセージ盛</div><p style="font-size:11px; color:#b39a76; margin-top:3px;">3種 / ¥1,280</p></div>
+                </div>
+                <div style="border-radius:14px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+                  <div style="height:90px; position:relative; background:repeating-linear-gradient(120deg,#352718,#352718 8px,#2c1f11 8px,#2c1f11 16px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                  <div style="padding:10px 12px;"><div style="font-weight:700; font-size:13px; color:#f3e7d2;">フィッシュ&amp;チップス</div><p style="font-size:11px; color:#b39a76; margin-top:3px;">¥980</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4b PC -->
+      <div id="4b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">4b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">メニュー — PC</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; gap:12px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9b48c" stroke-width="2"><path d="M15 18l-6-6 6-6"></path></svg>
+            <div style="font-family:'Zen Old Mincho',serif; font-size:17px; font-weight:700; color:#f5e9d4;">クラフトビアバー 静岡</div>
+          </header>
+          <div style="display:flex; gap:30px; padding:0 32px; background:rgba(21,16,10,.95); border-bottom:1px solid rgba(224,163,65,.16);">
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">基本情報</span>
+            <span style="font-size:14px; font-weight:700; color:#e0a341; padding:16px 0; border-bottom:2px solid #e0a341;">メニュー</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">タグ付き投稿</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">お店からの投稿</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">クーポン</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">イベント</span>
+          </div>
+
+          <div style="padding:28px 32px 36px;">
+            <div style="display:flex; align-items:baseline; gap:14px; margin-bottom:18px;">
+              <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:26px; letter-spacing:.03em; color:#e0a341;">Beers</span>
+              <span style="flex:1; height:1px; background:rgba(224,163,65,.2);"></span>
+              <span style="font-size:13px; color:#9c8763;">On Tap 12</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div style="display:flex; gap:16px; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:14px;">
+                <div style="flex:0 0 84px; width:84px; height:104px; border-radius:10px; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 9px,#31240f 9px,#31240f 18px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:16px; color:#f3e7d2;">駿河ベイIPA</div><div style="font-size:12px; color:#e0a341; margin-top:3px;">West Coast IPA · ABV 6.5%</div><p style="font-size:12.5px; color:#b39a76; line-height:1.7; margin-top:8px;">柑橘とパインの華やかなホップ香。苦味しっかりの定番。</p><div style="font-size:11px; color:#9c8763; margin-top:8px;">🏭 ベアードブルーイング · 静岡</div></div>
+              </div>
+              <div style="display:flex; gap:16px; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:14px;">
+                <div style="flex:0 0 84px; width:84px; height:104px; border-radius:10px; position:relative; background:repeating-linear-gradient(120deg,#352718,#352718 9px,#2c1f11 9px,#2c1f11 18px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:16px; color:#f3e7d2;">安倍川スタウト</div><div style="font-size:12px; color:#e0a341; margin-top:3px;">Imperial Stout · ABV 8.0%</div><p style="font-size:12.5px; color:#b39a76; line-height:1.7; margin-top:8px;">焙煎モルトのコーヒー様の香り。濃厚でクリーミー。</p><div style="font-size:11px; color:#9c8763; margin-top:8px;">🏭 志太泉ブルワリー · 静岡</div></div>
+              </div>
+              <div style="display:flex; gap:16px; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:14px;">
+                <div style="flex:0 0 84px; width:84px; height:104px; border-radius:10px; position:relative; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 9px,#332510 9px,#332510 18px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:16px; color:#f3e7d2;">富士山ヴァイツェン</div><div style="font-size:12px; color:#e0a341; margin-top:3px;">Hefeweizen · ABV 5.2%</div><p style="font-size:12.5px; color:#b39a76; line-height:1.7; margin-top:8px;">バナナとクローブの香り。飲みやすい小麦ビール。</p><div style="font-size:11px; color:#9c8763; margin-top:8px;">🏭 御殿場高原ビール · 静岡</div></div>
+              </div>
+              <div style="display:flex; gap:16px; background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:14px;">
+                <div style="flex:0 0 84px; width:84px; height:104px; border-radius:10px; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 9px,#31240f 9px,#31240f 18px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div>
+                <div style="flex:1;"><div style="font-weight:700; font-size:16px; color:#f3e7d2;">三保ペールエール</div><div style="font-size:12px; color:#e0a341; margin-top:3px;">Pale Ale · ABV 5.0%</div><p style="font-size:12.5px; color:#b39a76; line-height:1.7; margin-top:8px;">バランス型。ホップの香りと麦の甘みが心地よい。</p><div style="font-size:11px; color:#9c8763; margin-top:8px;">🏭 West Coast Brewing · 静岡</div></div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:baseline; gap:14px; margin:30px 0 18px;">
+              <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:26px; letter-spacing:.03em; color:#e0a341;">Meals</span>
+              <span style="flex:1; height:1px; background:rgba(224,163,65,.2);"></span>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+              <div style="border-radius:14px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);"><div style="height:110px; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 9px,#31240f 9px,#31240f 18px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div><div style="padding:11px 13px;"><div style="font-weight:700; font-size:13.5px; color:#f3e7d2;">自家製ソーセージ盛</div><p style="font-size:11.5px; color:#b39a76; margin-top:4px;">3種 / ¥1,280</p></div></div>
+              <div style="border-radius:14px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);"><div style="height:110px; position:relative; background:repeating-linear-gradient(120deg,#352718,#352718 9px,#2c1f11 9px,#2c1f11 18px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div><div style="padding:11px 13px;"><div style="font-weight:700; font-size:13.5px; color:#f3e7d2;">フィッシュ&amp;チップス</div><p style="font-size:11.5px; color:#b39a76; margin-top:4px;">¥980</p></div></div>
+              <div style="border-radius:14px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);"><div style="height:110px; position:relative; background:repeating-linear-gradient(120deg,#3d2e1a,#3d2e1a 9px,#332510 9px,#332510 18px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div><div style="padding:11px 13px;"><div style="font-weight:700; font-size:13.5px; color:#f3e7d2;">アヒージョ</div><p style="font-size:11.5px; color:#b39a76; margin-top:4px;">¥880</p></div></div>
+              <div style="border-radius:14px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);"><div style="height:110px; position:relative; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 9px,#31240f 9px,#31240f 18px);"><span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#a58a5c;">写真</span></div><div style="padding:11px 13px;"><div style="font-weight:700; font-size:13.5px; color:#f3e7d2;">チーズ盛り合わせ</div><p style="font-size:11.5px; color:#b39a76; margin-top:4px;">¥1,180</p></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 3 : BAR DETAIL ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">店舗詳細ページ</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        1a の世界観で。フルブリードの写真ヒーロー＋固定タブ（基本情報・メニュー・投稿・クーポン）。モバイル <a href="#3a" style="color:#a6702a; font-weight:700;">3a</a> / PC <a href="#3b" style="color:#a6702a; font-weight:700;">3b</a>。
+    </p></div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- 3a MOBILE -->
+      <div id="3a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">3a</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">店舗詳細 — モバイル</div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <!-- hero image -->
+            <div style="position:relative; height:280px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 14px,#31240f 14px,#31240f 28px);">
+              <div style="position:absolute; inset:0; background:linear-gradient(180deg,rgba(15,11,6,.55) 0%,transparent 30%,transparent 55%,rgba(15,11,6,.95) 100%);"></div>
+              <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6d5732" stroke-width="1.4"><path d="M17 11h1a3 3 0 010 6h-1M9 12v6M5 8h12v9a4 4 0 01-4 4H9a4 4 0 01-4-4z"></path></svg></div>
+              <!-- top bar -->
+              <div style="position:absolute; top:34px; left:16px; right:16px; display:flex; justify-content:space-between;">
+                <div style="width:38px; height:38px; border-radius:50%; background:rgba(15,11,6,.55); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f3e7d2" stroke-width="2.2"><path d="M15 18l-6-6 6-6"></path></svg></div>
+                <div style="display:flex; gap:8px;">
+                  <div style="width:38px; height:38px; border-radius:50%; background:rgba(15,11,6,.55); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f3e7d2" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg></div>
+                  <div style="width:38px; height:38px; border-radius:50%; background:rgba(224,163,65,.9); display:flex; align-items:center; justify-content:center;"><svg width="19" height="19" viewBox="0 0 24 24" fill="#20160a" stroke="#20160a" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></div>
+                </div>
+              </div>
+              <!-- dots -->
+              <div style="position:absolute; bottom:74px; left:0; right:0; display:flex; gap:6px; justify-content:center;"><span style="width:20px; height:4px; border-radius:2px; background:#e0a341;"></span><span style="width:6px; height:4px; border-radius:2px; background:rgba(243,231,210,.4);"></span><span style="width:6px; height:4px; border-radius:2px; background:rgba(243,231,210,.4);"></span></div>
+              <!-- title -->
+              <div style="position:absolute; bottom:18px; left:20px; right:20px;">
+                <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.2em; color:#e0a341; text-transform:uppercase; margin-bottom:6px;">Craft Beer Bar</div>
+                <h2 style="font-family:'Zen Old Mincho',serif; font-size:25px; font-weight:900; color:#f5e9d4; line-height:1.25;">クラフトビアバー 静岡</h2>
+                <div style="font-size:12.5px; color:#c9b48c; margin-top:6px;">静岡県 静岡市葵区 · 営業中 〜23:00</div>
+              </div>
+            </div>
+
+            <!-- tabs -->
+            <div class="canvas-scroll" style="position:sticky; top:0; z-index:4; display:flex; gap:22px; padding:14px 20px 0; background:rgba(21,16,10,.95); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16); overflow-x:auto;">
+              <span style="font-size:14px; font-weight:700; color:#e0a341; padding-bottom:12px; border-bottom:2px solid #e0a341; white-space:nowrap;">基本情報</span>
+              <span style="font-size:14px; color:#9c8763; padding-bottom:12px; white-space:nowrap;">メニュー</span>
+              <span style="font-size:14px; color:#9c8763; padding-bottom:12px; white-space:nowrap;">投稿</span>
+              <span style="font-size:14px; color:#9c8763; padding-bottom:12px; white-space:nowrap;">お店から</span>
+              <span style="font-size:14px; color:#9c8763; padding-bottom:12px; white-space:nowrap;">クーポン</span>
+            </div>
+
+            <div style="padding:20px; display:flex; flex-direction:column; gap:16px;">
+              <!-- PR -->
+              <div>
+                <p style="font-family:'Zen Old Mincho',serif; font-size:16px; color:#f3e7d2; line-height:1.6;">静岡の地ビールと世界のクラフトを、いつも12種類。</p>
+                <p style="font-size:13.5px; color:#b39a76; line-height:1.8; margin-top:8px;">駿府城公園ほど近く。地元ブルワリーの限定樽を中心に、料理と合わせて楽しめる一軒。</p>
+              </div>
+              <!-- hours -->
+              <div style="background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:16px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="font-size:13px; font-weight:700; color:#f3e7d2; letter-spacing:.05em;">営業時間</span></div>
+                <div style="display:flex; flex-direction:column; gap:7px; font-size:13px;">
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#9c8763;">月</span><span style="color:#8a7355;">定休日</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#d9c4a0;">火–木</span><span style="color:#e6d3ac;">17:00–23:00</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#d9c4a0;">金土</span><span style="color:#e6d3ac;">17:00–翌2:00</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#d9c4a0;">日</span><span style="color:#e6d3ac;">15:00–22:00</span></div>
+                </div>
+              </div>
+              <!-- info rows -->
+              <div style="background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; overflow:hidden;">
+                <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid rgba(224,163,65,.08);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.8"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><span style="font-size:13px; color:#d9c4a0;">静岡市葵区常磐町2-6-8</span></div>
+                <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid rgba(224,163,65,.08);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3-8.6A2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.6a2 2 0 01-.5 2.1L8 9.5a16 16 0 006 6l1.1-1.1a2 2 0 012.1-.5c.8.3 1.7.5 2.6.6a2 2 0 011.7 2z"></path></svg><span style="font-size:13px; color:#e0a341;">054-xxx-xxxx</span></div>
+                <div style="display:flex; align-items:center; gap:12px; padding:14px 16px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path></svg><span style="font-size:13px; color:#d9c4a0;">現金 · カード · QR決済</span></div>
+              </div>
+              <!-- sns -->
+              <div style="display:flex; gap:10px;">
+                <div style="flex:1; height:46px; border-radius:12px; background:#241a0e; border:1px solid rgba(224,163,65,.18); display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; color:#d9c4a0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="#e0a341"></circle></svg>Instagram</div>
+                <div style="flex:1; height:46px; border-radius:12px; background:#241a0e; border:1px solid rgba(224,163,65,.18); display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; color:#d9c4a0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="#e0a341"><path d="M18.9 2H22l-7 8 8.2 12h-6.4l-5-6.6L5.9 22H2.8l7.5-8.6L2.4 2h6.6l4.5 6zm-1.1 18h1.7L7.3 3.8H5.5z"></path></svg>X</div>
+              </div>
+            </div>
+
+            <!-- sticky action -->
+            <div style="position:sticky; bottom:0; z-index:4; padding:12px 20px 18px; background:rgba(21,16,10,.94); backdrop-filter:blur(14px); border-top:1px solid rgba(224,163,65,.16); display:flex; gap:10px;">
+              <button style="flex:0 0 52px; height:50px; border-radius:14px; background:#241a0e; border:1px solid rgba(224,163,65,.25); display:flex; align-items:center; justify-content:center; cursor:pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></button>
+              <button style="flex:1; height:50px; border:none; border-radius:14px; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg>このお店に投稿する</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3b PC -->
+      <div id="3b" style="display:flex; flex-direction:column; gap:18px; width:900px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">3b</span>
+          <div style="font-family:'Zen Old Mincho',serif; font-size:18px; font-weight:700; color:#241a0e;">店舗詳細 — PC</div>
+        </div>
+
+        <div style="width:900px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+          <header style="padding:16px 32px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px; color:#c9b48c; font-size:13px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9b48c" stroke-width="2"><path d="M15 18l-6-6 6-6"></path></svg>さがすに戻る</div>
+            <div style="display:flex; align-items:baseline; gap:2px;"><span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:20px; color:#f3e7d2;">Beer</span><span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:18px; color:#e0a341;">Salon</span></div>
+          </header>
+
+          <!-- hero -->
+          <div style="position:relative; height:300px; background:repeating-linear-gradient(120deg,#3a2b18,#3a2b18 16px,#31240f 16px,#31240f 32px);">
+            <div style="position:absolute; inset:0; background:linear-gradient(180deg,transparent 40%,rgba(15,11,6,.96) 100%);"></div>
+            <div style="position:absolute; top:16px; right:24px; display:flex; gap:8px; font-family:'Archivo',monospace; font-size:10px; color:#cbb184;"><span style="background:rgba(15,11,6,.6); padding:4px 9px; border-radius:6px;">店舗写真 1 / 6</span></div>
+            <div style="position:absolute; bottom:24px; left:32px; right:32px; display:flex; align-items:flex-end; justify-content:space-between; gap:24px;">
+              <div>
+                <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.22em; color:#e0a341; text-transform:uppercase; margin-bottom:8px;">Craft Beer Bar</div>
+                <h2 style="font-family:'Zen Old Mincho',serif; font-size:34px; font-weight:900; color:#f5e9d4; line-height:1.2;">クラフトビアバー 静岡</h2>
+                <div style="font-size:13px; color:#c9b48c; margin-top:8px;">静岡県 静岡市葵区 · <span style="color:#7fc47f;">営業中</span> 〜23:00</div>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <button style="height:46px; padding:0 18px; border-radius:12px; background:#241a0e; border:1px solid rgba(224,163,65,.25); color:#e0a341; font-weight:700; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>お気に入り</button>
+                <button style="height:46px; padding:0 20px; border:none; border-radius:12px; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:800; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg>投稿する</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- tabs -->
+          <div style="display:flex; gap:30px; padding:0 32px; background:rgba(21,16,10,.95); border-bottom:1px solid rgba(224,163,65,.16);">
+            <span style="font-size:14px; font-weight:700; color:#e0a341; padding:16px 0; border-bottom:2px solid #e0a341;">基本情報</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">メニュー</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">タグ付き投稿</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">お店からの投稿</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">クーポン</span>
+            <span style="font-size:14px; color:#9c8763; padding:16px 0;">イベント</span>
+          </div>
+
+          <!-- 2col body -->
+          <div style="display:flex; gap:28px; padding:28px 32px 36px; background:#15100a;">
+            <div style="flex:1; display:flex; flex-direction:column; gap:14px;">
+              <p style="font-family:'Zen Old Mincho',serif; font-size:19px; color:#f3e7d2; line-height:1.6;">静岡の地ビールと世界のクラフトを、いつも12種類。</p>
+              <p style="font-size:14px; color:#b39a76; line-height:1.9;">駿府城公園ほど近く。地元ブルワリーの限定樽を中心に、旬の料理と合わせて楽しめる一軒。カウンター10席、テーブル4卓。ひとり飲みも歓迎です。</p>
+              <div style="display:flex; gap:10px; margin-top:4px;">
+                <span style="font-size:12px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:5px 12px; border-radius:999px;">IPA</span>
+                <span style="font-size:12px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:5px 12px; border-radius:999px;">地ビール</span>
+                <span style="font-size:12px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:5px 12px; border-radius:999px;">フード充実</span>
+              </div>
+              <!-- map -->
+              <div style="margin-top:8px; height:200px; border-radius:16px; overflow:hidden; position:relative; background:linear-gradient(135deg,#241a0e,#2e2213); border:1px solid rgba(224,163,65,.14);">
+                <div style="position:absolute; inset:0; background-image:linear-gradient(rgba(224,163,65,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(224,163,65,.07) 1px,transparent 1px); background-size:32px 32px;"></div>
+                <div style="position:absolute; top:46%; left:48%; width:18px; height:18px; border-radius:50% 50% 50% 0; background:#e0a341; transform:rotate(-45deg); box-shadow:0 0 0 6px rgba(224,163,65,.18);"></div>
+              </div>
+            </div>
+            <div style="flex:0 0 300px; display:flex; flex-direction:column; gap:14px;">
+              <div style="background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; padding:18px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="font-size:13px; font-weight:700; color:#f3e7d2;">営業時間</span></div>
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:13px;">
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#9c8763;">月</span><span style="color:#8a7355;">定休日</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#d9c4a0;">火–木</span><span style="color:#e6d3ac;">17:00–23:00</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#d9c4a0;">金土</span><span style="color:#e6d3ac;">17:00–翌2:00</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span style="color:#d9c4a0;">日</span><span style="color:#e6d3ac;">15:00–22:00</span></div>
+                </div>
+              </div>
+              <div style="background:#1e160d; border:1px solid rgba(224,163,65,.12); border-radius:16px; overflow:hidden;">
+                <div style="display:flex; align-items:center; gap:11px; padding:13px 16px; border-bottom:1px solid rgba(224,163,65,.08);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.8"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><span style="font-size:12.5px; color:#d9c4a0;">静岡市葵区常磐町2-6-8</span></div>
+                <div style="display:flex; align-items:center; gap:11px; padding:13px 16px; border-bottom:1px solid rgba(224,163,65,.08);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3-8.6A2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.6a2 2 0 01-.5 2.1L8 9.5a16 16 0 006 6l1.1-1.1a2 2 0 012.1-.5c.8.3 1.7.5 2.6.6a2 2 0 011.7 2z"></path></svg><span style="font-size:12.5px; color:#e0a341;">054-xxx-xxxx</span></div>
+                <div style="display:flex; align-items:center; gap:11px; padding:13px 16px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c79241" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path></svg><span style="font-size:12.5px; color:#d9c4a0;">現金 · カード · QR</span></div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <div style="flex:1; height:44px; border-radius:12px; background:#241a0e; border:1px solid rgba(224,163,65,.18); display:flex; align-items:center; justify-content:center; gap:7px; font-size:12.5px; color:#d9c4a0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e0a341" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="#e0a341"></circle></svg>Instagram</div>
+                <div style="flex:1; height:44px; border-radius:12px; background:#241a0e; border:1px solid rgba(224,163,65,.18); display:flex; align-items:center; justify-content:center; gap:7px; font-size:12.5px; color:#d9c4a0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#e0a341"><path d="M18.9 2H22l-7 8 8.2 12h-6.4l-5-6.6L5.9 22H2.8l7.5-8.6L2.4 2h6.6l4.5 6zm-1.1 18h1.7L7.3 3.8H5.5z"></path></svg>X</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TURN 2 : 1a PC LAYOUT ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto 80px;">
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · Dark Taproom</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px;">1a をPCレイアウトに展開</h1>
+      <p style="max-width:820px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        <a href="#1a" style="color:#a6702a; font-weight:700;">1a</a> の世界観そのままに、PC幅では「地図＋店舗一覧」を2カラム化。左に固定マップ、右にスクロールする店舗リスト。下部に横スクロールの発見セクションを配置。<a href="#2a" style="color:#a6702a; font-weight:700;">2a</a>
+    </p></div>
+
+    <div id="2a" style="width:1400px; border-radius:22px; overflow:hidden; background:#15100a; box-shadow:0 50px 100px -40px rgba(40,25,8,.65);">
+      <!-- header -->
+      <header style="padding:18px 40px; background:rgba(21,16,10,.92); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:44px;">
+          <div style="display:flex; align-items:baseline; gap:2px;">
+            <span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:24px; color:#f3e7d2;">Beer</span>
+            <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:22px; color:#e0a341;">Salon</span>
+          </div>
+          <nav style="display:flex; gap:30px; font-size:14px; color:#c9b48c;">
+            <span style="color:#e0a341; font-weight:700; border-bottom:2px solid #e0a341; padding-bottom:20px;">さがす</span>
+            <span>タイムライン</span>
+            <span>お気に入り</span>
+            <span>閲覧履歴</span>
+          </nav>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button style="border:none; cursor:pointer; display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#e0a341,#c47f28); color:#20160a; font-weight:700; font-size:14px; padding:10px 18px; border-radius:12px;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg>投稿する
+          </button>
+          <div style="width:42px; height:42px; border-radius:50%; background:#241a0e; border:1px solid rgba(224,163,65,.2); display:flex; align-items:center; justify-content:center; position:relative;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#e6d3ac" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 01-3.4 0"></path></svg>
+            <span style="position:absolute; top:-2px; right:-2px; width:17px; height:17px; border-radius:50%; background:#e0483a; color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif;">3</span>
+          </div>
+          <div style="width:42px; height:42px; border-radius:50%; background:#241a0e; border:1px solid rgba(224,163,65,.2); display:flex; align-items:center; justify-content:center;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#e6d3ac" stroke-width="1.8"><path d="M20 21a8 8 0 10-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+        </div>
+      </header>
+
+      <!-- hero band -->
+      <div style="padding:40px 40px 30px; background:linear-gradient(180deg,#1e150b 0%,#15100a 100%); position:relative; overflow:hidden;">
+        <div style="position:absolute; top:-80px; right:60px; width:340px; height:340px; border-radius:50%; background:radial-gradient(circle,rgba(224,163,65,.18),transparent 70%);"></div>
+        <div style="position:relative; display:flex; align-items:flex-end; justify-content:space-between; gap:40px;">
+          <div style="max-width:640px;">
+            <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.26em; color:#c79241; text-transform:uppercase; margin-bottom:12px;">Shizuoka · Craft Beer</div>
+            <h2 style="font-family:'Zen Old Mincho',serif; font-size:42px; font-weight:900; line-height:1.3; color:#f5e9d4;">今夜の一杯を、この街で見つける。</h2>
+          </div>
+          <!-- search card -->
+          <div style="flex:0 0 460px; background:#211810; border:1px solid rgba(224,163,65,.2); border-radius:18px; padding:20px;">
+            <div style="display:flex; gap:8px; margin-bottom:14px;">
+              <div style="flex:1; display:flex; align-items:center; gap:10px; background:#2c2013; border:1px solid rgba(224,163,65,.22); border-radius:12px; padding:12px 14px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b39a76" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+                <span style="color:#8f7c5d; font-size:14px;">店名・エリアで探す</span>
+              </div>
+              <button style="width:50px; border:none; border-radius:12px; background:linear-gradient(135deg,#e0a341,#c47f28); display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+              </button>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <div style="flex:1; display:flex; align-items:center; justify-content:space-between; background:#2c2013; border:1px solid rgba(224,163,65,.18); border-radius:12px; padding:11px 14px; font-size:13px; color:#d9c4a0;">市町村 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg></div>
+              <div style="flex:1; display:flex; align-items:center; justify-content:space-between; background:#2c2013; border:1px solid rgba(224,163,65,.18); border-radius:12px; padding:11px 14px; font-size:13px; color:#d9c4a0;">産地 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+              <span style="font-size:12.5px; font-weight:700; color:#20160a; background:#e0a341; padding:6px 13px; border-radius:999px;">✓ IPA</span>
+              <span style="font-size:12.5px; color:#d9c4a0; background:#2c2013; border:1px solid rgba(224,163,65,.18); padding:6px 13px; border-radius:999px;">スタウト</span>
+              <span style="font-size:12.5px; color:#d9c4a0; background:#2c2013; border:1px solid rgba(224,163,65,.18); padding:6px 13px; border-radius:999px;">ペールエール</span>
+              <span style="font-size:12.5px; color:#d9c4a0; background:#2c2013; border:1px solid rgba(224,163,65,.18); padding:6px 13px; border-radius:999px;">ヴァイツェン</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2col map + list -->
+      <div style="display:flex; gap:0; height:620px;">
+        <!-- map -->
+        <div style="flex:0 0 620px; position:relative; background:linear-gradient(135deg,#241a0e 0%,#2e2213 100%); border-right:1px solid rgba(224,163,65,.14);">
+          <div style="position:absolute; inset:0; background-image:linear-gradient(rgba(224,163,65,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(224,163,65,.07) 1px,transparent 1px); background-size:36px 36px;"></div>
+          <div style="position:absolute; top:38%; left:30%; width:18px; height:18px; border-radius:50% 50% 50% 0; background:#e0a341; transform:rotate(-45deg); box-shadow:0 0 0 6px rgba(224,163,65,.18);"></div>
+          <div style="position:absolute; top:55%; left:56%; width:18px; height:18px; border-radius:50% 50% 50% 0; background:#e0a341; transform:rotate(-45deg); box-shadow:0 0 0 6px rgba(224,163,65,.18);"></div>
+          <div style="position:absolute; top:28%; left:68%; width:18px; height:18px; border-radius:50% 50% 50% 0; background:#e0a341; transform:rotate(-45deg); box-shadow:0 0 0 6px rgba(224,163,65,.18);"></div>
+          <div style="position:absolute; top:66%; left:38%; width:18px; height:18px; border-radius:50% 50% 50% 0; background:#e0a341; transform:rotate(-45deg); box-shadow:0 0 0 6px rgba(224,163,65,.18);"></div>
+          <div style="position:absolute; bottom:16px; left:16px; font-family:'Archivo',monospace; font-size:11px; letter-spacing:.1em; color:#c79241; background:rgba(15,11,6,.72); padding:6px 12px; border-radius:8px;">MAP · 12店舗を表示中</div>
+        </div>
+        <!-- list -->
+        <div class="canvas-scroll" style="flex:1; overflow-y:auto; padding:24px 32px 32px; background:#15100a;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px;">
+            <h3 style="font-family:'Zen Old Mincho',serif; font-size:20px; font-weight:700; color:#f5e9d4;">近くのお店</h3>
+            <span style="font-size:13px; color:#9c8763;">12件 · 近い順</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+              <div style="height:130px; position:relative; background:repeating-linear-gradient(115deg,#3a2b18,#3a2b18 12px,#332512 12px,#332512 24px);">
+                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7a6238" stroke-width="1.6"><path d="M17 11h1a3 3 0 010 6h-1M9 12v6M5 8h12v9a4 4 0 01-4 4H9a4 4 0 01-4-4z"></path></svg></div>
+                <span style="position:absolute; top:10px; right:10px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.6); padding:3px 7px; border-radius:5px;">店舗写真</span>
+              </div>
+              <div style="padding:14px 16px;">
+                <div style="font-weight:700; font-size:15px; color:#f3e7d2;">クラフトビアバー 静岡</div>
+                <div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 静岡市</div>
+                <div style="display:flex; gap:6px; margin-top:10px;"><span style="font-size:10.5px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:3px 9px; border-radius:999px;">IPA</span><span style="font-size:10.5px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:3px 9px; border-radius:999px;">クラフト</span></div>
+              </div>
+            </div>
+            <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+              <div style="height:130px; position:relative; background:repeating-linear-gradient(115deg,#35281a,#35281a 12px,#2e2214 12px,#2e2214 24px);"><span style="position:absolute; top:10px; right:10px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.6); padding:3px 7px; border-radius:5px;">店舗写真</span></div>
+              <div style="padding:14px 16px;"><div style="font-weight:700; font-size:15px; color:#f3e7d2;">ブルワリータップ 浜松</div><div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 浜松市</div><div style="display:flex; gap:6px; margin-top:10px;"><span style="font-size:10.5px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:3px 9px; border-radius:999px;">ペールエール</span></div></div>
+            </div>
+            <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+              <div style="height:130px; position:relative; background:repeating-linear-gradient(115deg,#3a2b18,#3a2b18 12px,#332512 12px,#332512 24px);"><span style="position:absolute; top:10px; right:10px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.6); padding:3px 7px; border-radius:5px;">店舗写真</span></div>
+              <div style="padding:14px 16px;"><div style="font-weight:700; font-size:15px; color:#f3e7d2;">ビアホール 沼津</div><div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 沼津市</div><div style="display:flex; gap:6px; margin-top:10px;"><span style="font-size:10.5px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:3px 9px; border-radius:999px;">スタウト</span></div></div>
+            </div>
+            <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+              <div style="height:130px; position:relative; background:repeating-linear-gradient(115deg,#35281a,#35281a 12px,#2e2214 12px,#2e2214 24px);"><span style="position:absolute; top:10px; right:10px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.6); padding:3px 7px; border-radius:5px;">店舗写真</span></div>
+              <div style="padding:14px 16px;"><div style="font-weight:700; font-size:15px; color:#f3e7d2;">タップスタンド 三島</div><div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 三島市</div><div style="display:flex; gap:6px; margin-top:10px;"><span style="font-size:10.5px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:3px 9px; border-radius:999px;">IPA</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- discover strip -->
+      <div style="padding:30px 40px 40px; background:#120d07; border-top:1px solid rgba(224,163,65,.12);">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px;">
+          <h3 style="font-family:'Zen Old Mincho',serif; font-size:20px; font-weight:700; color:#f5e9d4;">人気のカテゴリで探す</h3>
+          <span style="font-family:'Archivo',sans-serif; font-size:12px; letter-spacing:.1em; color:#9c8763;">VIEW ALL →</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+          <div style="height:150px; border-radius:16px; background:linear-gradient(160deg,#e0a341,#a5691f); display:flex; flex-direction:column; justify-content:flex-end; padding:16px;"><span style="font-family:'Archivo',monospace; font-size:11px; color:#5a3a10;">01</span><span style="color:#20160a; font-weight:800; font-size:19px;">IPA</span></div>
+          <div style="height:150px; border-radius:16px; background:linear-gradient(160deg,#8a5a2a,#4a2e12); display:flex; flex-direction:column; justify-content:flex-end; padding:16px;"><span style="font-family:'Archivo',monospace; font-size:11px; color:#c79241;">02</span><span style="color:#f3e7d2; font-weight:800; font-size:19px;">スタウト</span></div>
+          <div style="height:150px; border-radius:16px; background:linear-gradient(160deg,#c99a4e,#8a6427); display:flex; flex-direction:column; justify-content:flex-end; padding:16px;"><span style="font-family:'Archivo',monospace; font-size:11px; color:#5a3a10;">03</span><span style="color:#20160a; font-weight:800; font-size:19px;">ペールエール</span></div>
+          <div style="height:150px; border-radius:16px; background:linear-gradient(160deg,#b98a52,#6e4a22); display:flex; flex-direction:column; justify-content:flex-end; padding:16px;"><span style="font-family:'Archivo',monospace; font-size:11px; color:#f0dcb4;">04</span><span style="color:#20160a; font-weight:800; font-size:19px;">ヴァイツェン</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TURN 1 ============ -->
+  <section style="display:flex; flex-direction:column; gap:8px; max-width:1500px; margin:0 auto;">
+
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; letter-spacing:.28em; text-transform:uppercase; color:#8a6d3f;">Beer Salon · User Screens</div>
+      <h1 style="font-family:'Zen Old Mincho',serif; font-size:40px; font-weight:900; color:#241a0e; margin-top:8px; letter-spacing:.01em;">トップ / 検索ページ — 3つの方向性</h1>
+      <p style="max-width:760px; margin-top:14px; font-size:15px; line-height:1.85; color:#5c4f3c;">
+        現状の課題「ヘッダー・フッターの帯色と本文のコントラスト不一致」を、それぞれ<strong style="color:#3a2c18;">内部で完全に統一した世界観</strong>として解決した3案。全案モバイルファースト、PC対応前提。左から
+        <a href="#1a" style="color:#a6702a; font-weight:700;">1a</a> ·
+        <a href="#1b" style="color:#a6702a; font-weight:700;">1b</a> ·
+        <a href="#1c" style="color:#a6702a; font-weight:700;">1c</a>。
+      </p>
+    </div>
+
+    <div style="display:flex; flex-wrap:nowrap; gap:52px; align-items:flex-start; min-width:1320px;">
+
+      <!-- ========== OPTION 1a : DARK TAPROOM ========== -->
+      <div id="1a" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#241a0e; color:#e6b25a; padding:6px 12px; border-radius:6px;">1a</span>
+          <div>
+            <div style="font-family:'Zen Old Mincho',serif; font-size:19px; font-weight:700; color:#241a0e;">Dark Taproom</div>
+            <div style="font-size:12.5px; color:#6f5f47;">夜のタップルーム。統一されたダーク × アンバー</div>
+          </div>
+        </div>
+
+        <!-- phone -->
+        <div style="width:392px; height:812px; background:#0f0b06; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(40,25,8,.6), 0 0 0 2px rgba(255,255,255,.04) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#15100a;">
+            <div style="position:sticky; top:0; z-index:5; height:34px; background:linear-gradient(#15100a,#15100a); display:flex; justify-content:center; align-items:flex-start; pointer-events:none;">
+              <div style="width:118px; height:26px; background:#0f0b06; border-radius:0 0 16px 16px;"></div>
+            </div>
+
+            <!-- header -->
+            <header style="position:sticky; top:34px; z-index:4; margin-top:-34px; padding:14px 20px 12px; background:rgba(21,16,10,.86); backdrop-filter:blur(14px); border-bottom:1px solid rgba(224,163,65,.16); display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:baseline; gap:2px;">
+                <span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:21px; color:#f3e7d2;">Beer</span>
+                <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:19px; letter-spacing:.02em; color:#e0a341;">Salon</span>
+              </div>
+              <div style="display:flex; gap:9px;">
+                <div style="width:38px; height:38px; border-radius:50%; background:#241a0e; border:1px solid rgba(224,163,65,.2); display:flex; align-items:center; justify-content:center; position:relative;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e6d3ac" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 01-3.4 0"></path></svg>
+                  <span style="position:absolute; top:-2px; right:-2px; width:16px; height:16px; border-radius:50%; background:#e0483a; color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif;">3</span>
+                </div>
+                <div style="width:38px; height:38px; border-radius:50%; background:#241a0e; border:1px solid rgba(224,163,65,.2); display:flex; align-items:center; justify-content:center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e6d3ac" stroke-width="1.8"><path d="M20 21a8 8 0 10-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+              </div>
+            </header>
+
+            <!-- hero + search -->
+            <div style="padding:22px 20px 24px; background:linear-gradient(180deg,#1c140b 0%,#15100a 100%); position:relative; overflow:hidden;">
+              <div style="position:absolute; top:-40px; right:-30px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle,rgba(224,163,65,.22),transparent 70%);"></div>
+              <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.24em; color:#c79241; text-transform:uppercase; margin-bottom:8px;">Shizuoka · Craft Beer</div>
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:27px; font-weight:900; line-height:1.35; color:#f5e9d4; position:relative;">今夜の一杯を、<br>この街で見つける。</h2>
+
+              <div style="margin-top:20px; display:flex; gap:8px;">
+                <div style="flex:1; display:flex; align-items:center; gap:10px; background:#2c2013; border:1px solid rgba(224,163,65,.22); border-radius:14px; padding:13px 15px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b39a76" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+                  <span style="color:#8f7c5d; font-size:14px;">店名・エリアで探す</span>
+                </div>
+                <button style="width:50px; border:none; border-radius:14px; background:linear-gradient(135deg,#e0a341,#c47f28); display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+                </button>
+              </div>
+
+              <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                <span style="font-size:12.5px; font-weight:700; color:#20160a; background:#e0a341; padding:7px 14px; border-radius:999px;">✓ IPA</span>
+                <span style="font-size:12.5px; color:#d9c4a0; background:#2c2013; border:1px solid rgba(224,163,65,.18); padding:7px 14px; border-radius:999px;">スタウト</span>
+                <span style="font-size:12.5px; color:#d9c4a0; background:#2c2013; border:1px solid rgba(224,163,65,.18); padding:7px 14px; border-radius:999px;">ペールエール</span>
+                <span style="font-size:12.5px; color:#d9c4a0; background:#2c2013; border:1px solid rgba(224,163,65,.18); padding:7px 14px; border-radius:999px;">ヴァイツェン</span>
+              </div>
+            </div>
+
+            <!-- map -->
+            <div style="margin:0 20px 6px; height:150px; border-radius:18px; overflow:hidden; position:relative; background:
+                linear-gradient(135deg,#241a0e 0%,#2e2213 100%);
+                border:1px solid rgba(224,163,65,.14);">
+              <div style="position:absolute; inset:0; background-image:linear-gradient(rgba(224,163,65,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(224,163,65,.07) 1px,transparent 1px); background-size:26px 26px;"></div>
+              <div style="position:absolute; top:44%; left:32%; width:14px; height:14px; border-radius:50% 50% 50% 0; background:#e0a341; transform:rotate(-45deg); box-shadow:0 0 0 4px rgba(224,163,65,.2);"></div>
+              <div style="position:absolute; top:60%; left:60%; width:14px; height:14px; border-radius:50% 50% 50% 0; background:#e0a341; transform:rotate(-45deg); box-shadow:0 0 0 4px rgba(224,163,65,.2);"></div>
+              <div style="position:absolute; top:30%; left:72%; width:14px; height:14px; border-radius:50% 50% 50% 0; background:#e0a341; transform:rotate(-45deg); box-shadow:0 0 0 4px rgba(224,163,65,.2);"></div>
+              <div style="position:absolute; bottom:10px; left:12px; font-family:'Archivo',monospace; font-size:10px; letter-spacing:.1em; color:#c79241; background:rgba(15,11,6,.7); padding:4px 9px; border-radius:6px;">MAP · 3店舗を表示</div>
+            </div>
+
+            <!-- list header -->
+            <div style="padding:18px 20px 10px; display:flex; align-items:baseline; justify-content:space-between;">
+              <h3 style="font-family:'Zen Old Mincho',serif; font-size:17px; font-weight:700; color:#f5e9d4;">近くのお店</h3>
+              <span style="font-size:12px; color:#9c8763;">12件</span>
+            </div>
+
+            <!-- bar cards -->
+            <div style="padding:0 20px; display:flex; flex-direction:column; gap:13px;">
+              <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+                <div style="height:118px; position:relative; background:repeating-linear-gradient(115deg,#3a2b18,#3a2b18 11px,#332512 11px,#332512 22px);">
+                  <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#7a6238" stroke-width="1.6"><path d="M17 11h1a3 3 0 010 6h-1M9 12v6M5 8h12v9a4 4 0 01-4 4H9a4 4 0 01-4-4z"></path></svg>
+                  </div>
+                  <span style="position:absolute; top:10px; right:10px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.6); padding:3px 7px; border-radius:5px;">店舗写真</span>
+                </div>
+                <div style="padding:13px 15px;">
+                  <div style="font-weight:700; font-size:15px; color:#f3e7d2;">クラフトビアバー 静岡</div>
+                  <div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 静岡市</div>
+                  <div style="display:flex; gap:6px; margin-top:9px;">
+                    <span style="font-size:10.5px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:3px 9px; border-radius:999px;">IPA</span>
+                    <span style="font-size:10.5px; color:#e0a341; border:1px solid rgba(224,163,65,.3); padding:3px 9px; border-radius:999px;">クラフト</span>
+                  </div>
+                </div>
+              </div>
+              <div style="border-radius:16px; overflow:hidden; background:#1e160d; border:1px solid rgba(224,163,65,.12);">
+                <div style="height:118px; position:relative; background:repeating-linear-gradient(115deg,#35281a,#35281a 11px,#2e2214 11px,#2e2214 22px);">
+                  <span style="position:absolute; top:10px; right:10px; font-family:'Archivo',monospace; font-size:9px; color:#cbb184; background:rgba(15,11,6,.6); padding:3px 7px; border-radius:5px;">店舗写真</span>
+                </div>
+                <div style="padding:13px 15px;">
+                  <div style="font-weight:700; font-size:15px; color:#f3e7d2;">ブルワリータップ 浜松</div>
+                  <div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 浜松市</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- popular strip -->
+            <div style="padding:22px 0 16px;">
+              <h3 style="font-family:'Zen Old Mincho',serif; font-size:17px; font-weight:700; color:#f5e9d4; padding:0 20px 12px;">人気のカテゴリ</h3>
+              <div class="canvas-scroll" style="display:flex; gap:12px; overflow-x:auto; padding:0 20px 6px;">
+                <div style="flex:0 0 120px;">
+                  <div style="height:96px; border-radius:14px; background:linear-gradient(160deg,#e0a341,#a5691f); display:flex; align-items:flex-end; padding:10px;"><span style="color:#20160a; font-weight:800; font-size:15px;">IPA</span></div>
+                </div>
+                <div style="flex:0 0 120px;">
+                  <div style="height:96px; border-radius:14px; background:linear-gradient(160deg,#8a5a2a,#5a3818); display:flex; align-items:flex-end; padding:10px;"><span style="color:#f3e7d2; font-weight:800; font-size:15px;">スタウト</span></div>
+                </div>
+                <div style="flex:0 0 120px;">
+                  <div style="height:96px; border-radius:14px; background:linear-gradient(160deg,#c99a4e,#8a6427); display:flex; align-items:flex-end; padding:10px;"><span style="color:#20160a; font-weight:800; font-size:15px;">ペールエール</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- bottom nav -->
+            <div style="position:sticky; bottom:0; z-index:4; margin-top:8px; padding:11px 22px 16px; background:rgba(21,16,10,.9); backdrop-filter:blur(14px); border-top:1px solid rgba(224,163,65,.16); display:flex; justify-content:space-between;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="#e0a341" stroke="#e0a341" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><span style="font-size:9.5px; color:#e0a341; font-weight:700;">お気に入り</span></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.7"><path d="M4 4h16v13H8l-4 4z"></path></svg><span style="font-size:9.5px; color:#9c8763;">タイムライン</span></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;"><div style="width:38px; height:38px; margin-top:-8px; border-radius:50%; background:linear-gradient(135deg,#e0a341,#c47f28); display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#20160a" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg></div></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9c8763" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="font-size:9.5px; color:#9c8763;">履歴</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== OPTION 1b : BRIGHT CELLAR ========== -->
+      <div id="1b" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#c47a1e; color:#fff; padding:6px 12px; border-radius:6px;">1b</span>
+          <div>
+            <div style="font-family:'Zen Old Mincho',serif; font-size:19px; font-weight:700; color:#241a0e;">Bright Cellar</div>
+            <div style="font-size:12.5px; color:#6f5f47;">明るいクリーム基調。昼のブラウジングに</div>
+          </div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#efe6d4; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(120,90,40,.4), 0 0 0 2px rgba(255,255,255,.5) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#f7f1e5;">
+            <div style="position:sticky; top:0; z-index:5; height:34px; background:#f7f1e5; display:flex; justify-content:center; align-items:flex-start; pointer-events:none;">
+              <div style="width:118px; height:26px; background:#efe6d4; border-radius:0 0 16px 16px;"></div>
+            </div>
+
+            <header style="position:sticky; top:34px; z-index:4; margin-top:-34px; padding:14px 20px 12px; background:rgba(247,241,229,.9); backdrop-filter:blur(14px); border-bottom:1px solid #e3d7bd; display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:baseline; gap:2px;">
+                <span style="font-family:'Zen Old Mincho',serif; font-weight:900; font-size:21px; color:#2a2016;">Beer</span>
+                <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:19px; color:#c47a1e;">Salon</span>
+              </div>
+              <div style="display:flex; gap:9px;">
+                <div style="width:38px; height:38px; border-radius:50%; background:#fff; border:1px solid #e3d7bd; display:flex; align-items:center; justify-content:center; position:relative;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a6a4c" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 01-3.4 0"></path></svg>
+                  <span style="position:absolute; top:-2px; right:-2px; width:16px; height:16px; border-radius:50%; background:#e0483a; color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; font-family:'Archivo',sans-serif;">3</span>
+                </div>
+                <div style="width:38px; height:38px; border-radius:50%; background:#fff; border:1px solid #e3d7bd; display:flex; align-items:center; justify-content:center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a6a4c" stroke-width="1.8"><path d="M20 21a8 8 0 10-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+              </div>
+            </header>
+
+            <div style="padding:22px 20px 22px;">
+              <div style="font-family:'Archivo',sans-serif; font-size:11px; font-weight:700; letter-spacing:.24em; color:#b0791f; text-transform:uppercase; margin-bottom:8px;">Shizuoka · Craft Beer</div>
+              <h2 style="font-family:'Zen Old Mincho',serif; font-size:26px; font-weight:900; line-height:1.4; color:#2a2016;">好きなビールから、<br>行きたいお店へ。</h2>
+
+              <div style="margin-top:20px; display:flex; gap:8px;">
+                <div style="flex:1; display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #e3d7bd; border-radius:14px; padding:13px 15px; box-shadow:0 2px 8px -4px rgba(120,90,40,.2);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a8946f" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+                  <span style="color:#a08a64; font-size:14px;">店名・エリアで探す</span>
+                </div>
+                <button style="width:50px; border:none; border-radius:14px; background:#c47a1e; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+                </button>
+              </div>
+
+              <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                <span style="font-size:12.5px; font-weight:700; color:#fff; background:#c47a1e; padding:7px 14px; border-radius:999px;">✓ IPA</span>
+                <span style="font-size:12.5px; color:#6b5b3f; background:#fff; border:1px solid #e3d7bd; padding:7px 14px; border-radius:999px;">スタウト</span>
+                <span style="font-size:12.5px; color:#6b5b3f; background:#fff; border:1px solid #e3d7bd; padding:7px 14px; border-radius:999px;">ペールエール</span>
+                <span style="font-size:12.5px; color:#6b5b3f; background:#fff; border:1px solid #e3d7bd; padding:7px 14px; border-radius:999px;">ヴァイツェン</span>
+              </div>
+            </div>
+
+            <div style="margin:0 20px 6px; height:150px; border-radius:18px; overflow:hidden; position:relative; background:linear-gradient(135deg,#e9dfc8,#ddd0b2); border:1px solid #e3d7bd;">
+              <div style="position:absolute; inset:0; background-image:linear-gradient(rgba(150,120,70,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(150,120,70,.12) 1px,transparent 1px); background-size:26px 26px;"></div>
+              <div style="position:absolute; top:44%; left:32%; width:14px; height:14px; border-radius:50% 50% 50% 0; background:#c47a1e; transform:rotate(-45deg); box-shadow:0 0 0 4px rgba(196,122,30,.2);"></div>
+              <div style="position:absolute; top:60%; left:60%; width:14px; height:14px; border-radius:50% 50% 50% 0; background:#c47a1e; transform:rotate(-45deg); box-shadow:0 0 0 4px rgba(196,122,30,.2);"></div>
+              <div style="position:absolute; top:30%; left:72%; width:14px; height:14px; border-radius:50% 50% 50% 0; background:#c47a1e; transform:rotate(-45deg); box-shadow:0 0 0 4px rgba(196,122,30,.2);"></div>
+              <div style="position:absolute; bottom:10px; left:12px; font-family:'Archivo',monospace; font-size:10px; letter-spacing:.1em; color:#8a6d3f; background:rgba(255,255,255,.8); padding:4px 9px; border-radius:6px;">MAP · 3店舗を表示</div>
+            </div>
+
+            <div style="padding:18px 20px 10px; display:flex; align-items:baseline; justify-content:space-between;">
+              <h3 style="font-family:'Zen Old Mincho',serif; font-size:17px; font-weight:700; color:#2a2016;">近くのお店</h3>
+              <span style="font-size:12px; color:#a08a64;">12件</span>
+            </div>
+
+            <div style="padding:0 20px; display:flex; flex-direction:column; gap:13px;">
+              <div style="border-radius:16px; overflow:hidden; background:#fff; border:1px solid #e8ddc6; box-shadow:0 4px 14px -8px rgba(120,90,40,.3);">
+                <div style="height:118px; position:relative; background:repeating-linear-gradient(115deg,#ece0c8,#ece0c8 11px,#e5d7ba 11px,#e5d7ba 22px);">
+                  <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#c3ad82" stroke-width="1.6"><path d="M17 11h1a3 3 0 010 6h-1M9 12v6M5 8h12v9a4 4 0 01-4 4H9a4 4 0 01-4-4z"></path></svg>
+                  </div>
+                  <span style="position:absolute; top:10px; right:10px; font-family:'Archivo',monospace; font-size:9px; color:#8a6d3f; background:rgba(255,255,255,.8); padding:3px 7px; border-radius:5px;">店舗写真</span>
+                </div>
+                <div style="padding:13px 15px;">
+                  <div style="font-weight:700; font-size:15px; color:#2a2016;">クラフトビアバー 静岡</div>
+                  <div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 静岡市</div>
+                  <div style="display:flex; gap:6px; margin-top:9px;">
+                    <span style="font-size:10.5px; color:#b0791f; background:#f6ecd7; padding:3px 9px; border-radius:999px;">IPA</span>
+                    <span style="font-size:10.5px; color:#b0791f; background:#f6ecd7; padding:3px 9px; border-radius:999px;">クラフト</span>
+                  </div>
+                </div>
+              </div>
+              <div style="border-radius:16px; overflow:hidden; background:#fff; border:1px solid #e8ddc6; box-shadow:0 4px 14px -8px rgba(120,90,40,.3);">
+                <div style="height:118px; position:relative; background:repeating-linear-gradient(115deg,#e9dcc2,#e9dcc2 11px,#e2d3b3 11px,#e2d3b3 22px);">
+                  <span style="position:absolute; top:10px; right:10px; font-family:'Archivo',monospace; font-size:9px; color:#8a6d3f; background:rgba(255,255,255,.8); padding:3px 7px; border-radius:5px;">店舗写真</span>
+                </div>
+                <div style="padding:13px 15px;">
+                  <div style="font-weight:700; font-size:15px; color:#2a2016;">ブルワリータップ 浜松</div>
+                  <div style="font-size:12.5px; color:#a08a64; margin-top:3px;">静岡県 浜松市</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding:22px 0 16px;">
+              <h3 style="font-family:'Zen Old Mincho',serif; font-size:17px; font-weight:700; color:#2a2016; padding:0 20px 12px;">人気のカテゴリ</h3>
+              <div class="canvas-scroll" style="display:flex; gap:12px; overflow-x:auto; padding:0 20px 6px;">
+                <div style="flex:0 0 120px;"><div style="height:96px; border-radius:14px; background:linear-gradient(160deg,#e6a94a,#c47a1e); display:flex; align-items:flex-end; padding:10px;"><span style="color:#fff; font-weight:800; font-size:15px;">IPA</span></div></div>
+                <div style="flex:0 0 120px;"><div style="height:96px; border-radius:14px; background:linear-gradient(160deg,#9c6a34,#6a4318); display:flex; align-items:flex-end; padding:10px;"><span style="color:#fff; font-weight:800; font-size:15px;">スタウト</span></div></div>
+                <div style="flex:0 0 120px;"><div style="height:96px; border-radius:14px; background:linear-gradient(160deg,#d9b56b,#b08a3d); display:flex; align-items:flex-end; padding:10px;"><span style="color:#3a2c14; font-weight:800; font-size:15px;">ペールエール</span></div></div>
+              </div>
+            </div>
+
+            <div style="position:sticky; bottom:0; z-index:4; margin-top:8px; padding:11px 22px 16px; background:rgba(247,241,229,.94); backdrop-filter:blur(14px); border-top:1px solid #e3d7bd; display:flex; justify-content:space-between;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="#c47a1e" stroke="#c47a1e" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><span style="font-size:9.5px; color:#c47a1e; font-weight:700;">お気に入り</span></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a8946f" stroke-width="1.7"><path d="M4 4h16v13H8l-4 4z"></path></svg><span style="font-size:9.5px; color:#a8946f;">タイムライン</span></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;"><div style="width:38px; height:38px; margin-top:-8px; border-radius:50%; background:#c47a1e; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg></div></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a8946f" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="font-size:9.5px; color:#a8946f;">履歴</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== OPTION 1c : EDITORIAL MINIMAL ========== -->
+      <div id="1c" style="display:flex; flex-direction:column; gap:18px; width:392px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.15em; background:#1c1a16; color:#e9dcc2; padding:6px 12px; border-radius:6px;">1c</span>
+          <div>
+            <div style="font-family:'Zen Old Mincho',serif; font-size:19px; font-weight:700; color:#241a0e;">Editorial Minimal</div>
+            <div style="font-size:12.5px; color:#6f5f47;">余白と大きな文字。雑誌のような一枚</div>
+          </div>
+        </div>
+
+        <div style="width:392px; height:812px; background:#e3ded2; border-radius:44px; padding:11px; box-shadow:0 40px 80px -30px rgba(60,50,30,.4), 0 0 0 2px rgba(255,255,255,.4) inset;">
+          <div class="canvas-scroll" style="position:relative; width:100%; height:100%; border-radius:34px; overflow-y:auto; overflow-x:hidden; background:#ece7dd;">
+            <div style="position:sticky; top:0; z-index:5; height:34px; background:#ece7dd; display:flex; justify-content:center; align-items:flex-start; pointer-events:none;">
+              <div style="width:118px; height:26px; background:#e3ded2; border-radius:0 0 16px 16px;"></div>
+            </div>
+
+            <header style="position:sticky; top:34px; z-index:4; margin-top:-34px; padding:16px 22px 14px; background:rgba(236,231,221,.92); backdrop-filter:blur(14px); border-bottom:1px solid #d8d1c1; display:flex; align-items:center; justify-content:space-between;">
+              <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:16px; letter-spacing:.02em; color:#1c1a16;">BEER<span style="color:#d98a2b;">·</span>SALON</div>
+              <div style="display:flex; gap:16px; align-items:center;">
+                <div style="position:relative;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1c1a16" stroke-width="1.7"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 01-3.4 0"></path></svg><span style="position:absolute; top:-4px; right:-4px; width:8px; height:8px; border-radius:50%; background:#d98a2b;"></span></div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1c1a16" stroke-width="1.7"><path d="M20 21a8 8 0 10-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+            </header>
+
+            <div style="padding:30px 22px 24px;">
+              <div style="font-family:'Archivo',sans-serif; font-size:10.5px; font-weight:700; letter-spacing:.3em; color:#9a8a6a; text-transform:uppercase;">No.01 — Shizuoka</div>
+              <h2 style="font-family:'Instrument Serif',serif; font-size:46px; font-weight:400; line-height:1.02; color:#1c1a16; margin-top:14px; letter-spacing:-.01em;">Find your<br><span style="font-style:italic; color:#d98a2b;">craft</span> beer.</h2>
+              <p style="font-family:'Zen Old Mincho',serif; font-size:15px; color:#4a4436; margin-top:14px; line-height:1.7;">静岡のクラフトビールを、街とジャンルで。</p>
+
+              <div style="margin-top:24px; display:flex; align-items:center; gap:12px; border-bottom:1.5px solid #1c1a16; padding-bottom:11px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1c1a16" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+                <span style="flex:1; color:#8a7f68; font-size:15px;">店名・エリアで探す</span>
+                <span style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:700; color:#d98a2b; letter-spacing:.05em;">検索</span>
+              </div>
+
+              <div style="display:flex; gap:18px; margin-top:16px; flex-wrap:wrap; font-family:'Archivo',sans-serif;">
+                <span style="font-size:13px; font-weight:700; color:#1c1a16; border-bottom:2px solid #d98a2b; padding-bottom:2px;">IPA</span>
+                <span style="font-size:13px; color:#8a7f68;">スタウト</span>
+                <span style="font-size:13px; color:#8a7f68;">ペールエール</span>
+                <span style="font-size:13px; color:#8a7f68;">ヴァイツェン</span>
+              </div>
+            </div>
+
+            <div style="margin:0 22px 8px; height:158px; border-radius:4px; overflow:hidden; position:relative; background:#e0d9ca; border:1px solid #d3cbb9;">
+              <div style="position:absolute; inset:0; background-image:linear-gradient(rgba(120,100,60,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(120,100,60,.1) 1px,transparent 1px); background-size:30px 30px;"></div>
+              <div style="position:absolute; top:44%; left:34%; width:12px; height:12px; border-radius:50% 50% 50% 0; background:#1c1a16; transform:rotate(-45deg);"></div>
+              <div style="position:absolute; top:58%; left:62%; width:12px; height:12px; border-radius:50% 50% 50% 0; background:#d98a2b; transform:rotate(-45deg);"></div>
+              <div style="position:absolute; top:32%; left:70%; width:12px; height:12px; border-radius:50% 50% 50% 0; background:#1c1a16; transform:rotate(-45deg);"></div>
+              <div style="position:absolute; bottom:10px; left:12px; font-family:'Archivo',monospace; font-size:10px; letter-spacing:.1em; color:#5a5240; background:rgba(236,231,221,.85); padding:4px 9px; border-radius:3px;">MAP · 3 PINS</div>
+            </div>
+
+            <div style="padding:22px 22px 8px; display:flex; align-items:baseline; justify-content:space-between; border-bottom:1px solid #d8d1c1; margin:0 0 4px;">
+              <h3 style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:800; letter-spacing:.18em; color:#1c1a16; text-transform:uppercase;">Bars Nearby</h3>
+              <span style="font-family:'Archivo',sans-serif; font-size:12px; color:#9a8a6a;">12</span>
+            </div>
+
+            <div style="padding:6px 22px;">
+              <div style="display:flex; gap:14px; padding:14px 0; border-bottom:1px solid #e0dacd;">
+                <div style="width:88px; height:88px; flex:0 0 88px; border-radius:3px; position:relative; background:repeating-linear-gradient(115deg,#ddd3bd,#ddd3bd 9px,#d5c9ae 9px,#d5c9ae 18px);">
+                  <span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#7a6d52;">写真</span>
+                </div>
+                <div style="flex:1; padding-top:2px;">
+                  <div style="font-family:'Archivo',sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; color:#d98a2b;">01</div>
+                  <div style="font-family:'Zen Old Mincho',serif; font-weight:700; font-size:16px; color:#1c1a16; margin-top:2px; line-height:1.3;">クラフトビアバー 静岡</div>
+                  <div style="font-size:12.5px; color:#8a7f68; margin-top:4px;">静岡県 静岡市</div>
+                  <div style="font-family:'Archivo',sans-serif; font-size:11px; color:#6a6150; margin-top:8px;">IPA · クラフト</div>
+                </div>
+              </div>
+              <div style="display:flex; gap:14px; padding:14px 0; border-bottom:1px solid #e0dacd;">
+                <div style="width:88px; height:88px; flex:0 0 88px; border-radius:3px; position:relative; background:repeating-linear-gradient(115deg,#dacfb8,#dacfb8 9px,#d2c5a8 9px,#d2c5a8 18px);">
+                  <span style="position:absolute; bottom:5px; left:5px; font-family:'Archivo',monospace; font-size:8px; color:#7a6d52;">写真</span>
+                </div>
+                <div style="flex:1; padding-top:2px;">
+                  <div style="font-family:'Archivo',sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; color:#d98a2b;">02</div>
+                  <div style="font-family:'Zen Old Mincho',serif; font-weight:700; font-size:16px; color:#1c1a16; margin-top:2px; line-height:1.3;">ブルワリータップ 浜松</div>
+                  <div style="font-size:12.5px; color:#8a7f68; margin-top:4px;">静岡県 浜松市</div>
+                  <div style="font-family:'Archivo',sans-serif; font-size:11px; color:#6a6150; margin-top:8px;">ペールエール</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding:20px 22px 18px;">
+              <h3 style="font-family:'Archivo',sans-serif; font-size:12px; font-weight:800; letter-spacing:.18em; color:#1c1a16; text-transform:uppercase; margin-bottom:14px;">Popular Styles</h3>
+              <div style="display:flex; flex-direction:column;">
+                <a href="#1c" style="display:flex; align-items:baseline; justify-content:space-between; padding:11px 0; border-top:1px solid #d8d1c1;"><span style="font-family:'Zen Old Mincho',serif; font-size:17px; color:#1c1a16;">IPA</span><span style="font-family:'Instrument Serif',serif; font-style:italic; font-size:18px; color:#d98a2b;">01</span></a>
+                <a href="#1c" style="display:flex; align-items:baseline; justify-content:space-between; padding:11px 0; border-top:1px solid #d8d1c1;"><span style="font-family:'Zen Old Mincho',serif; font-size:17px; color:#1c1a16;">スタウト</span><span style="font-family:'Instrument Serif',serif; font-style:italic; font-size:18px; color:#9a8a6a;">02</span></a>
+                <a href="#1c" style="display:flex; align-items:baseline; justify-content:space-between; padding:11px 0; border-top:1px solid #d8d1c1; border-bottom:1px solid #d8d1c1;"><span style="font-family:'Zen Old Mincho',serif; font-size:17px; color:#1c1a16;">ペールエール</span><span style="font-family:'Instrument Serif',serif; font-style:italic; font-size:18px; color:#9a8a6a;">03</span></a>
+              </div>
+            </div>
+
+            <div style="position:sticky; bottom:0; z-index:4; padding:12px 26px 18px; background:rgba(236,231,221,.94); backdrop-filter:blur(14px); border-top:1px solid #d8d1c1; display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><svg width="21" height="21" viewBox="0 0 24 24" fill="#1c1a16" stroke="#1c1a16" stroke-width="1.5"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"></path></svg></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9a8f78" stroke-width="1.7"><path d="M4 4h16v13H8l-4 4z"></path></svg></div>
+              <div style="width:44px; height:44px; margin-top:-10px; border-radius:50%; background:#1c1a16; display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e9dcc2" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg></div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:3px;"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#9a8f78" stroke-width="1.7"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+</x-dc>
+</body>
+</html>
