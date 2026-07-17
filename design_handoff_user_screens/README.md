@@ -70,6 +70,7 @@ Google Fonts で読み込み:
 - **Zen Old Mincho**（serif, 700/900）— 見出し・店名・PR文・記事本文。ブランドの落ち着いた世界観の核。
 - **Zen Kaku Gothic New**（sans, 400/500/700/900）— UI本文・ラベル・ボタンのデフォルト。
 - **Archivo**（sans, 500–800）— ラテン文字の見出し・ロゴの "Salon"・オーバーライン（`letter-spacing` を広めに, `text-transform: uppercase`）・カウンタ数字・monospace風のキャプション。
+  - **運用ルール**: Archivo は**和文グリフを持たない**ため、`.font-archivo`（実装は `apps/web/src/app/globals.css`）は**ラテン文字（英字・数字）要素に限定**して適用する。日本語を含む要素に当てると和文がフォールバックフォントへ落ちてラテン字と和字でフォントが混在するため、和文を含む見出し・本文は Zen Old Mincho / Zen Kaku Gothic New を使う。
 
 代表サイズ:
 - モバイル ヒーロー見出し: 25–27px / 900 / line-height 1.25–1.35（Zen Old Mincho）

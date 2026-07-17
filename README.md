@@ -161,7 +161,7 @@ pnpm --filter @beersalon/web theme amber-dark
 - **拡張トークン**: `--heading` / `--subtext` / `--primary-strong` / `--surface-deep` / `--surface-raised` / `--success` を追加（`text-heading` / `bg-surface-raised` 等で参照可）。
 - **タイポグラフィ（`next/font`）**: `apps/web/src/app/layout.tsx` で **Zen Old Mincho**（見出し・店名・記事本文）/ **Zen Kaku Gothic New**（UI 本文・デフォルト）/ **Archivo**（ラテン見出し・ロゴ）を読み込み、CSS 変数（`--font-mincho` / `--font-gothic` / `--font-archivo`）を `<body>` に付与。デフォルト UI フォント（`font-sans`）は Zen Kaku Gothic New。明朝は `.font-mincho`、Archivo は `.font-archivo` ユーティリティで任意要素へ当てる。
 - **新しいテーマを足すときは `themes/` に CSS を1つ追加するだけ**でよい（`current.css` を複製して値を変える）。手で `globals.css` の `:root` を直接編集した場合は、巻き戻し先である `themes/current.css` も同じ内容に揃えること（UT `apply-theme.test.ts` が両者の一致を検査する）。
-- **`amber-dark.css` の位置づけ**: #389 で作られた「surface トークンのみダーク化・他は旧ライト HSL 値の据え置き」テーマ。基盤が Dark Taproom になった今は役割が薄いが、テーマ切替フローの互換のため残置（撤去は別 Issue）。このテーマを当てると surface 以外は旧 HSL 値のため透明化する。
+- **`amber-dark.css` の位置づけ**: #389 で作られた「surface トークンのみダーク化・他は旧ライト HSL 値の据え置き」テーマ。基盤が Dark Taproom になった今は役割を失っており、このテーマを当てると surface 以外は旧 HSL 値のため透明化する（＝壊れたテーマ）。テーマ切替フローの互換のため #440 では残置し、**撤去は別 Issue #449 で扱う**。
 
 ### トップページ（`/`）の `.top-amber-dark` スコープ
 

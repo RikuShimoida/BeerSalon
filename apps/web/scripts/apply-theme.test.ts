@@ -9,6 +9,18 @@ const webRoot = join(scriptDir, "..");
 const themesDir = join(webRoot, "src", "styles", "themes");
 const globalsPath = join(webRoot, "src", "app", "globals.css");
 
+/**
+ * テーマ CSS から `--token: value;` 形式の宣言行だけを抽出して並べる。
+ * コメント（`/* ... *​/`）や `:root {` / `}` などの構造行は落とすため、
+ * コメント文言だけが異なる2ファイルでもトークンの完全一致を検査できる。
+ */
+function extractDeclarations(css: string): string[] {
+	return css
+		.split("\n")
+		.map((line) => line.trim())
+		.filter((line) => /^--[\w-]+\s*:/.test(line));
+}
+
 describe("extractRootBlock", () => {
 	it(":root ブロックのみを抜き出す（前後のコメント・他セレクタは含めない）", () => {
 		const css = `/* comment */\n:root {\n  --a: 1;\n  --b: #fff;\n}\n.other { color: red; }`;
@@ -106,22 +118,18 @@ describe("テーマファイルと globals.css の整合", () => {
 		expect(themes).toContain("dark-taproom");
 	});
 
-	it("dark-taproom テーマの :root ブロックが current.css と一致する（復元用の同一性）", () => {
+	it("dark-taproom テーマの全トークンが current.css と完全一致する（片方だけ変更したらドリフト検出）", () => {
 		const currentCss = readFileSync(join(themesDir, "current.css"), "utf8");
 		const darkTaproomCss = readFileSync(
 			join(themesDir, "dark-taproom.css"),
 			"utf8",
 		);
-		// コメント文言は異なるため、色トークンの実値が揃っていることを主要トークンで検査する
-		for (const token of [
-			"--background: #15100a;",
-			"--primary: #e0a341;",
-			"--heading: #f5e9d4;",
-			"--surface-panel: rgba(21, 16, 10, 0.9);",
-		]) {
-			expect(currentCss).toContain(token);
-			expect(darkTaproomCss).toContain(token);
-		}
+		// コメント文言は両ファイルで異なるため、:root 内の `--token: value;` 行だけを
+		// 全件抽出して比較する。主要4トークンだけの部分検査だと残り約30トークンが片方だけ
+		// 変更されても緑のまま通ってしまうため、全トークンの完全一致で守る。
+		expect(extractDeclarations(currentCss)).toEqual(
+			extractDeclarations(darkTaproomCss),
+		);
 	});
 });
 

@@ -12,7 +12,11 @@
 	--font-sans: var(--font-gothic);
 	--font-mincho: var(--font-mincho);
 	--font-archivo: var(--font-archivo);
-	--font-mono: var(--font-archivo);
+	/* Why not var(--font-archivo): Archivo はプロポーショナルサンセリフで等幅ではないため、
+	   font-mono に割り当てるとコードブロック・桁揃え数値で桁ズレが起きる。等幅スタックを明示する。 */
+	--font-mono:
+		ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+		"Courier New", monospace;
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
