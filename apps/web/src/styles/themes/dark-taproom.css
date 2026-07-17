@@ -1,9 +1,7 @@
 :root {
 	/*
-	 * Dark Taproom（ダーク×アンバー基調）。
-	 * Why not HSL 成分値: 従来の `--primary: 30 75% 45%` は @theme inline で hsl() 未ラップのため
-	 * bg-primary / text-foreground / bg-card 等が透明化し機能していなかった（Issue #440）。
-	 * トークンに実 Hex を直接持たせ、@theme inline の --color-* がそれを返すことで有効化する。
+	 * Dark Taproom（ダーク×アンバー基調）。current.css と同内容の復元用テーマ（Issue #440）。
+	 * `pnpm --filter @beersalon/web theme dark-taproom` で globals.css の :root をこの内容へ戻せる。
 	 * 値は design_handoff_user_screens/README.md の Design Tokens 表を正とする。
 	 */
 	--radius: 1rem;

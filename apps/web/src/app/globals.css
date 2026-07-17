@@ -6,8 +6,13 @@
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
-	--font-sans: var(--font-geist-sans);
-	--font-mono: var(--font-geist-mono);
+	/* Why not var(--font-geist-*): Dark Taproom は Zen Kaku Gothic New を UI 本文の
+	   デフォルトにするため、--font-sans を Gothic 変数に付け替える。Zen Old Mincho（見出し・
+	   店名・記事本文）と Archivo（ラテン見出し・ロゴ）は個別ユーティリティで参照する。 */
+	--font-sans: var(--font-gothic);
+	--font-mincho: var(--font-mincho);
+	--font-archivo: var(--font-archivo);
+	--font-mono: var(--font-archivo);
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,6 +44,13 @@
 	--color-card: var(--card);
 	--color-surface-panel: var(--surface-panel);
 	--color-surface-control: var(--surface-control);
+	/* Dark Taproom 拡張トークン（README の Design Tokens 表を正とする） */
+	--color-surface-deep: var(--surface-deep);
+	--color-surface-raised: var(--surface-raised);
+	--color-primary-strong: var(--primary-strong);
+	--color-heading: var(--heading);
+	--color-subtext: var(--subtext);
+	--color-success: var(--success);
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
@@ -47,40 +59,54 @@
 
 /* THEME:START (このブロックは pnpm theme <name> で src/styles/themes/<name>.css の内容に差し替わる。手編集する場合は themes/current.css も揃えること) */
 :root {
+	/*
+	 * Dark Taproom（ダーク×アンバー基調）。
+	 * Why not HSL 成分値: 従来の `--primary: 30 75% 45%` は @theme inline で hsl() 未ラップのため
+	 * bg-primary / text-foreground / bg-card 等が透明化し機能していなかった（Issue #440）。
+	 * トークンに実 Hex を直接持たせ、@theme inline の --color-* がそれを返すことで有効化する。
+	 * 値は design_handoff_user_screens/README.md の Design Tokens 表を正とする。
+	 */
 	--radius: 1rem;
-	--background: 35 25% 92%;
-	--foreground: 30 15% 20%;
-	--card: 35 20% 96%;
-	--card-foreground: 30 15% 25%;
-	--popover: 35 20% 96%;
-	--popover-foreground: 30 15% 25%;
-	--primary: 30 75% 45%;
-	--primary-foreground: 0 0% 100%;
-	--secondary: 35 60% 55%;
-	--secondary-foreground: 30 15% 20%;
-	--muted: 35 20% 85%;
-	--muted-foreground: 30 10% 45%;
-	--accent: 30 50% 88%;
-	--accent-foreground: 30 75% 40%;
-	--destructive: 0 84% 60%;
-	--border: 35 15% 82%;
-	--input: 35 15% 82%;
-	--ring: 30 75% 45%;
-	--chart-1: 30 75% 45%;
-	--chart-2: 35 60% 55%;
-	--chart-3: 40 65% 50%;
-	--chart-4: 25 70% 50%;
-	--chart-5: 35 55% 60%;
-	--sidebar: 35 20% 96%;
-	--sidebar-foreground: 30 15% 20%;
-	--sidebar-primary: 30 75% 45%;
-	--sidebar-primary-foreground: 0 0% 100%;
-	--sidebar-accent: 35 20% 90%;
-	--sidebar-accent-foreground: 30 15% 20%;
-	--sidebar-border: 35 15% 82%;
-	--sidebar-ring: 30 75% 45%;
-	--surface-panel: #e2d6bf;
-	--surface-control: #ffffff;
+	--background: #15100a;
+	--foreground: #e6d3ac;
+	--card: #1e160d;
+	--card-foreground: #f3e7d2;
+	--popover: #1e160d;
+	--popover-foreground: #f3e7d2;
+	--primary: #e0a341;
+	--primary-foreground: #20160a;
+	--secondary: #2c2013;
+	--secondary-foreground: #f5e9d4;
+	--muted: #241a0e;
+	--muted-foreground: #9c8763;
+	--accent: #2c2013;
+	--accent-foreground: #e0a341;
+	--destructive: #e0483a;
+	--border: rgba(224, 163, 65, 0.18);
+	--input: #241a0e;
+	--ring: #e0a341;
+	--chart-1: #e0a341;
+	--chart-2: #c47f28;
+	--chart-3: #a5691f;
+	--chart-4: #8a5a2a;
+	--chart-5: #5a3818;
+	--sidebar: #1e160d;
+	--sidebar-foreground: #e6d3ac;
+	--sidebar-primary: #e0a341;
+	--sidebar-primary-foreground: #20160a;
+	--sidebar-accent: #2c2013;
+	--sidebar-accent-foreground: #f5e9d4;
+	--sidebar-border: rgba(224, 163, 65, 0.18);
+	--sidebar-ring: #e0a341;
+	--surface-panel: rgba(21, 16, 10, 0.9);
+	--surface-control: #241a0e;
+	/* Dark Taproom 拡張トークン */
+	--surface-deep: #0f0b06;
+	--surface-raised: #241a0e;
+	--primary-strong: #c47f28;
+	--heading: #f5e9d4;
+	--subtext: #c9b48c;
+	--success: #7fc47f;
 }
 /* THEME:END */
 
@@ -128,45 +154,28 @@
 }
 
 /*
- * トップページ（/）限定の案A（Amber Taproom / ダーク基調）スコープ。
- * Why not :root ごとダーク化: globals.css の既存 HSL トークン（--background / --card / --card-foreground 等）は
- * @theme inline で hsl() ラップされておらず bg-card / text-foreground 等は透明で機能していない。
- * これを :root で有効化すると web 全体（他14ページ・共通ヘッダー/フッター）へダークが芋づる波及し、
- * Issue #388 が明示的にスコープ外とした「全画面ダーク化」になる。よってトップの最上位ラッパに付与した
- * .top-amber-dark の配下だけで、実 CSS 値の背景・面・テキスト色を当ててダーク化を閉じ込める。
+ * トップページ（/）限定スコープ（旧: 案A Amber Taproom）。
+ * Issue #440 で :root 自体を Dark Taproom 化し、壊れていた HSL トークンを実 Hex で有効化したため、
+ * bg-card / text-foreground / text-muted-foreground 等は :root 経由で正しく色が付くようになった。
+ * よって、以前スコープ内で壊れトークンを実色に置換していた個別上書きは不要になり撤去する。
+ * スコープ内の surface トークン上書きも、基盤（:root）の Dark Taproom 値へ寄せて二重定義の色ズレを防ぐ。
+ * Why not スコープ全撤去: .top-amber-dark ラッパの撤去とトップの見た目最適化は本 Issue（基盤のみ）の
+ * スコープ外で、後続の共通レイアウト / 各画面 Issue が扱う。ここではラッパを残しつつ基盤と整合させる。
  */
 .top-amber-dark {
-	/* 案A: ダークブラウン基調の本文背景とアンバー寄りのテキスト */
-	background-color: #1a1206;
-	color: #f5e9d4;
-
-	/* 帯（検索カード）＝ダークブラウン、操作面（入力欄・チップ）＝一段明るいブラウン。
-	   surface トークンはスコープ内で上書きし、テーマ切替(current)の他画面には影響させない。 */
-	--surface-panel: #2a1c0e;
-	--surface-control: #3d2b17;
-}
-
-/* 透明で機能していない壊れトークン依存クラスを、スコープ配下で実色に置換する。 */
-.top-amber-dark .bg-card {
-	background-color: #241a0c;
-}
-.top-amber-dark .text-card-foreground {
-	color: #f5e9d4;
-}
-.top-amber-dark .text-foreground {
-	color: #f5e9d4;
-}
-.top-amber-dark .text-muted-foreground {
-	color: #c4a878;
-}
-.top-amber-dark .bg-muted {
-	background-color: #3d2b17;
-}
-.top-amber-dark .border-border {
-	border-color: #4a3620;
+	background-color: var(--background);
+	color: var(--foreground);
 }
 
 @layer utilities {
+	/* Dark Taproom タイポグラフィ。見出し・店名・記事本文は明朝、ラテン見出し・ロゴは Archivo。 */
+	.font-mincho {
+		font-family: var(--font-mincho), serif;
+	}
+	.font-archivo {
+		font-family: var(--font-archivo), sans-serif;
+	}
+
 	.glass-card {
 		@apply bg-card/80 backdrop-blur-xl border border-border/20 shadow-2xl;
 	}
