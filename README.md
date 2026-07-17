@@ -140,32 +140,36 @@ claude --plugin-dir ./plugins/bs-workflow
 
 ---
 
-## 🎨 配色テーマの切替（ユーザー画面 / apps/web）
+## 🎨 配色テーマ（ユーザー画面 / apps/web）＝ Dark Taproom 基盤
 
-ユーザー画面の配色を「テーマ」単位で差し替えられる（方式③: ビルド時・開発者切替。実行時のユーザー向けトグルは対象外）。目的は、デザインを変えても**容易に前へ戻せる**こと。
+ユーザー画面は **Dark Taproom（ダーク×アンバー基調）** で全画面を統一する方針（#440 で基盤導入）。配色は「テーマ」単位で差し替えられる（方式③: ビルド時・開発者切替。実行時のユーザー向けトグルは対象外）。目的は、デザインを変えても**容易に前へ戻せる**こと。配色・タイポの正は `design_handoff_user_screens/README.md` の Design Tokens 表。
 
 ```bash
-# 現行（ライトなアンバー・クリーム基調 = 巻き戻し先）に戻す
+# 現行 = Dark Taproom（巻き戻し先）に戻す
 pnpm --filter @beersalon/web theme current
 
-# #383 案A（ダークブラウン × アンバーゴールド）に切り替える
+# Dark Taproom を明示的に復元する（current.css と同内容）
+pnpm --filter @beersalon/web theme dark-taproom
+
+# 旧: #383 案A（surface のみダーク化・他トークンは旧ライト値の据え置き）
 pnpm --filter @beersalon/web theme amber-dark
 ```
 
 - テーマ本体は `apps/web/src/styles/themes/<name>.css`（各ファイルが `:root { ... }` を1つ持つ）。
 - `pnpm theme <name>` は `apps/web/src/app/globals.css` 内の `/* THEME:START */` 〜 `/* THEME:END */` で囲まれた `:root` ブロックを、指定テーマの内容へ差し替える。反映は `pnpm dev` の再ビルド / ブラウザリロードで行われる。
-- 切替が一貫して追従するのは、共通ヘッダー / フッターの帯・検索フォームのカード・入力欄・チップ・アイコン背景で使う `--surface-panel`（帯・カード）/ `--surface-control`（白い操作面）の2トークン。以前はこれらが `#f0e68c` / `#ffffff` / `bg-white` としてハードコードされ、テーマ切替から取り残されていた（#388 で「戻せない」と判明した直接原因）。現行 current の帯色は `--surface-panel: #e2d6bf`（ウォームサンド。#414 で、以前の明るい黄色 `#f0e68c` がメインコンテンツと合わず幼い印象だったのを落ち着いた色味へ変更）。
+- **#440 で HSL トークンの透明化を解消済み**: 以前は `:root` の `--background` / `--primary` 等が HSL 成分値（`30 75% 45%`）のままで `@theme inline` が `hsl()` ラップせず、`bg-background` / `bg-primary` / `text-foreground` / `bg-card` 等が**透明（無色）**で機能していなかった。#440 で各トークンに**実 Hex 値**（例 `--primary: #e0a341`、`--background: #15100a`）を直接持たせ、`@theme inline` の `--color-*` がそれを返すことでこれらのクラスが有効化された。web 全体の面が Dark Taproom で色を持つ。
+- **拡張トークン**: `--heading` / `--subtext` / `--primary-strong` / `--surface-deep` / `--surface-raised` / `--success` を追加（`text-heading` / `bg-surface-raised` 等で参照可）。
+- **タイポグラフィ（`next/font`）**: `apps/web/src/app/layout.tsx` で **Zen Old Mincho**（見出し・店名・記事本文）/ **Zen Kaku Gothic New**（UI 本文・デフォルト）/ **Archivo**（ラテン見出し・ロゴ）を読み込み、CSS 変数（`--font-mincho` / `--font-gothic` / `--font-archivo`）を `<body>` に付与。デフォルト UI フォント（`font-sans`）は Zen Kaku Gothic New。明朝は `.font-mincho`、Archivo は `.font-archivo` ユーティリティで任意要素へ当てる。
 - **新しいテーマを足すときは `themes/` に CSS を1つ追加するだけ**でよい（`current.css` を複製して値を変える）。手で `globals.css` の `:root` を直接編集した場合は、巻き戻し先である `themes/current.css` も同じ内容に揃えること（UT `apply-theme.test.ts` が両者の一致を検査する）。
-- **既知の制約**: `globals.css` の既存 HSL トークン（`--background` / `--primary` 等）は `hsl()` ラップされておらず、`bg-background` / `bg-primary` などは現状レンダリング上は無色（透明）で機能していない。そのため `theme amber-dark`（ビルド時切替）でも「帯・操作面（`--surface-*`）」以外の面はダーク化しない。全画面のダークテーマ化・実行時テーマトグル（next-themes 等）は別 Issue で扱う。
+- **`amber-dark.css` の位置づけ**: #389 で作られた「surface トークンのみダーク化・他は旧ライト HSL 値の据え置き」テーマ。基盤が Dark Taproom になった今は役割を失っており、このテーマを当てると surface 以外は旧 HSL 値のため透明化する（＝壊れたテーマ）。テーマ切替フローの互換のため #440 では残置し、**撤去は別 Issue #449 で扱う**。
 
-### トップページ（`/`）のダーク基調（#388 案A / Amber Taproom）
+### トップページ（`/`）の `.top-amber-dark` スコープ
 
-トップページ（`apps/web` の `/`）は、上記のビルド時テーマ切替とは別に、**トップページ限定でダークブラウン × アンバーゴールド基調**に固定している（#383 案A）。
+トップページ（`apps/web` の `/`）の最上位ラッパには `page-client.tsx` で `.top-amber-dark` クラスが付いている。
 
-- 実装は `globals.css` の `.top-amber-dark` スコープと、`page-client.tsx` の最上位ラッパへのクラス付与。トップの本文背景・検索カード・入力欄・チップ・店舗カード・各「人気で探す」セクションがこのスコープ配下でダーク化される。
-- **なぜ `:root` ごとダーク化しないか**: 上記の既知の制約どおり `bg-card` / `text-foreground` 等は透明で機能しておらず、`:root` を有効化すると web 全体（他ページ・共通ヘッダー/フッター）へダークが芋づる波及する。#388 のスコープはトップページの見た目に限定のため、`.top-amber-dark` 配下だけに閉じ込めている。
-- **スコープ外**: 共通ヘッダー / フッターの帯（`--surface-panel` = ウォームサンド `#e2d6bf`）と、トップ以外の14ページはライト基調のまま。全画面ダーク化は別 Issue。
-- スコープが `THEME:START`〜`THEME:END` の外にあること・`:root` が current のライト値のままであることは UT `apply-theme.test.ts` が検査する。
+- **#440 以降の役割**: `:root` 自体が Dark Taproom 化され、壊れトークンが実 Hex で有効化されたため、以前このスコープ内で壊れトークンを実色に置換していた個別上書き（`.top-amber-dark .bg-card` 等）は**不要になり撤去済み**。スコープは背景・文字色を基盤トークン（`--background` / `--foreground`）へ寄せるだけの薄い定義に縮小した。
+- **スコープ全撤去は別 Issue**: `.top-amber-dark` ラッパの撤去とトップの見た目最適化は #440（基盤のみ）のスコープ外。後続の共通レイアウト / 各画面 Issue が扱う。
+- スコープ定義が `THEME:START`〜`THEME:END` の外にあること・`:root` が Dark Taproom の実 Hex トークンで定義されていることは UT `apply-theme.test.ts` が検査する。
 
 ---
 

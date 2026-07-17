@@ -9,6 +9,18 @@ const webRoot = join(scriptDir, "..");
 const themesDir = join(webRoot, "src", "styles", "themes");
 const globalsPath = join(webRoot, "src", "app", "globals.css");
 
+/**
+ * テーマ CSS から `--token: value;` 形式の宣言行だけを抽出して並べる。
+ * コメント（`/* ... *​/`）や `:root {` / `}` などの構造行は落とすため、
+ * コメント文言だけが異なる2ファイルでもトークンの完全一致を検査できる。
+ */
+function extractDeclarations(css: string): string[] {
+	return css
+		.split("\n")
+		.map((line) => line.trim())
+		.filter((line) => /^--[\w-]+\s*:/.test(line));
+}
+
 describe("extractRootBlock", () => {
 	it(":root ブロックのみを抜き出す（前後のコメント・他セレクタは含めない）", () => {
 		const css = `/* comment */\n:root {\n  --a: 1;\n  --b: #fff;\n}\n.other { color: red; }`;
@@ -55,7 +67,8 @@ describe("replaceThemeBlock", () => {
 	});
 
 	it("current → amber-dark → current で元の内容に戻る", () => {
-		const currentBlock = ":root {\n  --surface-panel: #e2d6bf;\n}";
+		const currentBlock =
+			":root {\n  --surface-panel: rgba(21, 16, 10, 0.9);\n}";
 		const darkBlock = ":root {\n  --surface-panel: #2a1c0e;\n}";
 		const toDark = replaceThemeBlock(base, darkBlock);
 		const backToCurrent = replaceThemeBlock(toDark, currentBlock);
@@ -97,17 +110,48 @@ describe("テーマファイルと globals.css の整合", () => {
 		expect(applied).not.toContain("--surface-control: #ffffff;");
 	});
 
-	it("listThemes が current と amber-dark を返す", () => {
+	it("listThemes が current / amber-dark / dark-taproom を返す", () => {
 		const themes = listThemes(themesDir);
 		expect(themes).toContain("current");
 		expect(themes).toContain("amber-dark");
+		// Issue #440: current と同内容の Dark Taproom 復元用テーマ
+		expect(themes).toContain("dark-taproom");
+	});
+
+	it("dark-taproom テーマの全トークンが current.css と完全一致する（片方だけ変更したらドリフト検出）", () => {
+		const currentCss = readFileSync(join(themesDir, "current.css"), "utf8");
+		const darkTaproomCss = readFileSync(
+			join(themesDir, "dark-taproom.css"),
+			"utf8",
+		);
+		// コメント文言は両ファイルで異なるため、:root 内の `--token: value;` 行だけを
+		// 全件抽出して比較する。主要4トークンだけの部分検査だと残り約30トークンが片方だけ
+		// 変更されても緑のまま通ってしまうため、全トークンの完全一致で守る。
+		expect(extractDeclarations(currentCss)).toEqual(
+			extractDeclarations(darkTaproomCss),
+		);
 	});
 });
 
-describe("トップページ限定ダークスコープ（#388 案A）", () => {
+describe("Dark Taproom 基盤（Issue #440）", () => {
 	const globalsCss = readFileSync(globalsPath, "utf8");
 
-	it("globals.css にトップ限定スコープ .top-amber-dark が定義されている", () => {
+	it("THEME ブロック（:root）が Dark Taproom の実 Hex トークンを実値で定義している", () => {
+		const startIdx = globalsCss.indexOf("/* THEME:START");
+		const endIdx = globalsCss.indexOf("/* THEME:END */");
+		const themeBlock = globalsCss.slice(startIdx, endIdx);
+		// 壊れた HSL 成分値ではなく実 Hex 値で定義され、bg-* / text-* が透明化しないこと
+		expect(themeBlock).toContain("--background: #15100a;");
+		expect(themeBlock).toContain("--card: #1e160d;");
+		expect(themeBlock).toContain("--primary: #e0a341;");
+		expect(themeBlock).toContain("--foreground: #e6d3ac;");
+		expect(themeBlock).toContain("--heading: #f5e9d4;");
+		// 旧ライト基調（透明化していた HSL 成分値・白操作面）が残っていないこと
+		expect(themeBlock).not.toContain("--surface-control: #ffffff;");
+		expect(themeBlock).not.toContain("--primary: 30 75% 45%;");
+	});
+
+	it("globals.css にトップ限定スコープ .top-amber-dark が残っている（撤去は別 Issue）", () => {
 		expect(globalsCss).toContain(".top-amber-dark");
 	});
 
@@ -120,20 +164,10 @@ describe("トップページ限定ダークスコープ（#388 案A）", () => {
 		expect(themeBlock).not.toContain(".top-amber-dark");
 	});
 
-	it("スコープ内で surface トークンを案Aのダーク値へ上書きしている", () => {
-		const scopeIdx = globalsCss.indexOf(".top-amber-dark {");
-		const scopeEnd = globalsCss.indexOf("}", scopeIdx);
-		const scopeBlock = globalsCss.slice(scopeIdx, scopeEnd);
-		expect(scopeBlock).toContain("--surface-panel: #2a1c0e;");
-		expect(scopeBlock).toContain("--surface-control: #3d2b17;");
-	});
-
-	it("THEME ブロック（:root）は現行 current のライト値のまま（全画面ダーク化していない）", () => {
-		const startIdx = globalsCss.indexOf("/* THEME:START");
-		const endIdx = globalsCss.indexOf("/* THEME:END */");
-		const themeBlock = globalsCss.slice(startIdx, endIdx);
-		// current のライト基調（帯=ウォームサンド / 操作面=白）が :root に維持されていること
-		expect(themeBlock).toContain("--surface-panel: #e2d6bf;");
-		expect(themeBlock).toContain("--surface-control: #ffffff;");
+	it("@theme inline に明朝・Archivo のフォント変数が登録されている", () => {
+		// next/font で読み込む Zen Old Mincho / Archivo を任意要素へ適用できること
+		expect(globalsCss).toContain("--font-mincho: var(--font-mincho);");
+		expect(globalsCss).toContain("--font-archivo: var(--font-archivo);");
+		expect(globalsCss).toContain("--font-sans: var(--font-gothic);");
 	});
 });
