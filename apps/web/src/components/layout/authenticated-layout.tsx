@@ -9,7 +9,7 @@ export function AuthenticatedLayout({
 	return (
 		<div className="min-h-screen bg-background">
 			<Header />
-			<main className="pt-16 pb-16">{children}</main>
+			<main className="pt-16 pb-16 md:pb-0">{children}</main>
 			<Footer />
 		</div>
 	);
