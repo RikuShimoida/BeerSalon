@@ -13,8 +13,8 @@ test.describe("投稿作成ページ", () => {
 		// seed.e2e.sql で固定投入される /bars/100001 (E2Eテストバー静岡) を使う。
 		await page.goto("/bars/100001");
 
-		// 「このお店について投稿する」導線から投稿ページへ遷移する
-		await page.getByRole("link", { name: "このお店について投稿する" }).click();
+		// 「このお店に投稿する」導線から投稿ページへ遷移する
+		await page.getByRole("link", { name: "このお店に投稿する" }).click();
 		await expect(page).toHaveURL(/\/posts\/new\?barId=100001/);
 
 		// 投稿対象店舗が固定表示され、選び直すプルダウン(select)は存在しない
@@ -37,7 +37,7 @@ test.describe("投稿作成ページ", () => {
 
 		// 店舗が確定していないため本文フォームは出さず、案内を表示する
 		await expect(
-			page.getByText("このお店について投稿する", { exact: false }),
+			page.getByText("このお店に投稿する", { exact: false }),
 		).toBeVisible();
 		await expect(page.locator('textarea[name="body"]')).toHaveCount(0);
 	});
