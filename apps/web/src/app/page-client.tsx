@@ -5,13 +5,7 @@ import { useEffect, useState } from "react";
 import { getBars } from "@/actions/bar";
 import { BarList } from "@/components/bar/bar-list";
 import type { BarSummary } from "@/components/bar/bar-summary";
-import { FooterLinks } from "@/components/home/footer-links";
-import { LearnAboutCraftBeerCard } from "@/components/home/learn-about-craft-beer-card";
-import { PopularArticlesSection } from "@/components/home/popular-articles-section";
-import { PopularBarsSection } from "@/components/home/popular-bars-section";
-import { PopularCategoriesSection } from "@/components/home/popular-categories-section";
-import { PopularCitiesSection } from "@/components/home/popular-cities-section";
-import { PopularRegionsSection } from "@/components/home/popular-regions-section";
+import { PopularCategoriesScroll } from "@/components/home/popular-categories-scroll";
 import { GoogleMap } from "@/components/map/google-map";
 import { SearchForm } from "@/components/search/search-form";
 import {
@@ -24,6 +18,8 @@ export function HomeClient() {
 	const urlSearchParams = useSearchParams();
 	const urlQuery = urlSearchParams.get("q") ?? "";
 	const urlCity = urlSearchParams.get("city") ?? "";
+	const urlCat = urlSearchParams.get("cat") ?? "";
+	const urlOrigin = urlSearchParams.get("origin") ?? "";
 
 	const [searchParams, setSearchParams] = useState<{
 		q: string;
@@ -33,15 +29,13 @@ export function HomeClient() {
 	}>(() => parseSearchParams(urlSearchParams));
 
 	// Why not: useState 初期化関数は初回マウントのみ実行されるため、ブラウザバック等で
-	// URL だけが変わるケースに追従できない。URL を真実の源とし、URL の q/city が変わったら
-	// state を同期する。
+	// URL だけが変わるケースに追従できない。URL を真実の源とし、URL の q/city/cat/origin が
+	// 変わったら state を同期する。
 	useEffect(() => {
-		setSearchParams((prev) => ({
-			...prev,
-			q: urlQuery,
-			city: urlCity,
-		}));
-	}, [urlQuery, urlCity]);
+		setSearchParams(
+			parseSearchParams(new URLSearchParams(urlSearchParams.toString())),
+		);
+	}, [urlSearchParams]);
 
 	// Why not: マップと店舗一覧が別々に getBars を呼ぶと、同一検索条件でも取得タイミングの
 	// ズレで表示がリンクしなくなる。親で一度だけ取得し、両者へ同じ結果を配ってデータソースを
@@ -80,202 +74,50 @@ export function HomeClient() {
 	}) => {
 		setSearchParams(params);
 
-		const queryString = buildSearchQueryString({
-			q: params.q,
-			city: params.city,
-		});
+		const queryString = buildSearchQueryString(params);
 		router.replace(queryString ? `/?${queryString}` : "/", {
 			scroll: false,
 		});
 	};
 
-	const mockPopularArticles = [
-		{
-			id: 1,
-			title: "新しいIPAが入荷しました！ホップの香りが最高です",
-			barName: "クラフトビアバー 静岡",
-			publishedAt: "2025-12-15",
-			likeCount: 42,
-			imageUrl:
-				"https://images.unsplash.com/photo-1608270586620-248524c67de9?w=800&h=600&fit=crop",
-		},
-		{
-			id: 2,
-			title: "冬季限定スタウト登場 - 濃厚な味わいをお楽しみください",
-			barName: "ブルワリータップ 浜松",
-			publishedAt: "2025-12-20",
-			likeCount: 38,
-			imageUrl:
-				"https://images.unsplash.com/photo-1618183479302-1e0aa382c36b?w=800&h=600&fit=crop",
-		},
-		{
-			id: 3,
-			title: "週末はハッピーアワー実施中！お得にクラフトビールを",
-			barName: "ビアホール 沼津",
-			publishedAt: "2025-12-25",
-			likeCount: 35,
-			imageUrl:
-				"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=800&h=600&fit=crop",
-		},
-	];
-
-	const mockPopularBars = [
-		{
-			id: 1,
-			name: "クラフトビアバー 静岡",
-			rank: 1,
-			href: "/bars/1",
-			imageUrl:
-				"https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&h=600&fit=crop",
-		},
-		{
-			id: 2,
-			name: "ブルワリータップ 浜松",
-			rank: 2,
-			href: "/bars/2",
-			imageUrl:
-				"https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop",
-		},
-		{
-			id: 3,
-			name: "ビアホール 沼津",
-			rank: 3,
-			href: "/bars/3",
-			imageUrl:
-				"https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop",
-		},
-	];
-
-	const mockPopularCities = [
-		{
-			id: "shizuoka",
-			name: "静岡市",
-			rank: 1,
-			href: "/?city=静岡市",
-			imageUrl:
-				"https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&h=600&fit=crop",
-		},
-		{
-			id: "hamamatsu",
-			name: "浜松市",
-			rank: 2,
-			href: "/?city=浜松市",
-			imageUrl:
-				"https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=800&h=600&fit=crop",
-		},
-		{
-			id: "numazu",
-			name: "沼津市",
-			rank: 3,
-			href: "/?city=沼津市",
-			imageUrl:
-				"https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?w=800&h=600&fit=crop",
-		},
-	];
-
-	const mockPopularCategories = [
-		{
-			id: 1,
-			name: "IPA",
-			rank: 1,
-			href: "/?cat=1",
-			imageUrl:
-				"https://images.unsplash.com/photo-1608270586620-248524c67de9?w=800&h=600&fit=crop",
-		},
-		{
-			id: 2,
-			name: "ペールエール",
-			rank: 2,
-			href: "/?cat=2",
-			imageUrl:
-				"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=800&h=600&fit=crop",
-		},
-		{
-			id: 3,
-			name: "スタウト",
-			rank: 3,
-			href: "/?cat=3",
-			imageUrl:
-				"https://images.unsplash.com/photo-1618183479302-1e0aa382c36b?w=800&h=600&fit=crop",
-		},
-	];
-
-	const mockPopularRegions = [
-		{
-			id: 1,
-			name: "アメリカ・西海岸",
-			rank: 1,
-			href: "/?region=1",
-			imageUrl:
-				"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&h=600&fit=crop",
-		},
-		{
-			id: 2,
-			name: "ベルギー・フランダース",
-			rank: 2,
-			href: "/?region=2",
-			imageUrl:
-				"https://images.unsplash.com/photo-1551801841-ecad875a5142?w=800&h=600&fit=crop",
-		},
-		{
-			id: 3,
-			name: "日本・静岡",
-			rank: 3,
-			href: "/?region=3",
-			imageUrl:
-				"https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=600&fit=crop",
-		},
-	];
-
 	return (
-		<div className="top-amber-dark min-h-screen px-4 py-8 md:py-12">
-			<div className="max-w-7xl mx-auto">
-				<div className="flex flex-col gap-8 md:gap-12">
-					{/* 検索セクション */}
+		<div className="min-h-screen bg-background">
+			<div className="mx-auto max-w-7xl px-5 py-8 md:px-10 md:py-12">
+				{/* ヒーロー + 検索（PC はヒーロー左・検索カード右の2カラム） */}
+				<section className="mb-8 grid gap-6 md:mb-10 md:grid-cols-[1fr_minmax(360px,420px)] md:items-center md:gap-10">
+					<div>
+						<p className="mb-3 font-archivo text-xs uppercase tracking-[0.24em] text-primary">
+							Tonight&apos;s Craft Beer
+						</p>
+						<h1 className="font-mincho text-[26px] font-black leading-[1.3] text-heading md:text-[40px]">
+							今夜の一杯を、
+							<br />
+							この街で見つける。
+						</h1>
+						<p className="mt-4 max-w-md text-sm leading-relaxed text-subtext md:text-[15px]">
+							キーワード・市町村・ビールカテゴリ・産地から、あなたにぴったりのクラフトビアバーを探せます。
+						</p>
+					</div>
+
 					{/* Why not: 制御 input の value を毎レンダリング上書きすると入力中のIME変換が
-				    途切れるため、URL の q/city が変わったときだけ key で再マウントして初期値を反映する。 */}
+					    途切れるため、URL のパラメータが変わったときだけ key で再マウントして初期値を反映する。 */}
 					<SearchForm
-						key={`${urlQuery}|${urlCity}`}
+						key={`${urlQuery}|${urlCity}|${urlCat}|${urlOrigin}`}
 						initialValues={searchParams}
 						onSearch={handleSearch}
 					/>
+				</section>
 
-					{/* 地図エリア */}
-					<GoogleMap city={searchParams.city} bars={bars} />
-
-					{/* 店舗一覧 */}
+				{/* 地図 + 店舗一覧（PC は左マップ固定・右2列グリッドの2カラム） */}
+				<section className="mb-10 grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] md:items-start md:gap-8">
+					<div className="md:sticky md:top-20 md:h-[calc(100vh-8rem)]">
+						<GoogleMap city={searchParams.city} bars={bars} />
+					</div>
 					<BarList bars={bars} isLoading={isBarsLoading} />
+				</section>
 
-					{/* クラフトビールについて知る */}
-					<LearnAboutCraftBeerCard />
-
-					{/* 先月いいねの多かった記事 */}
-					<PopularArticlesSection articles={mockPopularArticles} />
-
-					{/* 人気なお店で探す */}
-					<PopularBarsSection title="人気なお店で探す" bars={mockPopularBars} />
-
-					{/* 人気な市町村で探す */}
-					<PopularCitiesSection
-						title="人気な市町村で探す"
-						cities={mockPopularCities}
-					/>
-
-					{/* 人気なカテゴリのビールで探す */}
-					<PopularCategoriesSection
-						title="人気なカテゴリのビールで探す"
-						categories={mockPopularCategories}
-					/>
-
-					{/* 人気なビールの産地で探す */}
-					<PopularRegionsSection
-						title="人気なビールの産地で探す"
-						regions={mockPopularRegions}
-					/>
-
-					{/* 利用規約エリア */}
-					<FooterLinks />
-				</div>
+				{/* 人気カテゴリ横スクロール */}
+				<PopularCategoriesScroll />
 			</div>
 		</div>
 	);

@@ -1,11 +1,11 @@
 export function BarCardSkeleton() {
 	return (
-		<div className="block bg-card rounded-2xl border border-border overflow-hidden">
-			<div className="aspect-video bg-muted animate-pulse" />
+		<div className="block overflow-hidden rounded-2xl border border-border bg-card">
+			<div className="aspect-[4/3] animate-pulse bg-surface-raised" />
 
-			<div className="p-4 space-y-2">
-				<div className="h-5 bg-muted rounded animate-pulse w-3/4" />
-				<div className="h-4 bg-muted rounded animate-pulse w-1/2" />
+			<div className="space-y-2 p-4">
+				<div className="h-5 w-3/4 animate-pulse rounded bg-surface-raised" />
+				<div className="h-6 w-1/2 animate-pulse rounded-full bg-surface-raised" />
 			</div>
 		</div>
 	);

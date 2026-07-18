@@ -157,20 +157,6 @@
 	}
 }
 
-/*
- * トップページ（/）限定スコープ（旧: 案A Amber Taproom）。
- * Issue #440 で :root 自体を Dark Taproom 化し、壊れていた HSL トークンを実 Hex で有効化したため、
- * bg-card / text-foreground / text-muted-foreground 等は :root 経由で正しく色が付くようになった。
- * よって、以前スコープ内で壊れトークンを実色に置換していた個別上書きは不要になり撤去する。
- * スコープ内の surface トークン上書きも、基盤（:root）の Dark Taproom 値へ寄せて二重定義の色ズレを防ぐ。
- * Why not スコープ全撤去: .top-amber-dark ラッパの撤去とトップの見た目最適化は本 Issue（基盤のみ）の
- * スコープ外で、後続の共通レイアウト / 各画面 Issue が扱う。ここではラッパを残しつつ基盤と整合させる。
- */
-.top-amber-dark {
-	background-color: var(--background);
-	color: var(--foreground);
-}
-
 @layer utilities {
 	/* Dark Taproom タイポグラフィ。見出し・店名・記事本文は明朝、ラテン見出し・ロゴは Archivo。 */
 	.font-mincho {

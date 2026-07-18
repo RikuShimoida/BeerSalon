@@ -163,13 +163,14 @@ pnpm --filter @beersalon/web theme amber-dark
 - **新しいテーマを足すときは `themes/` に CSS を1つ追加するだけ**でよい（`current.css` を複製して値を変える）。手で `globals.css` の `:root` を直接編集した場合は、巻き戻し先である `themes/current.css` も同じ内容に揃えること（UT `apply-theme.test.ts` が両者の一致を検査する）。
 - **`amber-dark.css` の位置づけ**: #389 で作られた「surface トークンのみダーク化・他は旧ライト HSL 値の据え置き」テーマ。基盤が Dark Taproom になった今は役割を失っており、このテーマを当てると surface 以外は旧 HSL 値のため透明化する（＝壊れたテーマ）。テーマ切替フローの互換のため #440 では残置し、**撤去は別 Issue #449 で扱う**。
 
-### トップページ（`/`）の `.top-amber-dark` スコープ
+### トップページ（`/`）の Dark Taproom 再実装（#442 で `.top-amber-dark` 撤去済み）
 
-トップページ（`apps/web` の `/`）の最上位ラッパには `page-client.tsx` で `.top-amber-dark` クラスが付いている。
+トップ/検索ページ（`apps/web` の `/`）は #442 で Dark Taproom（1a / 2a）で再実装済み。以前 `page-client.tsx` の最上位ラッパに付いていた暫定スコープ `.top-amber-dark` は**撤去した**。
 
-- **#440 以降の役割**: `:root` 自体が Dark Taproom 化され、壊れトークンが実 Hex で有効化されたため、以前このスコープ内で壊れトークンを実色に置換していた個別上書き（`.top-amber-dark .bg-card` 等）は**不要になり撤去済み**。スコープは背景・文字色を基盤トークン（`--background` / `--foreground`）へ寄せるだけの薄い定義に縮小した。
-- **スコープ全撤去は別 Issue**: `.top-amber-dark` ラッパの撤去とトップの見た目最適化は #440（基盤のみ）のスコープ外。後続の共通レイアウト / 各画面 Issue が扱う。
-- スコープ定義が `THEME:START`〜`THEME:END` の外にあること・`:root` が Dark Taproom の実 Hex トークンで定義されていることは UT `apply-theme.test.ts` が検査する。
+- **撤去の理由**: #440 で `:root` 自体が Dark Taproom 化され、壊れトークンが実 Hex で有効化されたため、トップの背景・文字色は共通レイアウト（`AuthenticatedLayout` の `bg-background`）と基盤トークンだけで足りる。トップ限定のスコープ上書きは役割を失っていた。
+- **画面構成**: ヒーロー（オーバーライン `font-archivo` + 明朝見出し `font-mincho`）→ 検索フォーム（`SearchForm`）→ 地図（`GoogleMap`）+ 店舗一覧（`BarList`）→ 人気カテゴリ横スクロール（`components/home/popular-categories-scroll.tsx`）。PC（`md:` 以上）はヒーロー右に検索カード、地図（左・`sticky`）と一覧（右・2列グリッド）の2カラム。
+- **旧モックセクション撤去**: `components/home/` にあった `popular-articles-section` / `popular-bars-section` / `popular-cities-section` / `popular-categories-section` / `popular-ranking-section` / `popular-regions-section` / `learn-about-craft-beer-card` / `footer-links`（Unsplash 画像ハードコードのモック）は #442 で削除。`home/` は実データ導線の `popular-categories-scroll.tsx` のみ残る。
+- `.top-amber-dark` が globals.css・page-client から撤去されていること、`:root` が Dark Taproom の実 Hex トークンで定義されていることは UT `apply-theme.test.ts` が検査する。
 
 ---
 
