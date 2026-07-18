@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
 import { prisma } from "@/lib/prisma";
@@ -19,23 +20,24 @@ export default async function NewPostPage({
 		redirect("/login");
 	}
 
-	const bars = await prisma.bar.findMany({
-		where: {
-			isActive: true,
-		},
-		select: {
-			id: true,
-			name: true,
-			prefecture: true,
-			city: true,
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
-
 	const params = await searchParams;
-	const selectedBarId = params.barId;
+	const barIdParam = params.barId;
+
+	const bar =
+		barIdParam && /^\d+$/.test(barIdParam)
+			? await prisma.bar.findFirst({
+					where: {
+						id: BigInt(barIdParam),
+						isActive: true,
+					},
+					select: {
+						id: true,
+						name: true,
+						prefecture: true,
+						city: true,
+					},
+				})
+			: null;
 
 	return (
 		<AuthenticatedLayout>
@@ -45,7 +47,21 @@ export default async function NewPostPage({
 				</div>
 
 				<div className="bg-card p-8 rounded-lg shadow-md">
-					<PostForm bars={bars} selectedBarId={selectedBarId} />
+					{bar ? (
+						<PostForm bar={bar} />
+					) : (
+						<div className="flex flex-col items-center gap-6 text-center">
+							<p className="text-foreground">
+								投稿する店舗の詳細ページから「このお店について投稿する」を押して投稿してください。
+							</p>
+							<Link
+								href="/"
+								className="px-6 py-3 text-white bg-blue-600 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+							>
+								店舗を探す
+							</Link>
+						</div>
+					)}
 				</div>
 			</div>
 		</AuthenticatedLayout>

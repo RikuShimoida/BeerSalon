@@ -12,11 +12,10 @@ type Bar = {
 };
 
 type PostFormProps = {
-	bars: Bar[];
-	selectedBarId?: string;
+	bar: Bar;
 };
 
-export function PostForm({ bars, selectedBarId }: PostFormProps) {
+export function PostForm({ bar }: PostFormProps) {
 	const router = useRouter();
 	const [state, formAction] = useActionState(createPost, undefined);
 	const [isPending, startTransition] = useTransition();
@@ -73,24 +72,16 @@ export function PostForm({ bars, selectedBarId }: PostFormProps) {
 
 	return (
 		<form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full">
+			<input type="hidden" name="barId" value={bar.id.toString()} />
+
 			<div className="flex flex-col gap-2">
-				<label htmlFor="barId" className="text-sm font-medium text-gray-700">
-					店舗選択<span className="text-red-500 ml-1">*</span>
-				</label>
-				<select
-					id="barId"
-					name="barId"
-					defaultValue={selectedBarId || state?.barId || ""}
-					className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-					required
-				>
-					<option value="">店舗を選択してください</option>
-					{bars.map((bar) => (
-						<option key={bar.id.toString()} value={bar.id.toString()}>
-							{bar.name} ({bar.prefecture} {bar.city})
-						</option>
-					))}
-				</select>
+				<div className="text-sm font-medium text-gray-700">投稿する店舗</div>
+				<div className="px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+					<span className="font-medium text-gray-900">{bar.name}</span>
+					<span className="ml-2 text-sm text-gray-600">
+						{bar.prefecture} {bar.city}
+					</span>
+				</div>
 			</div>
 
 			<div className="flex flex-col gap-2">
