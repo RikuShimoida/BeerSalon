@@ -34,7 +34,7 @@ PC では横幅に応じて余白や2カラムレイアウトにすることを�
     - お気に入りバー（★）→ `/favorites/bars`
     - タイムライン → `/timeline`
     - 投稿（＋）→ `/posts/new`（**中央 FAB**。アンバーグラデ丸 `from-primary`〜`to-primary-strong`・一段浮かせて表示）
-    - 履歴（🕒）→ `/history/bars`
+    - 閲覧履歴（🕒）→ `/history/bars`
   - アクティブ項目はアンバー（`text-primary` / `fill-primary`・`aria-current="page"`）、非アクティブは `subtext`
 
 - **コンテンツエリア**

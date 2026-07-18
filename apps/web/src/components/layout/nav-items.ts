@@ -14,5 +14,5 @@ export const NAV_ITEMS: NavItem[] = [
 	{ href: "/favorites/bars", label: "お気に入り", icon: Star },
 	{ href: "/timeline", label: "タイムライン", icon: Rss },
 	{ href: "/posts/new", label: "投稿", icon: Plus, isPost: true },
-	{ href: "/history/bars", label: "履歴", icon: Clock },
+	{ href: "/history/bars", label: "閲覧履歴", icon: Clock },
 ];

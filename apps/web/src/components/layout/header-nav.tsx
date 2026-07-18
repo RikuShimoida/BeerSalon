@@ -34,7 +34,7 @@ export function HeaderNav() {
 									: "text-subtext border-transparent hover:text-foreground"
 							}`}
 						>
-							{item.label === "履歴" ? "閲覧履歴" : item.label}
+							{item.label}
 						</Link>
 					);
 				})}
