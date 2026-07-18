@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBarDetail, isFavoriteBar, recordViewHistory } from "@/actions/bar";
 import { BarTabs } from "@/components/bar/bar-tabs";
@@ -43,6 +44,15 @@ export default async function BarDetailPage({
 								barId={barId}
 								initialIsFavorite={initialIsFavorite}
 							/>
+						</div>
+
+						<div className="mt-4">
+							<Link
+								href={`/posts/new?barId=${barId}`}
+								className="inline-flex items-center px-4 py-2 text-white bg-blue-600 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+							>
+								このお店について投稿する
+							</Link>
 						</div>
 					</div>
 
