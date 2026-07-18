@@ -1,4 +1,4 @@
-import { Instagram } from "lucide-react";
+import { Clock, Instagram, MapPin, Phone, Wallet } from "lucide-react";
 import { FacebookIcon } from "@/components/icons/facebook-icon";
 import { LineIcon } from "@/components/icons/line-icon";
 import { XIcon } from "@/components/icons/x-icon";
@@ -113,161 +113,166 @@ export function TopTab({ bar }: TopTabProps) {
 	return (
 		<div className="space-y-6">
 			<section>
-				<h2 className="text-lg font-bold text-gray-900 mb-2">PR文</h2>
-				<p className="text-gray-700 whitespace-pre-wrap">
+				<h2 className="mb-3 font-archivo text-xs uppercase tracking-[0.22em] text-primary">
+					About
+				</h2>
+				<p className="whitespace-pre-wrap font-mincho text-lg leading-relaxed text-heading">
 					{bar.description || "PR文はまだ登録されていません。"}
 				</p>
 			</section>
 
-			<section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<div className="md:col-span-2">
-					<h3 className="text-sm font-semibold text-gray-700 mb-1">営業時間</h3>
-					{bar.openingHours.length > 0 ? (
-						<p className="text-gray-900 whitespace-pre-line">
-							{formatOpeningHours(bar.openingHours)}
-						</p>
-					) : (
-						<p className="text-gray-900">
-							{formatTime(bar.openingTime)} - {formatTime(bar.endingTime)}
-						</p>
-					)}
-					{bar.regularHoliday && (
-						<p className="text-gray-900 whitespace-pre-line mt-1">
-							定休日: {bar.regularHoliday}
-						</p>
-					)}
-				</div>
-
-				<div>
-					<h3 className="text-sm font-semibold text-gray-700 mb-1">
-						交通手段・アクセス
-					</h3>
-					<p className="text-gray-900 whitespace-pre-line">
-						{bar.access || "-"}
+			<section className="rounded-2xl border border-border bg-surface-raised p-5">
+				<h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-heading">
+					<Clock className="h-4 w-4 text-primary" />
+					営業時間
+				</h3>
+				{bar.openingHours.length > 0 ? (
+					<p className="whitespace-pre-line text-sm leading-relaxed text-subtext">
+						{formatOpeningHours(bar.openingHours)}
 					</p>
-				</div>
-
-				<div>
-					<h3 className="text-sm font-semibold text-gray-700 mb-1">電話番号</h3>
-					{bar.phoneNumber ? (
-						<a
-							href={`tel:${bar.phoneNumber}`}
-							className="text-blue-600 hover:underline"
-						>
-							{bar.phoneNumber}
-						</a>
-					) : (
-						<p className="text-gray-900">-</p>
-					)}
-				</div>
-
-				<div>
-					<h3 className="text-sm font-semibold text-gray-700 mb-1">住所</h3>
-					<p className="text-gray-900">
-						{bar.prefecture}
-						{bar.city}
-						{bar.addressLine1}
-						{bar.addressLine2 && ` ${bar.addressLine2}`}
+				) : (
+					<p className="text-sm text-subtext">
+						{formatTime(bar.openingTime)} - {formatTime(bar.endingTime)}
 					</p>
-				</div>
+				)}
+				{bar.regularHoliday && (
+					<p className="mt-2 whitespace-pre-line text-sm text-subtext">
+						定休日: {bar.regularHoliday}
+					</p>
+				)}
+			</section>
 
-				<div>
-					<h3 className="text-sm font-semibold text-gray-700 mb-1">
-						支払い方法
-					</h3>
-					{bar.paymentMethods.length > 0 ? (
-						<p className="text-gray-900">
-							{bar.paymentMethods.map((pm) => pm.name).join("、")}
+			<section className="divide-y divide-border rounded-2xl border border-border bg-surface-raised">
+				<div className="flex gap-3 p-5">
+					<MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+					<div>
+						<h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-subtext">
+							住所
+						</h3>
+						<p className="text-sm text-heading">
+							{bar.prefecture}
+							{bar.city}
+							{bar.addressLine1}
+							{bar.addressLine2 && ` ${bar.addressLine2}`}
 						</p>
-					) : (
-						<p className="text-gray-900">-</p>
-					)}
+					</div>
 				</div>
 
-				<div>
-					<h3 className="text-sm font-semibold text-gray-700 mb-1">
-						ホームページ
-					</h3>
-					{bar.websiteUrl ? (
-						<a
-							href={bar.websiteUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-blue-600 hover:underline break-all"
-						>
-							{bar.websiteUrl}
-						</a>
-					) : (
-						<p className="text-gray-900">-</p>
-					)}
+				<div className="flex gap-3 p-5">
+					<Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+					<div>
+						<h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-subtext">
+							電話番号
+						</h3>
+						{bar.phoneNumber ? (
+							<a
+								href={`tel:${bar.phoneNumber}`}
+								className="text-sm text-primary hover:underline"
+							>
+								{bar.phoneNumber}
+							</a>
+						) : (
+							<p className="text-sm text-heading">-</p>
+						)}
+					</div>
 				</div>
 
-				{bar.instagramUrl && (
+				<div className="flex gap-3 p-5">
+					<Wallet className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
 					<div>
-						<h3 className="text-sm font-semibold text-gray-700 mb-1">
-							Instagram
+						<h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-subtext">
+							支払い方法
 						</h3>
-						<a
-							href={bar.instagramUrl}
-							target="_blank"
-							rel="nofollow noopener"
-							className="inline-flex items-center text-gray-700 hover:text-pink-600 transition-colors"
-							aria-label="Instagramで見る"
-						>
-							<Instagram className="w-6 h-6" />
-						</a>
+						<p className="text-sm text-heading">
+							{bar.paymentMethods.length > 0
+								? bar.paymentMethods.map((pm) => pm.name).join("、")
+								: "-"}
+						</p>
 					</div>
-				)}
+				</div>
 
-				{bar.xUrl && (
-					<div>
-						<h3 className="text-sm font-semibold text-gray-700 mb-1">
-							X（Twitter）
-						</h3>
-						<a
-							href={bar.xUrl}
-							target="_blank"
-							rel="nofollow noopener"
-							className="inline-flex items-center text-gray-700 hover:text-black transition-colors"
-							aria-label="Xで見る"
-						>
-							<XIcon className="w-6 h-6" />
-						</a>
-					</div>
-				)}
-
-				{bar.facebookUrl && (
-					<div>
-						<h3 className="text-sm font-semibold text-gray-700 mb-1">
-							Facebook
-						</h3>
-						<a
-							href={bar.facebookUrl}
-							target="_blank"
-							rel="nofollow noopener"
-							className="inline-flex items-center text-gray-700 hover:text-blue-600 transition-colors"
-							aria-label="Facebookで見る"
-						>
-							<FacebookIcon className="w-6 h-6" />
-						</a>
-					</div>
-				)}
-
-				{bar.lineUrl && (
-					<div>
-						<h3 className="text-sm font-semibold text-gray-700 mb-1">LINE</h3>
-						<a
-							href={bar.lineUrl}
-							target="_blank"
-							rel="nofollow noopener"
-							className="inline-flex items-center text-gray-700 hover:text-[#06C755] transition-colors"
-							aria-label="LINEで見る"
-						>
-							<LineIcon className="w-6 h-6" />
-						</a>
+				{bar.access && (
+					<div className="flex gap-3 p-5">
+						<MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+						<div>
+							<h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-subtext">
+								交通手段・アクセス
+							</h3>
+							<p className="whitespace-pre-line text-sm text-heading">
+								{bar.access}
+							</p>
+						</div>
 					</div>
 				)}
 			</section>
+
+			{(bar.websiteUrl ||
+				bar.instagramUrl ||
+				bar.xUrl ||
+				bar.facebookUrl ||
+				bar.lineUrl) && (
+				<section>
+					<h3 className="mb-3 text-sm font-semibold text-heading">
+						ウェブ・SNS
+					</h3>
+					<div className="flex flex-wrap items-center gap-3">
+						{bar.websiteUrl && (
+							<a
+								href={bar.websiteUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-surface-raised px-4 py-2 text-sm text-heading transition-colors hover:border-primary/60 hover:text-primary"
+							>
+								ホームページ
+							</a>
+						)}
+						{bar.instagramUrl && (
+							<a
+								href={bar.instagramUrl}
+								target="_blank"
+								rel="nofollow noopener"
+								className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/30 bg-surface-raised text-heading transition-colors hover:border-primary/60 hover:text-primary"
+								aria-label="Instagramで見る"
+							>
+								<Instagram className="h-5 w-5" />
+							</a>
+						)}
+						{bar.xUrl && (
+							<a
+								href={bar.xUrl}
+								target="_blank"
+								rel="nofollow noopener"
+								className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/30 bg-surface-raised text-heading transition-colors hover:border-primary/60 hover:text-primary"
+								aria-label="Xで見る"
+							>
+								<XIcon className="h-5 w-5" />
+							</a>
+						)}
+						{bar.facebookUrl && (
+							<a
+								href={bar.facebookUrl}
+								target="_blank"
+								rel="nofollow noopener"
+								className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/30 bg-surface-raised text-heading transition-colors hover:border-primary/60 hover:text-primary"
+								aria-label="Facebookで見る"
+							>
+								<FacebookIcon className="h-5 w-5" />
+							</a>
+						)}
+						{bar.lineUrl && (
+							<a
+								href={bar.lineUrl}
+								target="_blank"
+								rel="nofollow noopener"
+								className="flex h-11 w-11 items-center justify-center rounded-full border border-primary/30 bg-surface-raised text-heading transition-colors hover:border-primary/60 hover:text-primary"
+								aria-label="LINEで見る"
+							>
+								<LineIcon className="h-5 w-5" />
+							</a>
+						)}
+					</div>
+				</section>
+			)}
 		</div>
 	);
 }
