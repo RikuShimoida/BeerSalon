@@ -151,17 +151,11 @@ describe("Dark Taproom 基盤（Issue #440）", () => {
 		expect(themeBlock).not.toContain("--primary: 30 75% 45%;");
 	});
 
-	it("globals.css にトップ限定スコープ .top-amber-dark が残っている（撤去は別 Issue）", () => {
-		expect(globalsCss).toContain(".top-amber-dark");
-	});
-
-	it("スコープ定義は THEME:START〜THEME:END の外にあり、テーマ切替ブロックを侵さない", () => {
-		const startIdx = globalsCss.indexOf("/* THEME:START");
-		const endIdx = globalsCss.indexOf("/* THEME:END */");
-		const themeBlock = globalsCss.slice(startIdx, endIdx);
-		// Why not スコープを :root(THEMEブロック)内に置く: そこへ書くと apply-theme が
-		// 差し替え対象にしてテーマ切替で消える。スコープは THEME ブロックの外に置く。
-		expect(themeBlock).not.toContain(".top-amber-dark");
+	it("トップ限定スコープ .top-amber-dark は撤去されている（Issue #442）", () => {
+		// Issue #442 でトップ/検索ページを Dark Taproom で再実装し、page-client.tsx の
+		// .top-amber-dark ラッパを撤去した。:root 自体が Dark Taproom 化されているため、
+		// トップの背景・文字色は AuthenticatedLayout（bg-background）と基盤トークンで足りる。
+		expect(globalsCss).not.toContain(".top-amber-dark");
 	});
 
 	it("@theme inline に明朝・Archivo のフォント変数が登録されている", () => {

@@ -14,6 +14,25 @@ describe("parseSearchParams", () => {
 			});
 		});
 
+		it("cat をカンマ区切りで配列に、origin を文字列に変換する", () => {
+			const params = new URLSearchParams(
+				"q=IPA&city=静岡市&cat=IPA,スタウト&origin=日本/静岡",
+			);
+
+			expect(parseSearchParams(params)).toEqual({
+				q: "IPA",
+				city: "静岡市",
+				categories: ["IPA", "スタウト"],
+				origin: "日本/静岡",
+			});
+		});
+
+		it("cat の各要素の前後空白はトリムされ、空要素は除外される", () => {
+			const params = new URLSearchParams("cat=%20IPA%20,,%20スタウト%20");
+
+			expect(parseSearchParams(params).categories).toEqual(["IPA", "スタウト"]);
+		});
+
 		it("q のみ指定された場合は city は空文字になる", () => {
 			const params = new URLSearchParams("q=スタウト");
 
@@ -110,6 +129,33 @@ describe("buildSearchQueryString", () => {
 			expect(params.has("q")).toBe(false);
 			expect(params.get("city")).toBe("浜松市");
 		});
+
+		it("categories をカンマ区切りの cat に、origin を格納する", () => {
+			const result = buildSearchQueryString({
+				categories: ["IPA", "スタウト"],
+				origin: "日本/静岡",
+			});
+			const params = new URLSearchParams(result);
+
+			expect(params.get("cat")).toBe("IPA,スタウト");
+			expect(params.get("origin")).toBe("日本/静岡");
+		});
+
+		it("categories が空配列の場合は cat を含めない", () => {
+			const result = buildSearchQueryString({ q: "IPA", categories: [] });
+			const params = new URLSearchParams(result);
+
+			expect(params.has("cat")).toBe(false);
+		});
+
+		it("categories の空要素・空白のみ要素は除外される", () => {
+			const result = buildSearchQueryString({
+				categories: [" IPA ", "", "  "],
+			});
+			const params = new URLSearchParams(result);
+
+			expect(params.get("cat")).toBe("IPA");
+		});
 	});
 
 	describe("正規化", () => {
@@ -146,11 +192,15 @@ describe("buildSearchQueryString", () => {
 			const queryString = buildSearchQueryString({
 				q: " IPA ",
 				city: "静岡市",
+				categories: ["IPA", "スタウト"],
+				origin: "日本/静岡",
 			});
 			const parsed = parseSearchParams(new URLSearchParams(queryString));
 
 			expect(parsed.q).toBe("IPA");
 			expect(parsed.city).toBe("静岡市");
+			expect(parsed.categories).toEqual(["IPA", "スタウト"]);
+			expect(parsed.origin).toBe("日本/静岡");
 		});
 	});
 });

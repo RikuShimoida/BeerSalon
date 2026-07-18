@@ -9,18 +9,25 @@ interface BarListProps {
 	isLoading: boolean;
 }
 
+function ListHeader({ count }: { count: string }) {
+	return (
+		<div className="mb-5 flex items-end justify-between">
+			<h2 className="font-mincho text-lg font-bold text-heading md:text-xl">
+				近くのお店
+			</h2>
+			<span className="font-archivo text-sm font-medium text-subtext">
+				{count}
+			</span>
+		</div>
+	);
+}
+
 export function BarList({ bars, isLoading }: BarListProps) {
 	if (isLoading) {
 		return (
 			<div className="animate-fade-in">
-				<div className="flex justify-between items-center mb-6">
-					<h2 className="text-lg font-bold text-foreground">近くのお店</h2>
-					<span className="text-sm font-semibold text-muted-foreground">
-						...件
-					</span>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<ListHeader count="... 件" />
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 					{Array.from({ length: 6 }).map((_, i) => (
 						// biome-ignore lint/suspicious/noArrayIndexKey: skeleton items have fixed order
 						<BarCardSkeleton key={i} />
@@ -32,14 +39,9 @@ export function BarList({ bars, isLoading }: BarListProps) {
 
 	return (
 		<div className="animate-fade-in">
-			<div className="flex justify-between items-center mb-6">
-				<h2 className="text-lg font-bold text-foreground">近くのお店</h2>
-				<span className="text-sm font-semibold text-muted-foreground">
-					{bars.length}件
-				</span>
-			</div>
+			<ListHeader count={`${bars.length} 件`} />
 
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				{bars.map((bar) => (
 					<BarCard
 						key={bar.id}
@@ -53,8 +55,8 @@ export function BarList({ bars, isLoading }: BarListProps) {
 			</div>
 
 			{bars.length === 0 && (
-				<div className="text-center py-12 text-muted-foreground">
-					<p>店舗が見つかりませんでした</p>
+				<div className="rounded-2xl border border-dashed border-border bg-card/40 py-12 text-center text-subtext">
+					<p>条件に合う店舗が見つかりませんでした</p>
 				</div>
 			)}
 		</div>
