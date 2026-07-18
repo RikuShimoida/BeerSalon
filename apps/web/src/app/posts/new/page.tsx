@@ -52,7 +52,7 @@ export default async function NewPostPage({
 					) : (
 						<div className="flex flex-col items-center gap-6 text-center">
 							<p className="text-foreground">
-								投稿する店舗の詳細ページから「このお店について投稿する」を押して投稿してください。
+								投稿する店舗の詳細ページから「このお店に投稿する」を押して投稿してください。
 							</p>
 							<Link
 								href="/"
