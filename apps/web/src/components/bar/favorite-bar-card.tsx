@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Star } from "lucide-react";
+import { Beer, MapPin, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -53,28 +53,32 @@ export function FavoriteBarCard({
 	const displayImage = images[0]?.imageUrl;
 
 	return (
-		<div className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden relative">
+		<div className="group relative block overflow-hidden rounded-2xl border border-border bg-card modern-shadow transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30">
 			<Link href={`/bars/${id}`}>
-				<div className="aspect-video bg-gray-200 relative">
+				<div className="relative aspect-[4/3] overflow-hidden bg-surface-raised">
 					{displayImage ? (
 						<Image
 							src={displayImage}
 							alt={name}
 							fill
-							className="object-cover"
+							className="object-cover transition-transform duration-300 group-hover:scale-105"
 						/>
 					) : (
-						<div className="w-full h-full flex items-center justify-center text-gray-400">
-							<MapPin className="w-12 h-12" />
+						<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-raised to-surface-deep text-primary/40">
+							<Beer className="h-14 w-14" />
 						</div>
 					)}
+					<div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface-deep/40 to-transparent" />
 				</div>
 
 				<div className="p-4">
-					<h3 className="font-bold text-lg text-gray-900 mb-2">{name}</h3>
-					<p className="text-sm text-gray-600">
+					<h3 className="mb-2 font-mincho text-[15px] font-bold text-heading">
+						{name}
+					</h3>
+					<span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-1 text-xs text-subtext">
+						<MapPin className="h-3 w-3 text-primary" />
 						{prefecture} {city}
-					</p>
+					</span>
 				</div>
 			</Link>
 
@@ -82,10 +86,10 @@ export function FavoriteBarCard({
 				type="button"
 				onClick={handleRemoveFavorite}
 				disabled={isRemoving}
-				className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-colors disabled:opacity-50"
+				className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(15,11,6,0.6)] backdrop-blur-sm transition-colors hover:bg-[rgba(15,11,6,0.8)] disabled:opacity-50"
 				aria-label="お気に入りから削除"
 			>
-				<Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+				<Star className="h-5 w-5 fill-primary text-primary" />
 			</button>
 		</div>
 	);

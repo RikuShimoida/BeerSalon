@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { getCurrentUser, getUserCoupons, getUserPosts } from "@/actions/user";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
 import { MyCouponsList } from "@/components/mypage/my-coupons-list";
-import { LikeButton } from "@/components/post/like-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function MyPage() {
@@ -23,137 +22,120 @@ export default async function MyPage() {
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto px-4 py-6">
-				<div className="glass-card rounded-2xl modern-shadow overflow-hidden animate-fade-in">
-					<div className="p-6 border-b border-border/50">
-						<div className="flex items-center gap-4 mb-4">
-							<div className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
+			<div className="mx-auto max-w-3xl px-4 py-6">
+				<div className="overflow-hidden rounded-2xl border border-border bg-card modern-shadow">
+					<div className="bg-gradient-to-br from-surface-raised to-surface-deep p-6">
+						<div className="mb-4 flex items-center gap-4">
+							<div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full border-2 border-primary">
 								{user.profileImageUrl ? (
 									<Image
 										src={user.profileImageUrl}
 										alt={`${user.nickname}のプロフィール画像`}
 										width={96}
 										height={96}
-										className="w-full h-full object-cover"
+										className="h-full w-full object-cover"
 									/>
 								) : (
-									<div className="w-full h-full bg-muted flex items-center justify-center text-4xl text-muted-foreground">
+									<div className="flex h-full w-full items-center justify-center bg-surface-raised text-4xl text-primary/60">
 										{user.nickname.charAt(0)}
 									</div>
 								)}
 							</div>
-							<div className="flex-1">
-								<h1 className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">
+							<div className="min-w-0 flex-1">
+								<h1 className="mb-2 font-mincho text-2xl font-bold text-heading">
 									{user.nickname}
 								</h1>
 								{user.bio && (
-									<p className="text-sm text-muted-foreground whitespace-pre-wrap">
+									<p className="whitespace-pre-wrap text-sm text-subtext">
 										{user.bio}
 									</p>
 								)}
 							</div>
 						</div>
 
-						<div className="flex gap-2 mb-4">
-							<Link
-								href="/mypage/edit"
-								className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-300 font-medium tracking-wide"
-							>
-								プロフィールを編集
-							</Link>
-						</div>
-
-						<div className="flex gap-6 mt-4">
-							<Link
-								href="/mypage/following"
-								className="hover:text-primary transition-colors duration-300"
-							>
-								<span className="font-semibold text-card-foreground">
+						<div className="mb-4 flex gap-6">
+							<div className="text-center">
+								<span className="block font-semibold text-heading">
+									{user.postsCount}
+								</span>
+								<span className="text-xs tracking-wide text-subtext">投稿</span>
+							</div>
+							<Link href="/mypage/following" className="text-center">
+								<span className="block font-semibold text-heading">
 									{user.followingCount}
 								</span>
-								<span className="text-muted-foreground ml-1 tracking-wide">
+								<span className="text-xs tracking-wide text-subtext">
 									フォロー
 								</span>
 							</Link>
-							<Link
-								href="/mypage/followers"
-								className="hover:text-primary transition-colors duration-300"
-							>
-								<span className="font-semibold text-card-foreground">
+							<Link href="/mypage/followers" className="text-center">
+								<span className="block font-semibold text-heading">
 									{user.followersCount}
 								</span>
-								<span className="text-muted-foreground ml-1 tracking-wide">
+								<span className="text-xs tracking-wide text-subtext">
 									フォロワー
 								</span>
 							</Link>
 						</div>
+
+						<Link
+							href="/mypage/edit"
+							className="inline-flex items-center rounded-full border border-primary/40 bg-surface-raised px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+						>
+							プロフィールを編集
+						</Link>
 					</div>
 
 					<Tabs defaultValue="posts" className="w-full">
-						<TabsList className="grid w-full grid-cols-2">
-							<TabsTrigger value="posts">投稿</TabsTrigger>
-							<TabsTrigger value="coupons">持っているクーポン</TabsTrigger>
+						<TabsList className="grid w-full grid-cols-2 rounded-none border-b border-border bg-transparent p-0">
+							<TabsTrigger
+								value="posts"
+								className="rounded-none border-b-2 border-transparent py-3 text-subtext data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary"
+							>
+								投稿
+							</TabsTrigger>
+							<TabsTrigger
+								value="coupons"
+								className="rounded-none border-b-2 border-transparent py-3 text-subtext data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary"
+							>
+								持っているクーポン
+							</TabsTrigger>
 						</TabsList>
 
-						<TabsContent value="posts" className="p-6">
+						<TabsContent value="posts" className="p-4">
 							{posts.length === 0 ? (
-								<div className="p-8 text-center">
-									<p className="text-muted-foreground tracking-wide">
-										投稿はありません
-									</p>
+								<div className="py-12 text-center">
+									<p className="tracking-wide text-subtext">投稿はありません</p>
 								</div>
 							) : (
-								<div className="space-y-6">
+								<div className="grid grid-cols-3 gap-1">
 									{posts.map((post) => (
-										<div
+										<Link
 											key={post.id}
-											className="glass-card border-border/30 rounded-xl p-4 hover-lift"
+											href={`/bars/${post.bar.id}`}
+											className="group relative aspect-square overflow-hidden rounded-lg bg-surface-raised"
 										>
-											{post.images.length > 0 && (
-												<div className="grid grid-cols-2 gap-2 mb-4">
-													{post.images.map((image) => (
-														<div
-															key={image.id}
-															className="aspect-square relative overflow-hidden rounded-lg"
-														>
-															<Image
-																src={image.url}
-																alt=""
-																fill
-																className="object-cover"
-															/>
-														</div>
-													))}
+											{post.images.length > 0 ? (
+												<Image
+													src={post.images[0].url}
+													alt=""
+													fill
+													className="object-cover transition-transform duration-300 group-hover:scale-105"
+												/>
+											) : (
+												<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-raised to-surface-deep p-2">
+													<p className="line-clamp-4 text-xs text-subtext">
+														{post.body}
+													</p>
 												</div>
 											)}
-											<p className="text-card-foreground mb-2 tracking-wide">
-												{post.body}
-											</p>
-											<div className="flex items-center justify-between text-sm mb-2">
-												<Link
-													href={`/bars/${post.bar.id}`}
-													className="text-primary hover:text-primary/80 transition-colors duration-300 tracking-wide"
-												>
-													{post.bar.name}
-												</Link>
-												<span className="text-muted-foreground tracking-wide">
-													{new Date(post.createdAt).toLocaleDateString("ja-JP")}
-												</span>
-											</div>
-											<div className="flex justify-end">
-												<LikeButton
-													postId={post.id}
-													initialLikeCount={post.likeCount}
-													initialIsLiked={post.isLikedByCurrentUser}
-												/>
-											</div>
-										</div>
+										</Link>
 									))}
 								</div>
 							)}
 						</TabsContent>
 
-						<TabsContent value="coupons" className="p-6">
+						<TabsContent value="coupons" className="p-4">
 							<MyCouponsList coupons={coupons} />
 						</TabsContent>
 					</Tabs>

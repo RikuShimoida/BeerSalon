@@ -1,5 +1,6 @@
+import { Clock } from "lucide-react";
 import { getViewHistories } from "@/actions/bar";
-import { BarCard } from "@/components/bar/bar-card";
+import { ViewHistoryList } from "@/components/history/view-history-list";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
 
 export default async function ViewHistoriesPage() {
@@ -7,31 +8,25 @@ export default async function ViewHistoriesPage() {
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-				<h1 className="text-2xl font-semibold text-foreground mb-6">
+			<div className="mx-auto max-w-3xl px-4 py-8 md:py-12">
+				<h1 className="mb-6 font-mincho text-2xl font-bold text-heading">
 					閲覧履歴
 				</h1>
 
 				{!viewHistories || viewHistories.length === 0 ? (
-					<div className="text-center py-12 text-muted-foreground">
-						<p className="mb-2">閲覧履歴はありません</p>
-						<p className="text-sm">
+					<div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
+						<div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-raised text-primary/60">
+							<Clock className="h-7 w-7" />
+						</div>
+						<p className="mb-1 font-medium text-heading">
+							閲覧履歴はありません
+						</p>
+						<p className="text-sm text-subtext">
 							店舗を閲覧すると、ここに履歴が表示されます
 						</p>
 					</div>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{viewHistories.map((history) => (
-							<BarCard
-								key={history.id}
-								id={history.bar.id}
-								name={history.bar.name}
-								prefecture={history.bar.prefecture}
-								city={history.bar.city}
-								imageUrl={history.bar.imageUrl}
-							/>
-						))}
-					</div>
+					<ViewHistoryList histories={viewHistories} />
 				)}
 			</div>
 		</AuthenticatedLayout>
