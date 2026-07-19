@@ -16,6 +16,7 @@ export async function getArticleDetail(articleId: string) {
 				select: {
 					id: true,
 					name: true,
+					previewImageUrl: true,
 				},
 			},
 		},

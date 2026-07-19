@@ -1,6 +1,8 @@
 "use client";
 
+import { Bell, ChevronRight, Heart, Newspaper, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { ComponentType } from "react";
 import { markNotificationAsRead } from "@/actions/notification";
 
 type NotificationCardProps = {
@@ -13,16 +15,33 @@ type NotificationCardProps = {
 	createdAt: Date;
 };
 
-function getNotificationIcon(type: string): string {
+type IconStyle = {
+	Icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+	className: string;
+};
+
+function getNotificationIconStyle(type: string): IconStyle {
 	switch (type) {
 		case "post_liked":
-			return "❤️";
+			return {
+				Icon: Heart,
+				className: "bg-destructive/15 text-destructive",
+			};
 		case "followed":
-			return "👤";
+			return {
+				Icon: UserPlus,
+				className: "bg-primary/15 text-primary",
+			};
 		case "new_article":
-			return "📰";
+			return {
+				Icon: Newspaper,
+				className: "bg-surface-raised text-primary",
+			};
 		default:
-			return "🔔";
+			return {
+				Icon: Bell,
+				className: "bg-surface-raised text-subtext",
+			};
 	}
 }
 
@@ -56,6 +75,7 @@ export function NotificationCard({
 	createdAt,
 }: NotificationCardProps) {
 	const router = useRouter();
+	const { Icon, className: iconClassName } = getNotificationIconStyle(type);
 
 	const handleClick = async () => {
 		if (!isRead) {
@@ -70,36 +90,39 @@ export function NotificationCard({
 		<button
 			type="button"
 			onClick={handleClick}
-			className={`w-full text-left p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors ${
-				!isRead ? "bg-blue-50" : "bg-white"
+			className={`relative w-full rounded-2xl border p-4 text-left transition-colors ${
+				isRead
+					? "border-border bg-card hover:bg-surface-raised"
+					: "border-primary/40 bg-primary/5 hover:bg-primary/10"
 			}`}
 		>
+			{!isRead && (
+				<span
+					aria-hidden="true"
+					className="absolute inset-y-3 left-0 w-[3px] rounded-full bg-primary"
+				/>
+			)}
 			<div className="flex items-start gap-3">
-				<div className="flex-shrink-0 text-2xl">
-					{getNotificationIcon(type)}
+				<div
+					className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${iconClassName}`}
+				>
+					<Icon className="h-5 w-5" aria-hidden />
 				</div>
-				<div className="flex-1 min-w-0">
-					<p className="text-sm font-semibold text-gray-900">{title}</p>
-					<p className="text-sm text-gray-600 mt-1">{message}</p>
-					<p className="text-xs text-gray-400 mt-1">
+				<div className="min-w-0 flex-1">
+					<p className="text-sm font-semibold text-heading">{title}</p>
+					<p className="mt-1 text-sm text-foreground">{message}</p>
+					<p className="mt-1 text-xs text-subtext">
 						{formatRelativeTime(createdAt)}
 					</p>
 				</div>
-				<div className="flex-shrink-0">
-					<svg
-						className="w-5 h-5 text-gray-400"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<title>詳細を見る</title>
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth={2}
-							d="M9 5l7 7-7 7"
+				<div className="flex flex-shrink-0 items-center gap-2 self-center">
+					{!isRead && (
+						<span
+							aria-hidden="true"
+							className="hidden h-2 w-2 rounded-full bg-primary md:block"
 						/>
-					</svg>
+					)}
+					<ChevronRight className="h-5 w-5 text-subtext" aria-hidden="true" />
 				</div>
 			</div>
 		</button>

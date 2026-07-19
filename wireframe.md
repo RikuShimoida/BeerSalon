@@ -315,17 +315,19 @@ Dark Taproom（1a / 2a）で実装（#442）。配色・タイポは `design_han
 
 ### 3-1. 記事ページ `/articles/[articleId]`
 
+Dark Taproom（9a / 9b）で実装（#446）。配色・タイポは `design_handoff_user_screens/README.md` の Design Tokens が正。中央 660px 幅の1カラム。
+
 **レイアウト**
 
-- 上部: 店舗名ラベル（小）、記事タイトル（大）
-- いいねボタン（トグル）＋いいね数
-- 投稿日
-- 画像（任意・最大3枚。`image_url` / `image_url_2` / `image_url_3` のうち設定済みのもののみ表示）
-- 記事本文（段落）
-
-- 下部:
-  - 関連店舗へのリンクボタン → `/bars/[barId]`
-  - シェアボタン（X 等 / 任意）
+- 上部: オーバーライン「ARTICLE」（Archivo・`uppercase`・アンバー）＋店舗名リンク（`subtext` → `/bars/[barId]`）＋記事タイトル（明朝 `font-mincho` 大見出し）
+- メタ行（下線区切り）:
+  - いいねボタン（トグル・塗り時は赤 `destructive`）＋いいね数
+  - シェアボタン（`Share2`。Web Share API、非対応時は URL コピー＋トースト）
+  - 投稿日（右寄せ・`subtext`）
+- 画像（任意・最大3枚。`image_url` / `image_url_2` / `image_url_3` のうち設定済みのもののみ表示。`16:9`・角丸）
+- 記事本文（明朝 `font-mincho`・ゆったりした行間 `leading-[2]`）
+- 下部: 関連店舗カード（`bg-card`・「この記事のお店」見出し）
+  - 店舗プレビュー画像サムネ（`bars.preview_image_url`。未設定時はビールジョッキアイコン + `surface-deep` フォールバック）＋店名（明朝）＋「店舗を見る」＋ `ChevronRight`。タップで `/bars/[barId]`
 
 ---
 
@@ -471,22 +473,27 @@ Dark Taproom（1a / 2a）で実装（#442）。配色・タイポは `design_han
 
 ### 7-2. 通知一覧ページ `/notifications`
 
+Dark Taproom（8a / 8b）で実装（#446）。配色・タイポは `design_handoff_user_screens/README.md` の Design Tokens が正。
+
 **レイアウト**
 
-- 上部: タイトル「通知」
-- 通知リスト:
+- 上部: 見出し「通知」（明朝 `font-mincho`）。右に「すべて既読にする」ボタン（`Check` アイコン付き・アンバー枠ピル。未読が1件以上あるときのみ表示。押下で本人の未読を一括既読化）
+- 通知リスト: 作成日時（暦日）で「今日 / 昨日 / それ以前」にグルーピング（該当のあるグループのみ、`subtext` の小見出しを出す）
 
-各行:
+各カード（`bg-card` / 角丸 / 未読はアンバー枠 + 薄アンバー背景 + 左3pxアンバーバー + 右アンバードット、既読は通常カード）:
 
-- 左: 通知アイコン（種類ごとに変更）
-  - 例: いいね / フォロー / クーポン情報 / 店舗記事
+- 左: 通知種別アイコン（丸背景・lucide）
+  - いいね（`post_liked`）→ `Heart`（赤系 `destructive`）
+  - フォロー（`followed`）→ `UserPlus`（アンバー）
+  - 新着記事（`new_article`）→ `Newspaper`（アンバー）
+  - その他 → `Bell`（`subtext`）
 - 中央:
-  - 通知タイトル（例: 「あなたの投稿にいいねがつきました」）
+  - 通知タイトル（`heading`）
   - 補足テキスト（例: 「○○さんがあなたの投稿にいいねしました」）
-  - 日時
+  - 相対時刻（`subtext`）
 - 右:
-  - 「＞」アイコン（タップで対象ページへ）
-    - 投稿 → 投稿詳細 or タイムライン位置
+  - `ChevronRight` アイコン（タップで対象ページへ。未読ならタップで既読化）
+    - 投稿 → タイムライン位置
     - ユーザー → `/users/[userId]`
     - 店舗 → `/bars/[barId]`
     - 記事 → `/articles/[articleId]`
