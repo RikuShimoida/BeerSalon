@@ -466,6 +466,7 @@ export async function getTimelinePosts() {
 				select: {
 					id: true,
 					nickname: true,
+					profileImageUrl: true,
 				},
 			},
 			postImages: {
@@ -477,6 +478,8 @@ export async function getTimelinePosts() {
 				select: {
 					id: true,
 					name: true,
+					prefecture: true,
+					city: true,
 				},
 			},
 			postLikes: {
@@ -499,6 +502,7 @@ export async function getTimelinePosts() {
 		user: {
 			id: post.user.id,
 			nickname: post.user.nickname,
+			profileImageUrl: post.user.profileImageUrl,
 		},
 		images: post.postImages.map((img) => ({
 			id: img.id,
@@ -507,6 +511,8 @@ export async function getTimelinePosts() {
 		bar: {
 			id: post.bar.id,
 			name: post.bar.name,
+			prefecture: post.bar.prefecture,
+			city: post.bar.city,
 		},
 	}));
 }
