@@ -26,7 +26,7 @@ vi.mock("next/cache", () => ({
 }));
 
 // Why not: vi.mock のホイスト後に import すると mock が効くため、import 順を明示するために整理。
-import { toggleArticleLike } from "@/actions/article";
+import { getArticleDetail, toggleArticleLike } from "@/actions/article";
 
 const prisma = new PrismaClient({
 	adapter: new PrismaPg(
@@ -151,5 +151,23 @@ describe("toggleArticleLike (Integration)", () => {
 		await expect(toggleArticleLike(articleId)).rejects.toThrow(
 			"Not authenticated",
 		);
+	});
+});
+
+describe("getArticleDetail (Integration)", () => {
+	it("関連店舗の previewImageUrl を含めて返す（関連店舗カードのサムネ用）", async () => {
+		const articleId = await createTestArticle(testBarId);
+		await prisma.bar.update({
+			where: { id: testBarId },
+			data: { previewImageUrl: "https://example.com/preview.jpg" },
+		});
+
+		mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+
+		const detail = await getArticleDetail(articleId.toString());
+
+		expect(detail).not.toBeNull();
+		expect(detail?.bar.id).toBe(testBarId.toString());
+		expect(detail?.bar.previewImageUrl).toBe("https://example.com/preview.jpg");
 	});
 });
