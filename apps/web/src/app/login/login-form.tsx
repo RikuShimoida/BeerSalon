@@ -1,10 +1,10 @@
 "use client";
 
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { FormError } from "@/components/form/form-error";
-import { TextField } from "@/components/form/text-field";
 import { login } from "./actions";
 
 type Props = {
@@ -13,6 +13,7 @@ type Props = {
 
 export function LoginForm({ resetSuccess = false }: Props) {
 	const [state, formAction, isPending] = useActionState(login, undefined);
+	const [showPassword, setShowPassword] = useState(false);
 	const hasShownResetToastRef = useRef(false);
 
 	useEffect(() => {
@@ -31,43 +32,74 @@ export function LoginForm({ resetSuccess = false }: Props) {
 	}, [resetSuccess]);
 
 	return (
-		<form action={formAction} className="flex flex-col gap-4 w-full">
-			<TextField
-				id="email"
-				name="email"
-				label="メールアドレス"
-				type="email"
-				required
-			/>
+		<form action={formAction} className="flex w-full flex-col gap-5">
+			<div className="flex flex-col gap-2">
+				<label
+					htmlFor="email"
+					className="text-sm font-medium tracking-wide text-subtext"
+				>
+					メールアドレス
+				</label>
+				<input
+					type="email"
+					id="email"
+					name="email"
+					required
+					className="rounded-xl border border-primary/20 bg-surface-raised px-4 py-3 text-card-foreground transition-colors focus:border-primary/60 focus:outline-none focus:ring-1 focus:ring-primary/40"
+				/>
+			</div>
 
-			<TextField
-				id="password"
-				name="password"
-				label="パスワード"
-				type="password"
-				required
-			/>
+			<div className="flex flex-col gap-2">
+				<label
+					htmlFor="password"
+					className="text-sm font-medium tracking-wide text-subtext"
+				>
+					パスワード
+				</label>
+				<div className="relative">
+					<input
+						type={showPassword ? "text" : "password"}
+						id="password"
+						name="password"
+						required
+						className="w-full rounded-xl border border-primary/20 bg-surface-raised px-4 py-3 pr-12 text-card-foreground transition-colors focus:border-primary/60 focus:outline-none focus:ring-1 focus:ring-primary/40"
+					/>
+					<button
+						type="button"
+						onClick={() => setShowPassword((prev) => !prev)}
+						aria-label={showPassword ? "パスワードを隠す" : "パスワードを表示"}
+						aria-pressed={showPassword}
+						className="absolute inset-y-0 right-0 flex items-center px-4 text-subtext transition-colors hover:text-primary"
+					>
+						{showPassword ? (
+							<EyeOff className="h-5 w-5" aria-hidden="true" />
+						) : (
+							<Eye className="h-5 w-5" aria-hidden="true" />
+						)}
+					</button>
+				</div>
+			</div>
 
 			{state?.error && <FormError>{state.error}</FormError>}
 
 			<button
 				type="submit"
 				disabled={isPending}
-				className="w-full px-4 py-3 text-primary-foreground gradient-primary rounded-xl font-medium hover:shadow-lg hover:scale-105 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-all duration-300 shadow-md"
+				className="w-full rounded-xl bg-gradient-to-r from-primary to-primary-strong px-4 py-3 font-medium text-primary-foreground shadow-md transition-all duration-300 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
 			>
 				{isPending ? "ログイン中..." : "ログイン"}
 			</button>
 
-			<div className="flex flex-col gap-2 text-sm text-center">
+			<div className="flex flex-col gap-2 text-center text-sm">
 				<Link
 					href="/signup"
-					className="text-primary hover:text-primary/80 hover:underline font-medium tracking-wide transition-colors duration-300"
+					className="font-medium tracking-wide text-primary transition-colors duration-300 hover:text-primary/80 hover:underline"
 				>
 					新規登録はこちら
 				</Link>
 				<Link
 					href="/password/forgot"
-					className="text-muted-foreground hover:text-foreground hover:underline tracking-wide transition-colors duration-300"
+					className="tracking-wide text-subtext transition-colors duration-300 hover:text-foreground hover:underline"
 				>
 					パスワードをお忘れの方
 				</Link>
