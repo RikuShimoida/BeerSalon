@@ -231,8 +231,6 @@ UNIQUE制約: `country_id + name`
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
 
-**管理画面での変更**: 国IDを必須化し、管理画面でのフィルタリングを容易にする。
-
 ---
 
 ### 2-7. beers
@@ -280,8 +278,6 @@ UNIQUE制約: `country_id + name`
 | is_active    | boolean    | NOT NULL DEFAULT true            | 提供中フラグ                        |
 | created_at   | timestamptz| NOT NULL DEFAULT now()           | 作成日時                            |
 | updated_at   | timestamptz| NOT NULL DEFAULT now()           | 更新日時                            |
-
-**変更履歴**: `size` カラムと `price` カラムを削除。サイズ/価格は `bar_beer_menu_sizes` テーブルに移行（1メニューに複数サイズ/価格を設定可能に）。
 
 ---
 
@@ -415,10 +411,6 @@ UNIQUE制約: `country_id + name`
 | deleted_at   | timestamptz| NULLABLE                        | 削除日時（論理削除） |
 | created_at   | timestamptz| NOT NULL DEFAULT now()          | 作成日時        |
 | updated_at   | timestamptz| NOT NULL DEFAULT now()          | 更新日時        |
-
-**管理画面での変更**:
-- `is_published` を `status` に変更（draft/published/scheduledを管理）
-- `deleted_at` を追加（論理削除により誤削除からの復旧が可能）
 
 ---
 
@@ -720,12 +712,6 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-### ~~8-2. bar_owners~~（廃止）
-
-**このテーブルは廃止されました。** `admin_users` テーブルに `bar_id` カラムを追加し、1対1の紐付けに変更。中間テーブルは不要になりました。
-
----
-
 ### 8-3. subscription_plans
 
 サブスクリプションプラン定義。
@@ -841,27 +827,15 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-### ~~8-7. master_beer_styles~~（廃止）
+### 8-7. 廃止テーブル一覧（履歴）
 
-**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
+以下のテーブルは廃止済み。現行スキーマには存在しない。
 
----
-
-### ~~8-8. master_breweries~~（廃止）
-
-**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。醸造所情報は Web 側の `breweries` テーブルに一本化。
-
----
-
-### ~~8-9. master_food_categories~~（廃止）
-
-**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
-
----
-
-### ~~8-10. master_event_categories~~（廃止）
-
-**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
+- `bar_owners` — `admin_users` に `bar_id` カラムを追加して1対1の紐付けに変更したため、中間テーブルを廃止
+- `master_beer_styles` — マスタ管理機能の廃止に伴い不要化
+- `master_breweries` — マスタ管理機能の廃止に伴い不要化。醸造所情報は Web 側の `breweries` テーブルに一本化
+- `master_food_categories` — マスタ管理機能の廃止に伴い不要化
+- `master_event_categories` — マスタ管理機能の廃止に伴い不要化
 
 ---
 
