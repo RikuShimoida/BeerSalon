@@ -23,4 +23,70 @@ test.describe("店舗詳細ページ", () => {
 		const hasFavoriteButton = (await favoriteButton.count()) > 0;
 		expect(hasFavoriteButton).toBe(true);
 	});
+
+	test("緯度経度が未登録の店舗では、住所ベースの経路案内リンクが表示される", async ({
+		page,
+	}) => {
+		// 100001 は seed.e2e.sql で緯度経度 NULL のため、住所文字列フォールバックを検証する。
+		await page.goto("/bars/100001");
+
+		// Why not: dev サーバーのオンデマンドコンパイルにより基本情報タブの初回描画が
+		// 遅れることがあるため、住所見出しの表示を待ってから導線リンクを検証する。
+		await expect(
+			page.getByRole("heading", { name: "住所", exact: true }),
+		).toBeVisible();
+
+		const encodedAddress = encodeURIComponent("静岡県静岡市テスト住所1-1-1");
+
+		const appleLink = page.getByRole("link", {
+			name: "マップで開く",
+			exact: true,
+		});
+		await expect(appleLink).toBeVisible();
+		await expect(appleLink).toHaveAttribute(
+			"href",
+			`https://maps.apple.com/?daddr=${encodedAddress}`,
+		);
+
+		const googleLink = page.getByRole("link", { name: "Googleマップで開く" });
+		await expect(googleLink).toBeVisible();
+		await expect(googleLink).toHaveAttribute(
+			"href",
+			`https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`,
+		);
+	});
+
+	test("緯度経度が登録済みの店舗では、座標ベースの経路案内リンクが表示される", async ({
+		page,
+	}) => {
+		// 100002 は seed.e2e.sql で座標 (35.6595, 139.7005) を投入済み。座標優先を検証する。
+		await page.goto("/bars/100002");
+
+		// Why not: dev サーバーのオンデマンドコンパイルにより基本情報タブの初回描画が
+		// 遅れることがあるため、住所見出しの表示を待ってから導線リンクを検証する。
+		await expect(
+			page.getByRole("heading", { name: "住所", exact: true }),
+		).toBeVisible();
+
+		const appleLink = page.getByRole("link", {
+			name: "マップで開く",
+			exact: true,
+		});
+		await expect(appleLink).toBeVisible();
+		await expect(appleLink).toHaveAttribute(
+			"href",
+			"https://maps.apple.com/?daddr=35.6595%2C139.7005",
+		);
+
+		const googleLink = page.getByRole("link", { name: "Googleマップで開く" });
+		await expect(googleLink).toBeVisible();
+		await expect(googleLink).toHaveAttribute(
+			"href",
+			"https://www.google.com/maps/dir/?api=1&destination=35.6595%2C139.7005",
+		);
+
+		// 経路案内リンクは新規タブで開く
+		await expect(appleLink).toHaveAttribute("target", "_blank");
+		await expect(googleLink).toHaveAttribute("target", "_blank");
+	});
 });
