@@ -11,11 +11,13 @@ HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WEB_UP=false
 ADMIN_UP=false
 
-if curl -s -o /dev/null --max-time 2 http://localhost:3000 2>/dev/null; then
+# Why not -f 無し: start-dev-servers.sh の is_up と判定基準を揃える。Next.js devはコンパイル中に
+# 5xxを返すため、-f(--fail)で5xxを未起動扱いにして委譲側の自動起動・待機に回す。
+if curl -sf -o /dev/null --max-time 2 http://localhost:3000 2>/dev/null; then
   WEB_UP=true
 fi
 
-if curl -s -o /dev/null --max-time 2 http://localhost:3001 2>/dev/null; then
+if curl -sf -o /dev/null --max-time 2 http://localhost:3001 2>/dev/null; then
   ADMIN_UP=true
 fi
 

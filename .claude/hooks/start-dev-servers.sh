@@ -6,13 +6,17 @@
 # Why not Bashツール経由でpnpm devを起動: settings.jsonのBashフックが`pnpm dev`を無条件ブロックし、
 # run_in_background:true も禁止のため、Claude自身のBash経由では起動不可。フック内nohupで回避する。
 
+# Why not worktree側から起動: dev:web/dev:admin は単一ポート(3000/3001)を共有するため、
+# 常にメインcheckoutから1組だけ起動する。worktreeごとに起こすとポート競合するため、REPO_ROOTを固定する。
 REPO_ROOT="/Users/rikushimoida/Documents/repository/BeerSalon"
 LOG_DIR="/tmp/beersalon-dev-logs"
 mkdir -p "$LOG_DIR"
 
 is_up() {
   # $1: ポート番号
-  curl -s -o /dev/null --max-time 2 "http://localhost:$1" 2>/dev/null
+  # Why not -f 無し: Next.js devはコンパイル完了前でも5xxを返すため、-f(--fail)で5xxを失敗扱いにし、
+  # コンパイル中を「起動済み」と誤判定してE2Eが500に当たるのを減らす。
+  curl -sf -o /dev/null --max-time 2 "http://localhost:$1" 2>/dev/null
 }
 
 wait_up() {
