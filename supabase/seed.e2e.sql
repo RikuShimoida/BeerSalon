@@ -62,3 +62,27 @@ INSERT INTO beer_categories (name) VALUES
   ('ピルスナー'),
   ('ペールエール')
 ON CONFLICT (name) DO NOTHING;
+
+-- ============================================================
+-- 4. 店舗詳細ヒーロー用スライダーメディア (bar 100001)
+-- ============================================================
+-- 動画1件 + 画像2件を投入し、ヒーローのオートスライド/フェード/ループ/
+-- 動画自動再生 (#485) を E2E で検証できるようにする。
+-- 動画/画像の実体が Storage に無くても、DOM 上のスライダー挙動
+-- (opacity 切替・index 遷移・ドット操作) は検証可能。
+-- Why not: 単純な INSERT だと、ローカル開発 DB に残る既存 slider 画像と混在して
+-- 枚数が固定にならず E2E が非決定的になる。100001 の slider を一度掃除してから
+-- 固定 3 件を投入し、CI/ローカルで同じ枚数を保証する。
+DELETE FROM bar_images WHERE bar_id = 100001 AND image_type = 'slider';
+
+INSERT INTO bar_images (id, bar_id, media_type, image_type, image_url, sort_order)
+VALUES
+  (100001001, 100001, 'video', 'slider', 'http://127.0.0.1:54421/storage/v1/object/public/bar-media/bars/100001/e2e_slider_video.mp4', 0),
+  (100001002, 100001, 'image', 'slider', 'https://placehold.co/800x600/png?text=slider-1', 1),
+  (100001003, 100001, 'image', 'slider', 'https://placehold.co/800x600/png?text=slider-2', 2)
+ON CONFLICT (id) DO NOTHING;
+
+SELECT setval(
+  pg_get_serial_sequence('bar_images', 'id'),
+  GREATEST((SELECT MAX(id) FROM bar_images), 100001003)
+);
