@@ -1,7 +1,18 @@
-import { Clock, Instagram, MapPin, Phone, Wallet } from "lucide-react";
+import {
+	Clock,
+	Instagram,
+	MapPin,
+	Navigation,
+	Phone,
+	Wallet,
+} from "lucide-react";
 import { FacebookIcon } from "@/components/icons/facebook-icon";
 import { LineIcon } from "@/components/icons/line-icon";
 import { XIcon } from "@/components/icons/x-icon";
+import {
+	buildDirectionsUrls,
+	hasDirectionsTarget,
+} from "@/lib/map/directions-url";
 
 interface PaymentMethod {
 	id: string;
@@ -31,6 +42,8 @@ interface BarInfo {
 	city: string;
 	addressLine1: string;
 	addressLine2: string | null;
+	latitude: string | null | undefined;
+	longitude: string | null | undefined;
 	websiteUrl: string | null;
 	instagramUrl: string | null;
 	xUrl: string | null;
@@ -155,6 +168,32 @@ export function TopTab({ bar }: TopTabProps) {
 							{bar.addressLine1}
 							{bar.addressLine2 && ` ${bar.addressLine2}`}
 						</p>
+						{hasDirectionsTarget(bar) &&
+							(() => {
+								const directions = buildDirectionsUrls(bar);
+								return (
+									<div className="mt-3 flex flex-wrap gap-2">
+										<a
+											href={directions.apple}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-surface-raised px-3 py-1.5 text-xs text-heading transition-colors hover:border-primary/60 hover:text-primary"
+										>
+											<Navigation className="h-3.5 w-3.5" />
+											マップで開く
+										</a>
+										<a
+											href={directions.google}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-surface-raised px-3 py-1.5 text-xs text-heading transition-colors hover:border-primary/60 hover:text-primary"
+										>
+											<Navigation className="h-3.5 w-3.5" />
+											Googleマップで開く
+										</a>
+									</div>
+								);
+							})()}
 					</div>
 				</div>
 

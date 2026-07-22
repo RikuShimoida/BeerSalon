@@ -14,6 +14,8 @@ const baseBar = {
 	city: "静岡市",
 	addressLine1: "1-2-3",
 	addressLine2: null,
+	latitude: null as string | null | undefined,
+	longitude: null as string | null | undefined,
 	websiteUrl: null,
 	instagramUrl: null,
 	xUrl: null,
@@ -79,6 +81,64 @@ describe("TopTab 定休日補足（regularHoliday）の表示", () => {
 		);
 
 		expect(screen.queryByText(/^定休日:/)).not.toBeInTheDocument();
+	});
+});
+
+describe("TopTab 住所の地図アプリ導線", () => {
+	it("緯度経度が登録済みのとき、Apple/Google 両方の経路案内リンクを座標付きで表示する", () => {
+		render(
+			<TopTab
+				bar={{
+					...baseBar,
+					latitude: "35.1614",
+					longitude: "138.6764",
+				}}
+			/>,
+		);
+
+		const apple = screen.getByRole("link", { name: /^マップで開く$/ });
+		expect(apple).toHaveAttribute(
+			"href",
+			"https://maps.apple.com/?daddr=35.1614%2C138.6764",
+		);
+
+		const google = screen.getByRole("link", { name: /Googleマップで開く/ });
+		expect(google).toHaveAttribute(
+			"href",
+			"https://www.google.com/maps/dir/?api=1&destination=35.1614%2C138.6764",
+		);
+	});
+
+	it("緯度経度が未登録でも住所ベースで導線を表示する", () => {
+		render(
+			<TopTab
+				bar={{
+					...baseBar,
+					prefecture: "東京都",
+					city: "渋谷区",
+					addressLine1: "道玄坂1-2-3",
+					latitude: null,
+					longitude: null,
+				}}
+			/>,
+		);
+
+		const expected = encodeURIComponent("東京都渋谷区道玄坂1-2-3");
+		const google = screen.getByRole("link", { name: /Googleマップで開く/ });
+		expect(google).toHaveAttribute(
+			"href",
+			`https://www.google.com/maps/dir/?api=1&destination=${expected}`,
+		);
+	});
+
+	it("導線リンクは新規タブで開く（target=_blank + rel）", () => {
+		render(
+			<TopTab bar={{ ...baseBar, latitude: "35.1", longitude: "138.6" }} />,
+		);
+
+		const apple = screen.getByRole("link", { name: /^マップで開く$/ });
+		expect(apple).toHaveAttribute("target", "_blank");
+		expect(apple).toHaveAttribute("rel", "noopener noreferrer");
 	});
 });
 

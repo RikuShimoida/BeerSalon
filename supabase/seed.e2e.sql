@@ -14,11 +14,18 @@
 -- 1. 固定 Bar (id=100001, 100002)
 -- ============================================================
 
-INSERT INTO bars (id, name, prefecture, city, address_line1, description, is_active)
+-- Why not: 100001 は緯度経度 NULL のまま残し、住所文字列フォールバックの地図導線を
+-- E2E で検証できるようにする。100002 に座標を投入し、座標優先の地図導線を検証する。
+INSERT INTO bars (id, name, prefecture, city, address_line1, description, latitude, longitude, is_active)
 VALUES
-  (100001, 'E2Eテストバー静岡', '静岡県', '静岡市', 'テスト住所1-1-1', 'E2Eテスト用のクラフトビアバーです', true),
-  (100002, 'E2Eテストバー東京', '東京都', '渋谷区', 'テスト住所2-2-2', 'E2Eテスト用の東京のクラフトビアバー', true)
+  (100001, 'E2Eテストバー静岡', '静岡県', '静岡市', 'テスト住所1-1-1', 'E2Eテスト用のクラフトビアバーです', NULL, NULL, true),
+  (100002, 'E2Eテストバー東京', '東京都', '渋谷区', 'テスト住所2-2-2', 'E2Eテスト用の東京のクラフトビアバー', 35.6595, 139.7005, true)
 ON CONFLICT (id) DO NOTHING;
+
+-- Why not: INSERT は ON CONFLICT DO NOTHING のため、既に投入済みのDBには座標が反映されない。
+-- 地図導線の座標優先ケースを再現するため、固定バーの緯度経度を明示的に揃える。
+UPDATE bars SET latitude = NULL, longitude = NULL WHERE id = 100001;
+UPDATE bars SET latitude = 35.6595, longitude = 139.7005 WHERE id = 100002;
 
 -- bars テーブルの sequence を 100002 以降に進めて、他のテストでの自動採番と衝突しないようにする
 SELECT setval(
