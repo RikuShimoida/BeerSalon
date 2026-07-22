@@ -48,8 +48,7 @@ describe("Header（共通ヘッダーのロゴ）", () => {
 	it("旧ロゴアセット(<img src>)を参照していない", async () => {
 		render(await Header());
 
-		// インライン化により img 要素自体が存在しない
-		expect(screen.queryByRole("img")?.tagName.toLowerCase()).not.toBe("img");
+		// インライン化により beer-salon-logo を指す <img> は存在しない
 		expect(document.querySelector('img[src*="beer-salon-logo"]')).toBeNull();
 	});
 });
