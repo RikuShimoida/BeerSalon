@@ -25,7 +25,10 @@ test.describe("店舗詳細ページ", () => {
 	});
 
 	test.describe("ヒーロースライダー (#485)", () => {
-		// seed.e2e.sql が bar 100001 に 動画1 + 画像2 のスライダーメディアを投入する前提。
+		// seed.e2e.sql が bar 100002 に 動画1 + 画像2 のスライダーメディアを投入する前提。
+		// Why not: bar 100001 は admin の slider regression テスト (#318) が「slider 0枚から
+		// 埋める」前提で使うため、alt を持たない video を混ぜると衝突する。100002 を使う。
+		const SLIDER_BAR_PATH = "/bars/100002";
 		const activeIndex = () =>
 			// opacity=1 の層のインデックス = 現在表示中のメディア。フェード遷移中は -1。
 			`(() => {
@@ -40,7 +43,7 @@ test.describe("店舗詳細ページ", () => {
 		test("動画が muted / playsInline で描画され、全メディアが重ね描画される", async ({
 			page,
 		}) => {
-			await page.goto("/bars/100001");
+			await page.goto(SLIDER_BAR_PATH);
 			await expect(page.locator("h1")).toBeVisible();
 
 			const video = page.locator('[class*="42vh"] video').first();
@@ -57,7 +60,7 @@ test.describe("店舗詳細ページ", () => {
 		test("メディアが2件以上のときドットが表示され、オートスライドで自動遷移する", async ({
 			page,
 		}) => {
-			await page.goto("/bars/100001");
+			await page.goto(SLIDER_BAR_PATH);
 			await expect(page.locator("h1")).toBeVisible();
 
 			const dots = page.locator('[aria-label^="画像"][aria-label$="を表示"]');
@@ -73,7 +76,7 @@ test.describe("店舗詳細ページ", () => {
 		test("ドットを手動タップすると該当メディアへ切り替わる", async ({
 			page,
 		}) => {
-			await page.goto("/bars/100001");
+			await page.goto(SLIDER_BAR_PATH);
 			await expect(page.locator("h1")).toBeVisible();
 
 			// 2番目のドット(index=1)をタップ
