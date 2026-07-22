@@ -56,17 +56,17 @@ describe("PostForm", () => {
 
 			expect(screen.getByText("投稿する店舗")).toBeInTheDocument();
 			expect(screen.getByLabelText(/投稿本文/)).toBeInTheDocument();
-			expect(screen.getByText(/写真を追加（最大4枚）/)).toBeInTheDocument();
+			expect(screen.getByText(/写真（最大4枚）/)).toBeInTheDocument();
 		});
 
-		it("送信ボタンとキャンセルボタンが表示される", () => {
+		it("送信ボタンと閉じるボタンが表示される", () => {
 			render(<PostForm bar={mockBar} />);
 
 			expect(
 				screen.getByRole("button", { name: "投稿する" }),
 			).toBeInTheDocument();
 			expect(
-				screen.getByRole("button", { name: "キャンセル" }),
+				screen.getByRole("button", { name: "閉じる" }),
 			).toBeInTheDocument();
 		});
 	});
@@ -88,7 +88,7 @@ describe("PostForm", () => {
 		it("写真アップロードフィールドが表示される", () => {
 			render(<PostForm bar={mockBar} />);
 
-			const imageInput = screen.getByLabelText("+ 写真を追加");
+			const imageInput = screen.getByLabelText("写真を追加");
 			expect(imageInput).toHaveAttribute("type", "file");
 			expect(imageInput).toHaveAttribute("accept", "image/*");
 			expect(imageInput).toHaveAttribute("multiple");
@@ -123,13 +123,13 @@ describe("PostForm", () => {
 		});
 	});
 
-	describe("正常系 - キャンセルボタン", () => {
-		it("キャンセルボタンをクリックするとrouter.back()が呼ばれる", async () => {
+	describe("正常系 - 閉じるボタン", () => {
+		it("閉じるボタンをクリックするとrouter.back()が呼ばれる", async () => {
 			const user = userEvent.setup();
 			render(<PostForm bar={mockBar} />);
 
-			const cancelButton = screen.getByRole("button", { name: "キャンセル" });
-			await user.click(cancelButton);
+			const closeButton = screen.getByRole("button", { name: "閉じる" });
+			await user.click(closeButton);
 
 			expect(mockBack).toHaveBeenCalled();
 		});
