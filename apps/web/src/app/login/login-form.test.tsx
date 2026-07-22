@@ -192,6 +192,36 @@ describe("LoginForm", () => {
 		});
 	});
 
+	describe("正常系 - パスワード表示トグル", () => {
+		it("初期状態ではパスワード欄が非表示(type='password')", () => {
+			render(<LoginForm />);
+			expect(screen.getByLabelText("パスワード")).toHaveAttribute(
+				"type",
+				"password",
+			);
+		});
+
+		it("トグル押下でtype='text'に切り替わり、再押下でpasswordに戻る", async () => {
+			const user = userEvent.setup();
+			render(<LoginForm />);
+
+			const passwordInput = screen.getByLabelText("パスワード");
+			expect(passwordInput).toHaveAttribute("type", "password");
+
+			const toggle = screen.getByRole("button", {
+				name: "パスワードを表示",
+			});
+			await user.click(toggle);
+			expect(passwordInput).toHaveAttribute("type", "text");
+
+			const toggleAgain = screen.getByRole("button", {
+				name: "パスワードを隠す",
+			});
+			await user.click(toggleAgain);
+			expect(passwordInput).toHaveAttribute("type", "password");
+		});
+	});
+
 	describe("正常系 - パスワード再設定完了トースト", () => {
 		beforeEach(() => {
 			vi.useFakeTimers();
