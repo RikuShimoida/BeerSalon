@@ -167,7 +167,7 @@ Google Fonts で読み込み:
 ## Assets
 - **アイコン**: すべて lucide-react 相当のストロークアイコン（ベル / ユーザー / 検索 / ピン / 時計 / ビールジョッキ / 星 / ハート / 吹き出し / プラス 等）+ ブランドSNS（Instagram / X / Facebook / LINE, 既存 `components/icons/` を利用）。モックではインラインSVGで再現。
 - **画像**: ストライプのプレースホルダ（`店舗写真` `投稿写真` `記事画像` ラベル）。実装では Supabase Storage の店舗・投稿・記事画像に差し替え。未設定時のフォールバックはビールジョッキアイコン + `#muted` 面。
-- **ロゴ**: 既存 `/beer-salon-logo.svg`。モックではテキストロゴ（Zen Old Mincho "Beer" + Archivo "Salon"）で表現。実装は既存SVGを使用可（配色をアンバー基調に合わせる）。
+- **ロゴ**: 既存 `/beer-salon-logo.svg`。モックではテキストロゴ（Zen Old Mincho "Beer" + Archivo "Salon"）で表現。実装は既存SVGを使用可（配色をアンバー基調に合わせる）。Dark Taproom 一体感のあるロゴ刷新案（4方向性の SVG + 適用ガイド）は `logo/`（Issue #480 のハンドオフバンドル）を参照。
 - **フォント**: Google Fonts（Zen Old Mincho / Zen Kaku Gothic New / Archivo）。Next.js の `next/font` での読み込みを推奨。
 
 ## Files

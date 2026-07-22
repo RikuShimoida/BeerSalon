@@ -1,0 +1,17 @@
+<svg width="240" height="52" viewBox="0 0 240 52" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beer Salon">
+  <defs>
+    <linearGradient id="b_ring" x1="0" y1="0" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e0a341"/>
+      <stop offset="1" stop-color="#a5691f"/>
+    </linearGradient>
+  </defs>
+  <!-- monogram badge -->
+  <circle cx="26" cy="26" r="24.5" fill="#20160a" stroke="url(#b_ring)" stroke-width="2.5"/>
+  <circle cx="26" cy="26" r="19.5" fill="none" stroke="#e0a341" stroke-opacity="0.25" stroke-width="1"/>
+  <text x="26" y="31" text-anchor="middle" font-family="'Zen Old Mincho', serif" font-weight="900" font-size="22" fill="#e0a341">B</text>
+  <line x1="16" y1="34" x2="36" y2="34" stroke="#e0a341" stroke-opacity="0.4" stroke-width="1"/>
+  <text x="26" y="43" text-anchor="middle" font-family="'Archivo', sans-serif" font-weight="800" font-size="7.5" letter-spacing="1.5" fill="#c9b48c">SALON</text>
+  <!-- wordmark -->
+  <text x="64" y="34" font-family="'Zen Old Mincho', serif" font-weight="900" font-size="27" fill="#f5e9d4">Beer<tspan font-family="'Archivo', sans-serif" font-weight="800" fill="#e0a341"> Salon</tspan></text>
+  <text x="64" y="46" font-family="'Archivo', sans-serif" font-weight="600" font-size="8" letter-spacing="2.6" fill="#9c8763">SHIZUOKA CRAFT BEER</text>
+</svg>
