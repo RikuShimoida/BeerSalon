@@ -66,13 +66,12 @@ describe("replaceThemeBlock", () => {
 		expect(twice).toBe(once);
 	});
 
-	it("current → amber-dark → current で元の内容に戻る", () => {
-		const currentBlock =
-			":root {\n  --surface-panel: rgba(21, 16, 10, 0.9);\n}";
-		const darkBlock = ":root {\n  --surface-panel: #2a1c0e;\n}";
-		const toDark = replaceThemeBlock(base, darkBlock);
-		const backToCurrent = replaceThemeBlock(toDark, currentBlock);
-		expect(replaceThemeBlock(base, currentBlock)).toBe(backToCurrent);
+	it("テーマ A → テーマ B → テーマ A で元の内容に戻る（可逆性）", () => {
+		const blockA = ":root {\n  --surface-panel: rgba(21, 16, 10, 0.9);\n}";
+		const blockB = ":root {\n  --surface-panel: #2a1c0e;\n}";
+		const toB = replaceThemeBlock(base, blockB);
+		const backToA = replaceThemeBlock(toB, blockA);
+		expect(replaceThemeBlock(base, blockA)).toBe(backToA);
 	});
 
 	it("開始マーカーが無いとエラーになる", () => {
@@ -98,24 +97,13 @@ describe("テーマファイルと globals.css の整合", () => {
 		expect(reapplied).toBe(globalsCss);
 	});
 
-	it("amber-dark 適用で --surface-panel / --surface-control がダーク値に切り替わる", () => {
-		const globalsCss = readFileSync(globalsPath, "utf8");
-		const darkCss = readFileSync(join(themesDir, "amber-dark.css"), "utf8");
-		const darkBlock = extractRootBlock(darkCss);
-		const applied = replaceThemeBlock(globalsCss, darkBlock);
-		expect(applied).toContain("--surface-panel: #2a1c0e;");
-		expect(applied).toContain("--surface-control: #3d2b17;");
-		// current 固有の帯色・白操作面は消えている
-		expect(applied).not.toContain("--surface-panel: #e2d6bf;");
-		expect(applied).not.toContain("--surface-control: #ffffff;");
-	});
-
-	it("listThemes が current / amber-dark / dark-taproom を返す", () => {
+	it("listThemes が current / dark-taproom を返す（amber-dark は #449 で撤去済み）", () => {
 		const themes = listThemes(themesDir);
 		expect(themes).toContain("current");
-		expect(themes).toContain("amber-dark");
 		// Issue #440: current と同内容の Dark Taproom 復元用テーマ
 		expect(themes).toContain("dark-taproom");
+		// Issue #449: Dark Taproom 基盤化で無効化された壊れテーマは撤去済み
+		expect(themes).not.toContain("amber-dark");
 	});
 
 	it("dark-taproom テーマの全トークンが current.css と完全一致する（片方だけ変更したらドリフト検出）", () => {
