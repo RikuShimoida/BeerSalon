@@ -1,4 +1,8 @@
 import { expect, test } from "@playwright/test";
+import {
+	SLIDE_DURATION_MS,
+	SLIDE_TRANSITION_MS,
+} from "../src/components/bar/hero-slider";
 import { createAuthenticatedUser } from "./helpers/auth";
 
 test.describe("店舗詳細ページ", () => {
@@ -98,7 +102,7 @@ test.describe("店舗詳細ページ", () => {
 		const activeIndex = () =>
 			// opacity=1 の層のインデックス = 現在表示中のメディア。フェード遷移中は -1。
 			`(() => {
-				const hero = document.querySelector('[class*="42vh"]');
+				const hero = document.querySelector('[data-testid="bar-hero"]');
 				const medias = Array.from(hero.querySelectorAll('video, img'));
 				return medias.findIndex((m) => {
 					const w = m.closest('div.absolute.inset-0');
@@ -112,14 +116,13 @@ test.describe("店舗詳細ページ", () => {
 			await page.goto(SLIDER_BAR_PATH);
 			await expect(page.locator("h1")).toBeVisible();
 
-			const video = page.locator('[class*="42vh"] video').first();
+			const hero = page.getByTestId("bar-hero");
+			const video = hero.locator("video").first();
 			await expect(video).toHaveJSProperty("muted", true);
 			await expect(video).toHaveJSProperty("playsInline", true);
 
 			// 動画1 + 画像2 = 3枚が重ね描画される
-			const mediaCount = await page
-				.locator('[class*="42vh"] video, [class*="42vh"] img')
-				.count();
+			const mediaCount = await hero.locator("video, img").count();
 			expect(mediaCount).toBe(3);
 		});
 
@@ -133,8 +136,9 @@ test.describe("店舗詳細ページ", () => {
 			await expect(dots).toHaveCount(3);
 
 			const before = await page.evaluate(activeIndex());
-			// 5秒の表示 + フェード遷移を跨ぐため十分待つ
-			await page.waitForTimeout(6500);
+			// 表示時間(5秒) + フェード遷移 + 描画マージン を跨ぐまで待つ。
+			// マジックナンバーを避け hero-slider.ts の定数から算出する。
+			await page.waitForTimeout(SLIDE_DURATION_MS + SLIDE_TRANSITION_MS + 800);
 			const after = await page.evaluate(activeIndex());
 			expect(after).not.toBe(before);
 		});

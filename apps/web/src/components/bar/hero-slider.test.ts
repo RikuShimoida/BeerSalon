@@ -3,6 +3,7 @@ import {
 	getNextIndex,
 	isVideoMedia,
 	SLIDE_DURATION_MS,
+	SLIDE_TRANSITION_MS,
 	shouldAutoSlide,
 	shouldLoopVideo,
 } from "./hero-slider";
@@ -66,5 +67,11 @@ describe("shouldAutoSlide", () => {
 describe("SLIDE_DURATION_MS", () => {
 	it("受入条件どおり1枚あたりの上限が5秒(5000ms)である", () => {
 		expect(SLIDE_DURATION_MS).toBe(5000);
+	});
+});
+
+describe("SLIDE_TRANSITION_MS", () => {
+	it("クロスフェード時間が定数として提供される", () => {
+		expect(SLIDE_TRANSITION_MS).toBe(700);
 	});
 });

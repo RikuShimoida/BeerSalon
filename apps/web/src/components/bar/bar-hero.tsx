@@ -10,6 +10,7 @@ import {
 	getNextIndex,
 	isVideoMedia,
 	SLIDE_DURATION_MS,
+	SLIDE_TRANSITION_MS,
 	shouldAutoSlide,
 	shouldLoopVideo,
 } from "@/components/bar/hero-slider";
@@ -52,6 +53,8 @@ export function BarHero({
 	// アクティブなメディアのみを再生し、非アクティブ動画は一時停止して先頭へ戻す。
 	// Why not: 全動画を同時再生するとモバイルで負荷・音源競合が出るため、1本だけ再生する。
 	useEffect(() => {
+		// media が縮んだときに末尾の古い ref が残らないよう、実際の件数に切り詰める。
+		videoRefs.current.length = media.length;
 		videoRefs.current.forEach((video, index) => {
 			if (!video) return;
 			if (index === currentIndex) {
@@ -63,7 +66,7 @@ export function BarHero({
 				video.pause();
 			}
 		});
-	}, [currentIndex]);
+	}, [currentIndex, media.length]);
 
 	// オートスライドのタイマー。動画は onEnded と 5秒 の早い方で次へ進むため、
 	// ここでは上限としての 5秒タイマーのみを張る（画像・動画共通）。
@@ -93,17 +96,24 @@ export function BarHero({
 	};
 
 	return (
-		<div className="relative h-[42vh] min-h-[280px] w-full overflow-hidden bg-surface-deep">
+		<div
+			data-testid="bar-hero"
+			className="relative h-[42vh] min-h-[280px] w-full overflow-hidden bg-surface-deep"
+		>
 			{currentMedia ? (
 				// 全メディアを重ねて描画し、アクティブのみ不透明にしてクロスフェードする。
 				// Why not: 単一要素の差し替えだと退場中の旧メディアが即消えてフェードにならないため。
 				media.map((item, index) => {
 					const isActive = index === currentIndex;
-					const fadeClass = `absolute inset-0 transition-opacity duration-700 ${
+					const fadeClass = `absolute inset-0 transition-opacity ${
 						isActive ? "opacity-100" : "opacity-0"
 					}`;
 					return isVideoMedia(item.mediaType) ? (
-						<div key={item.id} className={fadeClass}>
+						<div
+							key={item.id}
+							className={fadeClass}
+							style={{ transitionDuration: `${SLIDE_TRANSITION_MS}ms` }}
+						>
 							<video
 								ref={(el) => {
 									videoRefs.current[index] = el;
@@ -115,10 +125,16 @@ export function BarHero({
 								autoPlay={isActive}
 								loop={shouldLoopVideo(item.mediaType, media.length)}
 								onEnded={autoSlide ? goNext : undefined}
+								// 動画拒否・URL不正で onEnded が来ない場合でも 5 秒待たず前進する。
+								onError={autoSlide ? goNext : undefined}
 							/>
 						</div>
 					) : (
-						<div key={item.id} className={fadeClass}>
+						<div
+							key={item.id}
+							className={fadeClass}
+							style={{ transitionDuration: `${SLIDE_TRANSITION_MS}ms` }}
+						>
 							<Image
 								src={item.imageUrl}
 								alt={`${name}の画像`}

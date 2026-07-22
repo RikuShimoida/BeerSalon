@@ -1,4 +1,7 @@
 export const SLIDE_DURATION_MS = 5000;
+// クロスフェードの所要時間。bar-hero.tsx の transition-opacity と E2E の待機の
+// 両方がこの値に依存するため、マジックナンバーを1箇所に集約する。
+export const SLIDE_TRANSITION_MS = 700;
 
 export function getNextIndex(currentIndex: number, mediaCount: number): number {
 	if (mediaCount <= 0) return 0;
