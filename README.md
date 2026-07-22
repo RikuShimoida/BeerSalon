@@ -150,9 +150,6 @@ pnpm --filter @beersalon/web theme current
 
 # Dark Taproom を明示的に復元する（current.css と同内容）
 pnpm --filter @beersalon/web theme dark-taproom
-
-# 旧: #383 案A（surface のみダーク化・他トークンは旧ライト値の据え置き）
-pnpm --filter @beersalon/web theme amber-dark
 ```
 
 - テーマ本体は `apps/web/src/styles/themes/<name>.css`（各ファイルが `:root { ... }` を1つ持つ）。
@@ -161,7 +158,7 @@ pnpm --filter @beersalon/web theme amber-dark
 - **拡張トークン**: `--heading` / `--subtext` / `--primary-strong` / `--surface-deep` / `--surface-raised` / `--success` を追加（`text-heading` / `bg-surface-raised` 等で参照可）。
 - **タイポグラフィ（`next/font`）**: `apps/web/src/app/layout.tsx` で **Zen Old Mincho**（見出し・店名・記事本文）/ **Zen Kaku Gothic New**（UI 本文・デフォルト）/ **Archivo**（ラテン見出し・ロゴ）を読み込み、CSS 変数（`--font-mincho` / `--font-gothic` / `--font-archivo`）を `<body>` に付与。デフォルト UI フォント（`font-sans`）は Zen Kaku Gothic New。明朝は `.font-mincho`、Archivo は `.font-archivo` ユーティリティで任意要素へ当てる。
 - **新しいテーマを足すときは `themes/` に CSS を1つ追加するだけ**でよい（`current.css` を複製して値を変える）。手で `globals.css` の `:root` を直接編集した場合は、巻き戻し先である `themes/current.css` も同じ内容に揃えること（UT `apply-theme.test.ts` が両者の一致を検査する）。
-- **`amber-dark.css` の位置づけ**: #389 で作られた「surface トークンのみダーク化・他は旧ライト HSL 値の据え置き」テーマ。基盤が Dark Taproom になった今は役割を失っており、このテーマを当てると surface 以外は旧 HSL 値のため透明化する（＝壊れたテーマ）。テーマ切替フローの互換のため #440 では残置し、**撤去は別 Issue #449 で扱う**。
+- **旧 `amber-dark.css` は #449 で撤去済み**: #389（#383 案A）で作られた「surface トークンのみダーク化・他は旧ライト HSL 値の据え置き」テーマ。#440 の Dark Taproom 基盤化（`:root` が実 Hex トークンに置換）で、当てると surface 以外が旧 HSL 値のため透明化する壊れたテーマとなり役割を失ったため、#449 でファイル・関連テスト・本 README 記述ごと撤去した。`--surface-panel` / `--surface-control` トークン自体は Dark Taproom の現役トークン（`current.css` に実値がある）であり撤去対象ではない。
 
 ### トップページ（`/`）の Dark Taproom 再実装（#442 で `.top-amber-dark` 撤去済み）
 

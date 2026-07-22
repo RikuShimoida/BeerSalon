@@ -1,6 +1,6 @@
 ## 参照ルール
 
-実装時は必ず @README.md @routing.md @wireframe.md @database.md を参照すること。
+DB仕様は database.md、画面遷移・URL は routing.md、UI構造は wireframe.md、サービス概要・運用は README.md（管理画面UIは wireframe-admin.md）を、実装・調査の着手前に必ず Read すること。`@` による無条件参照は行わない（毎ターンのコンテキスト固定消費を避けるため。設計ドキュメントとしての価値は Read で維持される）。
 
 ## 用語定義
 
