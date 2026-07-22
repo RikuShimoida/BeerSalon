@@ -1,0 +1,29 @@
+<svg width="150" height="72" viewBox="0 0 150 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beer Salon — Shizuoka Craft">
+  <defs>
+    <path id="c_arc_top" d="M11 36 A25 25 0 0 1 61 36"/>
+    <path id="c_arc_bot" d="M13 40 A23 23 0 0 0 59 40"/>
+    <linearGradient id="c_ring" x1="11" y1="11" x2="61" y2="61" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e0a341"/>
+      <stop offset="1" stop-color="#a5691f"/>
+    </linearGradient>
+  </defs>
+  <!-- emblem -->
+  <circle cx="36" cy="36" r="25" fill="#20160a" stroke="url(#c_ring)" stroke-width="2"/>
+  <circle cx="36" cy="36" r="20" fill="none" stroke="#e0a341" stroke-opacity="0.22" stroke-width="0.8"/>
+  <text font-family="'Archivo', sans-serif" font-weight="700" font-size="6.4" letter-spacing="1.6" fill="#e0a341">
+    <textPath href="#c_arc_top" startOffset="50%" text-anchor="middle">BEER · SALON</textPath>
+  </text>
+  <text font-family="'Archivo', sans-serif" font-weight="600" font-size="4.6" letter-spacing="1.4" fill="#9c8763">
+    <textPath href="#c_arc_bot" startOffset="50%" text-anchor="middle">SHIZUOKA CRAFT</textPath>
+  </text>
+  <!-- hop cone (geometric) -->
+  <g transform="translate(36 38)">
+    <path d="M0 -9 L6 -3 L5 9 L0 12 L-5 9 L-6 -3 Z" fill="#e0a341"/>
+    <path d="M0 -9 L0 12 M-6 -3 L6 -3 M-5.4 1 L5.4 1 M-5 5 L5 5" stroke="#20160a" stroke-width="0.9"/>
+    <path d="M0 -9 L0 -13" stroke="#e0a341" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M0 -12 L4 -15 M0 -12 L-4 -15" stroke="#e0a341" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+  <!-- wordmark -->
+  <text x="72" y="34" font-family="'Zen Old Mincho', serif" font-weight="900" font-size="21" fill="#f5e9d4">Beer</text>
+  <text x="72" y="56" font-family="'Archivo', sans-serif" font-weight="800" font-size="18" letter-spacing="0.5" fill="#e0a341">Salon</text>
+</svg>
