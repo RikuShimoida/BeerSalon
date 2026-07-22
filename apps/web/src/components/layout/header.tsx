@@ -22,11 +22,12 @@ export async function Header() {
 						aria-label="Beer Salon ホーム"
 					>
 						<Image
-							src="/beer-salon-logo.svg"
+							src="/beer-salon-logo-a.svg"
 							alt="Beer Salon"
 							width={240}
-							height={48}
+							height={52}
 							priority
+							className="h-10 w-auto"
 						/>
 					</Link>
 
