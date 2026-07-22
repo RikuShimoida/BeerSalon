@@ -1,11 +1,11 @@
 <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beer Salon">
   <defs>
-    <linearGradient id="a_tile" x1="0" y1="0" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+    <linearGradient id="favicon-tile" x1="0" y1="0" x2="52" y2="52" gradientUnits="userSpaceOnUse">
       <stop stop-color="#e0a341"/>
       <stop offset="1" stop-color="#c47f28"/>
     </linearGradient>
   </defs>
-  <rect x="0.75" y="0.75" width="50.5" height="50.5" rx="14" fill="url(#a_tile)"/>
+  <rect x="0.75" y="0.75" width="50.5" height="50.5" rx="14" fill="url(#favicon-tile)"/>
   <rect x="0.75" y="0.75" width="50.5" height="50.5" rx="14" stroke="#f0c06a" stroke-opacity="0.5" stroke-width="1"/>
   <path d="M18 20 H34 L32 40 A2 2 0 0 1 30 42 H22 A2 2 0 0 1 20 40 Z" fill="#20160a" fill-opacity="0.92"/>
   <path d="M18.9 27 H33.1 L32 40 A2 2 0 0 1 30 42 H22 A2 2 0 0 1 20 40 Z" fill="#20160a" fill-opacity="0.35"/>

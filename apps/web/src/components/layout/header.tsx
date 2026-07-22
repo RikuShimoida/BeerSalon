@@ -1,8 +1,8 @@
 import { Bell, LogOut, User } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { getUnreadNotificationCount } from "@/actions/notification";
 import { logout } from "./actions";
+import { BeerSalonLogo } from "./beer-salon-logo";
 import { HeaderNav } from "./header-nav";
 
 export async function Header() {
@@ -21,14 +21,7 @@ export async function Header() {
 						className="hover:opacity-80 transition-opacity"
 						aria-label="Beer Salon ホーム"
 					>
-						<Image
-							src="/beer-salon-logo-a.svg"
-							alt="Beer Salon"
-							width={240}
-							height={52}
-							priority
-							className="h-10 w-auto"
-						/>
+						<BeerSalonLogo className="h-10 w-auto" />
 					</Link>
 
 					<HeaderNav />

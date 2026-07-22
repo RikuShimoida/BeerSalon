@@ -12,11 +12,9 @@ test.describe("共通ヘッダーロゴ（Dark Taproom 案A）", () => {
 		// ヘッダーが描画される認証後ページから確認する
 		await page.goto("/timeline");
 
-		const logo = page.getByAltText("Beer Salon");
+		// インラインSVGロゴ（role=img, aria-label=Beer Salon）が表示される
+		const logo = page.getByRole("img", { name: "Beer Salon" });
 		await expect(logo).toBeVisible();
-
-		// 新アセット beer-salon-logo-a.svg を指しており、旧ロゴを参照していない
-		await expect(logo).toHaveAttribute("src", /beer-salon-logo-a\.svg/);
 
 		// ロゴのリンクはトップページ / を指す（aria-label でヘッダーのホームリンクを特定）
 		const homeLink = page.getByRole("link", { name: "Beer Salon ホーム" });
@@ -31,7 +29,7 @@ test.describe("共通ヘッダーロゴ（Dark Taproom 案A）", () => {
 
 		// クリックでトップページへ遷移する
 		await homeLink.click();
-		await expect(page).toHaveURL("http://localhost:3000/");
+		await expect(page).toHaveURL("/");
 	});
 
 	test("favicon(app/icon.svg)が配信されアクセス可能である", async ({

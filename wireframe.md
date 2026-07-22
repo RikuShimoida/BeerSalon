@@ -18,7 +18,7 @@ PC では横幅に応じて余白や2カラムレイアウトにすることを�
 配色・タイポは Dark Taproom 基盤（`design_handoff_user_screens/README.md` の Design Tokens が正）に準拠する。共通レイアウトは `apps/web/src/components/layout/`（`Header` / `Footer` / `HeaderNav` / `AuthenticatedLayout` / `nav-items.ts`）で実装し、`AuthenticatedLayout` を使う全ページに一括反映される。ナビ項目は `nav-items.ts` に集約し、PC 横ナビ（Header）とモバイルボトムナビ（Footer）で共有する。
 
 - **共通ヘッダー（画面上部固定・全幅共通）**
-  - 左: サービスロゴ（クリックで `/`）。Dark Taproom 準拠の案A（`apps/web/public/beer-salon-logo-a.svg`・アンバータイル + 泡付きグラス + ワードマーク「Beer Salon」）。ブラウザタブの favicon は同シンボルを切り出した `apps/web/src/app/icon.svg`（Next.js App Router 規約）
+  - 左: サービスロゴ（クリックで `/`）。Dark Taproom 準拠の案A（`apps/web/src/components/layout/beer-salon-logo.tsx`・アンバータイル + 泡付きグラス + ワードマーク「Beer Salon」）。ワードマークのフォント（明朝 `--font-mincho` / Archivo `--font-archivo`）を確実に適用するためインライン SVG で描画する（外部 `<img src>` だと `next/font` が効かずフォールバックするため）。ブラウザタブの favicon は同シンボルを切り出した `apps/web/src/app/icon.svg`（Next.js App Router 規約）
   - 右: アイコン群（各アイコンは `#241a0e`（`surface-raised`）の丸背景 + アンバー薄ボーダー `border-primary/20`）
     - 通知アイコン（ベル・未読があれば赤バッジ。99 超は「99+」表示）
     - マイページアイコン（人型）
