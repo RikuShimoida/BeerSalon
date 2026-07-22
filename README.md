@@ -120,6 +120,11 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 詳細・トラブルシューティング・UIモード起動方法は `docs/e2e.md` を参照。
 
+> **impl スキル経由の場合は dev サーバーの手動起動は不要**：`impl` 実行時、`check-docker.sh` フックが
+> Docker（＝ローカル Supabase の実体）の起動を検証し（未起動ならブロック）、`check-dev-servers.sh` →
+> `start-dev-servers.sh` フックが dev:web(3000)/dev:admin(3001) を自動起動してから E2E フェーズに入る。
+> Docker 自体の自動起動は行わない（未起動時は Docker Desktop 起動＋`supabase start` を促してブロック）。
+
 ---
 
 ## 🧩 開発ワークフロープラグイン（bs-workflow）

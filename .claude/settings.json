@@ -71,8 +71,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/check-dev-servers.sh",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/check-docker.sh",
             "if": "Skill(impl *)"
+          },
+          {
+            "type": "command",
+            "command": "bash /Users/rikushimoida/Documents/repository/BeerSalon/.claude/hooks/check-dev-servers.sh",
+            "if": "Skill(impl *)",
+            "timeout": 120
           },
           {
             "type": "command",
