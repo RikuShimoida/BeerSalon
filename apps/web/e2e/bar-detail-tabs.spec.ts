@@ -157,4 +157,66 @@ test.describe("店舗詳細ページ", () => {
 				.toBe(1);
 		});
 	});
+
+	test.describe("基本情報タブのPC 2カラムレイアウト (#499)", () => {
+		test("PC 幅では左カラム(About)と右カラム(営業時間)が横並びになる", async ({
+			page,
+		}) => {
+			await page.setViewportSize({ width: 1280, height: 900 });
+			await page.goto("/bars/100001");
+
+			const about = page.getByRole("heading", { name: "About", exact: true });
+			const openingHours = page.getByRole("heading", {
+				name: "営業時間",
+				exact: true,
+			});
+			await expect(about).toBeVisible();
+			await expect(openingHours).toBeVisible();
+
+			const aboutBox = await about.boundingBox();
+			const openingBox = await openingHours.boundingBox();
+			if (!aboutBox || !openingBox) {
+				throw new Error("見出しの bounding box が取得できませんでした");
+			}
+
+			// 横並び = 右カラム(営業時間)が左カラム(About)より右にあり、
+			// かつ縦位置が概ね揃う(縦積みなら営業時間は About より大きく下へ回る)。
+			expect(openingBox.x).toBeGreaterThan(aboutBox.x);
+			expect(Math.abs(openingBox.y - aboutBox.y)).toBeLessThan(200);
+
+			// 右カラムは約300px 幅に収まり、全幅(1200px超)に間延びしない。
+			const openingCard = page
+				.locator("section", { has: openingHours })
+				.first();
+			const cardBox = await openingCard.boundingBox();
+			if (!cardBox) {
+				throw new Error("営業時間カードの bounding box が取得できませんでした");
+			}
+			expect(cardBox.width).toBeLessThan(360);
+		});
+
+		test("モバイル幅では左カラム(About)の下に右カラム(営業時間)が縦積みされる", async ({
+			page,
+		}) => {
+			await page.setViewportSize({ width: 375, height: 812 });
+			await page.goto("/bars/100001");
+
+			const about = page.getByRole("heading", { name: "About", exact: true });
+			const openingHours = page.getByRole("heading", {
+				name: "営業時間",
+				exact: true,
+			});
+			await expect(about).toBeVisible();
+			await expect(openingHours).toBeVisible();
+
+			const aboutBox = await about.boundingBox();
+			const openingBox = await openingHours.boundingBox();
+			if (!aboutBox || !openingBox) {
+				throw new Error("見出しの bounding box が取得できませんでした");
+			}
+
+			// 縦積み = 営業時間が About より下に配置される(横並びではない)。
+			expect(openingBox.y).toBeGreaterThan(aboutBox.y);
+		});
+	});
 });
