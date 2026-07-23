@@ -42,3 +42,23 @@ describe("BarTabs のアクティブ切替", () => {
 		expect(topTab.className).toContain("text-primary");
 	});
 });
+
+describe("BarTabs のスクロールアフォーダンス（フェード）", () => {
+	it("左右フェードは aria-hidden でアクセシビリティツリーから隠れる（タブ操作を汚染しない）", () => {
+		const { container } = render(<BarTabs>{children}</BarTabs>);
+
+		const fades = container.querySelectorAll('[aria-hidden="true"]');
+		expect(fades).toHaveLength(2);
+
+		// フェードは button/nav のクエリ対象を増やさない（6タブのみ取得できる）
+		expect(screen.getAllByRole("button")).toHaveLength(6);
+	});
+
+	it("初期表示では左フェードは非表示（opacity-0）で描画される", () => {
+		const { container } = render(<BarTabs>{children}</BarTabs>);
+
+		// 先頭にいる初期状態では左に戻れる余地が無いため左フェードは opacity-0
+		const leftFade = container.querySelector('[aria-hidden="true"].left-0');
+		expect(leftFade?.className).toContain("opacity-0");
+	});
+});
