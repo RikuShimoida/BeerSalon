@@ -131,20 +131,34 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 	// Why not: 素の insert だと、Stripe の at-least-once 配信で created が重複到達したり、
 	//   select 後・insert 前に別配信が先に入ると stripe_subscription_id が重複した二重行になる。
 	//   UNIQUE 制約 + upsert(onConflict) で一意行へ収束させる。
-	await supabaseAdmin.from("bar_subscriptions").upsert(
-		{
-			bar_id: Number(barId),
-			subscription_plan_id: Number(subscriptionPlanId),
-			stripe_customer_id: customerId,
-			stripe_subscription_id: subscriptionId,
-			status,
-			current_period_start: currentPeriodStart,
-			current_period_end: currentPeriodEnd,
-			cancel_at_period_end: cancelAtPeriodEnd,
-			canceled_at: canceledAt,
-		},
-		{ onConflict: "stripe_subscription_id" },
-	);
+	const { error: upsertError } = await supabaseAdmin
+		.from("bar_subscriptions")
+		.upsert(
+			{
+				bar_id: Number(barId),
+				subscription_plan_id: Number(subscriptionPlanId),
+				stripe_customer_id: customerId,
+				stripe_subscription_id: subscriptionId,
+				status,
+				current_period_start: currentPeriodStart,
+				current_period_end: currentPeriodEnd,
+				cancel_at_period_end: cancelAtPeriodEnd,
+				canceled_at: canceledAt,
+			},
+			{ onConflict: "stripe_subscription_id" },
+		);
+
+	// Why not: bar_id 部分ユニークインデックス違反（23505）で throw すると webhook が 500 を返し、
+	//   Stripe が同じイベントを無限リトライする。二重サブスク（別 subscription で同一店舗が有効）は
+	//   運用で解約対応すべき異常状態のため、エラーログを残して 200 で受理しリトライを止める。
+	if (upsertError && upsertError.code !== "23505") {
+		throw new Error(upsertError.message);
+	}
+	if (upsertError?.code === "23505") {
+		console.error(
+			`bar_subscriptions 二重サブスク検知（bar_id=${barId} に別の有効サブスクが存在）: subscription=${subscriptionId}`,
+		);
+	}
 }
 
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {

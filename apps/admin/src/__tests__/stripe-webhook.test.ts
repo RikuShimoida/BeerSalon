@@ -74,6 +74,9 @@ describe("POST /api/webhooks/stripe（customer.subscription.created）", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
+		// clearAllMocks で実装が消えるため upsert の既定戻り値（成功）を毎回設定し直す。
+		upsertSpy.mockResolvedValue({ data: null, error: null });
+		updateEqSpy.mockResolvedValue({ data: null, error: null });
 	});
 
 	it("署名が無い場合は400を返す", async () => {
@@ -159,5 +162,48 @@ describe("POST /api/webhooks/stripe（customer.subscription.created）", () => {
 		expect(updateSpy).not.toHaveBeenCalled();
 		expect(warnSpy).toHaveBeenCalled();
 		warnSpy.mockRestore();
+	});
+
+	it("bar_id 部分ユニーク違反(23505)時は 200 で受理しエラーログを出す（Stripe 無限リトライ回避）", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		setupBarSubscriptionsMock(null);
+		upsertSpy.mockResolvedValue({
+			data: null,
+			error: { code: "23505", message: "duplicate key value" },
+		});
+		mockConstructEvent.mockReturnValue(
+			subscriptionCreatedEvent({
+				bar_id: "100001",
+				subscription_plan_id: "42",
+			}),
+		);
+
+		const response = await POST(createMockRequest());
+
+		expect(response.status).toBe(200);
+		expect(errorSpy).toHaveBeenCalledWith(
+			expect.stringContaining("二重サブスク検知"),
+		);
+		errorSpy.mockRestore();
+	});
+
+	it("23505 以外の upsert エラー時は 500 を返す", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		setupBarSubscriptionsMock(null);
+		upsertSpy.mockResolvedValue({
+			data: null,
+			error: { code: "XX000", message: "internal error" },
+		});
+		mockConstructEvent.mockReturnValue(
+			subscriptionCreatedEvent({
+				bar_id: "100001",
+				subscription_plan_id: "42",
+			}),
+		);
+
+		const response = await POST(createMockRequest());
+
+		expect(response.status).toBe(500);
+		errorSpy.mockRestore();
 	});
 });

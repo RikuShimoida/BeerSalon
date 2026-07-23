@@ -766,6 +766,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 - `bar_id`
 - `stripe_customer_id`
 - `stripe_subscription_id`（UNIQUE 制約により一意インデックス）
+- `bar_id`（部分ユニーク: `WHERE status IN ('active','trialing','past_due')`）。1店舗につき有効サブスクを1件に制限し、checkout 連打・並行リクエストによる二重サブスク（二重課金）を DB レイヤーで防ぐ
 
 **権限**:
 - バーオーナー: 自バーのサブスクリプション参照のみ
