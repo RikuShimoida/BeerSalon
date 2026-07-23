@@ -13,6 +13,9 @@ export async function GET(
 
 	const { barId } = await params;
 
+	// Why not: status を "active" だけで見ると、checkout の 409 ガード（active/trialing/past_due）と
+	//   条件がズレ、trialing/past_due の店舗で「課金を開始する」が出るのに押すと 409 で詰む。
+	//   課金導線の出し分けを 409 と一致させるため同じ status 集合で判定する。
 	const { data: subscription, error } = await supabaseAdmin
 		.from("bar_subscriptions")
 		.select(`
@@ -20,8 +23,10 @@ export async function GET(
       subscription_plans (*)
     `)
 		.eq("bar_id", barId)
-		.eq("status", "active")
-		.single();
+		.in("status", ["active", "trialing", "past_due"])
+		.order("created_at", { ascending: false })
+		.limit(1)
+		.maybeSingle();
 
 	if (error && error.code !== "PGRST116") {
 		return NextResponse.json({ error: error.message }, { status: 500 });
