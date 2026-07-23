@@ -128,17 +128,23 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 		return;
 	}
 
-	await supabaseAdmin.from("bar_subscriptions").insert({
-		bar_id: Number(barId),
-		subscription_plan_id: Number(subscriptionPlanId),
-		stripe_customer_id: customerId,
-		stripe_subscription_id: subscriptionId,
-		status,
-		current_period_start: currentPeriodStart,
-		current_period_end: currentPeriodEnd,
-		cancel_at_period_end: cancelAtPeriodEnd,
-		canceled_at: canceledAt,
-	});
+	// Why not: 素の insert だと、Stripe の at-least-once 配信で created が重複到達したり、
+	//   select 後・insert 前に別配信が先に入ると stripe_subscription_id が重複した二重行になる。
+	//   UNIQUE 制約 + upsert(onConflict) で一意行へ収束させる。
+	await supabaseAdmin.from("bar_subscriptions").upsert(
+		{
+			bar_id: Number(barId),
+			subscription_plan_id: Number(subscriptionPlanId),
+			stripe_customer_id: customerId,
+			stripe_subscription_id: subscriptionId,
+			status,
+			current_period_start: currentPeriodStart,
+			current_period_end: currentPeriodEnd,
+			cancel_at_period_end: cancelAtPeriodEnd,
+			canceled_at: canceledAt,
+		},
+		{ onConflict: "stripe_subscription_id" },
+	);
 }
 
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {

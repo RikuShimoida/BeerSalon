@@ -206,6 +206,33 @@ describe("POST /api/bars/[barId]/checkout", () => {
 		consoleSpy.mockRestore();
 	});
 
+	it("baseUrl(ADMIN_BASE_URL/NEXT_PUBLIC_APP_URL)未設定の場合は500を返す", async () => {
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		process.env.ADMIN_BASE_URL = "";
+		process.env.NEXT_PUBLIC_APP_URL = "";
+		mockGetCurrentUser.mockResolvedValue({
+			id: "user-1",
+			role: "bar_owner",
+			barId: 1,
+		});
+		mockCanAccessBar.mockReturnValue(true);
+		mockSupabaseTables({
+			activeSub: { data: null },
+			plan: {
+				data: { id: 42, stripe_price_id: "price_test_5000" },
+				error: null,
+			},
+		});
+
+		const response = await POST(createMockRequest(), createMockParams("1"));
+		const body = await response.json();
+
+		expect(response.status).toBe(500);
+		expect(body.error).toBe("Stripe Checkoutの作成に失敗しました");
+		expect(mockCheckoutSessionsCreate).not.toHaveBeenCalled();
+		consoleSpy.mockRestore();
+	});
+
 	it("Checkoutセッションにurlが無い場合は500を返す", async () => {
 		mockGetCurrentUser.mockResolvedValue({
 			id: "user-1",

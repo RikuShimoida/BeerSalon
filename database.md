@@ -753,7 +753,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 | bar_id                  | bigint     | NOT NULL, FK → bars(id)                   | バーID                             |
 | subscription_plan_id    | bigint     | NOT NULL, FK → subscription_plans(id)     | プランID                           |
 | stripe_customer_id      | text       | NOT NULL                                  | Stripe顧客ID                      |
-| stripe_subscription_id  | text       | NOT NULL                                  | StripeサブスクリプションID         |
+| stripe_subscription_id  | text       | NOT NULL, UNIQUE                          | StripeサブスクリプションID（webhook の at-least-once 配信でも upsert が二重行を作らないよう一意） |
 | status                  | text       | NOT NULL DEFAULT 'active'                 | ステータス（'active', 'canceled', 'past_due', 'trialing', 'incomplete'） |
 | current_period_start    | timestamptz| NOT NULL                                  | 現在の課金期間開始日               |
 | current_period_end      | timestamptz| NOT NULL                                  | 現在の課金期間終了日               |
@@ -765,7 +765,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 **インデックス**:
 - `bar_id`
 - `stripe_customer_id`
-- `stripe_subscription_id`
+- `stripe_subscription_id`（UNIQUE 制約により一意インデックス）
 
 **権限**:
 - バーオーナー: 自バーのサブスクリプション参照のみ

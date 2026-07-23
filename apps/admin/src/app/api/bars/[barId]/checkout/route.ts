@@ -50,6 +50,18 @@ export async function POST(
 
 	const baseUrl = process.env.ADMIN_BASE_URL || process.env.NEXT_PUBLIC_APP_URL;
 
+	// Why not: baseUrl 未設定のまま Checkout を作ると success_url が "undefined/bars/..." になり
+	//   決済後の戻り先が壊れる。無言で壊すより 500 で早期に落とす。
+	if (!baseUrl) {
+		console.error(
+			"Stripe Checkout: ADMIN_BASE_URL / NEXT_PUBLIC_APP_URL が未設定です",
+		);
+		return NextResponse.json(
+			{ error: "Stripe Checkoutの作成に失敗しました" },
+			{ status: 500 },
+		);
+	}
+
 	try {
 		const checkoutSession = await stripe.checkout.sessions.create({
 			mode: "subscription",

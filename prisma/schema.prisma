@@ -507,7 +507,7 @@ model BarSubscription {
   barId                BigInt           @map("bar_id")
   subscriptionPlanId   BigInt           @map("subscription_plan_id")
   stripeCustomerId     String           @map("stripe_customer_id")
-  stripeSubscriptionId String           @map("stripe_subscription_id")
+  stripeSubscriptionId String           @unique @map("stripe_subscription_id")
   status               String           @default("active")
   currentPeriodStart   DateTime         @map("current_period_start") @db.Timestamptz(6)
   currentPeriodEnd     DateTime         @map("current_period_end") @db.Timestamptz(6)
@@ -521,7 +521,6 @@ model BarSubscription {
 
   @@index([barId])
   @@index([stripeCustomerId])
-  @@index([stripeSubscriptionId])
   @@map("bar_subscriptions")
 }
 
