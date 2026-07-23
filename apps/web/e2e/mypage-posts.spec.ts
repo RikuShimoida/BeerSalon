@@ -40,9 +40,13 @@ test.describe("マイページ 投稿タブ", () => {
 			};
 		});
 
-		// 薄ボーダーが付与され境界が視認できる
+		// 境界視認性の主担保は border 側。薄ボーダーが付与され境界が視認できることを検証する。
 		expect(Number.parseFloat(styles.borderTopWidth)).toBeGreaterThan(0);
-		// タイル面色がカード背景と異なり、背景に溶けない
+		// 面色は surface-control (#241a0e = rgb(36, 26, 14)) を期待値として明示検証する。
+		// tileBg !== cardBg だけだと bg-surface-control を同値の bg-surface-raised に
+		// 戻してもパスしデグレを見逃すため、期待面色そのものを固定する。
+		expect(styles.tileBg).toBe("rgb(36, 26, 14)");
+		// 面色がカード背景 (#1e160d = rgb(30, 22, 13)) と一致せず背景に溶けないことも併せて確認する。
 		expect(styles.tileBg).not.toBe(styles.cardBg);
 	});
 
