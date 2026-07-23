@@ -90,14 +90,24 @@ test.describe("トップページ（検索ページ）", () => {
 		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
 	});
 
-	test("産地フィルターは国見出し付きで、地域がチップとして表示される（Issue #491）", async ({
+	test("産地フィルターは既定で折りたたまれ、トグル展開で国見出し付きの地域チップが表示される（Issue #491 / #497）", async ({
 		page,
 	}) => {
 		await page.goto("/");
 
 		// 産地セクションの見出し（apps/web/src/components/search/search-form.tsx と同期）
 		await expect(page.getByText("Origin", { exact: true })).toBeVisible();
-		// 国見出し（例: 日本）と、その配下の地域チップ（ボタン）が描画される。
+
+		const originToggle = page.getByRole("button", { name: /産地で絞り込む/ });
+		await expect(originToggle).toBeVisible();
+		// 既定は折りたたみ: 国見出し・地域チップは展開するまで描画されない（#497）
+		await expect(originToggle).toHaveAttribute("aria-expanded", "false");
+		await expect(page.getByText("日本", { exact: true })).toHaveCount(0);
+
+		await originToggle.click();
+		await expect(originToggle).toHaveAttribute("aria-expanded", "true");
+
+		// 展開後: 国見出し（例: 日本）と、その配下の地域チップ（ボタン）が描画される。
 		// seed の regions マスタに存在する「静岡」「カリフォルニア」で検証する。
 		await expect(page.getByText("日本", { exact: true })).toBeVisible();
 		await expect(
@@ -108,43 +118,56 @@ test.describe("トップページ（検索ページ）", () => {
 		).toBeVisible();
 	});
 
-	test("産地を複数チップ選択すると URL が origin=国/地域 のカンマ区切りで更新される（Issue #491）", async ({
+	test("産地を複数チップ選択すると URL が origin=国/地域 のカンマ区切りで更新される（Issue #491 / #497）", async ({
 		page,
 	}) => {
 		await page.goto("/");
 
+		const originToggle = page.getByRole("button", { name: /産地で絞り込む/ });
+
+		// #497: 産地セクションは既定で折りたたまれるため、選択のたびにトグルを展開する。
+		// 選択で URL が更新されると page-client の key 再マウントが走り、折りたたみ状態に戻る。
+		await originToggle.click();
 		const shizuokaChip = page.getByRole("button", {
 			name: "静岡",
 			exact: true,
 		});
-		const californiaChip = page.getByRole("button", {
-			name: "カリフォルニア",
-			exact: true,
-		});
-
-		// hydration 完了を待つため、チップが操作可能になるまで待機する。
 		await expect(shizuokaChip).toBeVisible();
-
 		await shizuokaChip.click();
 		await expect(page).toHaveURL(
 			/origin=(%E6%97%A5%E6%9C%AC%2F%E9%9D%99%E5%B2%A1|日本\/静岡)/,
 		);
-		await expect(shizuokaChip).toHaveAttribute("aria-pressed", "true");
 
+		await originToggle.click();
+		const californiaChip = page.getByRole("button", {
+			name: "カリフォルニア",
+			exact: true,
+		});
+		await expect(californiaChip).toBeVisible();
 		await californiaChip.click();
 		// 2 産地が OR でカンマ連結される（%2C = カンマ）。
 		await expect(page).toHaveURL(/origin=[^&]*(%2C|,)[^&]*/);
-		await expect(shizuokaChip).toHaveAttribute("aria-pressed", "true");
-		await expect(californiaChip).toHaveAttribute("aria-pressed", "true");
+
+		// 折りたたみ時のサマリチップに両産地が選択状態（aria-pressed=true）で残る（#497）。
+		await expect(
+			page.getByRole("button", { name: "静岡", exact: true }),
+		).toHaveAttribute("aria-pressed", "true");
+		await expect(
+			page.getByRole("button", { name: "カリフォルニア", exact: true }),
+		).toHaveAttribute("aria-pressed", "true");
 	});
 
-	test("複数産地の直リンクアクセスで両チップが選択状態に復元される（Issue #491）", async ({
+	test("複数産地の直リンクアクセスで折りたたみサマリに両産地が選択状態で復元される（Issue #491 / #497）", async ({
 		page,
 	}) => {
 		// URL を真実の源として、両産地の選択状態が復元されることを検証する。
 		// これはブラウザバック復元と同一経路（parseSearchParams → チップ反映）。
 		await page.goto("/?origin=日本/静岡,アメリカ/カリフォルニア");
 
+		// #497: 折りたたみ状態でも、選択中の産地はサマリチップとして aria-pressed=true で表示される。
+		await expect(
+			page.getByRole("button", { name: /産地で絞り込む/ }),
+		).toHaveAttribute("aria-expanded", "false");
 		await expect(
 			page.getByRole("button", { name: "静岡", exact: true }),
 		).toHaveAttribute("aria-pressed", "true");

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Search } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getBeerRegions } from "@/actions/bar";
 import { SHIZUOKA_CITIES } from "@/lib/constants/cities";
@@ -38,6 +38,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 	const [selectedOrigins, setSelectedOrigins] = useState<string[]>(
 		initialValues?.origins ?? [],
 	);
+	const [isOriginOpen, setIsOriginOpen] = useState(false);
 
 	useEffect(() => {
 		const fetchRegions = async () => {
@@ -163,35 +164,74 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 				<span className="block text-xs font-medium text-subtext mb-2 tracking-[0.14em] uppercase font-archivo">
 					Origin
 				</span>
-				<div className="flex flex-col gap-3">
-					{Object.entries(origins).map(([country, regions]) => (
-						<div key={country}>
-							<span className="block text-[11px] font-semibold text-muted-foreground mb-1.5">
-								{country}
-							</span>
-							<div className="flex flex-wrap gap-2">
-								{regions.map((region) => {
-									const value = `${country}/${region}`;
-									const isSelected = selectedOrigins.includes(value);
-									return (
-										<button
-											key={value}
-											type="button"
-											aria-pressed={isSelected}
-											onClick={() => handleOriginToggle(value)}
-											className={chipClassName(isSelected)}
-										>
-											{isSelected && (
-												<Check className="w-4 h-4" strokeWidth={3} />
-											)}
-											{region}
-										</button>
-									);
-								})}
+				{/* Why not: 産地チップを常時全展開すると DB 登録数の増加でカードが縦に伸びファーストビュー（地図・店舗カード）を圧迫するため折りたたむ */}
+				<button
+					type="button"
+					aria-expanded={isOriginOpen}
+					aria-controls="origin-regions"
+					onClick={() => setIsOriginOpen((prev) => !prev)}
+					className="flex w-full items-center justify-between gap-2 rounded-xl bg-surface-control border border-border px-4 py-3 text-card-foreground transition-all duration-300 hover:border-primary/40"
+				>
+					<span className="text-sm">産地で絞り込む</span>
+					<ChevronDown
+						className={`w-4 h-4 shrink-0 transition-transform duration-300 ${
+							isOriginOpen ? "rotate-180" : ""
+						}`}
+						strokeWidth={2.5}
+					/>
+				</button>
+
+				{!isOriginOpen && selectedOrigins.length > 0 && (
+					<div className="flex flex-wrap gap-2 mt-3">
+						{selectedOrigins.map((value) => {
+							const region = value.split("/")[1] ?? value;
+							return (
+								<button
+									key={value}
+									type="button"
+									aria-pressed
+									onClick={() => handleOriginToggle(value)}
+									className={chipClassName(true)}
+								>
+									<Check className="w-4 h-4" strokeWidth={3} />
+									{region}
+								</button>
+							);
+						})}
+					</div>
+				)}
+
+				{isOriginOpen && (
+					<div id="origin-regions" className="flex flex-col gap-3 mt-3">
+						{Object.entries(origins).map(([country, regions]) => (
+							<div key={country}>
+								<span className="block text-[11px] font-semibold text-muted-foreground mb-1.5">
+									{country}
+								</span>
+								<div className="flex flex-wrap gap-2">
+									{regions.map((region) => {
+										const value = `${country}/${region}`;
+										const isSelected = selectedOrigins.includes(value);
+										return (
+											<button
+												key={value}
+												type="button"
+												aria-pressed={isSelected}
+												onClick={() => handleOriginToggle(value)}
+												className={chipClassName(isSelected)}
+											>
+												{isSelected && (
+													<Check className="w-4 h-4" strokeWidth={3} />
+												)}
+												{region}
+											</button>
+										);
+									})}
+								</div>
 							</div>
-						</div>
-					))}
-				</div>
+						))}
+					</div>
+				)}
 			</div>
 
 			<div>
