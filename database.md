@@ -734,6 +734,8 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
 
+**初期データ**: 店舗月額プラン（¥5,000/月・`interval='month'`・`currency='jpy'`）を seed で1件投入する（#335 の課金開始フローが is_active な1件を参照して Checkout に渡すため）。`stripe_price_id` は seed 時点では placeholder（`price_placeholder_5000_monthly`）であり、Stripe ダッシュボードで作成した実 Price ID（`price_xxx`）へ手動で差し替える必要がある。
+
 ---
 
 ### 8-4. bar_subscriptions

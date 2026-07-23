@@ -66,46 +66,79 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-	const _customerId = subscription.customer as string;
+	const customerId = subscription.customer as string;
 	const subscriptionId = subscription.id;
 
 	const { data: existingSub } = await supabaseAdmin
 		.from("bar_subscriptions")
 		.select("bar_id")
 		.eq("stripe_subscription_id", subscriptionId)
-		.single();
+		.maybeSingle();
+
+	const sub = subscription as unknown as {
+		status: string;
+		current_period_start: number;
+		current_period_end: number;
+		cancel_at_period_end: boolean;
+		canceled_at: number | null;
+		metadata: Record<string, string> | null;
+	};
+
+	const status = sub.status as
+		| "active"
+		| "canceled"
+		| "past_due"
+		| "trialing"
+		| "incomplete";
+	const currentPeriodStart = new Date(
+		sub.current_period_start * 1000,
+	).toISOString();
+	const currentPeriodEnd = new Date(
+		sub.current_period_end * 1000,
+	).toISOString();
+	const cancelAtPeriodEnd = sub.cancel_at_period_end || false;
+	const canceledAt = sub.canceled_at
+		? new Date(sub.canceled_at * 1000).toISOString()
+		: null;
 
 	if (existingSub) {
-		const sub = subscription as unknown as {
-			status: string;
-			current_period_start: number;
-			current_period_end: number;
-			cancel_at_period_end: boolean;
-			canceled_at: number | null;
-		};
-
 		await supabaseAdmin
 			.from("bar_subscriptions")
 			.update({
-				status: sub.status as
-					| "active"
-					| "canceled"
-					| "past_due"
-					| "trialing"
-					| "incomplete",
-				current_period_start: new Date(
-					sub.current_period_start * 1000,
-				).toISOString(),
-				current_period_end: new Date(
-					sub.current_period_end * 1000,
-				).toISOString(),
-				cancel_at_period_end: sub.cancel_at_period_end || false,
-				canceled_at: sub.canceled_at
-					? new Date(sub.canceled_at * 1000).toISOString()
-					: null,
+				status,
+				current_period_start: currentPeriodStart,
+				current_period_end: currentPeriodEnd,
+				cancel_at_period_end: cancelAtPeriodEnd,
+				canceled_at: canceledAt,
 			})
 			.eq("stripe_subscription_id", subscriptionId);
+		return;
 	}
+
+	// 初回サブスク（Checkout 経由）は既存行が無いため insert する。
+	// bar_id / subscription_plan_id は Checkout で subscription_data.metadata に埋めた値を復元する。
+	const barId = sub.metadata?.bar_id;
+	const subscriptionPlanId = sub.metadata?.subscription_plan_id;
+
+	// metadata を持たないサブスク（Portal 経由等）は紐付け先を特定できないため insert しない。
+	if (!barId || !subscriptionPlanId) {
+		console.warn(
+			`bar_subscriptions insert をスキップ: metadata が不足 (subscription=${subscriptionId})`,
+		);
+		return;
+	}
+
+	await supabaseAdmin.from("bar_subscriptions").insert({
+		bar_id: Number(barId),
+		subscription_plan_id: Number(subscriptionPlanId),
+		stripe_customer_id: customerId,
+		stripe_subscription_id: subscriptionId,
+		status,
+		current_period_start: currentPeriodStart,
+		current_period_end: currentPeriodEnd,
+		cancel_at_period_end: cancelAtPeriodEnd,
+		canceled_at: canceledAt,
+	});
 }
 
 async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {

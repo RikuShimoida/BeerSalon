@@ -9,13 +9,34 @@ import type { Bar, BarImage, BarOpeningHour } from "@/types/database";
 function PaymentManagementCard({ barId }: { barId: string }) {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
 
-	const handleClick = async () => {
+	useEffect(() => {
+		let active = true;
+		(async () => {
+			try {
+				const response = await fetch(`/api/bars/${barId}/subscription`);
+				if (!response.ok) {
+					if (active) setHasSubscription(false);
+					return;
+				}
+				const data = await response.json();
+				if (active) setHasSubscription(Boolean(data.subscription));
+			} catch (_e) {
+				if (active) setHasSubscription(false);
+			}
+		})();
+		return () => {
+			active = false;
+		};
+	}, [barId]);
+
+	const redirectTo = async (endpoint: "checkout" | "portal") => {
 		setLoading(true);
 		setError("");
 
 		try {
-			const response = await fetch(`/api/bars/${barId}/portal`, {
+			const response = await fetch(`/api/bars/${barId}/${endpoint}`, {
 				method: "POST",
 			});
 
@@ -34,11 +55,41 @@ function PaymentManagementCard({ barId }: { barId: string }) {
 		}
 	};
 
+	if (hasSubscription === null) {
+		return (
+			<div className="border border-gray-200 rounded-lg p-4">
+				<h3 className="font-medium text-gray-900">課金設定</h3>
+				<p className="text-sm text-gray-500 mt-1">読み込み中...</p>
+			</div>
+		);
+	}
+
+	if (!hasSubscription) {
+		return (
+			<div className="border border-gray-200 rounded-lg p-4">
+				<button
+					type="button"
+					onClick={() => redirectTo("checkout")}
+					disabled={loading}
+					className="w-full text-left hover:opacity-80 transition-opacity disabled:opacity-50"
+				>
+					<h3 className="font-medium text-gray-900">課金を開始する</h3>
+					<p className="text-sm text-gray-500 mt-1">
+						{loading
+							? "Stripe Checkoutを開いています..."
+							: "Stripe Checkout（外部サイト）でサブスクリプションを開始"}
+					</p>
+				</button>
+				{error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+			</div>
+		);
+	}
+
 	return (
 		<div className="border border-gray-200 rounded-lg p-4">
 			<button
 				type="button"
-				onClick={handleClick}
+				onClick={() => redirectTo("portal")}
 				disabled={loading}
 				className="w-full text-left hover:opacity-80 transition-opacity disabled:opacity-50"
 			>
