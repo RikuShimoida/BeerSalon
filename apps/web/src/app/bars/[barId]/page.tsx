@@ -37,7 +37,9 @@ export default async function BarDetailPage({
 					name={bar.name}
 					prefecture={bar.prefecture}
 					city={bar.city}
-					media={bar.barImages.slice(0, 5)}
+					media={bar.barImages
+						.filter((img) => img.imageType === "slider")
+						.slice(0, 5)}
 					initialIsFavorite={initialIsFavorite}
 				/>
 

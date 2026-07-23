@@ -1,4 +1,8 @@
 import { expect, test } from "@playwright/test";
+import {
+	SLIDE_DURATION_MS,
+	SLIDE_TRANSITION_MS,
+} from "../src/components/bar/hero-slider";
 import { createAuthenticatedUser } from "./helpers/auth";
 
 test.describe("店舗詳細ページ", () => {
@@ -88,5 +92,69 @@ test.describe("店舗詳細ページ", () => {
 		// 経路案内リンクは新規タブで開く
 		await expect(appleLink).toHaveAttribute("target", "_blank");
 		await expect(googleLink).toHaveAttribute("target", "_blank");
+	});
+
+	test.describe("ヒーロースライダー (#485)", () => {
+		// seed.e2e.sql が bar 100002 に 動画1 + 画像2 のスライダーメディアを投入する前提。
+		// Why not: bar 100001 は admin の slider regression テスト (#318) が「slider 0枚から
+		// 埋める」前提で使うため、alt を持たない video を混ぜると衝突する。100002 を使う。
+		const SLIDER_BAR_PATH = "/bars/100002";
+		const activeIndex = () =>
+			// opacity=1 の層のインデックス = 現在表示中のメディア。フェード遷移中は -1。
+			`(() => {
+				const hero = document.querySelector('[data-testid="bar-hero"]');
+				const medias = Array.from(hero.querySelectorAll('video, img'));
+				return medias.findIndex((m) => {
+					const w = m.closest('div.absolute.inset-0');
+					return w && getComputedStyle(w).opacity === '1';
+				});
+			})()`;
+
+		test("動画が muted / playsInline で描画され、全メディアが重ね描画される", async ({
+			page,
+		}) => {
+			await page.goto(SLIDER_BAR_PATH);
+			await expect(page.locator("h1")).toBeVisible();
+
+			const hero = page.getByTestId("bar-hero");
+			const video = hero.locator("video").first();
+			await expect(video).toHaveJSProperty("muted", true);
+			await expect(video).toHaveJSProperty("playsInline", true);
+
+			// 動画1 + 画像2 = 3枚が重ね描画される
+			const mediaCount = await hero.locator("video, img").count();
+			expect(mediaCount).toBe(3);
+		});
+
+		test("メディアが2件以上のときドットが表示され、オートスライドで自動遷移する", async ({
+			page,
+		}) => {
+			await page.goto(SLIDER_BAR_PATH);
+			await expect(page.locator("h1")).toBeVisible();
+
+			const dots = page.locator('[aria-label^="画像"][aria-label$="を表示"]');
+			await expect(dots).toHaveCount(3);
+
+			const before = await page.evaluate(activeIndex());
+			// 表示時間(5秒) + フェード遷移 + 描画マージン を跨ぐまで待つ。
+			// マジックナンバーを避け hero-slider.ts の定数から算出する。
+			await page.waitForTimeout(SLIDE_DURATION_MS + SLIDE_TRANSITION_MS + 800);
+			const after = await page.evaluate(activeIndex());
+			expect(after).not.toBe(before);
+		});
+
+		test("ドットを手動タップすると該当メディアへ切り替わる", async ({
+			page,
+		}) => {
+			await page.goto(SLIDER_BAR_PATH);
+			await expect(page.locator("h1")).toBeVisible();
+
+			// 2番目のドット(index=1)をタップ
+			await page.locator('button[aria-label="画像2を表示"]').click();
+			// クリック直後はフェード遷移中(-1)を挟むため、遷移完了を待って index=1 を確認
+			await expect
+				.poll(async () => page.evaluate(activeIndex()), { timeout: 3000 })
+				.toBe(1);
+		});
 	});
 });
