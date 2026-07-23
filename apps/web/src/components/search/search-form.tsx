@@ -18,13 +18,13 @@ interface SearchFormProps {
 		q?: string;
 		city?: string;
 		categories?: string[];
-		origin?: string;
+		origins?: string[];
 	};
 	onSearch?: (params: {
 		q: string;
 		city: string;
 		categories: string[];
-		origin: string;
+		origins: string[];
 	}) => void;
 }
 
@@ -35,8 +35,8 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 	const [selectedCategories, setSelectedCategories] = useState<string[]>(
 		initialValues?.categories ?? [],
 	);
-	const [selectedOrigin, setSelectedOrigin] = useState(
-		initialValues?.origin ?? "",
+	const [selectedOrigins, setSelectedOrigins] = useState<string[]>(
+		initialValues?.origins ?? [],
 	);
 
 	useEffect(() => {
@@ -52,7 +52,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 			q: query,
 			city: selectedCity,
 			categories: selectedCategories,
-			origin: selectedOrigin,
+			origins: selectedOrigins,
 		});
 	};
 
@@ -62,7 +62,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 			q: query,
 			city,
 			categories: selectedCategories,
-			origin: selectedOrigin,
+			origins: selectedOrigins,
 		});
 	};
 
@@ -75,19 +75,29 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 			q: query,
 			city: selectedCity,
 			categories: nextCategories,
-			origin: selectedOrigin,
+			origins: selectedOrigins,
 		});
 	};
 
-	const handleOriginChange = (origin: string) => {
-		setSelectedOrigin(origin);
+	const handleOriginToggle = (origin: string) => {
+		const nextOrigins = selectedOrigins.includes(origin)
+			? selectedOrigins.filter((o) => o !== origin)
+			: [...selectedOrigins, origin];
+		setSelectedOrigins(nextOrigins);
 		onSearch?.({
 			q: query,
 			city: selectedCity,
 			categories: selectedCategories,
-			origin,
+			origins: nextOrigins,
 		});
 	};
+
+	const chipClassName = (isSelected: boolean) =>
+		`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${
+			isSelected
+				? "bg-primary text-primary-foreground border-transparent"
+				: "bg-secondary text-subtext border-border hover:border-primary/40"
+		}`;
 
 	const selectClassName =
 		"w-full px-4 py-3 rounded-xl bg-surface-control border border-border text-card-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300";
@@ -139,11 +149,7 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 								type="button"
 								aria-pressed={isSelected}
 								onClick={() => handleCategoryToggle(category)}
-								className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border ${
-									isSelected
-										? "bg-primary text-primary-foreground border-transparent"
-										: "bg-secondary text-subtext border-border hover:border-primary/40"
-								}`}
+								className={chipClassName(isSelected)}
 							>
 								{isSelected && <Check className="w-4 h-4" strokeWidth={3} />}
 								{category}
@@ -153,57 +159,61 @@ export function SearchForm({ initialValues, onSearch }: SearchFormProps) {
 				</div>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-				<div>
-					<label
-						htmlFor="city"
-						className="block text-xs font-medium text-subtext mb-2 tracking-[0.14em] uppercase font-archivo"
-					>
-						City
-					</label>
-					<select
-						id="city"
-						value={selectedCity}
-						onChange={(e) => handleCityChange(e.target.value)}
-						className={selectClassName}
-					>
-						<option value="">市町村（全て）</option>
-						{SHIZUOKA_CITIES.map((city) => (
-							<option key={city} value={city}>
-								{city}
-							</option>
-						))}
-					</select>
+			<div className="mb-5">
+				<span className="block text-xs font-medium text-subtext mb-2 tracking-[0.14em] uppercase font-archivo">
+					Origin
+				</span>
+				<div className="flex flex-col gap-3">
+					{Object.entries(origins).map(([country, regions]) => (
+						<div key={country}>
+							<span className="block text-[11px] font-semibold text-muted-foreground mb-1.5">
+								{country}
+							</span>
+							<div className="flex flex-wrap gap-2">
+								{regions.map((region) => {
+									const value = `${country}/${region}`;
+									const isSelected = selectedOrigins.includes(value);
+									return (
+										<button
+											key={value}
+											type="button"
+											aria-pressed={isSelected}
+											onClick={() => handleOriginToggle(value)}
+											className={chipClassName(isSelected)}
+										>
+											{isSelected && (
+												<Check className="w-4 h-4" strokeWidth={3} />
+											)}
+											{region}
+										</button>
+									);
+								})}
+							</div>
+						</div>
+					))}
 				</div>
+			</div>
 
-				<div>
-					<label
-						htmlFor="origin"
-						className="block text-xs font-medium text-subtext mb-2 tracking-[0.14em] uppercase font-archivo"
-					>
-						Origin
-					</label>
-					<select
-						id="origin"
-						value={selectedOrigin}
-						onChange={(e) => handleOriginChange(e.target.value)}
-						className={selectClassName}
-					>
-						<option value="">産地（全て）</option>
-						{Object.entries(origins).map(([country, regions]) => (
-							<optgroup key={country} label={country}>
-								{regions.map((region) => (
-									<option
-										key={`${country}/${region}`}
-										value={`${country}/${region}`}
-									>
-										{region}
-									</option>
-								))}
-							</optgroup>
-						))}
-					</select>
-				</div>
+			<div>
+				<label
+					htmlFor="city"
+					className="block text-xs font-medium text-subtext mb-2 tracking-[0.14em] uppercase font-archivo"
+				>
+					City
+				</label>
+				<select
+					id="city"
+					value={selectedCity}
+					onChange={(e) => handleCityChange(e.target.value)}
+					className={selectClassName}
+				>
+					<option value="">市町村（全て）</option>
+					{SHIZUOKA_CITIES.map((city) => (
+						<option key={city} value={city}>
+							{city}
+						</option>
+					))}
+				</select>
 			</div>
 		</div>
 	);

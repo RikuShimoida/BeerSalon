@@ -89,4 +89,67 @@ test.describe("トップページ（検索ページ）", () => {
 		await expect(page.locator("#search-keyword")).toHaveValue("静岡");
 		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
 	});
+
+	test("産地フィルターは国見出し付きで、地域がチップとして表示される（Issue #491）", async ({
+		page,
+	}) => {
+		await page.goto("/");
+
+		// 産地セクションの見出し（apps/web/src/components/search/search-form.tsx と同期）
+		await expect(page.getByText("Origin", { exact: true })).toBeVisible();
+		// 国見出し（例: 日本）と、その配下の地域チップ（ボタン）が描画される。
+		// seed の regions マスタに存在する「静岡」「カリフォルニア」で検証する。
+		await expect(page.getByText("日本", { exact: true })).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "静岡", exact: true }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "カリフォルニア", exact: true }),
+		).toBeVisible();
+	});
+
+	test("産地を複数チップ選択すると URL が origin=国/地域 のカンマ区切りで更新される（Issue #491）", async ({
+		page,
+	}) => {
+		await page.goto("/");
+
+		const shizuokaChip = page.getByRole("button", {
+			name: "静岡",
+			exact: true,
+		});
+		const californiaChip = page.getByRole("button", {
+			name: "カリフォルニア",
+			exact: true,
+		});
+
+		// hydration 完了を待つため、チップが操作可能になるまで待機する。
+		await expect(shizuokaChip).toBeVisible();
+
+		await shizuokaChip.click();
+		await expect(page).toHaveURL(
+			/origin=(%E6%97%A5%E6%9C%AC%2F%E9%9D%99%E5%B2%A1|日本\/静岡)/,
+		);
+		await expect(shizuokaChip).toHaveAttribute("aria-pressed", "true");
+
+		await californiaChip.click();
+		// 2 産地が OR でカンマ連結される（%2C = カンマ）。
+		await expect(page).toHaveURL(/origin=[^&]*(%2C|,)[^&]*/);
+		await expect(shizuokaChip).toHaveAttribute("aria-pressed", "true");
+		await expect(californiaChip).toHaveAttribute("aria-pressed", "true");
+	});
+
+	test("複数産地の直リンクアクセスで両チップが選択状態に復元される（Issue #491）", async ({
+		page,
+	}) => {
+		// URL を真実の源として、両産地の選択状態が復元されることを検証する。
+		// これはブラウザバック復元と同一経路（parseSearchParams → チップ反映）。
+		await page.goto("/?origin=日本/静岡,アメリカ/カリフォルニア");
+
+		await expect(
+			page.getByRole("button", { name: "静岡", exact: true }),
+		).toHaveAttribute("aria-pressed", "true");
+		await expect(
+			page.getByRole("button", { name: "カリフォルニア", exact: true }),
+		).toHaveAttribute("aria-pressed", "true");
+	});
 });
