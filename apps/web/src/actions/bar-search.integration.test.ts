@@ -31,6 +31,8 @@ const uniqueCategoryName = `it-cat-${faker.string.alphanumeric(6).toLowerCase()}
 const uniqueCategoryName2 = `it-cat2-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueCountryName = `it-country-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueRegionName = `it-region-${faker.string.alphanumeric(6).toLowerCase()}`;
+const uniqueCountryName2 = `it-country2-${faker.string.alphanumeric(6).toLowerCase()}`;
+const uniqueRegionName2 = `it-region2-${faker.string.alphanumeric(6).toLowerCase()}`;
 const uniqueKeyword = `it-kw-${faker.string.alphanumeric(6).toLowerCase()}`;
 
 const geoCity = `it-geocity-${faker.string.alphanumeric(6).toLowerCase()}`;
@@ -39,6 +41,8 @@ let barOnlyCityId: bigint;
 let barOnlyCategoryId: bigint;
 let barOnlyCategory2Id: bigint;
 let barOnlyOriginId: bigint;
+let barOnlyOrigin2Id: bigint;
+let barCat1Region2Id: bigint;
 let barAllMatchedId: bigint;
 let barKeywordInNameId: bigint;
 let barWithGeoId: bigint;
@@ -47,6 +51,8 @@ let createdCategoryId: bigint;
 let createdCategory2Id: bigint;
 let createdCountryId: bigint;
 let createdRegionId: bigint;
+let createdCountry2Id: bigint;
+let createdRegion2Id: bigint;
 let createdBreweryId: bigint;
 
 beforeAll(async () => {
@@ -73,6 +79,16 @@ beforeAll(async () => {
 		data: { name: uniqueRegionName, countryId: country.id },
 	});
 	createdRegionId = region.id;
+
+	const country2 = await prisma.country.create({
+		data: { name: uniqueCountryName2 },
+	});
+	createdCountry2Id = country2.id;
+
+	const region2 = await prisma.region.create({
+		data: { name: uniqueRegionName2, countryId: country2.id },
+	});
+	createdRegion2Id = region2.id;
 
 	const brewery = await prisma.brewery.create({
 		data: {
@@ -153,6 +169,57 @@ beforeAll(async () => {
 		data: { barId: barAllMatched.id, beerId: beer3.id },
 	});
 
+	// 4-2) origin2 のみ一致: region2 の産地ビール (産地 OR 検証用)
+	const barOnlyOrigin2 = await createTestBar(prisma);
+	barOnlyOrigin2Id = barOnlyOrigin2.id;
+	const beerOrigin2 = await prisma.beer.create({
+		data: {
+			name: `it-beer-origin2-${faker.string.alphanumeric(6).toLowerCase()}`,
+			beerCategoryId: (
+				await prisma.beerCategory.findFirstOrThrow({
+					where: { name: { notIn: [uniqueCategoryName, uniqueCategoryName2] } },
+				})
+			).id,
+			breweryId: brewery.id,
+			regionId: region2.id,
+		},
+	});
+	await prisma.barBeerMenu.create({
+		data: { barId: barOnlyOrigin2Id, beerId: beerOrigin2.id },
+	});
+
+	// 4-3) category=cat1 と origin=region2 を「別々のビール」で満たす bar。
+	// カテゴリと産地を独立した AND (店舗単位) で判定するため、同一メニュー縛りでは
+	// ヒットしないが、店舗単位の AND ではヒットすることを検証する (Issue #491)。
+	const barCat1Region2 = await createTestBar(prisma);
+	barCat1Region2Id = barCat1Region2.id;
+	const beerCat1NoRegion = await prisma.beer.create({
+		data: {
+			name: `it-beer-c1r2a-${faker.string.alphanumeric(6).toLowerCase()}`,
+			beerCategoryId: cat.id,
+			breweryId: brewery.id,
+			regionId: null,
+		},
+	});
+	const beerRegion2OtherCat = await prisma.beer.create({
+		data: {
+			name: `it-beer-c1r2b-${faker.string.alphanumeric(6).toLowerCase()}`,
+			beerCategoryId: (
+				await prisma.beerCategory.findFirstOrThrow({
+					where: { name: { notIn: [uniqueCategoryName, uniqueCategoryName2] } },
+				})
+			).id,
+			breweryId: brewery.id,
+			regionId: region2.id,
+		},
+	});
+	await prisma.barBeerMenu.create({
+		data: { barId: barCat1Region2Id, beerId: beerCat1NoRegion.id },
+	});
+	await prisma.barBeerMenu.create({
+		data: { barId: barCat1Region2Id, beerId: beerRegion2OtherCat.id },
+	});
+
 	// 5) フリーワード一致: 店名に uniqueKeyword を含む bar (city / category / origin はデフォルト)
 	const barKeywordInName = await createTestBar(prisma, {
 		name: `${INTEGRATION_TEST_PREFIX}bar-${uniqueKeyword}`,
@@ -184,8 +251,12 @@ afterAll(async () => {
 		where: { name: { startsWith: INTEGRATION_TEST_PREFIX } },
 	});
 	await prisma.brewery.deleteMany({ where: { id: createdBreweryId } });
-	await prisma.region.deleteMany({ where: { id: createdRegionId } });
-	await prisma.country.deleteMany({ where: { id: createdCountryId } });
+	await prisma.region.deleteMany({
+		where: { id: { in: [createdRegionId, createdRegion2Id] } },
+	});
+	await prisma.country.deleteMany({
+		where: { id: { in: [createdCountryId, createdCountry2Id] } },
+	});
 	await prisma.beerCategory.deleteMany({
 		where: { id: { in: [createdCategoryId, createdCategory2Id] } },
 	});
@@ -264,9 +335,9 @@ describe("getBars (Integration)", () => {
 		expect(ids).not.toContain(barOnlyOriginId.toString());
 	});
 
-	it("origin 単独フィルタは指定産地のビールを提供する bar のみ返す", async () => {
+	it("origins 単一指定は指定産地のビールを提供する bar のみ返す", async () => {
 		const result = await getBars({
-			origin: `${uniqueCountryName}/${uniqueRegionName}`,
+			origins: [`${uniqueCountryName}/${uniqueRegionName}`],
 		});
 		const ids = result.map((bar) => bar.id);
 		expect(ids).toEqual(
@@ -277,13 +348,48 @@ describe("getBars (Integration)", () => {
 		);
 		expect(ids).not.toContain(barOnlyCityId.toString());
 		expect(ids).not.toContain(barOnlyCategoryId.toString());
+		expect(ids).not.toContain(barOnlyOrigin2Id.toString());
+	});
+
+	it("origins 複数指定はいずれかの産地のビールを提供する bar をすべて返す (OR)", async () => {
+		const result = await getBars({
+			origins: [
+				`${uniqueCountryName}/${uniqueRegionName}`,
+				`${uniqueCountryName2}/${uniqueRegionName2}`,
+			],
+		});
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toEqual(
+			expect.arrayContaining([
+				barOnlyOriginId.toString(),
+				barOnlyOrigin2Id.toString(),
+				barAllMatchedId.toString(),
+			]),
+		);
+		expect(ids).not.toContain(barOnlyCityId.toString());
+		expect(ids).not.toContain(barOnlyCategoryId.toString());
+	});
+
+	it("categories と origins を両方指定すると、別々のビールで両条件を満たす bar もヒットする (店舗単位 AND)", async () => {
+		// barCat1Region2 は cat1 のビールと region2 のビールを別メニューで持つ。
+		// 同一メニュー縛りでは落ちるが、店舗単位の独立 AND ではヒットする。
+		const result = await getBars({
+			categories: [uniqueCategoryName],
+			origins: [`${uniqueCountryName2}/${uniqueRegionName2}`],
+		});
+		const ids = result.map((bar) => bar.id);
+		expect(ids).toContain(barCat1Region2Id.toString());
+		// cat1 は持つが region2 を持たない bar は落ちる
+		expect(ids).not.toContain(barOnlyCategoryId.toString());
+		// region2 は持つが cat1 を持たない bar は落ちる
+		expect(ids).not.toContain(barOnlyOrigin2Id.toString());
 	});
 
 	it("city + category + origin の AND 複合フィルタは 3 条件すべてを満たす bar のみ返す", async () => {
 		const result = await getBars({
 			city: uniqueCity,
 			categories: [uniqueCategoryName],
-			origin: `${uniqueCountryName}/${uniqueRegionName}`,
+			origins: [`${uniqueCountryName}/${uniqueRegionName}`],
 		});
 		const ids = result.map((bar) => bar.id);
 		expect(ids).toContain(barAllMatchedId.toString());

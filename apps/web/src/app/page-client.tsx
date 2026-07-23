@@ -25,7 +25,7 @@ export function HomeClient() {
 		q: string;
 		city: string;
 		categories: string[];
-		origin: string;
+		origins: string[];
 	}>(() => parseSearchParams(urlSearchParams));
 
 	// Why not: useState 初期化関数は初回マウントのみ実行されるため、ブラウザバック等で
@@ -44,6 +44,7 @@ export function HomeClient() {
 	const [isBarsLoading, setIsBarsLoading] = useState(true);
 
 	const categoriesKey = searchParams.categories.join(",");
+	const originsKey = searchParams.origins.join(",");
 
 	useEffect(() => {
 		let isCurrent = true;
@@ -53,7 +54,7 @@ export function HomeClient() {
 				q: searchParams.q,
 				city: searchParams.city,
 				categories: categoriesKey ? categoriesKey.split(",") : [],
-				origin: searchParams.origin,
+				origins: originsKey ? originsKey.split(",") : [],
 			});
 			if (!isCurrent) return;
 			setBars(result);
@@ -64,13 +65,13 @@ export function HomeClient() {
 		return () => {
 			isCurrent = false;
 		};
-	}, [searchParams.q, searchParams.city, categoriesKey, searchParams.origin]);
+	}, [searchParams.q, searchParams.city, categoriesKey, originsKey]);
 
 	const handleSearch = (params: {
 		q: string;
 		city: string;
 		categories: string[];
-		origin: string;
+		origins: string[];
 	}) => {
 		setSearchParams(params);
 

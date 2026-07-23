@@ -7,8 +7,16 @@ export async function getBars(params?: {
 	q?: string;
 	city?: string;
 	categories?: string[];
-	origin?: string;
+	origins?: string[];
 }) {
+	type BeerMenusCategoryFilter = {
+		some: { beer: { beerCategory: { name: { in: string[] } } } };
+	};
+	type OriginPair = { country: { name: string }; name: string };
+	type BeerMenusOriginFilter = {
+		some: { beer: { region: { OR: OriginPair[] } } };
+	};
+
 	const where: {
 		isActive: boolean;
 		city?: string;
@@ -16,23 +24,13 @@ export async function getBars(params?: {
 			name?: { contains: string; mode: "insensitive" };
 			description?: { contains: string; mode: "insensitive" };
 		}>;
-		beerMenus?: {
-			some: {
-				beer: {
-					beerCategory?: {
-						name: {
-							in: string[];
-						};
-					};
-					region?: {
-						country: {
-							name: string;
-						};
-						name: string;
-					};
-				};
-			};
-		};
+		// Why not: カテゴリと産地を単一の some に同居させると「同一の1杯が両条件を満たす」縛りになる。
+		// 別々のビールで満たしてよい店舗単位の AND にするため、条件ごとに独立した beerMenus.some を
+		// AND 配列で並べる（Issue #491）。
+		AND?: Array<
+			| { beerMenus: BeerMenusCategoryFilter }
+			| { beerMenus: BeerMenusOriginFilter }
+		>;
 	} = {
 		isActive: true,
 	};
@@ -49,37 +47,40 @@ export async function getBars(params?: {
 		where.city = params.city;
 	}
 
-	const hasCategories = (params?.categories?.length ?? 0) > 0;
+	const categories = params?.categories ?? [];
+	const hasCategories = categories.length > 0;
 
-	if (hasCategories || params?.origin) {
-		where.beerMenus = {
-			some: {
-				beer: {},
-			},
-		};
-
-		if (hasCategories && params?.categories) {
-			where.beerMenus.some.beer.beerCategory = {
-				name: {
-					in: params.categories,
-				},
-			};
-		}
-
-		if (params?.origin) {
-			const parts = params.origin.split("/");
+	// Why not: origin は「国/地域」ペアのカンマ区切り複数値。国名・地域名の両方が揃った
+	// 妥当なペアだけを OR 条件に採用し、片側欠けの不正値は無視する。
+	const originPairs: OriginPair[] = (params?.origins ?? [])
+		.map((origin) => {
+			const parts = origin.split("/");
 			const countryName = parts[0]?.trim();
 			const regionName = parts[1]?.trim();
+			return countryName && regionName
+				? { country: { name: countryName }, name: regionName }
+				: null;
+		})
+		.filter((pair): pair is OriginPair => pair !== null);
 
-			if (countryName && regionName) {
-				where.beerMenus.some.beer.region = {
-					country: {
-						name: countryName,
-					},
-					name: regionName,
-				};
-			}
-		}
+	const andConditions: NonNullable<typeof where.AND> = [];
+
+	if (hasCategories) {
+		andConditions.push({
+			beerMenus: {
+				some: { beer: { beerCategory: { name: { in: categories } } } },
+			},
+		});
+	}
+
+	if (originPairs.length > 0) {
+		andConditions.push({
+			beerMenus: { some: { beer: { region: { OR: originPairs } } } },
+		});
+	}
+
+	if (andConditions.length > 0) {
+		where.AND = andConditions;
 	}
 
 	const bars = await prisma.bar.findMany({
