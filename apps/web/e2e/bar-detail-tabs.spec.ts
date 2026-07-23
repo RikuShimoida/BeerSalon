@@ -94,6 +94,71 @@ test.describe("店舗詳細ページ", () => {
 		await expect(googleLink).toHaveAttribute("target", "_blank");
 	});
 
+	test.describe("タブナビのスクロールアフォーダンス (#500)", () => {
+		// Why not: 100002 はヒーロースライダー（動画+画像のオートスライド）が常時再描画され、
+		// evaluate の poll がフレーク要因になる。タブ 6 種は店舗に依らず固定描画されるため、
+		// スライダーの軽い 100001 でフェードの出し分けを検証する。
+		const fadeOpacity = (side: "left" | "right") =>
+			`(() => {
+				const fade = document.querySelector(
+					'[data-testid="bar-tabs"] > [aria-hidden="true"].${side}-0',
+				);
+				return fade ? Number(getComputedStyle(fade).opacity) : -1;
+			})()`;
+
+		test("モバイル幅で初期は右フェードのみ表示され、右端までスクロールすると左フェードのみ表示される", async ({
+			page,
+		}) => {
+			await page.setViewportSize({ width: 375, height: 812 });
+			await page.goto("/bars/100001");
+
+			const tabsNav = page.locator('[data-testid="bar-tabs"] nav');
+			await expect(tabsNav).toBeVisible();
+
+			// タブ列が画面幅を超えて横スクロール可能であること（アフォーダンス改善の前提）
+			const scroller = page.locator('[data-testid="bar-tabs-scroller"]');
+			const isScrollable = await scroller.evaluate(
+				(el) => el.scrollWidth > el.clientWidth,
+			);
+			expect(isScrollable).toBe(true);
+
+			// 初期（先頭）: 右に続きがあるので右フェード表示、左は戻れないので非表示。
+			// Why not: transition-opacity の中間値でフレークしないよう厳密一致ではなく
+			// 表示側 > 0.9 / 非表示側 < 0.1 の閾値で判定し、遷移完了を poll で待つ。
+			await expect
+				.poll(async () => page.evaluate(fadeOpacity("right")))
+				.toBeGreaterThan(0.9);
+			await expect
+				.poll(async () => page.evaluate(fadeOpacity("left")))
+				.toBeLessThan(0.1);
+
+			// 右端までスクロール
+			await scroller.evaluate((el) => {
+				el.scrollLeft = el.scrollWidth;
+			});
+
+			// 右端: 左に戻れるので左フェード表示、右は終端なので非表示
+			await expect
+				.poll(async () => page.evaluate(fadeOpacity("left")))
+				.toBeGreaterThan(0.9);
+			await expect
+				.poll(async () => page.evaluate(fadeOpacity("right")))
+				.toBeLessThan(0.1);
+		});
+
+		test("フェードを追加してもタブ切替は従来どおり動作する（デグレなし）", async ({
+			page,
+		}) => {
+			await page.setViewportSize({ width: 375, height: 812 });
+			await page.goto("/bars/100001");
+
+			const menuTab = page.getByRole("button", { name: "メニュー" });
+			await expect(menuTab).toBeVisible();
+			await menuTab.click();
+			await expect(menuTab).toHaveAttribute("aria-current", "page");
+		});
+	});
+
 	test.describe("ヒーロースライダー (#485)", () => {
 		// seed.e2e.sql が bar 100002 に 動画1 + 画像2 のスライダーメディアを投入する前提。
 		// Why not: bar 100001 は admin の slider regression テスト (#318) が「slider 0枚から
