@@ -734,6 +734,8 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
 
+**初期データ**: 店舗月額プラン（¥5,000/月・`interval='month'`・`currency='jpy'`）を seed で1件投入する（#335 の課金開始フローが is_active な1件を参照して Checkout に渡すため）。`stripe_price_id` は seed 時点では placeholder（`price_placeholder_5000_monthly`）であり、Stripe ダッシュボードで作成した実 Price ID（`price_xxx`）へ手動で差し替える必要がある。
+
 ---
 
 ### 8-4. bar_subscriptions
@@ -751,7 +753,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 | bar_id                  | bigint     | NOT NULL, FK → bars(id)                   | バーID                             |
 | subscription_plan_id    | bigint     | NOT NULL, FK → subscription_plans(id)     | プランID                           |
 | stripe_customer_id      | text       | NOT NULL                                  | Stripe顧客ID                      |
-| stripe_subscription_id  | text       | NOT NULL                                  | StripeサブスクリプションID         |
+| stripe_subscription_id  | text       | NOT NULL, UNIQUE                          | StripeサブスクリプションID（webhook の at-least-once 配信でも upsert が二重行を作らないよう一意） |
 | status                  | text       | NOT NULL DEFAULT 'active'                 | ステータス（'active', 'canceled', 'past_due', 'trialing', 'incomplete'） |
 | current_period_start    | timestamptz| NOT NULL                                  | 現在の課金期間開始日               |
 | current_period_end      | timestamptz| NOT NULL                                  | 現在の課金期間終了日               |
@@ -763,7 +765,8 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 **インデックス**:
 - `bar_id`
 - `stripe_customer_id`
-- `stripe_subscription_id`
+- `stripe_subscription_id`（UNIQUE 制約により一意インデックス）
+- `bar_id`（部分ユニーク: `WHERE status IN ('active','trialing','past_due')`）。1店舗につき有効サブスクを1件に制限し、checkout 連打・並行リクエストによる二重サブスク（二重課金）を DB レイヤーで防ぐ
 
 **権限**:
 - バーオーナー: 自バーのサブスクリプション参照のみ

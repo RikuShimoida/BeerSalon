@@ -97,3 +97,18 @@ SELECT setval(
   pg_get_serial_sequence('bar_images', 'id'),
   GREATEST((SELECT MAX(id) FROM bar_images), 100002003)
 );
+
+-- ============================================================
+-- Subscription Plans（課金開始フロー #335 の E2E 用・固定ID）
+-- ============================================================
+-- Why not: checkout API は is_active な subscription_plans を1件引いて Checkout の
+--   line_items に stripe_price_id を渡すため、E2E でも active プランが1件必要。実 Price ID は
+--   未確定のため placeholder を入れる（Checkout 遷移までを E2E の受入とする方針）。
+INSERT INTO subscription_plans (id, name, stripe_price_id, price, currency, interval, is_active)
+VALUES (100001, '店舗月額プラン', 'price_placeholder_5000_monthly', 5000, 'jpy', 'month', true)
+ON CONFLICT (id) DO NOTHING;
+
+SELECT setval(
+  pg_get_serial_sequence('subscription_plans', 'id'),
+  GREATEST((SELECT MAX(id) FROM subscription_plans), 100001)
+);

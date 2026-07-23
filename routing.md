@@ -481,7 +481,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 - 承認フロー:
   - admin が `/bars`（店舗管理ページ）の「審査中の店舗」セクションから「承認する」を押すと、`admin_users.approval_status='approved'`・`bars.is_active=true` に更新され、当該オーナーがログイン可能・ユーザー画面に公開される
   - API: `POST /api/bars/[barId]/approve`（admin 専用）
-  - ※却下（rejected）UI・承認通知メール・登録直後の課金（#335 Stripe Checkout）連携は本スコープ外（別 Issue）
+  - ※却下（rejected）UI・承認通知メールは本スコープ外（別 Issue）。登録直後の課金（Stripe Checkout）連携は #335 で店舗詳細の課金カードとして実装済み（3-8 参照）
 
 ### 3-2. 店舗管理（admin専用）
 
@@ -720,10 +720,14 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - 編集ボタン → `/bars/[barId]/events/[eventId]/edit`（bar_ownerのみ）
   - 削除ボタン（bar_ownerのみ）
 
-### 3-8. 支払い方法管理
+### 3-8. 課金・支払い方法管理
 
-- Stripe Customer Portal への外部リダイレクト
-- 管理画面内に専用ページは設けない
+- 店舗詳細ページの課金カードは、当該店舗の active サブスクリプション有無で導線を出し分ける（GET `/api/bars/[barId]/subscription` で判定）
+  - **未サブスク（active 行なし）**: 「課金を開始する」ボタン → POST `/api/bars/[barId]/checkout` で Stripe Checkout セッション（mode: subscription）を生成し外部リダイレクト。決済完了後は webhook `customer.subscription.created` が `bar_subscriptions` を insert する（Checkout の `subscription_data.metadata` に埋めた `bar_id` / `subscription_plan_id` で紐付け）
+  - **サブスク有り（active 行あり）**: 「支払い方法管理」ボタン → POST `/api/bars/[barId]/portal` で Stripe Customer Portal へ外部リダイレクト
+- 既に active/trialing/past_due のサブスクがある店舗で Checkout を叩くと 409（二重課金防止）
+- Checkout に渡す `stripe_price_id` は `subscription_plans`（is_active な1件）から取得する
+- 管理画面内に専用ページは設けない（店舗詳細内のカードで完結）
 
 ### 3-9. 廃止したルート
 

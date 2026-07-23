@@ -507,7 +507,7 @@ model BarSubscription {
   barId                BigInt           @map("bar_id")
   subscriptionPlanId   BigInt           @map("subscription_plan_id")
   stripeCustomerId     String           @map("stripe_customer_id")
-  stripeSubscriptionId String           @map("stripe_subscription_id")
+  stripeSubscriptionId String           @unique @map("stripe_subscription_id")
   status               String           @default("active")
   currentPeriodStart   DateTime         @map("current_period_start") @db.Timestamptz(6)
   currentPeriodEnd     DateTime         @map("current_period_end") @db.Timestamptz(6)
@@ -521,7 +521,9 @@ model BarSubscription {
 
   @@index([barId])
   @@index([stripeCustomerId])
-  @@index([stripeSubscriptionId])
+  // Why not: bar_id × 有効 status(active/trialing/past_due) の部分ユニークインデックス
+  //   uniq_bar_subscriptions_active_bar_id は WHERE 句付きのため Prisma スキーマで表現できない。
+  //   実体は migration 20260723000001 で管理する（1店舗1有効サブスクの DB 保証）。
   @@map("bar_subscriptions")
 }
 

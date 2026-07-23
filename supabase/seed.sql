@@ -116,3 +116,19 @@ SELECT r.name, c.id
 FROM (VALUES ('アムステルダム')) AS r(name)
 CROSS JOIN countries c WHERE c.name = 'オランダ'
 ON CONFLICT (country_id, name) DO NOTHING;
+
+-- ============================================================
+-- Subscription Plans（店舗月額 ¥5,000/月）
+-- ============================================================
+-- Why not: stripe_price_id はここでは placeholder を投入している。実運用では Stripe
+--   ダッシュボードで作成した実 Price ID（price_xxx）へ差し替える必要がある。SQL seed は
+--   環境変数展開ができないため実値を直書きできず、確定後の手動更新を前提とする。
+-- Why not: subscription_plans に UNIQUE 制約が無いため ON CONFLICT が使えず、再実行時の重複を
+--   WHERE NOT EXISTS で防ぐ。冪等ガードは stripe_price_id ではなく name を基準にする。
+--   stripe_price_id を実 Price ID へ差し替えた後に再 seed すると placeholder 基準では
+--   一致せず active プランが2件に増えてしまうため。
+INSERT INTO subscription_plans (name, stripe_price_id, price, currency, interval, is_active)
+SELECT '店舗月額プラン', 'price_placeholder_5000_monthly', 5000, 'jpy', 'month', true
+WHERE NOT EXISTS (
+  SELECT 1 FROM subscription_plans WHERE name = '店舗月額プラン'
+);

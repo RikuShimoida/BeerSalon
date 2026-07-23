@@ -137,7 +137,7 @@
   - 記事管理 リンクカード → `/bars/[barId]/articles` 同上
   - クーポン管理 リンクカード → `/bars/[barId]/coupons` 同上
   - イベント管理 リンクカード → `/bars/[barId]/events` 同上
-  - 支払い方法管理 リンクカード → Stripe Customer Portal（外部リダイレクト）
+  - 課金カード（active サブスク有無で出し分け）: 未サブスクなら「課金を開始する」→ Stripe Checkout（外部リダイレクト）、サブスク有りなら「支払い方法管理」→ Stripe Customer Portal（外部リダイレクト）
 
 ### 3-3. 店舗編集ページ `/bars/[barId]/edit`
 
@@ -426,11 +426,19 @@
 
 ---
 
-## 8. 支払い方法管理
+## 8. 課金・支払い方法管理
 
-### 8-1. 支払い方法管理
+### 8-1. 課金開始（未サブスク時）
 
-- 店舗詳細ページの「支払い方法管理」リンクをタップすると、Stripe Customer Portal へ外部リダイレクトする
+- 店舗詳細ページの課金カードは、当該店舗に active サブスクリプションが無い場合「課金を開始する」ボタンを表示する
+- タップすると Stripe Checkout（mode: subscription・外部サイト）へ遷移し、決済完了でサブスクリプションが開始される
+- 決済完了後、Stripe webhook（`customer.subscription.created`）が `bar_subscriptions` にレコードを作成する
+- 既に active/trialing/past_due のサブスクがある店舗では、課金開始 API は 409 を返す（二重課金防止）
+
+### 8-2. 支払い方法管理（サブスク有り時）
+
+- active サブスクリプションがある場合、課金カードは「支払い方法管理」ボタンを表示する
+- タップすると Stripe Customer Portal へ外部リダイレクトする
 - 管理画面内に専用ページは設けない
 
 ---
@@ -448,7 +456,7 @@
 | 記事管理 | 閲覧・編集・登録・削除可 | 参照のみ |
 | クーポン管理 | 閲覧・編集・登録・削除可 | 参照のみ |
 | イベント管理 | 閲覧・編集・登録・削除可 | 参照のみ |
-| 支払い方法管理 | Stripe Portal へ遷移 | Stripe Portal へ遷移 |
+| 課金・支払い方法管理 | 未サブスクは Checkout、サブスク有りは Portal へ遷移 | 同左 |
 
 ---
 
