@@ -85,7 +85,7 @@ export function HomeClient() {
 		<div className="min-h-screen bg-background">
 			<div className="mx-auto max-w-7xl px-5 py-8 md:px-10 md:py-12">
 				{/* ヒーロー + 検索（PC はヒーロー左・検索カード右の2カラム） */}
-				<section className="mb-8 grid gap-6 md:mb-10 md:grid-cols-[1fr_minmax(360px,420px)] md:items-center md:gap-10">
+				<section className="mb-8 grid gap-6 md:mb-10 md:grid-cols-[1fr_minmax(360px,420px)] md:items-start md:gap-10">
 					<div>
 						<p className="mb-3 font-archivo text-xs uppercase tracking-[0.24em] text-primary">
 							Tonight&apos;s Craft Beer

@@ -152,4 +152,30 @@ test.describe("トップページ（検索ページ）", () => {
 			page.getByRole("button", { name: "カリフォルニア", exact: true }),
 		).toHaveAttribute("aria-pressed", "true");
 	});
+
+	test("PC幅ではヒーロー見出しがファーストビュー上部に表示される（Issue #498）", async ({
+		page,
+	}) => {
+		// PC 幅の 2 カラム（左ヒーロー・右検索カード）で、背の高い右カードに
+		// 左ヒーローが中央揃えで引きずられ見出しが沈む回帰を防ぐ。
+		// 修正前は md:items-center により y≈667px まで沈んでいた。
+		await page.setViewportSize({ width: 1280, height: 900 });
+		await page.goto("/");
+
+		// h1 は <br /> を含む2行構成のため、アクセシブル名の空白畳み込みに依存せず
+		// レベル指定のみで一意の見出しとして掴む（page-client.tsx の h1 と同期）。
+		const heading = page.getByRole("heading", { level: 1 });
+		await expect(heading).toBeVisible();
+		await expect(heading).toContainText("この街で見つける");
+
+		const box = await heading.boundingBox();
+		// box が null（不可視）なら検証不能なので明示的に失敗させる。
+		// これにより後続の toBeLessThan が undefined を素通りしない。
+		if (box === null) {
+			throw new Error("h1 見出しの boundingBox が取得できませんでした");
+		}
+		// 上寄せ（md:items-start）なら見出しはコンテナ上端付近に来る。
+		// 300px は「上部に留まる」と「中央へ沈む(≈667px)」を明確に分ける閾値。
+		expect(box.y).toBeLessThan(300);
+	});
 });
