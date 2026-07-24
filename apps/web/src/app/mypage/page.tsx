@@ -113,7 +113,7 @@ export default async function MyPage() {
 										<Link
 											key={post.id}
 											href={`/bars/${post.bar.id}`}
-											className="group relative aspect-square overflow-hidden rounded-lg bg-surface-raised"
+											className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-surface-control"
 										>
 											{post.images.length > 0 ? (
 												<Image
@@ -123,7 +123,7 @@ export default async function MyPage() {
 													className="object-cover transition-transform duration-300 group-hover:scale-105"
 												/>
 											) : (
-												<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface-raised to-surface-deep p-2">
+												<div className="flex h-full w-full items-center justify-center bg-surface-control p-2">
 													<p className="line-clamp-4 text-xs text-subtext">
 														{post.body}
 													</p>
