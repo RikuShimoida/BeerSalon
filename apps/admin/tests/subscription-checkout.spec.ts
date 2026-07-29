@@ -22,6 +22,19 @@ test.describe("サブスクリプション課金開始フロー", () => {
 		).toHaveCount(0);
 	});
 
+	// 課金状態を明示するステータスラベル（#514）。未サブスク店舗（seed の 100001）では
+	// 「未課金」バッジが出る。「課金中」バッジ（サブスク有り時）は E2E seed に active な
+	// bar_subscriptions 行が無いため E2E では検証できず、subscription API の UT
+	// （subscription-api.test.ts）が status 集合による有無判定を担保する。
+	test("未サブスクの店舗で『未課金』ステータスバッジが表示される", async ({
+		barOwnerPage,
+	}) => {
+		await barOwnerPage.goto("/bars/100001");
+
+		await expect(barOwnerPage.getByText("未課金")).toBeVisible();
+		await expect(barOwnerPage.getByText("課金中")).toHaveCount(0);
+	});
+
 	test("『課金を開始する』押下で checkout API が呼ばれる", async ({
 		barOwnerPage,
 	}) => {
