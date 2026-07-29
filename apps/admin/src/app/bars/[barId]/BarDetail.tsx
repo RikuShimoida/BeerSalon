@@ -67,11 +67,14 @@ function PaymentManagementCard({ barId }: { barId: string }) {
 	if (!hasSubscription) {
 		return (
 			<div className="border border-gray-200 rounded-lg p-4">
+				<span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+					未課金
+				</span>
 				<button
 					type="button"
 					onClick={() => redirectTo("checkout")}
 					disabled={loading}
-					className="w-full text-left hover:opacity-80 transition-opacity disabled:opacity-50"
+					className="mt-2 w-full text-left hover:opacity-80 transition-opacity disabled:opacity-50"
 				>
 					<h3 className="font-medium text-gray-900">課金を開始する</h3>
 					<p className="text-sm text-gray-500 mt-1">
@@ -87,11 +90,14 @@ function PaymentManagementCard({ barId }: { barId: string }) {
 
 	return (
 		<div className="border border-gray-200 rounded-lg p-4">
+			<span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
+				課金中
+			</span>
 			<button
 				type="button"
 				onClick={() => redirectTo("portal")}
 				disabled={loading}
-				className="w-full text-left hover:opacity-80 transition-opacity disabled:opacity-50"
+				className="mt-2 w-full text-left hover:opacity-80 transition-opacity disabled:opacity-50"
 			>
 				<h3 className="font-medium text-gray-900">支払い方法管理</h3>
 				<p className="text-sm text-gray-500 mt-1">
