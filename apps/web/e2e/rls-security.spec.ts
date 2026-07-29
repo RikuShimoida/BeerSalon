@@ -36,10 +36,10 @@ test.describe("RLS: public テーブルのアクセス制御 (#511)", () => {
 		test(`anon は ${table} を SELECT しても 0 件になる`, async ({
 			request,
 		}) => {
-			const res = await request.get(`${restBase()}/${table}?select=*&limit=5`, {
-				headers: anonHeaders(),
-			});
-			expect(res.ok()).toBeTruthy();
+			const url = `${restBase()}/${table}?select=*&limit=5`;
+			const res = await request.get(url, { headers: anonHeaders() });
+			// 失敗時に実 status/本文を CI ログへ残すため、第2引数にメッセージを渡す。
+			expect(res.status(), `GET ${url} -> ${await res.text()}`).toBe(200);
 			const rows = (await res.json()) as unknown[];
 			expect(Array.isArray(rows)).toBeTruthy();
 			expect(rows.length).toBe(0);
