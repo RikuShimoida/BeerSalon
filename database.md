@@ -10,6 +10,16 @@
 - 画像は Supabase Storage に保存し、DB には `image_url` / `storage_path` などの文字列のみ保持する
 - タイムスタンプは `created_at`, `updated_at`（`timestamptz`）
 
+### Row-Level Security（RLS）方針
+
+- `public` スキーマの全テーブルで RLS を有効化し、既定は deny-by-default（ポリシー無し＝ `anon` / `authenticated` は全操作拒否）とする。ブラウザに露出する anon 公開鍵だけで機微データが読み書きされることを防ぐ。
+- アプリのデータアクセスは RLS をバイパスするロールで行う：
+  - ユーザー画面（web）: Prisma 経由（`postgres` ロール、`rolbypassrls`）
+  - 管理画面（admin）: `supabaseAdmin`（`service_role`、`rolbypassrls`）
+- 例外的に `authenticated` ロールを使う経路（web middleware の自己プロフィール参照）のみ、必要最小限のポリシーで許可する：
+  - `user_profiles`: `authenticated` が自分の行（`user_auth_id = auth.uid()`）のみ SELECT 可
+- 定義マイグレーション: `supabase/migrations/20260729000000_enable_rls_public_tables.sql`
+
 ---
 
 ## 1. 認証・ユーザ
