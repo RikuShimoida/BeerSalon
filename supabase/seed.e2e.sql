@@ -112,3 +112,68 @@ SELECT setval(
   pg_get_serial_sequence('subscription_plans', 'id'),
   GREATEST((SELECT MAX(id) FROM subscription_plans), 100001)
 );
+
+-- ============================================================
+-- Dashboard 集計データ（bar_owner 分析ダッシュボード #348 の E2E 用・固定ID）
+-- ============================================================
+-- Why not: auth.users への FK は user_profiles に無い（init_schema 参照）ため、E2E では
+--   固定 UUID の user_profiles を直接投入する。auth 経由のサインアップは集計データ準備には過剰。
+-- 期待集計（bar 100001 = e2e-bar-owner の店）:
+--   閲覧数=2 / お気に入り=1 / 記事いいね=3 / タグ付け投稿=2
+-- bar 100002 側にも各1件入れ、100001 の集計に他店データが混入しないことを E2E で検証する。
+INSERT INTO user_profiles (id, user_auth_id, last_name, first_name, nickname, birthday, gender, prefecture, is_active)
+VALUES
+  ('00000000-0000-0000-0000-0000000da001', '00000000-0000-0000-0000-0000000da0a1', 'ダッシュ', '太郎', 'dash-a', '1990-01-01', 'male', '静岡県', true),
+  ('00000000-0000-0000-0000-0000000da002', '00000000-0000-0000-0000-0000000da0a2', 'ダッシュ', '花子', 'dash-b', '1991-02-02', 'female', '静岡県', true),
+  ('00000000-0000-0000-0000-0000000da003', '00000000-0000-0000-0000-0000000da0a3', 'ダッシュ', '次郎', 'dash-c', '1992-03-03', 'male', '静岡県', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 記事: 100001 に2件（公開）、100002 に1件
+INSERT INTO articles (id, bar_id, title, body, status, published_at)
+VALUES
+  (100001001, 100001, 'E2E記事A(100001)', '本文A', 'published', CURRENT_TIMESTAMP),
+  (100001002, 100001, 'E2E記事B(100001)', '本文B', 'published', CURRENT_TIMESTAMP),
+  (100002001, 100002, 'E2E記事C(100002)', '本文C', 'published', CURRENT_TIMESTAMP)
+ON CONFLICT (id) DO NOTHING;
+
+SELECT setval(
+  pg_get_serial_sequence('articles', 'id'),
+  GREATEST((SELECT MAX(id) FROM articles), 100002001)
+);
+
+-- 閲覧履歴: 100001 を 2ユーザー閲覧（=2）、100002 を 1ユーザー閲覧（混入しないこと）
+INSERT INTO view_histories (user_id, bar_id)
+VALUES
+  ('00000000-0000-0000-0000-0000000da001', 100001),
+  ('00000000-0000-0000-0000-0000000da002', 100001),
+  ('00000000-0000-0000-0000-0000000da003', 100002)
+ON CONFLICT (user_id, bar_id) DO NOTHING;
+
+-- お気に入り: 100001 を 1ユーザー（=1）、100002 を 1ユーザー
+INSERT INTO favorite_bars (user_id, bar_id)
+VALUES
+  ('00000000-0000-0000-0000-0000000da001', 100001),
+  ('00000000-0000-0000-0000-0000000da003', 100002)
+ON CONFLICT (user_id, bar_id) DO NOTHING;
+
+-- 記事いいね: 100001 の記事に 3件（=3）、100002 の記事に 1件
+INSERT INTO article_likes (article_id, user_id)
+VALUES
+  (100001001, '00000000-0000-0000-0000-0000000da001'),
+  (100001001, '00000000-0000-0000-0000-0000000da002'),
+  (100001002, '00000000-0000-0000-0000-0000000da003'),
+  (100002001, '00000000-0000-0000-0000-0000000da001')
+ON CONFLICT (article_id, user_id) DO NOTHING;
+
+-- タグ付け投稿: 100001 に 2件（=2）、100002 に 1件
+INSERT INTO posts (id, user_id, bar_id, body)
+VALUES
+  (100001101, '00000000-0000-0000-0000-0000000da001', 100001, 'E2E投稿A(100001)'),
+  (100001102, '00000000-0000-0000-0000-0000000da002', 100001, 'E2E投稿B(100001)'),
+  (100002101, '00000000-0000-0000-0000-0000000da003', 100002, 'E2E投稿C(100002)')
+ON CONFLICT (id) DO NOTHING;
+
+SELECT setval(
+  pg_get_serial_sequence('posts', 'id'),
+  GREATEST((SELECT MAX(id) FROM posts), 100002101)
+);

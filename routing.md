@@ -483,6 +483,23 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - API: `POST /api/bars/[barId]/approve`（admin 専用）
   - ※却下（rejected）UI・承認通知メールは本スコープ外（別 Issue）。登録直後の課金（Stripe Checkout）連携は #335 で店舗詳細の課金カードとして実装済み（3-8 参照）
 
+### 3-1-3. ダッシュボード（bar_owner専用）
+
+- Path: `/`
+- 認証: 必須
+- 役割:
+  - bar_owner が自店の反応指標（累計の合計値）を一目で確認する
+- 表示指標（すべて自店 `bar_id` に絞り込んだ累計件数。0件でも「0」を表示）:
+  - 店舗ページ閲覧数（`view_histories`。`UNIQUE(user_id, bar_id)` のためユニーク閲覧ユーザー数）
+  - お気に入り登録数（`favorite_bars`）
+  - 記事いいね数（`article_likes` を `articles.bar_id` で内部結合して自店分に絞る）
+  - タグ付け投稿数（`posts`）
+- アクセス制御:
+  - `admin` が `/` に来た場合は `/bars`（店舗一覧）へリダイレクト（自店の概念が無いため）
+  - 未ログインは `/login` へリダイレクト
+  - `bar_id` 未設定の `bar_owner` は全指標0のダッシュボードを表示（防御的）
+- 対象外（将来拡張候補）: 期間フィルタ・週次/月次の推移グラフ・admin 向け全店集計
+
 ### 3-2. 店舗管理（admin専用）
 
 #### 3-2-1. 店舗管理ページ
@@ -733,7 +750,6 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 
 以下のルートは廃止済み。実装が残っている場合は順次削除する。
 
-- `/`（ダッシュボード）
 - `/admin/master/*`（マスタ管理: beer-styles, breweries, food-categories, event-categories）
 - `/admin/users/*`（管理者ユーザー管理）
 - `/billing`（課金情報）
