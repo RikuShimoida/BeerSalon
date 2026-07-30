@@ -19,6 +19,7 @@ function buildFrom(counts: {
 	article_likes?: number | null;
 }) {
 	const eqSpies: Record<string, ReturnType<typeof vi.fn>> = {};
+	const selectSpies: Record<string, ReturnType<typeof vi.fn>> = {};
 
 	mockSupabaseFrom.mockImplementation((table: string) => {
 		const eq = vi
@@ -26,10 +27,11 @@ function buildFrom(counts: {
 			.mockResolvedValue({ count: counts[table as keyof typeof counts] });
 		eqSpies[table] = eq;
 		const select = vi.fn().mockReturnValue({ eq });
+		selectSpies[table] = select;
 		return { select };
 	});
 
-	return eqSpies;
+	return { eqSpies, selectSpies };
 }
 
 describe("getBarDashboardMetrics（自店の反応指標を集計する）", () => {
@@ -74,7 +76,7 @@ describe("getBarDashboardMetrics（自店の反応指標を集計する）", () 
 	});
 
 	it("bar_id 絞り込みが view_histories / favorite_bars / posts の各クエリに適用される", async () => {
-		const eqSpies = buildFrom({
+		const { eqSpies } = buildFrom({
 			view_histories: 1,
 			favorite_bars: 1,
 			article_likes: 1,
@@ -89,7 +91,7 @@ describe("getBarDashboardMetrics（自店の反応指標を集計する）", () 
 	});
 
 	it("記事いいねは articles を内部結合し articles.bar_id で自店に絞る（認可境界）", async () => {
-		const eqSpies = buildFrom({
+		const { eqSpies } = buildFrom({
 			view_histories: 0,
 			favorite_bars: 0,
 			article_likes: 7,
@@ -105,7 +107,7 @@ describe("getBarDashboardMetrics（自店の反応指標を集計する）", () 
 	});
 
 	it("別の barId を渡すとその店舗のフィルタで集計する（他店データが混入しない）", async () => {
-		const eqSpies = buildFrom({
+		const { eqSpies } = buildFrom({
 			view_histories: 99,
 			favorite_bars: 99,
 			article_likes: 99,
@@ -120,6 +122,46 @@ describe("getBarDashboardMetrics（自店の反応指標を集計する）", () 
 		expect(eqSpies.article_likes).toHaveBeenCalledWith(
 			"articles.bar_id",
 			200002,
+		);
+	});
+
+	it("view_histories / favorite_bars / posts は select('*', { count: 'exact', head: true }) で件数のみ取得する（全行転送への退行を防ぐ）", async () => {
+		const { selectSpies } = buildFrom({
+			view_histories: 1,
+			favorite_bars: 1,
+			article_likes: 1,
+			posts: 1,
+		});
+
+		await getBarDashboardMetrics(100001);
+
+		expect(selectSpies.view_histories).toHaveBeenCalledWith("*", {
+			count: "exact",
+			head: true,
+		});
+		expect(selectSpies.favorite_bars).toHaveBeenCalledWith("*", {
+			count: "exact",
+			head: true,
+		});
+		expect(selectSpies.posts).toHaveBeenCalledWith("*", {
+			count: "exact",
+			head: true,
+		});
+	});
+
+	it("article_likes は articles を内部結合しつつ件数のみ取得する（内部結合の欠落と全行転送への退行を防ぐ）", async () => {
+		const { selectSpies } = buildFrom({
+			view_histories: 1,
+			favorite_bars: 1,
+			article_likes: 1,
+			posts: 1,
+		});
+
+		await getBarDashboardMetrics(100001);
+
+		expect(selectSpies.article_likes).toHaveBeenCalledWith(
+			"*, articles!inner(bar_id)",
+			{ count: "exact", head: true },
 		);
 	});
 });
