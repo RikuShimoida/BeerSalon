@@ -94,6 +94,53 @@ test.describe("RLS: public テーブルのアクセス制御 (#511)", () => {
 	});
 });
 
+// Issue #513: anon/authenticated への過剰 DML GRANT を REVOKE したことを検証する。
+// #511 のテストは「GRANT の有無に関わらずデータが取れない」終状態を担保するが、
+// #513 では「そもそも GRANT が剥がれ permission denied(401/403) になる」ことを主眼に
+// 検証する。GRANT が残ったまま RLS deny で空配列(200)になるケースは #513 では不合格とし、
+// 過剰権限そのものが除去されたことを主張する。
+test.describe("最小権限化: anon/authenticated の過剰 GRANT REVOKE (#513)", () => {
+	test.skip(
+		!SUPABASE_URL || !ANON_KEY,
+		"NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY が未設定のためスキップ",
+	);
+
+	const restBase = () => `${SUPABASE_URL}/rest/v1`;
+	const anonHeaders = () => ({
+		apikey: ANON_KEY as string,
+		Authorization: `Bearer ${ANON_KEY}`,
+	});
+
+	const expectPermissionDenied = (status: number, ctx: string) => {
+		// GRANT が無いと PostgREST は 401(anon)/403(role あり) の permission denied を返す。
+		expect(status, ctx).toBeGreaterThanOrEqual(401);
+		expect(status, ctx).toBeLessThan(404);
+	};
+
+	// anon から SELECT が GRANT レベルで拒否される(200+空配列ではない)ことを検証する。
+	// これらのテーブルは anon に SELECT GRANT が残っていない。
+	for (const table of ["user_profiles", "admin_users", "invoices", "bars"]) {
+		test(`anon の ${table} SELECT は GRANT 拒否される`, async ({ request }) => {
+			const url = `${restBase()}/${table}?select=*&limit=1`;
+			const res = await request.get(url, { headers: anonHeaders() });
+			expectPermissionDenied(res.status(), `GET ${url} -> ${await res.text()}`);
+		});
+	}
+
+	test("anon の user_profiles INSERT は GRANT 拒否される", async ({
+		request,
+	}) => {
+		const res = await request.post(`${restBase()}/user_profiles`, {
+			headers: { ...anonHeaders(), "Content-Type": "application/json" },
+			data: { last_name: "__probe__", first_name: "__probe__" },
+		});
+		expectPermissionDenied(
+			res.status(),
+			`POST user_profiles -> ${await res.text()}`,
+		);
+	});
+});
+
 // authenticated ロールの自己参照ポリシーの検証は、JWT 署名用シークレットが
 // テスト環境に存在する場合のみ実行する(CI 等で無い場合はスキップ)。
 test.describe("RLS: authenticated の自己プロフィール参照 (#511)", () => {
@@ -136,5 +183,27 @@ test.describe("RLS: authenticated の自己プロフィール参照 (#511)", () 
 		expect(res.ok()).toBeTruthy();
 		const rows = (await res.json()) as unknown[];
 		expect(rows.length).toBe(1);
+	});
+
+	// Issue #513: authenticated は user_profiles 以外のテーブルへ GRANT を持たないため、
+	// 自己参照ポリシーがあっても他テーブルへの SELECT は permission denied になる。
+	test("authenticated は user_profiles 以外の bars を SELECT できない (#513)", async ({
+		request,
+	}) => {
+		const jwt = signAuthenticatedJwt(AUTH_UID as string, JWT_SECRET as string);
+		const res = await request.get(
+			`${SUPABASE_URL}/rest/v1/bars?select=id&limit=1`,
+			{
+				headers: {
+					apikey: ANON_KEY as string,
+					Authorization: `Bearer ${jwt}`,
+				},
+			},
+		);
+		expect(
+			res.status(),
+			`GET bars -> ${await res.text()}`,
+		).toBeGreaterThanOrEqual(401);
+		expect(res.status()).toBeLessThan(404);
 	});
 });

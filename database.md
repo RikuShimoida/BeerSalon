@@ -19,6 +19,8 @@
 - 例外的に `authenticated` ロールを使う経路（web middleware の自己プロフィール参照）のみ、必要最小限のポリシーで許可する：
   - `user_profiles`: `authenticated` が自分の行（`user_auth_id = auth.uid()`）のみ SELECT 可
 - 定義マイグレーション: `supabase/migrations/20260729000000_enable_rls_public_tables.sql`
+- **GRANT の最小権限化**: RLS の deny-by-default に加え、`anon` / `authenticated` への過剰な DML GRANT を REVOKE し、GRANT レベルでも最小権限を保証する。`anon` は `public` の全テーブル GRANT を持たず（公開データ読み取りも Prisma 経由）、`authenticated` は `user_profiles` の SELECT/INSERT/UPDATE のみを持つ。あわせて `public` スキーマのデフォルト権限（`ALTER DEFAULT PRIVILEGES`）から `anon` / `authenticated` を除去し、新規テーブル追加時に過剰 GRANT が復活しないようにする。
+- 定義マイグレーション: `supabase/migrations/20260730000000_revoke_excess_grants_anon_authenticated.sql`
 
 ---
 
