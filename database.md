@@ -21,6 +21,8 @@
 - 定義マイグレーション: `supabase/migrations/20260729000000_enable_rls_public_tables.sql`
 - **GRANT の最小権限化**: RLS の deny-by-default に加え、`anon` / `authenticated` への過剰な DML GRANT を REVOKE し、GRANT レベルでも最小権限を保証する。`anon` は `public` の全テーブル GRANT を持たず（公開データ読み取りも Prisma 経由）、`authenticated` は `user_profiles` の SELECT/INSERT/UPDATE のみを持つ。あわせて `public` スキーマのデフォルト権限（`ALTER DEFAULT PRIVILEGES`）から `anon` / `authenticated` を除去し、新規テーブル追加時に過剰 GRANT が復活しないようにする。
 - 定義マイグレーション: `supabase/migrations/20260730000000_revoke_excess_grants_anon_authenticated.sql`
+- **運用ガード（テーブル追加）**: デフォルト権限の REVOKE は「新規テーブルは必ずマイグレーション（`postgres` 実行）で作られる」前提に依存する。テーブル追加は必ずマイグレーション（`postgres`）経由で行うこと。他ロールで `CREATE TABLE` すると、そのロール由来のデフォルト権限により `anon` / `authenticated` への過剰 GRANT が復活しうる。
+- **運用ガード（将来 anon で公開データを読む場合）**: 将来 `anon` で公開データ（例: `bars`）を読む要件が出た際は、テーブルへ直接 GRANT するだけにせず、「RLS の SELECT ポリシー」と「個別テーブルへの SELECT GRANT」の両方を同時に付与すること。GRANT のみだと RLS で拒否され、ポリシーのみだと GRANT レベルで拒否されるため、二層防御の設計思想を保つには両方が必要。
 
 ---
 

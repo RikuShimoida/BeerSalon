@@ -99,6 +99,13 @@ test.describe("RLS: public テーブルのアクセス制御 (#511)", () => {
 // #513 では「そもそも GRANT が剥がれ permission denied(401/403) になる」ことを主眼に
 // 検証する。GRANT が残ったまま RLS deny で空配列(200)になるケースは #513 では不合格とし、
 // 過剰権限そのものが除去されたことを主張する。
+//
+// 前提: このテストは 20260730000000_revoke_excess_grants_anon_authenticated.sql が
+// 適用済みの DB を対象とする。本リポジトリはリモート Supabase への migration が手動
+// push で遅延することがあり(CI 自動適用なし)、未適用の DB に対して実行すると
+// GRANT が残ったまま 200+空配列が返り、このテストは意図どおり失敗する。
+// その failure は「未適用の検知」であってテストの誤りではないため、失敗時はまず
+// 対象 DB に本マイグレーションが適用されているかを確認すること。
 test.describe("最小権限化: anon/authenticated の過剰 GRANT REVOKE (#513)", () => {
 	test.skip(
 		!SUPABASE_URL || !ANON_KEY,

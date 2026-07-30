@@ -26,7 +26,12 @@ REVOKE ALL ON ALL TABLES IN SCHEMA public FROM authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.user_profiles TO authenticated;
 
 -- ステップ C: シーケンスの過剰 GRANT も REVOKE。
--- anon/authenticated は INSERT 経路が無く nextval を使わないため USAGE は不要。
+-- authenticated は user_profiles の INSERT を再 GRANT されているが、user_profiles.id は
+-- UUID(gen_random_uuid())で serial/identity のシーケンスに依存しないため、この REVOKE で
+-- INSERT が壊れることはない。anon は INSERT 経路自体が無い。
+-- Why not(一部シーケンスに USAGE を残さない): 現状 anon/authenticated が nextval を
+-- 必要とする書き込み経路が無いため。将来シーケンス PK のテーブルへ直接 INSERT する経路が
+-- 生じた場合は、その時点で該当シーケンスのみ USAGE を GRANT する。
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated;
 
 -- ステップ D: デフォルト権限(pg_default_acl)を打ち消す。恒久対策の核。
