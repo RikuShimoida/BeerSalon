@@ -10,6 +10,18 @@ function makeFields(overrides: Partial<BarProfileFields>): BarProfileFields {
 	return { ...INITIAL_BAR_PROFILE_FIELDS, ...overrides };
 }
 
+// 検証結果が不正であることをアサートしつつ error 文字列を取り出す。
+// validateBarSnsUrls は判別可能ユニオンを返すため、error 参照前に isValid で narrow する。
+function expectInvalidError(
+	result: ReturnType<typeof validateBarSnsUrls>,
+): string {
+	expect(result.isValid).toBe(false);
+	if (result.isValid) {
+		throw new Error("valid な結果が返された（不正を期待）");
+	}
+	return result.error;
+}
+
 describe("validateBarSnsUrls", () => {
 	it("全 URL 項目が空なら valid を返す", () => {
 		expect(validateBarSnsUrls(INITIAL_BAR_PROFILE_FIELDS)).toEqual({
@@ -30,40 +42,35 @@ describe("validateBarSnsUrls", () => {
 
 	it("website_url が不正なら website のエラーを返す", () => {
 		const result = validateBarSnsUrls(makeFields({ website_url: "example" }));
-		expect(result.isValid).toBe(false);
-		expect(result.error).toContain("ホームページURL");
+		expect(expectInvalidError(result)).toContain("ホームページURL");
 	});
 
 	it("instagram_url が不正なら Instagram のエラーを返す", () => {
 		const result = validateBarSnsUrls(
 			makeFields({ instagram_url: "https://example.com" }),
 		);
-		expect(result.isValid).toBe(false);
-		expect(result.error).toContain("Instagram");
+		expect(expectInvalidError(result)).toContain("Instagram");
 	});
 
 	it("x_url が不正なら X のエラーを返す", () => {
 		const result = validateBarSnsUrls(
 			makeFields({ x_url: "https://example.com" }),
 		);
-		expect(result.isValid).toBe(false);
-		expect(result.error).toContain("X（Twitter）");
+		expect(expectInvalidError(result)).toContain("X（Twitter）");
 	});
 
 	it("facebook_url が不正なら Facebook のエラーを返す", () => {
 		const result = validateBarSnsUrls(
 			makeFields({ facebook_url: "https://example.com" }),
 		);
-		expect(result.isValid).toBe(false);
-		expect(result.error).toContain("Facebook");
+		expect(expectInvalidError(result)).toContain("Facebook");
 	});
 
 	it("line_url が不正なら LINE のエラーを返す", () => {
 		const result = validateBarSnsUrls(
 			makeFields({ line_url: "https://example.com" }),
 		);
-		expect(result.isValid).toBe(false);
-		expect(result.error).toContain("LINE URL");
+		expect(expectInvalidError(result)).toContain("LINE URL");
 	});
 
 	it("複数項目が不正な場合は検証順（website→instagram→x→facebook→line）の先頭のエラーを返す", () => {
@@ -74,9 +81,8 @@ describe("validateBarSnsUrls", () => {
 				line_url: "https://example.com",
 			}),
 		);
-		expect(result.isValid).toBe(false);
 		// website が最優先で検証されるため、website のエラーが返る
-		expect(result.error).toContain("ホームページURL");
+		expect(expectInvalidError(result)).toContain("ホームページURL");
 	});
 
 	it("website が正常で instagram が不正なら instagram のエラーを返す（website をスキップして次へ進む）", () => {
@@ -86,8 +92,7 @@ describe("validateBarSnsUrls", () => {
 				instagram_url: "https://example.com",
 			}),
 		);
-		expect(result.isValid).toBe(false);
-		expect(result.error).toContain("Instagram");
+		expect(expectInvalidError(result)).toContain("Instagram");
 	});
 });
 

@@ -158,7 +158,7 @@ export default function BarNewForm() {
 
 		const snsResult = validateBarSnsUrls(phase2);
 		if (!snsResult.isValid) {
-			setError(snsResult.error as string);
+			setError(snsResult.error);
 			return;
 		}
 

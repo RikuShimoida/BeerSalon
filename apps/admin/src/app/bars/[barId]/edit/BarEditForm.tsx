@@ -280,7 +280,7 @@ export default function BarEditForm({ barId }: { barId: string }) {
 
 		const snsResult = validateBarSnsUrls(formData);
 		if (!snsResult.isValid) {
-			setError(snsResult.error as string);
+			setError(snsResult.error);
 			return;
 		}
 
