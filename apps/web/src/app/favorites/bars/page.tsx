@@ -7,8 +7,8 @@ export default async function FavoriteBarsPage() {
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-				<h1 className="text-2xl font-semibold text-foreground mb-6">
+			<div className="mx-auto max-w-7xl px-4 py-8 md:py-12">
+				<h1 className="mb-6 font-mincho text-2xl font-bold text-heading">
 					お気に入りバー
 				</h1>
 

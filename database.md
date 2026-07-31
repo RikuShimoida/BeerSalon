@@ -10,6 +10,20 @@
 - 画像は Supabase Storage に保存し、DB には `image_url` / `storage_path` などの文字列のみ保持する
 - タイムスタンプは `created_at`, `updated_at`（`timestamptz`）
 
+### Row-Level Security（RLS）方針
+
+- `public` スキーマの全テーブルで RLS を有効化し、既定は deny-by-default（ポリシー無し＝ `anon` / `authenticated` は全操作拒否）とする。ブラウザに露出する anon 公開鍵だけで機微データが読み書きされることを防ぐ。
+- アプリのデータアクセスは RLS をバイパスするロールで行う：
+  - ユーザー画面（web）: Prisma 経由（`postgres` ロール、`rolbypassrls`）
+  - 管理画面（admin）: `supabaseAdmin`（`service_role`、`rolbypassrls`）
+- 例外的に `authenticated` ロールを使う経路（web middleware の自己プロフィール参照）のみ、必要最小限のポリシーで許可する：
+  - `user_profiles`: `authenticated` が自分の行（`user_auth_id = auth.uid()`）のみ SELECT 可
+- 定義マイグレーション: `supabase/migrations/20260729000000_enable_rls_public_tables.sql`
+- **GRANT の最小権限化**: RLS の deny-by-default に加え、`anon` / `authenticated` への過剰な DML GRANT を REVOKE し、GRANT レベルでも最小権限を保証する。`anon` は `public` の全テーブル GRANT を持たず（公開データ読み取りも Prisma 経由）、`authenticated` は `user_profiles` の SELECT/INSERT/UPDATE のみを持つ。あわせて `public` スキーマのデフォルト権限（`ALTER DEFAULT PRIVILEGES`）から `anon` / `authenticated` を除去し、新規テーブル追加時に過剰 GRANT が復活しないようにする。
+- 定義マイグレーション: `supabase/migrations/20260730000000_revoke_excess_grants_anon_authenticated.sql`
+- **運用ガード（テーブル追加）**: デフォルト権限の REVOKE は「新規テーブルは必ずマイグレーション（`postgres` 実行）で作られる」前提に依存する。テーブル追加は必ずマイグレーション（`postgres`）経由で行うこと。他ロールで `CREATE TABLE` すると、そのロール由来のデフォルト権限により `anon` / `authenticated` への過剰 GRANT が復活しうる。
+- **運用ガード（将来 anon で公開データを読む場合）**: 将来 `anon` で公開データ（例: `bars`）を読む要件が出た際は、テーブルへ直接 GRANT するだけにせず、「RLS の SELECT ポリシー」と「個別テーブルへの SELECT GRANT」の両方を同時に付与すること。GRANT のみだと RLS で拒否され、ポリシーのみだと GRANT レベルで拒否されるため、二層防御の設計思想を保つには両方が必要。
+
 ---
 
 ## 1. 認証・ユーザ
@@ -55,7 +69,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | id              | bigserial  | PK                               | 店舗ID                                  |
 | name            | text       | NOT NULL                         | 店舗名                                  |
 | prefecture      | text       | NOT NULL                         | 都道府県                                |
-| city            | text       | NOT NULL                         | 市区町村                                |
+| city            | text       | NOT NULL                         | 市区町村。ユーザー画面の市町村フィルターと完全一致（`where.city = city`）で突き合わせるため、管理画面の登録・検索フィルターの選択肢と同一マスタ（`@beersalon/shared` の `SHIZUOKA_MUNICIPALITIES`）に揃える。政令市は区なし粒度（例:「静岡市」）で保存する（区付き「静岡市（葵区）」等は使わない。Issue #419）|
 | address_line1   | text       | NOT NULL                         | 住所1                                   |
 | address_line2   | text       | NULLABLE                         | 建物名・部屋番号など                    |
 | latitude        | numeric(10,7) | NULLABLE                      | 緯度（Google Maps 表示用）             |
@@ -72,9 +86,11 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | line_url        | text       | NULLABLE                         | LINE URL                                |
 | description     | text       | NULLABLE                         | PR文                                    |
 | preview_image_url | text     | NULLABLE                         | 一覧表示用プレビュー画像URL             |
-| is_active       | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ                            |
+| is_active       | boolean    | NOT NULL DEFAULT true            | 掲載中フラグ（後述の3用途を兼ねる）     |
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                                |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                                |
+
+**`is_active=false` の用途**: 「非掲載」「セルフサーブ登録直後の審査中（`admin_users.approval_status='pending'` と対）」に加え、**admin による店舗の論理削除**にも使う。管理画面の店舗詳細ページ（`/bars/[barId]`）の「店舗を削除」ボタン（admin のみ）から `DELETE /api/bars/[barId]` で `is_active=false` に更新する。物理削除はせず、削除した店舗もログとして残す。削除された店舗は管理画面の一覧（`GET /api/bars` は `is_active=true` で絞り込み）・ユーザー画面の検索（`getBars()` は `isActive:true` で絞り込み）から非表示になる。削除は admin 限定で、bar_owner が API を直接叩いても 403。
 
 ---
 
@@ -151,6 +167,15 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | created_at  | timestamptz| NOT NULL DEFAULT now()   | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now()   | 更新日時             |
 
+**初期マスタデータ**:
+1. IPA
+2. ピルスナー
+3. スタウト
+4. ヴァイツェン
+5. ペールエール
+
+マイグレーション（`20260715000000_seed_beer_categories.sql`）で `ON CONFLICT (name) DO NOTHING` により冪等投入する（Issue #428）。従来 `beer_categories` はローカル専用の `seed.e2e.sql` にしか投入経路が無く、`migrate.yml`（`supabase db push` ＝マイグレーションのみ適用）では preview / production の remote DB に届かず、管理画面のメニュー登録でビールカテゴリのプルダウンが空になっていた。`payment_methods` と同じくマイグレーション内 INSERT に一本化して全環境へ届かせる。投入するカテゴリはユーザー画面の検索フォーム（`apps/web` の `BEER_CATEGORIES`）と語彙を揃える（検索側と登録側の語彙がズレるとヒットしないため）。
+
 ---
 
 ### 2-4. countries
@@ -169,6 +194,10 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | is_active   | boolean    | NOT NULL DEFAULT true  | 使用中フラグ         |
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
+
+**初期マスタデータ**: アメリカ / ベルギー / ドイツ / イギリス / チェコ / アイルランド / 日本 / オーストラリア / ニュージーランド / オランダ の10件。
+
+マイグレーション（`20260716000000_seed_countries_regions.sql`）で `ON CONFLICT (name) DO NOTHING` により冪等投入する（Issue #432）。従来 `countries` / `regions` はローカル専用の `seed.sql` にしか投入経路が無く、`migrate.yml`（`supabase db push` ＝マイグレーションのみ適用）では preview / production の remote DB に届かず、管理画面のビールメニュー登録で国・産地のプルダウンが空になっていた（産地はユーザー画面の検索フィルタ `getBeerRegions` とも連動するため検索側にも波及する）。`beer_categories`（#428）と同型の欠陥のため、同じくマイグレーション内 INSERT に一本化して全環境へ届かせる。投入内容は `seed.sql` の現行値を踏襲する（ローカル seed 側の INSERT も自己完結性のため残す）。
 
 ---
 
@@ -192,6 +221,8 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 
 UNIQUE制約: `country_id + name`
 
+**初期マスタデータ**: 各国の代表的ビール産地（例: 日本＝静岡 / 長野 / 北海道 / 東京 / 大阪 / 横浜、アメリカ＝カリフォルニア / オレゴン / コロラド / ワシントン ほか）。`countries` と同じマイグレーション（`20260716000000_seed_countries_regions.sql`）で投入する。`country_id` はハードコードせず `CROSS JOIN countries c WHERE c.name = '<国名>'` のサブクエリで動的解決し、`ON CONFLICT (country_id, name) DO NOTHING` で冪等投入する（Issue #432。詳細は `countries` を参照）。
+
 ---
 
 ### 2-6. breweries
@@ -214,8 +245,6 @@ UNIQUE制約: `country_id + name`
 | created_at  | timestamptz| NOT NULL DEFAULT now() | 作成日時             |
 | updated_at  | timestamptz| NOT NULL DEFAULT now() | 更新日時             |
 
-**管理画面での変更**: 国IDを必須化し、管理画面でのフィルタリングを容易にする。
-
 ---
 
 ### 2-7. beers
@@ -234,7 +263,7 @@ UNIQUE制約: `country_id + name`
 | beer_category_id | bigint     | NOT NULL, FK → beer_categories(id) | カテゴリ                     |
 | brewery_id       | bigint     | NULLABLE, FK → breweries(id)       | 醸造所                       |
 | region_id        | bigint     | NULLABLE, FK → regions(id)         | 地域ID（産地）              |
-| abv              | numeric(4,2)| NULLABLE                          | アルコール度数              |
+| abv              | numeric(4,2)| NULLABLE                          | アルコール度数（ABV, %）。管理画面のビールメニュー登録（`POST /api/bars/[barId]/menus/beers`）で `beers` INSERT 時に保存し、編集（`PUT /api/bars/[barId]/menus/beers/[menuId]`）で `bar_beer_menus` 更新後に関連 `beers` を UPDATE して同期する。任意入力（未入力は null）、範囲 0〜99.99 のバリデーションあり（範囲外・非数値は 400）。ユーザー画面・管理画面のメニュー詳細で表示 |
 | ibu              | integer    | NULLABLE                           | IBU                         |
 | description      | text       | NULLABLE                           | 説明文                      |
 | image_url        | text       | NULLABLE                           | サムネイル画像              |
@@ -263,8 +292,6 @@ UNIQUE制約: `country_id + name`
 | is_active    | boolean    | NOT NULL DEFAULT true            | 提供中フラグ                        |
 | created_at   | timestamptz| NOT NULL DEFAULT now()           | 作成日時                            |
 | updated_at   | timestamptz| NOT NULL DEFAULT now()           | 更新日時                            |
-
-**変更履歴**: `size` カラムと `price` カラムを削除。サイズ/価格は `bar_beer_menu_sizes` テーブルに移行（1メニューに複数サイズ/価格を設定可能に）。
 
 ---
 
@@ -398,10 +425,6 @@ UNIQUE制約: `country_id + name`
 | deleted_at   | timestamptz| NULLABLE                        | 削除日時（論理削除） |
 | created_at   | timestamptz| NOT NULL DEFAULT now()          | 作成日時        |
 | updated_at   | timestamptz| NOT NULL DEFAULT now()          | 更新日時        |
-
-**管理画面での変更**:
-- `is_published` を `status` に変更（draft/published/scheduledを管理）
-- `deleted_at` を追加（論理削除により誤削除からの復旧が可能）
 
 ---
 
@@ -703,12 +726,6 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-### ~~8-2. bar_owners~~（廃止）
-
-**このテーブルは廃止されました。** `admin_users` テーブルに `bar_id` カラムを追加し、1対1の紐付けに変更。中間テーブルは不要になりました。
-
----
-
 ### 8-3. subscription_plans
 
 サブスクリプションプラン定義。
@@ -731,6 +748,8 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 | created_at      | timestamptz| NOT NULL DEFAULT now()           | 作成日時                    |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()           | 更新日時                    |
 
+**初期データ**: 店舗月額プラン（¥5,000/月・`interval='month'`・`currency='jpy'`）を seed で1件投入する（#335 の課金開始フローが is_active な1件を参照して Checkout に渡すため）。`stripe_price_id` は seed 時点では placeholder（`price_placeholder_5000_monthly`）であり、Stripe ダッシュボードで作成した実 Price ID（`price_xxx`）へ手動で差し替える必要がある。
+
 ---
 
 ### 8-4. bar_subscriptions
@@ -748,7 +767,7 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 | bar_id                  | bigint     | NOT NULL, FK → bars(id)                   | バーID                             |
 | subscription_plan_id    | bigint     | NOT NULL, FK → subscription_plans(id)     | プランID                           |
 | stripe_customer_id      | text       | NOT NULL                                  | Stripe顧客ID                      |
-| stripe_subscription_id  | text       | NOT NULL                                  | StripeサブスクリプションID         |
+| stripe_subscription_id  | text       | NOT NULL, UNIQUE                          | StripeサブスクリプションID（webhook の at-least-once 配信でも upsert が二重行を作らないよう一意） |
 | status                  | text       | NOT NULL DEFAULT 'active'                 | ステータス（'active', 'canceled', 'past_due', 'trialing', 'incomplete'） |
 | current_period_start    | timestamptz| NOT NULL                                  | 現在の課金期間開始日               |
 | current_period_end      | timestamptz| NOT NULL                                  | 現在の課金期間終了日               |
@@ -760,7 +779,8 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 **インデックス**:
 - `bar_id`
 - `stripe_customer_id`
-- `stripe_subscription_id`
+- `stripe_subscription_id`（UNIQUE 制約により一意インデックス）
+- `bar_id`（部分ユニーク: `WHERE status IN ('active','trialing','past_due')`）。1店舗につき有効サブスクを1件に制限し、checkout 連打・並行リクエストによる二重サブスク（二重課金）を DB レイヤーで防ぐ
 
 **権限**:
 - バーオーナー: 自バーのサブスクリプション参照のみ
@@ -824,27 +844,15 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
-### ~~8-7. master_beer_styles~~（廃止）
+### 8-7. 廃止テーブル一覧（履歴）
 
-**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
+以下のテーブルは廃止済み。現行スキーマには存在しない。
 
----
-
-### ~~8-8. master_breweries~~（廃止）
-
-**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。醸造所情報は Web 側の `breweries` テーブルに一本化。
-
----
-
-### ~~8-9. master_food_categories~~（廃止）
-
-**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
-
----
-
-### ~~8-10. master_event_categories~~（廃止）
-
-**このテーブルは廃止されました。** マスタ管理機能の廃止に伴い、不要となりました。
+- `bar_owners` — `admin_users` に `bar_id` カラムを追加して1対1の紐付けに変更したため、中間テーブルを廃止
+- `master_beer_styles` — マスタ管理機能の廃止に伴い不要化
+- `master_breweries` — マスタ管理機能の廃止に伴い不要化。醸造所情報は Web 側の `breweries` テーブルに一本化
+- `master_food_categories` — マスタ管理機能の廃止に伴い不要化
+- `master_event_categories` — マスタ管理機能の廃止に伴い不要化
 
 ---
 

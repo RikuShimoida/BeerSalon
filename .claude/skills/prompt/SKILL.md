@@ -55,5 +55,5 @@ bash create_prompt.sh
 - 課題・期待する状態・理由の詳細
 - 受入条件（Playwright 検証可能な形式）
 - オプション項目（やらないこと、前提条件、補足）
-- 参照すべきドキュメント（@routing.md, @wireframe.md 等）
+- 参照すべきドキュメント（routing.md, wireframe.md 等）
 - GitHub Issue 作成の指示（適切なテンプレート使用）

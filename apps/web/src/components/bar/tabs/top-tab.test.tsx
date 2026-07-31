@@ -14,6 +14,8 @@ const baseBar = {
 	city: "静岡市",
 	addressLine1: "1-2-3",
 	addressLine2: null,
+	latitude: null as string | null | undefined,
+	longitude: null as string | null | undefined,
 	websiteUrl: null,
 	instagramUrl: null,
 	xUrl: null,
@@ -79,5 +81,113 @@ describe("TopTab 定休日補足（regularHoliday）の表示", () => {
 		);
 
 		expect(screen.queryByText(/^定休日:/)).not.toBeInTheDocument();
+	});
+});
+
+describe("TopTab 住所の地図アプリ導線", () => {
+	it("緯度経度が登録済みのとき、Apple/Google 両方の経路案内リンクを座標付きで表示する", () => {
+		render(
+			<TopTab
+				bar={{
+					...baseBar,
+					latitude: "35.1614",
+					longitude: "138.6764",
+				}}
+			/>,
+		);
+
+		const apple = screen.getByRole("link", { name: /^マップで開く$/ });
+		expect(apple).toHaveAttribute(
+			"href",
+			"https://maps.apple.com/?daddr=35.1614%2C138.6764",
+		);
+
+		const google = screen.getByRole("link", { name: /Googleマップで開く/ });
+		expect(google).toHaveAttribute(
+			"href",
+			"https://www.google.com/maps/dir/?api=1&destination=35.1614%2C138.6764",
+		);
+	});
+
+	it("緯度経度が未登録でも住所ベースで導線を表示する", () => {
+		render(
+			<TopTab
+				bar={{
+					...baseBar,
+					prefecture: "東京都",
+					city: "渋谷区",
+					addressLine1: "道玄坂1-2-3",
+					latitude: null,
+					longitude: null,
+				}}
+			/>,
+		);
+
+		const expected = encodeURIComponent("東京都渋谷区道玄坂1-2-3");
+		const google = screen.getByRole("link", { name: /Googleマップで開く/ });
+		expect(google).toHaveAttribute(
+			"href",
+			`https://www.google.com/maps/dir/?api=1&destination=${expected}`,
+		);
+	});
+
+	it("導線リンクは新規タブで開く（target=_blank + rel）", () => {
+		render(
+			<TopTab bar={{ ...baseBar, latitude: "35.1", longitude: "138.6" }} />,
+		);
+
+		const apple = screen.getByRole("link", { name: /^マップで開く$/ });
+		expect(apple).toHaveAttribute("target", "_blank");
+		expect(apple).toHaveAttribute("rel", "noopener noreferrer");
+	});
+});
+
+describe("TopTab SNSリンクの表示（アイコンのみ・URLテキスト非表示）", () => {
+	const snsBar = {
+		...baseBar,
+		instagramUrl: "https://instagram.com/shizuoka_beer",
+		xUrl: "https://x.com/shizuoka_x",
+		facebookUrl: "https://facebook.com/shizuoka_fb",
+		lineUrl: "https://line.me/shizuoka_line",
+	};
+
+	it("各SNSが設定されているとき、対応するリンクをアイコンのみで表示し href を維持する", () => {
+		render(<TopTab bar={snsBar} />);
+
+		const instagram = screen.getByLabelText("Instagramで見る");
+		expect(instagram).toHaveAttribute(
+			"href",
+			"https://instagram.com/shizuoka_beer",
+		);
+
+		const x = screen.getByLabelText("Xで見る");
+		expect(x).toHaveAttribute("href", "https://x.com/shizuoka_x");
+
+		const facebook = screen.getByLabelText("Facebookで見る");
+		expect(facebook).toHaveAttribute(
+			"href",
+			"https://facebook.com/shizuoka_fb",
+		);
+
+		const line = screen.getByLabelText("LINEで見る");
+		expect(line).toHaveAttribute("href", "https://line.me/shizuoka_line");
+	});
+
+	it("各SNSリンクにアカウント名テキスト（@xxx）を表示しない", () => {
+		render(<TopTab bar={snsBar} />);
+
+		expect(screen.queryByText("@shizuoka_beer")).not.toBeInTheDocument();
+		expect(screen.queryByText("@shizuoka_x")).not.toBeInTheDocument();
+		expect(screen.queryByText("@shizuoka_fb")).not.toBeInTheDocument();
+		expect(screen.queryByText("@shizuoka_line")).not.toBeInTheDocument();
+	});
+
+	it("未設定のSNSはリンク自体を表示しない", () => {
+		render(<TopTab bar={{ ...baseBar, instagramUrl: null }} />);
+
+		expect(screen.queryByLabelText("Instagramで見る")).not.toBeInTheDocument();
+		expect(screen.queryByLabelText("Xで見る")).not.toBeInTheDocument();
+		expect(screen.queryByLabelText("Facebookで見る")).not.toBeInTheDocument();
+		expect(screen.queryByLabelText("LINEで見る")).not.toBeInTheDocument();
 	});
 });

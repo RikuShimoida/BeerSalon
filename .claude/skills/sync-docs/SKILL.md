@@ -11,10 +11,10 @@ when_to_use: src/配下のソースコードを実際に編集した後、また
 バグ修正や仕様変更などにより **既存のソースコードを修正した場合**、
 その内容に応じて **以下の設計ドキュメントも必ず更新すること。**
 
-- @routing.md
-- @wireframe.md
-- @database.md
-- @README.md
+- routing.md
+- wireframe.md
+- database.md
+- README.md
 
 ### 判断基準
 

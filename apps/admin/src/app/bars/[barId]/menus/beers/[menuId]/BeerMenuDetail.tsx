@@ -87,6 +87,7 @@ export default function BeerMenuDetail({
 	const countryName = menu.beer?.region?.country?.name;
 	const regionName = menu.beer?.region?.name;
 	const breweryName = menu.beer?.brewery?.name;
+	const abv = menu.beer?.abv;
 
 	return (
 		<div className="space-y-6 max-w-2xl">
@@ -135,6 +136,15 @@ export default function BeerMenuDetail({
 					<div>
 						<dt className="text-sm font-medium text-gray-500">醸造所</dt>
 						<dd className="mt-1 text-sm text-gray-900">{breweryName}</dd>
+					</div>
+				)}
+
+				{abv != null && (
+					<div>
+						<dt className="text-sm font-medium text-gray-500">
+							アルコール度数
+						</dt>
+						<dd className="mt-1 text-sm text-gray-900">{abv}%</dd>
 					</div>
 				)}
 

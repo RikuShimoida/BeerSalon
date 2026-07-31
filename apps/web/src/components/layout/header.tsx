@@ -1,33 +1,36 @@
 import { Bell, LogOut, User } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { getUnreadNotificationCount } from "@/actions/notification";
 import { logout } from "./actions";
+import { BeerSalonLogo } from "./beer-salon-logo";
+import { HeaderNav } from "./header-nav";
 
 export async function Header() {
 	const unreadCount = await getUnreadNotificationCount();
 
+	// 通知ベル・マイページ・ログアウトに共通の丸ボタン（#241a0e 丸 + アンバー薄ボーダー）。
+	const iconButtonClass =
+		"flex items-center justify-center w-10 h-10 text-foreground bg-surface-raised border border-primary/20 rounded-full transition-colors hover:border-primary/40 relative";
+
 	return (
-		<header className="fixed top-0 left-0 right-0 bg-surface-panel backdrop-blur-xl border-b border-border/20 z-50 modern-shadow">
-			<div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-				<Link
-					href="/"
-					className="hover:opacity-80 transition-all duration-300"
-					aria-label="Beer Salon ホーム"
-				>
-					<Image
-						src="/beer-salon-logo.svg"
-						alt="Beer Salon"
-						width={240}
-						height={48}
-						priority
-					/>
-				</Link>
+		<header className="fixed top-0 left-0 right-0 bg-surface-panel backdrop-blur-xl border-b border-border/20 z-50">
+			<div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-6">
+				<div className="flex items-center gap-11">
+					<Link
+						href="/"
+						className="hover:opacity-80 transition-opacity"
+						aria-label="Beer Salon ホーム"
+					>
+						<BeerSalonLogo className="h-10 w-auto" />
+					</Link>
+
+					<HeaderNav />
+				</div>
 
 				<div className="flex items-center gap-2">
 					<Link
 						href="/notifications"
-						className="p-2.5 text-foreground bg-surface-control hover:bg-surface-control/80 rounded-full transition-all duration-300 relative"
+						className={iconButtonClass}
 						aria-label="通知"
 						data-testid="notification-icon"
 					>
@@ -35,7 +38,7 @@ export async function Header() {
 						{unreadCount > 0 && (
 							<span
 								data-testid="notification-badge"
-								className="absolute -top-0.5 -right-0.5 min-w-[1.25rem] h-5 px-1 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full"
+								className="absolute -top-0.5 -right-0.5 min-w-[1.25rem] h-5 px-1 flex items-center justify-center bg-destructive text-white text-xs font-bold rounded-full"
 							>
 								{unreadCount > 99 ? "99+" : unreadCount}
 							</span>
@@ -44,7 +47,7 @@ export async function Header() {
 
 					<Link
 						href="/mypage"
-						className="p-2.5 text-foreground bg-surface-control hover:bg-surface-control/80 rounded-full transition-all duration-300"
+						className={iconButtonClass}
 						aria-label="マイページ"
 					>
 						<User className="w-5 h-5" />
@@ -53,7 +56,7 @@ export async function Header() {
 					<form action={logout}>
 						<button
 							type="submit"
-							className="p-2.5 text-foreground bg-surface-control hover:bg-surface-control/80 rounded-full transition-all duration-300"
+							className={iconButtonClass}
 							aria-label="ログアウト"
 						>
 							<LogOut className="w-5 h-5" />

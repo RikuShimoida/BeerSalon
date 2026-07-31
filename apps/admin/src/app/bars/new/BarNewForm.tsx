@@ -3,28 +3,17 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import BarProfileFields from "@/components/BarProfileFields";
 import OpeningHoursEditor from "@/components/OpeningHoursEditor";
 import SliderMediaManager from "@/components/SliderMediaManager";
 import {
-	SHIZUOKA_MUNICIPALITIES,
-	SHIZUOKA_PREFECTURE,
-} from "@/lib/shizuoka-cities";
-import {
-	validateCoordinates,
-	validateFacebookUrl,
-	validateInstagramUrl,
-	validateLineUrl,
-	validateWebsiteUrl,
-	validateXUrl,
-} from "@/lib/validators";
-
-interface OpeningHourInput {
-	day_of_week: number;
-	open_time: string;
-	close_time: string;
-	sort_order: number;
-	is_closed: boolean;
-}
+	createInitialOpeningHours,
+	INITIAL_BAR_PROFILE_FIELDS,
+	type OpeningHourInput,
+	validateBarSnsUrls,
+} from "@/lib/bar-form";
+import { SHIZUOKA_PREFECTURE } from "@/lib/shizuoka-cities";
+import { validateCoordinates } from "@/lib/validators";
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const REDIRECT_DELAY_MS = 3000;
@@ -45,23 +34,7 @@ export default function BarNewForm() {
 		contact_phone: "",
 	});
 
-	const [phase2, setPhase2] = useState({
-		name: "",
-		description: "",
-		access: "",
-		phone_number: "",
-		prefecture: "",
-		city: "",
-		address_line1: "",
-		address_line2: "",
-		latitude: "",
-		longitude: "",
-		website_url: "",
-		instagram_url: "",
-		x_url: "",
-		facebook_url: "",
-		line_url: "",
-	});
+	const [phase2, setPhase2] = useState(INITIAL_BAR_PROFILE_FIELDS);
 
 	// Images
 	const [previewImageFile, setPreviewImageFile] = useState<File | null>(null);
@@ -70,13 +43,7 @@ export default function BarNewForm() {
 	const [sliderMediaFiles, setSliderMediaFiles] = useState<File[]>([]);
 
 	const [openingHours, setOpeningHours] = useState<OpeningHourInput[]>(
-		Array.from({ length: 7 }, (_, day) => ({
-			day_of_week: day,
-			open_time: "",
-			close_time: "",
-			sort_order: 0,
-			is_closed: false,
-		})),
+		createInitialOpeningHours,
 	);
 
 	const [regularHoliday, setRegularHoliday] = useState("");
@@ -189,40 +156,10 @@ export default function BarNewForm() {
 		setError("");
 		setOpeningHoursErrors({});
 
-		if (phase2.website_url) {
-			const result = validateWebsiteUrl(phase2.website_url);
-			if (!result.isValid) {
-				setError(result.error || "ホームページURLの形式が正しくありません");
-				return;
-			}
-		}
-		if (phase2.instagram_url) {
-			const result = validateInstagramUrl(phase2.instagram_url);
-			if (!result.isValid) {
-				setError(result.error || "Instagram URLの形式が正しくありません");
-				return;
-			}
-		}
-		if (phase2.x_url) {
-			const result = validateXUrl(phase2.x_url);
-			if (!result.isValid) {
-				setError(result.error || "X URLの形式が正しくありません");
-				return;
-			}
-		}
-		if (phase2.facebook_url) {
-			const result = validateFacebookUrl(phase2.facebook_url);
-			if (!result.isValid) {
-				setError(result.error || "Facebook URLの形式が正しくありません");
-				return;
-			}
-		}
-		if (phase2.line_url) {
-			const result = validateLineUrl(phase2.line_url);
-			if (!result.isValid) {
-				setError(result.error || "LINE URLの形式が正しくありません");
-				return;
-			}
+		const snsResult = validateBarSnsUrls(phase2);
+		if (!snsResult.isValid) {
+			setError(snsResult.error);
+			return;
 		}
 
 		const coordinatesResult = validateCoordinates(
@@ -517,253 +454,7 @@ export default function BarNewForm() {
 						onRegularHolidayChange={setRegularHoliday}
 					/>
 
-					<div>
-						<label
-							htmlFor="access"
-							className="block text-sm font-medium text-gray-700"
-						>
-							アクセス
-						</label>
-						<input
-							type="text"
-							id="access"
-							name="access"
-							value={phase2.access}
-							onChange={handlePhase2Change}
-							placeholder="JR静岡駅北口から徒歩5分"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="phone_number"
-							className="block text-sm font-medium text-gray-700"
-						>
-							電話番号
-						</label>
-						<input
-							type="tel"
-							id="phone_number"
-							name="phone_number"
-							value={phase2.phone_number}
-							onChange={handlePhase2Change}
-							placeholder="054-123-4567"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="prefecture"
-							className="block text-sm font-medium text-gray-700"
-						>
-							都道府県
-						</label>
-						<select
-							id="prefecture"
-							name="prefecture"
-							value={phase2.prefecture}
-							onChange={handlePhase2Change}
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						>
-							<option value="">選択してください</option>
-							<option value={SHIZUOKA_PREFECTURE}>{SHIZUOKA_PREFECTURE}</option>
-						</select>
-					</div>
-
-					<div>
-						<label
-							htmlFor="city"
-							className="block text-sm font-medium text-gray-700"
-						>
-							市区町村
-						</label>
-						<select
-							id="city"
-							name="city"
-							value={phase2.city}
-							onChange={handlePhase2Change}
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						>
-							<option value="">選択してください</option>
-							{SHIZUOKA_MUNICIPALITIES.map((city) => (
-								<option key={city} value={city}>
-									{city}
-								</option>
-							))}
-						</select>
-					</div>
-
-					<div>
-						<label
-							htmlFor="address_line1"
-							className="block text-sm font-medium text-gray-700"
-						>
-							住所1
-						</label>
-						<input
-							type="text"
-							id="address_line1"
-							name="address_line1"
-							value={phase2.address_line1}
-							onChange={handlePhase2Change}
-							placeholder="番地等"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="address_line2"
-							className="block text-sm font-medium text-gray-700"
-						>
-							住所2
-						</label>
-						<input
-							type="text"
-							id="address_line2"
-							name="address_line2"
-							value={phase2.address_line2}
-							onChange={handlePhase2Change}
-							placeholder="建物名・部屋番号"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="latitude"
-							className="block text-sm font-medium text-gray-700"
-						>
-							緯度
-						</label>
-						<input
-							type="number"
-							step="any"
-							id="latitude"
-							name="latitude"
-							value={phase2.latitude}
-							onChange={handlePhase2Change}
-							placeholder="35.0116"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-						<p className="mt-1 text-sm text-gray-500">
-							-90〜90（マップ表示用・任意）
-						</p>
-					</div>
-
-					<div>
-						<label
-							htmlFor="longitude"
-							className="block text-sm font-medium text-gray-700"
-						>
-							経度
-						</label>
-						<input
-							type="number"
-							step="any"
-							id="longitude"
-							name="longitude"
-							value={phase2.longitude}
-							onChange={handlePhase2Change}
-							placeholder="135.7681"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-						<p className="mt-1 text-sm text-gray-500">
-							-180〜180（マップ表示用・任意）
-						</p>
-					</div>
-
-					<div>
-						<label
-							htmlFor="website_url"
-							className="block text-sm font-medium text-gray-700"
-						>
-							ホームページ
-						</label>
-						<input
-							type="url"
-							id="website_url"
-							name="website_url"
-							value={phase2.website_url}
-							onChange={handlePhase2Change}
-							placeholder="https://example.com"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="instagram_url"
-							className="block text-sm font-medium text-gray-700"
-						>
-							Instagram
-						</label>
-						<input
-							type="url"
-							id="instagram_url"
-							name="instagram_url"
-							value={phase2.instagram_url}
-							onChange={handlePhase2Change}
-							placeholder="https://www.instagram.com/your_account"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="x_url"
-							className="block text-sm font-medium text-gray-700"
-						>
-							X（Twitter）
-						</label>
-						<input
-							type="url"
-							id="x_url"
-							name="x_url"
-							value={phase2.x_url}
-							onChange={handlePhase2Change}
-							placeholder="https://x.com/example"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="facebook_url"
-							className="block text-sm font-medium text-gray-700"
-						>
-							Facebook
-						</label>
-						<input
-							type="url"
-							id="facebook_url"
-							name="facebook_url"
-							value={phase2.facebook_url}
-							onChange={handlePhase2Change}
-							placeholder="https://www.facebook.com/yourpage"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
-
-					<div>
-						<label
-							htmlFor="line_url"
-							className="block text-sm font-medium text-gray-700"
-						>
-							LINE
-						</label>
-						<input
-							type="url"
-							id="line_url"
-							name="line_url"
-							value={phase2.line_url}
-							onChange={handlePhase2Change}
-							placeholder="https://line.me/R/ti/p/@example"
-							className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
-						/>
-					</div>
+					<BarProfileFields fields={phase2} onChange={handlePhase2Change} />
 
 					{/* Preview image section */}
 					<div>

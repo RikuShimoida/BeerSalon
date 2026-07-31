@@ -85,14 +85,19 @@ function MapContent({
 					position={{ lat: selectedPin.lat, lng: selectedPin.lng }}
 					onCloseClick={() => setSelectedPinId(null)}
 				>
-					<div className="p-2">
-						<h3 className="font-bold text-base mb-1">{selectedPin.name}</h3>
-						<p className="text-xs text-gray-600 mb-2">
+					{/* Why not テーマのダークトークン: InfoWindow の吹き出しは Google 管理の白背景で
+					    描画されるため、明色テキストのトークンを当てると白地に白で見えなくなる。
+					    白地で可読なブランドカラー（濃茶見出し・アンバーリンク）を明示指定する。 */}
+					<div className="p-2 font-sans">
+						<h3 className="mb-1 font-mincho text-base font-bold text-[#20160a]">
+							{selectedPin.name}
+						</h3>
+						<p className="mb-2 text-xs text-[#6b5535]">
 							{selectedPin.prefecture} {selectedPin.city}
 						</p>
 						<Link
 							href={`/bars/${selectedPin.id}`}
-							className="text-xs font-semibold text-blue-600 underline"
+							className="text-xs font-semibold text-[#c47f28] underline"
 						>
 							店舗詳細を見る
 						</Link>
@@ -140,12 +145,12 @@ export function GoogleMap({ city, bars, defaultZoom = 12 }: GoogleMapProps) {
 
 	if (!apiKey) {
 		return (
-			<div className="glass-card rounded-2xl flex items-center justify-center h-64 md:h-80 modern-shadow overflow-hidden">
-				<div className="text-center text-muted-foreground">
+			<div className="flex h-64 items-center justify-center overflow-hidden rounded-[18px] border border-border bg-card modern-shadow md:h-full md:min-h-80">
+				<div className="text-center text-subtext">
 					<p className="text-sm font-medium tracking-wide">
 						Google Maps APIキーが設定されていません
 					</p>
-					<p className="text-xs mt-1 tracking-wide">
+					<p className="mt-1 text-xs tracking-wide">
 						環境変数 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY を設定してください
 					</p>
 				</div>
@@ -156,7 +161,7 @@ export function GoogleMap({ city, bars, defaultZoom = 12 }: GoogleMapProps) {
 	const pins = toBarPins(bars);
 
 	return (
-		<div className="glass-card rounded-2xl overflow-hidden modern-shadow h-64 md:h-80">
+		<div className="h-64 overflow-hidden rounded-[18px] border border-border modern-shadow md:h-full md:min-h-80">
 			<APIProvider apiKey={apiKey}>
 				<GoogleMapComponent
 					defaultCenter={center}

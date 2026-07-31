@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cn } from "./utils";
+import { cn, formatRelativeTime } from "./utils";
 
 describe("cn", () => {
 	describe("正常系", () => {
@@ -87,6 +87,65 @@ describe("cn", () => {
 		it("Tailwindの競合する複数のクラスで、最後のクラスが適用される", () => {
 			const result = cn("p-2", "p-4", "p-6");
 			expect(result).toBe("p-6");
+		});
+	});
+});
+
+describe("formatRelativeTime", () => {
+	const now = new Date("2026-07-19T12:00:00Z");
+
+	describe("正常系", () => {
+		it("60秒未満は「たった今」を返す", () => {
+			const target = new Date("2026-07-19T11:59:30Z");
+			expect(formatRelativeTime(target, now)).toBe("たった今");
+		});
+
+		it("ちょうど1分は「1分前」を返す", () => {
+			const target = new Date("2026-07-19T11:59:00Z");
+			expect(formatRelativeTime(target, now)).toBe("1分前");
+		});
+
+		it("59分は「59分前」を返す", () => {
+			const target = new Date("2026-07-19T11:01:00Z");
+			expect(formatRelativeTime(target, now)).toBe("59分前");
+		});
+
+		it("ちょうど1時間は「1時間前」を返す", () => {
+			const target = new Date("2026-07-19T11:00:00Z");
+			expect(formatRelativeTime(target, now)).toBe("1時間前");
+		});
+
+		it("23時間は「23時間前」を返す", () => {
+			const target = new Date("2026-07-18T13:00:00Z");
+			expect(formatRelativeTime(target, now)).toBe("23時間前");
+		});
+
+		it("ちょうど1日は「1日前」を返す", () => {
+			const target = new Date("2026-07-18T12:00:00Z");
+			expect(formatRelativeTime(target, now)).toBe("1日前");
+		});
+
+		it("6日は「6日前」を返す", () => {
+			const target = new Date("2026-07-13T12:00:00Z");
+			expect(formatRelativeTime(target, now)).toBe("6日前");
+		});
+
+		it("7日以上は日付表記を返す", () => {
+			const target = new Date("2026-07-10T12:00:00Z");
+			expect(formatRelativeTime(target, now)).toBe(
+				target.toLocaleDateString("ja-JP"),
+			);
+		});
+
+		it("ISO文字列を受け取れる", () => {
+			expect(formatRelativeTime("2026-07-19T11:00:00Z", now)).toBe("1時間前");
+		});
+	});
+
+	describe("エッジケース", () => {
+		it("未来日時（時計差）は「たった今」に丸める", () => {
+			const target = new Date("2026-07-19T12:00:30Z");
+			expect(formatRelativeTime(target, now)).toBe("たった今");
 		});
 	});
 });

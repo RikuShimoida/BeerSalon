@@ -31,20 +31,12 @@ vi.mock("./actions", () => ({
 	createPost: vi.fn(),
 }));
 
-const mockBars = [
-	{
-		id: BigInt(1),
-		name: "テストバー1",
-		prefecture: "東京都",
-		city: "渋谷区",
-	},
-	{
-		id: BigInt(2),
-		name: "テストバー2",
-		prefecture: "神奈川県",
-		city: "横浜市",
-	},
-];
+const mockBar = {
+	id: BigInt(1),
+	name: "テストバー1",
+	prefecture: "東京都",
+	city: "渋谷区",
+};
 
 describe("PostForm", () => {
 	beforeEach(() => {
@@ -55,86 +47,89 @@ describe("PostForm", () => {
 
 	describe("正常系 - レンダリング", () => {
 		it("正しくレンダリングされる", () => {
-			render(<PostForm bars={mockBars} />);
-			expect(screen.getByLabelText(/店舗選択/)).toBeInTheDocument();
+			render(<PostForm bar={mockBar} />);
+			expect(screen.getByText("投稿する店舗")).toBeInTheDocument();
 		});
 
 		it("全ての入力フィールドが表示される", () => {
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
-			expect(screen.getByLabelText(/店舗選択/)).toBeInTheDocument();
+			expect(screen.getByText("投稿する店舗")).toBeInTheDocument();
 			expect(screen.getByLabelText(/投稿本文/)).toBeInTheDocument();
-			expect(screen.getByText(/写真を追加（最大4枚）/)).toBeInTheDocument();
+			expect(screen.getByText(/写真（最大4枚）/)).toBeInTheDocument();
 		});
 
-		it("送信ボタンとキャンセルボタンが表示される", () => {
-			render(<PostForm bars={mockBars} />);
+		it("送信ボタンと閉じるボタンが表示される", () => {
+			render(<PostForm bar={mockBar} />);
 
 			expect(
 				screen.getByRole("button", { name: "投稿する" }),
 			).toBeInTheDocument();
 			expect(
-				screen.getByRole("button", { name: "キャンセル" }),
+				screen.getByRole("button", { name: "閉じる" }),
 			).toBeInTheDocument();
 		});
 	});
 
 	describe("正常系 - フィールド属性", () => {
 		it("投稿本文フィールドがtextareaである", () => {
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
 			const bodyInput = screen.getByLabelText(/投稿本文/);
 			expect(bodyInput.tagName).toBe("TEXTAREA");
 		});
 
-		it("必須フィールドがrequiredである", () => {
-			render(<PostForm bars={mockBars} />);
+		it("投稿本文フィールドがrequiredである", () => {
+			render(<PostForm bar={mockBar} />);
 
-			expect(screen.getByLabelText(/店舗選択/)).toBeRequired();
 			expect(screen.getByLabelText(/投稿本文/)).toBeRequired();
 		});
 
 		it("写真アップロードフィールドが表示される", () => {
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
-			const imageInput = screen.getByLabelText("+ 写真を追加");
+			const imageInput = screen.getByLabelText("写真を追加");
 			expect(imageInput).toHaveAttribute("type", "file");
 			expect(imageInput).toHaveAttribute("accept", "image/*");
 			expect(imageInput).toHaveAttribute("multiple");
 		});
 	});
 
-	describe("正常系 - selectフィールド", () => {
-		it("店舗selectが正しいオプションを持つ", () => {
-			render(<PostForm bars={mockBars} />);
+	describe("正常系 - 店舗の固定表示", () => {
+		it("店舗選択のプルダウン(select)が存在しない", () => {
+			const { container } = render(<PostForm bar={mockBar} />);
 
-			const barSelect = screen.getByLabelText(/店舗選択/);
-			expect(barSelect).toBeInTheDocument();
-
-			expect(screen.getByText("店舗を選択してください")).toBeInTheDocument();
+			expect(container.querySelector("select")).not.toBeInTheDocument();
 			expect(
-				screen.getByText("テストバー1 (東京都 渋谷区)"),
-			).toBeInTheDocument();
-			expect(
-				screen.getByText("テストバー2 (神奈川県 横浜市)"),
-			).toBeInTheDocument();
+				screen.queryByText("店舗を選択してください"),
+			).not.toBeInTheDocument();
 		});
 
-		it("selectedBarIdが指定された場合、デフォルト値が設定される", () => {
-			render(<PostForm bars={mockBars} selectedBarId="1" />);
+		it("投稿対象の店舗名と所在地が表示される", () => {
+			render(<PostForm bar={mockBar} />);
 
-			const barSelect = screen.getByLabelText(/店舗選択/) as HTMLSelectElement;
-			expect(barSelect.value).toBe("1");
+			expect(screen.getByText("テストバー1")).toBeInTheDocument();
+			expect(screen.getByText("東京都 渋谷区")).toBeInTheDocument();
+		});
+
+		it("barIdがhidden inputとして正しい値で送信される", () => {
+			const { container } = render(<PostForm bar={mockBar} />);
+
+			const hiddenInput = container.querySelector(
+				'input[type="hidden"][name="barId"]',
+			) as HTMLInputElement;
+			expect(hiddenInput).toBeInTheDocument();
+			expect(hiddenInput.value).toBe("1");
 		});
 	});
 
-	describe("正常系 - キャンセルボタン", () => {
-		it("キャンセルボタンをクリックするとrouter.back()が呼ばれる", async () => {
+	describe("正常系 - 閉じるボタン", () => {
+		it("閉じるボタンをクリックするとrouter.back()が呼ばれる", async () => {
 			const user = userEvent.setup();
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
-			const cancelButton = screen.getByRole("button", { name: "キャンセル" });
-			await user.click(cancelButton);
+			const closeButton = screen.getByRole("button", { name: "閉じる" });
+			await user.click(closeButton);
 
 			expect(mockBack).toHaveBeenCalled();
 		});
@@ -145,7 +140,7 @@ describe("PostForm", () => {
 			const errorMessage = "投稿の作成に失敗しました";
 			mockUseActionState.mockReturnValue([{ error: errorMessage }, vi.fn()]);
 
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
 			expect(screen.getByText(errorMessage)).toBeInTheDocument();
 		});
@@ -153,7 +148,7 @@ describe("PostForm", () => {
 		it("エラーがない場合はエラーメッセージが表示されない", () => {
 			mockUseActionState.mockReturnValue([undefined, vi.fn()]);
 
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
 			expect(screen.queryByText(/失敗しました/)).not.toBeInTheDocument();
 		});
@@ -163,7 +158,7 @@ describe("PostForm", () => {
 		it("送信中はボタンがdisabledになる", () => {
 			mockUseTransition.mockReturnValue([true, vi.fn()]);
 
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
 			const submitButton = screen.getByRole("button", { name: "投稿中..." });
 			expect(submitButton).toBeDisabled();
@@ -172,7 +167,7 @@ describe("PostForm", () => {
 		it("送信中はボタンのテキストが変わる", () => {
 			mockUseTransition.mockReturnValue([true, vi.fn()]);
 
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
 			expect(
 				screen.getByRole("button", { name: "投稿中..." }),
@@ -185,7 +180,7 @@ describe("PostForm", () => {
 		it("送信中でない場合はボタンが有効である", () => {
 			mockUseTransition.mockReturnValue([false, vi.fn()]);
 
-			render(<PostForm bars={mockBars} />);
+			render(<PostForm bar={mockBar} />);
 
 			const submitButton = screen.getByRole("button", { name: "投稿する" });
 			expect(submitButton).not.toBeDisabled();

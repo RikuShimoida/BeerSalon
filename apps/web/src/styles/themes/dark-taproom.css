@@ -1,0 +1,48 @@
+:root {
+	/*
+	 * Dark Taproom（ダーク×アンバー基調）。current.css と同内容の復元用テーマ（Issue #440）。
+	 * `pnpm --filter @beersalon/web theme dark-taproom` で globals.css の :root をこの内容へ戻せる。
+	 * 値は design_handoff_user_screens/README.md の Design Tokens 表を正とする。
+	 */
+	--radius: 1rem;
+	--background: #15100a;
+	--foreground: #e6d3ac;
+	--card: #1e160d;
+	--card-foreground: #f3e7d2;
+	--popover: #1e160d;
+	--popover-foreground: #f3e7d2;
+	--primary: #e0a341;
+	--primary-foreground: #20160a;
+	--secondary: #2c2013;
+	--secondary-foreground: #f5e9d4;
+	--muted: #241a0e;
+	--muted-foreground: #9c8763;
+	--accent: #2c2013;
+	--accent-foreground: #e0a341;
+	--destructive: #e0483a;
+	--border: rgba(224, 163, 65, 0.18);
+	--input: #241a0e;
+	--ring: #e0a341;
+	--chart-1: #e0a341;
+	--chart-2: #c47f28;
+	--chart-3: #a5691f;
+	--chart-4: #8a5a2a;
+	--chart-5: #5a3818;
+	--sidebar: #1e160d;
+	--sidebar-foreground: #e6d3ac;
+	--sidebar-primary: #e0a341;
+	--sidebar-primary-foreground: #20160a;
+	--sidebar-accent: #2c2013;
+	--sidebar-accent-foreground: #f5e9d4;
+	--sidebar-border: rgba(224, 163, 65, 0.18);
+	--sidebar-ring: #e0a341;
+	--surface-panel: rgba(21, 16, 10, 0.9);
+	--surface-control: #241a0e;
+	/* Dark Taproom 拡張トークン */
+	--surface-deep: #0f0b06;
+	--surface-raised: #241a0e;
+	--primary-strong: #c47f28;
+	--heading: #f5e9d4;
+	--subtext: #c9b48c;
+	--success: #7fc47f;
+}

@@ -1,8 +1,9 @@
+import { PenSquare } from "lucide-react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBarDetail, isFavoriteBar, recordViewHistory } from "@/actions/bar";
+import { BarHero } from "@/components/bar/bar-hero";
 import { BarTabs } from "@/components/bar/bar-tabs";
-import { FavoriteButton } from "@/components/bar/favorite-button";
-import { MediaSlideshow } from "@/components/bar/media-slideshow";
 import { ArticlesTab } from "@/components/bar/tabs/articles-tab";
 import { CouponsTab } from "@/components/bar/tabs/coupons-tab";
 import { EventsTab } from "@/components/bar/tabs/events-tab";
@@ -30,24 +31,19 @@ export default async function BarDetailPage({
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-7xl mx-auto">
-				<div className="bg-card rounded-lg shadow-md overflow-hidden">
-					<div className="px-6 pt-6 pb-4">
-						<div className="flex items-start justify-between">
-							<div className="flex-1">
-								<h1 className="text-3xl font-semibold text-foreground">
-									{bar.name}
-								</h1>
-							</div>
-							<FavoriteButton
-								barId={barId}
-								initialIsFavorite={initialIsFavorite}
-							/>
-						</div>
-					</div>
+			<div className="pb-20 md:pb-0">
+				<BarHero
+					barId={barId}
+					name={bar.name}
+					prefecture={bar.prefecture}
+					city={bar.city}
+					media={bar.barImages
+						.filter((img) => img.imageType === "slider")
+						.slice(0, 5)}
+					initialIsFavorite={initialIsFavorite}
+				/>
 
-					<MediaSlideshow media={bar.barImages.slice(0, 5)} />
-
+				<div className="mx-auto max-w-7xl">
 					<BarTabs>
 						{{
 							top: <TopTab bar={bar} />,
@@ -62,6 +58,26 @@ export default async function BarDetailPage({
 							events: <EventsTab events={bar.events} />,
 						}}
 					</BarTabs>
+				</div>
+
+				<div className="fixed inset-x-0 bottom-16 z-20 border-t border-border bg-surface-deep/95 p-3 backdrop-blur-md md:hidden">
+					<Link
+						href={`/posts/new?barId=${barId}`}
+						className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-strong py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90"
+					>
+						<PenSquare className="h-4 w-4" />
+						このお店に投稿する
+					</Link>
+				</div>
+
+				<div className="mx-auto hidden max-w-7xl px-4 pb-8 md:block">
+					<Link
+						href={`/posts/new?barId=${barId}`}
+						className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary-strong px-6 py-3 font-medium text-primary-foreground transition-opacity hover:opacity-90"
+					>
+						<PenSquare className="h-4 w-4" />
+						このお店に投稿する
+					</Link>
 				</div>
 			</div>
 		</AuthenticatedLayout>

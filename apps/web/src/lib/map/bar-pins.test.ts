@@ -7,7 +7,7 @@ function makeBar(overrides: Partial<BarSummary>): BarSummary {
 		id: "1",
 		name: "テストバー",
 		prefecture: "静岡県",
-		city: "静岡市（葵区）",
+		city: "静岡市",
 		imageUrl: undefined,
 		latitude: "34.9756",
 		longitude: "138.3833",
@@ -25,7 +25,7 @@ describe("toBarPins", () => {
 		expect(pins[0]).toEqual({
 			id: "10",
 			name: "テストバー",
-			city: "静岡市（葵区）",
+			city: "静岡市",
 			prefecture: "静岡県",
 			lat: 35.1614,
 			lng: 138.6764,

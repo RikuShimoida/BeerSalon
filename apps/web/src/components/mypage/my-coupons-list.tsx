@@ -1,5 +1,6 @@
 "use client";
 
+import { Ticket } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { redeemCoupon } from "@/actions/coupon";
@@ -43,8 +44,11 @@ export function MyCouponsList({ coupons }: MyCouponsListProps) {
 
 	if (coupons.length === 0) {
 		return (
-			<div className="p-8 text-center">
-				<p className="text-muted-foreground tracking-wide">
+			<div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
+				<div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-raised text-primary/60">
+					<Ticket className="h-7 w-7" />
+				</div>
+				<p className="font-medium text-heading">
 					取得済みのクーポンはありません
 				</p>
 			</div>
@@ -87,7 +91,7 @@ export function MyCouponsList({ coupons }: MyCouponsListProps) {
 	};
 
 	return (
-		<div className="divide-y divide-border/50">
+		<div className="flex flex-col gap-4">
 			{coupons.map((coupon) => {
 				const isUsed = usedIds.has(coupon.id);
 				const withinPeriod = isWithinValidPeriod(coupon);
@@ -98,53 +102,71 @@ export function MyCouponsList({ coupons }: MyCouponsListProps) {
 				return (
 					<div
 						key={coupon.id}
-						className="p-4 hover:bg-primary/10 transition-all duration-300"
+						className={`flex overflow-hidden rounded-2xl border border-border bg-card modern-shadow transition-opacity ${
+							isUsed ? "opacity-60" : ""
+						}`}
 					>
-						<div className="flex flex-col gap-2">
-							<div className="flex items-start justify-between">
-								<h2 className="text-lg font-semibold text-card-foreground tracking-tight">
+						{/* Why not 通常のカードのままにしない: チケット型を表現するため、左端に
+						    破線区切り + 縦書きラベルのスタブ列を独立させて視覚的に「もぎり」を表す。 */}
+						<div
+							className={`flex w-14 flex-shrink-0 items-center justify-center border-r border-dashed ${
+								isUsed
+									? "border-border bg-surface-raised"
+									: "border-primary/40 bg-primary/10"
+							}`}
+						>
+							<span
+								className={`text-xs font-semibold uppercase tracking-widest [writing-mode:vertical-rl] ${
+									isUsed ? "text-subtext" : "text-primary"
+								}`}
+							>
+								Coupon
+							</span>
+						</div>
+
+						<div className="min-w-0 flex-1 p-4">
+							<div className="flex items-start justify-between gap-2">
+								<h2 className="font-mincho text-lg font-bold text-heading">
 									{coupon.title}
 								</h2>
 								{isUsed && (
-									<span className="px-2 py-1 text-xs font-medium text-muted-foreground bg-muted/50 rounded-lg">
+									<span className="flex-shrink-0 rounded-full bg-surface-raised px-2 py-1 text-xs font-medium text-subtext">
 										使用済み
 									</span>
 								)}
 							</div>
 
-							<p className="text-card-foreground tracking-wide">
+							<p className="mt-1 text-sm text-foreground">
 								{coupon.description}
 							</p>
 
-							<div className="text-sm text-muted-foreground tracking-wide">
+							<div className="mt-2 text-sm text-subtext">
 								<span className="font-medium">対象店舗：</span>
 								{coupon.barName}
 							</div>
 
 							{coupon.validUntil && (
-								<div className="text-sm text-muted-foreground tracking-wide">
+								<div className="text-sm text-subtext">
 									<span className="font-medium">有効期限：</span>
 									{new Date(coupon.validUntil).toLocaleDateString("ja-JP")}
 								</div>
 							)}
 
 							{!isUsed && (
-								<div className="mt-2">
-									<button
-										type="button"
-										onClick={() => handleUse(coupon.id)}
-										disabled={!isUsable || isLoading}
-										className="w-full py-2 px-4 rounded-md bg-amber-500 text-white font-medium hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-									>
-										{!withinPeriod
-											? "有効期限外"
-											: limitReached
-												? "利用上限に達しています"
-												: isLoading
-													? "利用中..."
-													: "クーポンを利用する"}
-									</button>
-								</div>
+								<button
+									type="button"
+									onClick={() => handleUse(coupon.id)}
+									disabled={!isUsable || isLoading}
+									className="mt-3 w-full rounded-full bg-gradient-to-r from-primary to-primary-strong px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+								>
+									{!withinPeriod
+										? "有効期限外"
+										: limitReached
+											? "利用上限に達しています"
+											: isLoading
+												? "利用中..."
+												: "クーポンを利用する"}
+								</button>
 							)}
 						</div>
 					</div>

@@ -110,4 +110,52 @@ describe("POST /api/bars/[barId]/menus/beers", () => {
 		expect(response.status).toBe(400);
 		expect(beersInsert).not.toHaveBeenCalled();
 	});
+
+	it("アルコール度数を指定すると beers insert に送信値どおりの abv が渡る", async () => {
+		const { beersInsert } = setupSupabaseMock();
+
+		const response = await POST(
+			createMockRequest({
+				name: "IPA Revolution",
+				beer_category_id: 5,
+				abv: 5.5,
+			}),
+			{ params: Promise.resolve({ barId: "1" }) },
+		);
+
+		expect(response.status).toBe(201);
+		expect(beersInsert).toHaveBeenCalledWith(
+			expect.objectContaining({ abv: 5.5 }),
+		);
+	});
+
+	it("アルコール度数が未指定の場合は abv=null で insert される（任意項目）", async () => {
+		const { beersInsert } = setupSupabaseMock();
+
+		const response = await POST(
+			createMockRequest({ name: "IPA Revolution", beer_category_id: 5 }),
+			{ params: Promise.resolve({ barId: "1" }) },
+		);
+
+		expect(response.status).toBe(201);
+		expect(beersInsert).toHaveBeenCalledWith(
+			expect.objectContaining({ abv: null }),
+		);
+	});
+
+	it("アルコール度数が範囲外（100以上）の場合は400を返し beers を insert しない", async () => {
+		const { beersInsert } = setupSupabaseMock();
+
+		const response = await POST(
+			createMockRequest({
+				name: "IPA Revolution",
+				beer_category_id: 5,
+				abv: 150,
+			}),
+			{ params: Promise.resolve({ barId: "1" }) },
+		);
+
+		expect(response.status).toBe(400);
+		expect(beersInsert).not.toHaveBeenCalled();
+	});
 });

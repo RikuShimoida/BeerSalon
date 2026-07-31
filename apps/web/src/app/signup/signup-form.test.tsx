@@ -120,13 +120,64 @@ describe("SignUpForm", () => {
 	});
 
 	describe("正常系 - リンク", () => {
-		it("「ログインはこちら」リンクが/loginへ遷移する", () => {
+		it("「すでにアカウントをお持ちの方」リンクが/loginへ遷移する", () => {
 			render(<SignUpForm />);
 
 			const loginLink = screen.getByRole("link", {
-				name: "ログインはこちら",
+				name: "すでにアカウントをお持ちの方",
 			});
 			expect(loginLink).toHaveAttribute("href", "/login");
+		});
+	});
+
+	describe("正常系 - パスワード表示トグル", () => {
+		it("トグル押下でtype='text'に切り替わり、再押下でpasswordに戻る", async () => {
+			const user = userEvent.setup();
+			render(<SignUpForm />);
+
+			const passwordInput = screen.getByLabelText("パスワード");
+			expect(passwordInput).toHaveAttribute("type", "password");
+
+			await user.click(
+				screen.getByRole("button", { name: "パスワードを表示" }),
+			);
+			expect(passwordInput).toHaveAttribute("type", "text");
+
+			await user.click(
+				screen.getByRole("button", { name: "パスワードを隠す" }),
+			);
+			expect(passwordInput).toHaveAttribute("type", "password");
+		});
+	});
+
+	describe("正常系 - パスワード強度メーター", () => {
+		it("入力に応じて塗り段数(data-strength)が増える", async () => {
+			const user = userEvent.setup();
+			render(<SignUpForm />);
+
+			const meter = screen.getByTestId("password-strength");
+			expect(meter).toHaveAttribute("data-strength", "0");
+
+			const passwordInput = screen.getByLabelText("パスワード");
+			// 8文字以上 + 小文字のみ = 2条件
+			await user.type(passwordInput, "abcdefgh");
+			expect(meter).toHaveAttribute("data-strength", "2");
+
+			// 8文字以上 + 小文字 + 大文字 + 数字 = 4条件
+			await user.clear(passwordInput);
+			await user.type(passwordInput, "Password123");
+			expect(meter).toHaveAttribute("data-strength", "4");
+		});
+	});
+
+	describe("正常系 - OAuth登録ボタン(配置のみ)", () => {
+		it("Google/Xで登録ボタンは表示されるが非活性である", () => {
+			render(<SignUpForm />);
+
+			const google = screen.getByRole("button", { name: /Googleで登録/ });
+			const x = screen.getByRole("button", { name: /Xで登録/ });
+			expect(google).toBeDisabled();
+			expect(x).toBeDisabled();
 		});
 	});
 

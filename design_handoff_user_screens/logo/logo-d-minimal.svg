@@ -1,0 +1,17 @@
+<svg width="240" height="52" viewBox="0 0 240 52" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Beer Salon">
+  <defs>
+    <linearGradient id="d_drop" x1="20" y1="6" x2="20" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e0a341"/>
+      <stop offset="1" stop-color="#c47f28"/>
+    </linearGradient>
+  </defs>
+  <!-- droplet mark (geometric) -->
+  <path d="M20 6 C27 22 32 27 32 33 A12 12 0 1 1 8 33 C8 27 13 22 20 6 Z" fill="url(#d_drop)"/>
+  <circle cx="15.5" cy="34" r="3.6" fill="#f5e9d4" fill-opacity="0.35"/>
+  <!-- overline -->
+  <text x="48" y="16" font-family="'Archivo', sans-serif" font-weight="600" font-size="8" letter-spacing="2.7" fill="#9c8763">SHIZUOKA CRAFT</text>
+  <!-- wordmark -->
+  <text x="48" y="40" font-family="'Zen Old Mincho', serif" font-weight="900" font-size="27" fill="#f5e9d4">Beer<tspan font-family="'Archivo', sans-serif" font-weight="800" fill="#e0a341"> Salon</tspan></text>
+  <!-- underline rule -->
+  <rect x="48" y="46" width="150" height="2" rx="1" fill="url(#d_drop)"/>
+</svg>

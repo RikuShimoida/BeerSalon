@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
 import { prisma } from "@/lib/prisma";
@@ -19,34 +20,51 @@ export default async function NewPostPage({
 		redirect("/login");
 	}
 
-	const bars = await prisma.bar.findMany({
-		where: {
-			isActive: true,
-		},
-		select: {
-			id: true,
-			name: true,
-			prefecture: true,
-			city: true,
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
-
 	const params = await searchParams;
-	const selectedBarId = params.barId;
+	const barIdParam = params.barId;
+
+	const bar =
+		barIdParam && /^\d+$/.test(barIdParam)
+			? await prisma.bar.findFirst({
+					where: {
+						id: BigInt(barIdParam),
+						isActive: true,
+					},
+					select: {
+						id: true,
+						name: true,
+						prefecture: true,
+						city: true,
+					},
+				})
+			: null;
 
 	return (
 		<AuthenticatedLayout>
-			<div className="max-w-2xl mx-auto px-4 py-8 md:py-12">
-				<div className="text-center mb-8">
-					<h1 className="text-3xl font-semibold text-foreground">投稿を作成</h1>
-				</div>
-
-				<div className="bg-card p-8 rounded-lg shadow-md">
-					<PostForm bars={bars} selectedBarId={selectedBarId} />
-				</div>
+			<div className="max-w-3xl mx-auto px-4 py-6 md:py-10">
+				{bar ? (
+					<PostForm bar={bar} />
+				) : (
+					<div className="mb-6">
+						<p className="font-archivo text-xs uppercase tracking-[0.2em] text-primary mb-1">
+							New Post
+						</p>
+						<h1 className="font-mincho text-3xl text-heading mb-6">
+							投稿を作成
+						</h1>
+						<div className="bg-card rounded-2xl border border-primary/15 p-8 flex flex-col items-center gap-6 text-center">
+							<p className="text-card-foreground">
+								投稿する店舗の詳細ページから「このお店に投稿する」を押して投稿してください。
+							</p>
+							<Link
+								href="/"
+								className="px-6 py-3 rounded-lg bg-gradient-to-br from-primary to-primary-strong text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+							>
+								店舗を探す
+							</Link>
+						</div>
+					</div>
+				)}
 			</div>
 		</AuthenticatedLayout>
 	);

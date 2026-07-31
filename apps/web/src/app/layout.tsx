@@ -1,15 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Archivo, Zen_Kaku_Gothic_New, Zen_Old_Mincho } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const geistSans = Geist({
-	variable: "--font-geist-sans",
+// Dark Taproom タイポグラフィ（design_handoff_user_screens/README.md を正とする）
+// Zen Old Mincho: 見出し・店名・PR文・記事本文（明朝）
+const zenOldMincho = Zen_Old_Mincho({
+	variable: "--font-mincho",
+	weight: ["700", "900"],
 	subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-	variable: "--font-geist-mono",
+// Zen Kaku Gothic New: UI 本文・ラベル・ボタンのデフォルト（ゴシック）
+const zenKakuGothicNew = Zen_Kaku_Gothic_New({
+	variable: "--font-gothic",
+	weight: ["400", "500", "700", "900"],
+	subsets: ["latin"],
+});
+
+// Archivo: ラテン見出し・ロゴ "Salon"・オーバーライン・カウンタ数字
+const archivo = Archivo({
+	variable: "--font-archivo",
+	weight: ["500", "600", "700", "800"],
 	subsets: ["latin"],
 });
 
@@ -27,7 +39,7 @@ export default function RootLayout({
 	return (
 		<html lang="ja">
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${zenKakuGothicNew.variable} ${zenOldMincho.variable} ${archivo.variable} font-sans antialiased`}
 			>
 				{children}
 				<Toaster />

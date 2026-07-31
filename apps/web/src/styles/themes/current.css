@@ -1,36 +1,50 @@
 :root {
+	/*
+	 * Dark Taproom（ダーク×アンバー基調）。
+	 * Why not HSL 成分値: 従来の `--primary: 30 75% 45%` は @theme inline で hsl() 未ラップのため
+	 * bg-primary / text-foreground / bg-card 等が透明化し機能していなかった（Issue #440）。
+	 * トークンに実 Hex を直接持たせ、@theme inline の --color-* がそれを返すことで有効化する。
+	 * 値は design_handoff_user_screens/README.md の Design Tokens 表を正とする。
+	 */
 	--radius: 1rem;
-	--background: 35 25% 92%;
-	--foreground: 30 15% 20%;
-	--card: 35 20% 96%;
-	--card-foreground: 30 15% 25%;
-	--popover: 35 20% 96%;
-	--popover-foreground: 30 15% 25%;
-	--primary: 30 75% 45%;
-	--primary-foreground: 0 0% 100%;
-	--secondary: 35 60% 55%;
-	--secondary-foreground: 30 15% 20%;
-	--muted: 35 20% 85%;
-	--muted-foreground: 30 10% 45%;
-	--accent: 30 50% 88%;
-	--accent-foreground: 30 75% 40%;
-	--destructive: 0 84% 60%;
-	--border: 35 15% 82%;
-	--input: 35 15% 82%;
-	--ring: 30 75% 45%;
-	--chart-1: 30 75% 45%;
-	--chart-2: 35 60% 55%;
-	--chart-3: 40 65% 50%;
-	--chart-4: 25 70% 50%;
-	--chart-5: 35 55% 60%;
-	--sidebar: 35 20% 96%;
-	--sidebar-foreground: 30 15% 20%;
-	--sidebar-primary: 30 75% 45%;
-	--sidebar-primary-foreground: 0 0% 100%;
-	--sidebar-accent: 35 20% 90%;
-	--sidebar-accent-foreground: 30 15% 20%;
-	--sidebar-border: 35 15% 82%;
-	--sidebar-ring: 30 75% 45%;
-	--surface-panel: #e2d6bf;
-	--surface-control: #ffffff;
+	--background: #15100a;
+	--foreground: #e6d3ac;
+	--card: #1e160d;
+	--card-foreground: #f3e7d2;
+	--popover: #1e160d;
+	--popover-foreground: #f3e7d2;
+	--primary: #e0a341;
+	--primary-foreground: #20160a;
+	--secondary: #2c2013;
+	--secondary-foreground: #f5e9d4;
+	--muted: #241a0e;
+	--muted-foreground: #9c8763;
+	--accent: #2c2013;
+	--accent-foreground: #e0a341;
+	--destructive: #e0483a;
+	--border: rgba(224, 163, 65, 0.18);
+	--input: #241a0e;
+	--ring: #e0a341;
+	--chart-1: #e0a341;
+	--chart-2: #c47f28;
+	--chart-3: #a5691f;
+	--chart-4: #8a5a2a;
+	--chart-5: #5a3818;
+	--sidebar: #1e160d;
+	--sidebar-foreground: #e6d3ac;
+	--sidebar-primary: #e0a341;
+	--sidebar-primary-foreground: #20160a;
+	--sidebar-accent: #2c2013;
+	--sidebar-accent-foreground: #f5e9d4;
+	--sidebar-border: rgba(224, 163, 65, 0.18);
+	--sidebar-ring: #e0a341;
+	--surface-panel: rgba(21, 16, 10, 0.9);
+	--surface-control: #241a0e;
+	/* Dark Taproom 拡張トークン */
+	--surface-deep: #0f0b06;
+	--surface-raised: #241a0e;
+	--primary-strong: #c47f28;
+	--heading: #f5e9d4;
+	--subtext: #c9b48c;
+	--success: #7fc47f;
 }

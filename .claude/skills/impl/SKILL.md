@@ -31,6 +31,12 @@ agent: frontend-engineer
 
 #### 1-0. 前提チェック（worktree モード。満たさなければ停止）
 
+- **Docker が起動済みであること**（`check-docker.sh` フックが impl 起動時に自動で検証する）。
+  - Docker デーモン未起動、または Supabase コンテナ未起動の場合、impl は PreToolUse フックで
+    ブロックされ、それ以上先に進めない。ローカル Supabase(54421) の実体が Docker のため、
+    dev サーバー自動起動（1-4）と E2E の前提として Docker 起動を保証する。
+  - ブロックされたら、Docker Desktop を起動し（必要なら `supabase start`）、impl を再実行する。
+    **Docker 自体の自動起動は行わない**（デーモン起動は非決定的なため、ブロックに留める）。
 - `git branch --show-current` が `develop` であること。
   - developメイン会話を司令塔とし、ここから worktree を切る運用のため。
   - develop 以外なら「`git switch develop` してから再実行してください」と案内して停止。
@@ -136,6 +142,11 @@ git / Claude Code のネイティブ機能では自動化されないため、wo
 - **承認レスで実行する**。E2E計画の事前提示・承認待ちは行わない
   （何を検証するかは `/plan` 承認時点で受入条件として確定済みのため。許可プロンプト排除方針に整合）。
 - Playwright MCP の操作、および E2E 実行に必要なコマンド（`pnpm e2e` 等）は、確認を求めずそのまま実行してよい。
+- **dev サーバーはユーザーへの手動起動依頼をしない**。impl 起動時の `check-dev-servers.sh` フックが
+  未起動の dev:web(3000)/dev:admin(3001) を `start-dev-servers.sh` 経由で自動起動し、ヘルスチェックで
+  起動を待ってから impl 本体を開始する。したがって E2E フェーズ到達時点で両サーバーは起動済みである。
+  - フックが起動に失敗した場合のみブロックされる。その際は `/tmp/beersalon-dev-logs/` のログを確認して報告する。
+  - 「dev サーバーを起動してください」とユーザーに依頼してはならない（自動起動が前提）。
 - 起動済みの localhost に対して E2E 確認を実施する。
 - ポートが不明な場合のみユーザーに確認する。
 - 不具合を発見した場合は修正せず、再現手順・期待結果・実際の結果を報告する

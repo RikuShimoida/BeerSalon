@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
@@ -111,4 +112,39 @@ export async function markNotificationAsRead(notificationId: string) {
 			isRead: true,
 		},
 	});
+}
+
+export async function markAllNotificationsAsRead() {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		throw new Error("Not authenticated");
+	}
+
+	const userProfile = await prisma.userProfile.findUnique({
+		where: {
+			userAuthId: user.id,
+		},
+	});
+
+	if (!userProfile) {
+		throw new Error("User profile not found");
+	}
+
+	// Why not: 個別 markNotificationAsRead の連続呼び出しは往復が通知件数分に増えるため、
+	// 本人の未読分のみを updateMany で一括更新する。
+	await prisma.notification.updateMany({
+		where: {
+			userId: userProfile.id,
+			isRead: false,
+		},
+		data: {
+			isRead: true,
+		},
+	});
+
+	revalidatePath("/notifications");
 }
