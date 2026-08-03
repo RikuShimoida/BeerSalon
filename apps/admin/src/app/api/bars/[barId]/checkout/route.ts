@@ -1,10 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { canAccessBar, getCurrentUser } from "@/lib/auth";
+import { resolveRequestOrigin } from "@/lib/request-origin";
 import { stripe } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(
-	_request: NextRequest,
+	request: NextRequest,
 	{ params }: { params: Promise<{ barId: string }> },
 ) {
 	const user = await getCurrentUser();
@@ -48,13 +49,15 @@ export async function POST(
 		);
 	}
 
-	const baseUrl = process.env.ADMIN_BASE_URL || process.env.NEXT_PUBLIC_APP_URL;
+	// 決済元のオリジン（プレビューならプレビュー、本番なら本番）へ戻すため、
+	// リクエストヘッダーからオリジンを解決する（Issue #528 課題2）。
+	const baseUrl = resolveRequestOrigin(request);
 
 	// Why not: baseUrl 未設定のまま Checkout を作ると success_url が "undefined/bars/..." になり
 	//   決済後の戻り先が壊れる。無言で壊すより 500 で早期に落とす。
 	if (!baseUrl) {
 		console.error(
-			"Stripe Checkout: ADMIN_BASE_URL / NEXT_PUBLIC_APP_URL が未設定です",
+			"Stripe Checkout: リクエストオリジンを解決できませんでした（ヘッダー・環境変数とも未設定）",
 		);
 		return NextResponse.json(
 			{ error: "Stripe Checkoutの作成に失敗しました" },

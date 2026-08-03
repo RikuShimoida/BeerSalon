@@ -742,6 +742,8 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 - 店舗詳細ページの課金カードは、当該店舗の active サブスクリプション有無で導線を出し分ける（GET `/api/bars/[barId]/subscription` で判定）
   - **未サブスク（active 行なし）**: 「課金を開始する」ボタン → POST `/api/bars/[barId]/checkout` で Stripe Checkout セッション（mode: subscription）を生成し外部リダイレクト。決済完了後は webhook `customer.subscription.created` が `bar_subscriptions` を insert する（Checkout の `subscription_data.metadata` に埋めた `bar_id` / `subscription_plan_id` で紐付け）
   - **サブスク有り（active 行あり）**: 「支払い方法管理」ボタン → POST `/api/bars/[barId]/portal` で Stripe Customer Portal へ外部リダイレクト
+- Checkout の success/cancel URL、Portal の return_url（決済完了後の戻り先）は、リクエストヘッダー（`x-forwarded-host` / `host`、プロトコルは `x-forwarded-proto`）から**リクエスト元のオリジンを動的に解決**して組む。これにより local / Vercel Preview / production のいずれから決済しても、決済元のオリジンへ戻る（Preview で決済して本番へ飛ぶ問題を回避）。ヘッダーが取れない場合のみ `ADMIN_BASE_URL` / `NEXT_PUBLIC_APP_URL` にフォールバックし、両方とも無ければ 500（認証メールのコールバックURL解決と同じ方針）
+- webhook（`STRIPE_WEBHOOK_SECRET`）と Stripe ダッシュボードのエンドポイント登録は環境作業のため `docs/stripe-webhook-setup.md` にまとめる
 - 既に active/trialing/past_due のサブスクがある店舗で Checkout を叩くと 409（二重課金防止）
 - Checkout に渡す `stripe_price_id` は `subscription_plans`（is_active な1件）から取得する
 - 管理画面内に専用ページは設けない（店舗詳細内のカードで完結）
