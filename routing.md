@@ -742,6 +742,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 - 店舗詳細ページの課金カードは、当該店舗の active サブスクリプション有無で導線を出し分ける（GET `/api/bars/[barId]/subscription` で判定）
   - **未サブスク（active 行なし）**: 「課金を開始する」ボタン → POST `/api/bars/[barId]/checkout` で Stripe Checkout セッション（mode: subscription）を生成し外部リダイレクト。決済完了後は webhook `customer.subscription.created` が `bar_subscriptions` を insert する（Checkout の `subscription_data.metadata` に埋めた `bar_id` / `subscription_plan_id` で紐付け）
   - **サブスク有り（active 行あり）**: 「支払い方法管理」ボタン → POST `/api/bars/[barId]/portal` で Stripe Customer Portal へ外部リダイレクト
+- Checkout の success/cancel URL、Portal の return_url（決済後の戻り先）は `resolveRequestOrigin`（`apps/admin/src/lib/request-origin.ts`）で解決する。解決順序は **env（`ADMIN_BASE_URL` → `NEXT_PUBLIC_APP_URL`）最優先 → `x-forwarded-host`+`x-forwarded-proto` → `host`（localhost は http）→ 解決不能なら 500**。web の `getSiteUrl`（認証メールのコールバックURL）と同じく env 最優先で、`x-forwarded-host` 由来の Host Header Injection を防ぐ。プレビューで戻り先が本番へ飛ぶ問題は、Preview の env をプレビュードメイン（`beer-salon-admin-develop.vercel.app`）に是正することで解決する（env・webhook の環境作業は `docs/stripe-webhook-setup.md`）
 - 既に active/trialing/past_due のサブスクがある店舗で Checkout を叩くと 409（二重課金防止）
 - Checkout に渡す `stripe_price_id` は `subscription_plans`（is_active な1件）から取得する
 - 管理画面内に専用ページは設けない（店舗詳細内のカードで完結）
