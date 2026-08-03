@@ -30,7 +30,7 @@
 
 ### 1-1. user_profiles
 
-Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロフィール。
+Supabase Auth の `auth.users` に論理的に紐づくアプリ側のユーザプロフィール。紐付けは `user_auth_id` カラムをアプリ層で `auth.uid()` と照合することで行い、DB外部キー制約は持たない。
 
 - **Table name:** `user_profiles`
 - **Description:** Beer Salon のユーザー基本情報を保持
@@ -40,7 +40,7 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | Column          | Type        | Constraints                           | Description                    |
 |-----------------|------------|----------------------------------------|--------------------------------|
 | id              | uuid       | PK, default gen_random_uuid()         | アプリ内でのユーザID（将来拡張用） |
-| user_auth_id         | uuid       | NOT NULL, UNIQUE, FK → auth.users(id) | Supabase Auth のユーザID       |
+| user_auth_id         | uuid       | NOT NULL, UNIQUE                        | Supabase Auth のユーザID。アプリ層で `user_auth_id = auth.uid()` により論理参照する（DB外部キー制約は無い） |
 | last_name       | text       | NOT NULL                               | 姓                            |
 | first_name      | text       | NOT NULL                               | 名                            |
 | nickname        | text       | NOT NULL                               | ニックネーム                   |
