@@ -54,7 +54,6 @@ test.describe("タイムライン（Dark Taproom）", () => {
 	test("投稿が上限を超えると初回20件表示 →「もっと見る」で続きが追加表示される", async ({
 		page,
 	}) => {
-		// スモークユーザーの投稿を上限(20)+3 件だけ直接投入し、ページングを確実に発火させる。
 		const smokeProfile = await prisma.userProfile.findFirst({
 			where: { nickname: "smoke-user" },
 			select: { id: true },
@@ -63,9 +62,16 @@ test.describe("タイムライン（Dark Taproom）", () => {
 			throw new Error("smoke-user の user_profiles が見つかりません");
 		}
 
+		// Why not マーカー件数で "初回にちょうど20件" を数える: seed やフォロー中ユーザーの
+		// 既存投稿がフィード先頭を食うと、初回20枠に入るマーカーが20未満になり件数がズレる
+		// （CI で 17 件になり fail した）。マーカーを最新 createdAt で投入して確実に先頭へ並べ、
+		// 「初回フィード総数=上限20」「もっと見るで総数が増える」「マーカーが全件到達する」という
+		// 既存データ量に依存しない不変条件で検証する。
 		const marker = `pager-${Date.now()}`;
-		const totalPosts = 23; // 20 + 3（2ページ目に確実に残る件数）
+		const totalPosts = 25; // 上限(20)を確実に超え、2ページ目にも残る件数
 		const barId = 100001n; // seed.e2e.sql で固定投入される店舗
+		// 未来日時からさらに 1 秒ずつ後ろへ積み、全マーカーが既存投稿より新しく・かつ内部で順序安定するようにする。
+		const baseTime = Date.now() + 60 * 60 * 1000;
 		try {
 			for (let i = 0; i < totalPosts; i++) {
 				await prisma.post.create({
@@ -73,7 +79,7 @@ test.describe("タイムライン（Dark Taproom）", () => {
 						userId: smokeProfile.id,
 						barId,
 						body: `${marker}-${String(i).padStart(2, "0")}`,
-						createdAt: new Date(Date.UTC(2026, 0, 1, 0, 0, i)),
+						createdAt: new Date(baseTime + i * 1000),
 					},
 				});
 			}
@@ -83,19 +89,20 @@ test.describe("タイムライン（Dark Taproom）", () => {
 				page.getByRole("heading", { name: "タイムライン" }),
 			).toBeVisible();
 
-			// 初回は上限(20)件までしか出ない = このマーカー投稿は初回に20件表示される。
+			// 初回フィードは上限20件ちょうど（全件取得しない）。マーカーが最新なので初回はマーカーのみ。
+			const allCards = page.locator("article");
 			const markerCards = page.locator("article", { hasText: marker });
+			await expect(allCards).toHaveCount(20);
 			await expect(markerCards).toHaveCount(20);
 
-			// 「もっと見る」で続きを読み込むと、残り3件が追加されて全23件になる。
+			// 「もっと見る」で続きを読み込むと総数が増える（追加読み込みの発火を検証）。
 			const loadMore = page.getByRole("button", { name: "もっと見る" });
 			await expect(loadMore).toBeVisible();
 			await loadMore.click();
 
+			// マーカー投稿が全25件そろう（続きが欠落せず連結される）。
 			await expect(markerCards).toHaveCount(totalPosts);
-
-			// 全件読み込んだら「もっと見る」は消える（続きなし）。
-			await expect(loadMore).toHaveCount(0);
+			await expect(allCards).not.toHaveCount(20);
 		} finally {
 			await prisma.post.deleteMany({ where: { body: { startsWith: marker } } });
 		}
