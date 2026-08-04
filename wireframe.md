@@ -422,7 +422,9 @@ Dark Taproom（6a / 6b）で再実装済み（#445）。配色・タイポは `d
 
 ### 6-1. タイムラインページ `/timeline`
 
-Dark Taproom（5a / 5b）で実装済み（#444）。配色・タイポは `design_handoff_user_screens/README.md` の Design Tokens が正。取得データは従来どおり `getTimelinePosts`（自分＋フォロー中ユーザーの投稿を時系列降順）。
+Dark Taproom（5a / 5b）で実装済み（#444）。配色・タイポは `design_handoff_user_screens/README.md` の Design Tokens が正。取得データは `getTimelinePosts`（自分＋フォロー中ユーザーの投稿を時系列降順）。
+
+**ページング（#523）**: `getTimelinePosts` は一度に最大 20 件（`TIMELINE_PAGE_SIZE`）までを返し、全件取得はしない。並び順は `createdAt desc, id desc` の複合キーで安定させ、次ページは投稿 id を基点にした複合カーソル（`{ id }`）で取得する。フィード末尾に続きがある場合のみ「もっと見る」ボタンを表示し、押下で `getTimelinePosts(cursor)` を呼んで続きを連結する（`components/post/timeline-post-list.tsx`）。続きが無くなるとボタンは消える。無限スクロールは採用しない（wireframe に記載が無く推測実装を避けるため）。
 
 **レイアウト（Dark Taproom）**
 
