@@ -18,6 +18,7 @@ vi.mock("@/lib/supabase/server", () => ({
 	}),
 }));
 
+import { TIMELINE_PAGE_SIZE } from "@/actions/timeline-types";
 import { getTimelinePosts } from "@/actions/user";
 
 const prisma = new PrismaClient({
@@ -90,11 +91,115 @@ describe("getTimelinePosts (Integration)", () => {
 			data: { user: { id: alice.authUserId } },
 		});
 
-		const posts = await getTimelinePosts();
-		expect(posts).not.toBeNull();
+		const result = await getTimelinePosts();
+		expect(result).not.toBeNull();
 
-		const ids = (posts ?? []).map((p) => p.id);
+		const ids = (result?.posts ?? []).map((p) => p.id);
 		expect(ids).toEqual(expect.arrayContaining([alicePostId, bobPostId]));
 		expect(ids).not.toContain(carolPostId);
+	});
+});
+
+describe("getTimelinePosts ページング境界 (Integration)", () => {
+	let pager: TestAuthUser; // ページング検証専用ユーザー（自分の投稿だけを対象にする）
+	let pagerBarId: bigint;
+
+	afterAll(async () => {
+		await cleanupTestData(prisma, { authUserIds: [pager.authUserId] });
+	});
+
+	async function seedPosts(count: number): Promise<bigint[]> {
+		const ids: bigint[] = [];
+		// createdAt の重複でカーソル境界が揺れないよう、1件ずつ時刻をずらして作成する。
+		for (let i = 0; i < count; i++) {
+			const post = await prisma.post.create({
+				data: {
+					userId: pager.userProfileId,
+					barId: pagerBarId,
+					body: `it-pager-body-${i}`,
+					createdAt: new Date(Date.UTC(2026, 0, 1, 0, 0, i)),
+				},
+			});
+			ids.push(post.id);
+		}
+		// createdAt desc, id desc の並び（新しい順）に合わせて期待順序を返す。
+		return ids.reverse();
+	}
+
+	it("上限ちょうど（20件）なら全件返り nextCursor は null（続きなし）", async () => {
+		pager = await createTestAuthUser(prisma);
+		const bar = await createTestBar(prisma);
+		pagerBarId = bar.id;
+		await seedPosts(TIMELINE_PAGE_SIZE);
+
+		mockGetUser.mockResolvedValueOnce({
+			data: { user: { id: pager.authUserId } },
+		});
+
+		const result = await getTimelinePosts();
+		expect(result).not.toBeNull();
+		expect(result?.posts).toHaveLength(TIMELINE_PAGE_SIZE);
+		expect(result?.nextCursor).toBeNull();
+	});
+});
+
+describe("getTimelinePosts ページング連結 (Integration)", () => {
+	let pager: TestAuthUser;
+	let pagerBarId: bigint;
+	let expectedOrder: bigint[]; // 新しい順の投稿id（21件）
+
+	beforeAll(async () => {
+		pager = await createTestAuthUser(prisma);
+		const bar = await createTestBar(prisma);
+		pagerBarId = bar.id;
+
+		const ids: bigint[] = [];
+		for (let i = 0; i < TIMELINE_PAGE_SIZE + 1; i++) {
+			const post = await prisma.post.create({
+				data: {
+					userId: pager.userProfileId,
+					barId: pagerBarId,
+					body: `it-pager2-body-${i}`,
+					createdAt: new Date(Date.UTC(2026, 0, 2, 0, 0, i)),
+				},
+			});
+			ids.push(post.id);
+		}
+		expectedOrder = ids.reverse();
+	});
+
+	afterAll(async () => {
+		await cleanupTestData(prisma, { authUserIds: [pager.authUserId] });
+	});
+
+	it("上限+1（21件）で初回20件+nextCursor、2ページ目に残り1件（重複・欠落なし）", async () => {
+		mockGetUser.mockResolvedValueOnce({
+			data: { user: { id: pager.authUserId } },
+		});
+
+		const first = await getTimelinePosts();
+		expect(first).not.toBeNull();
+		expect(first?.posts).toHaveLength(TIMELINE_PAGE_SIZE);
+		expect(first?.nextCursor).not.toBeNull();
+		expect(first?.posts.map((p) => p.id)).toEqual(
+			expectedOrder.slice(0, TIMELINE_PAGE_SIZE),
+		);
+
+		mockGetUser.mockResolvedValueOnce({
+			data: { user: { id: pager.authUserId } },
+		});
+
+		const second = await getTimelinePosts(first?.nextCursor ?? undefined);
+		expect(second).not.toBeNull();
+		expect(second?.posts).toHaveLength(1);
+		expect(second?.nextCursor).toBeNull();
+		expect(second?.posts[0].id).toBe(expectedOrder[TIMELINE_PAGE_SIZE]);
+
+		// 重複・欠落がないこと（2ページ合算で 21 件・全 id 一致）
+		const merged = [...(first?.posts ?? []), ...(second?.posts ?? [])].map(
+			(p) => p.id,
+		);
+		expect(merged).toEqual(expectedOrder);
+		expect(new Set(merged).size).toBe(TIMELINE_PAGE_SIZE + 1);
 	});
 });

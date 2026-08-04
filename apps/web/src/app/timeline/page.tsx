@@ -3,14 +3,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTimelinePosts } from "@/actions/user";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
-import { TimelinePostCard } from "@/components/post/timeline-post-card";
+import { TimelinePostList } from "@/components/post/timeline-post-list";
 
 export default async function TimelinePage() {
-	const posts = await getTimelinePosts();
+	const result = await getTimelinePosts();
 
-	if (posts === null) {
+	if (result === null) {
 		redirect("/login");
 	}
+
+	const { posts, nextCursor } = result;
 
 	return (
 		<AuthenticatedLayout>
@@ -34,22 +36,7 @@ export default async function TimelinePage() {
 				</div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-6">
-					<div className="flex flex-col gap-4">
-						{posts.length === 0 ? (
-							<div className="bg-card rounded-2xl border border-primary/15 p-8 text-center">
-								<p className="text-heading font-medium mb-2">
-									フォローしているユーザーの投稿がありません
-								</p>
-								<p className="text-sm text-subtext">
-									他のユーザーをフォローして、投稿をチェックしましょう
-								</p>
-							</div>
-						) : (
-							posts.map((post) => (
-								<TimelinePostCard key={post.id} post={post} />
-							))
-						)}
-					</div>
+					<TimelinePostList initialPosts={posts} initialCursor={nextCursor} />
 
 					<aside className="hidden lg:block">
 						<div className="sticky top-20 rounded-2xl bg-gradient-to-br from-primary to-primary-strong p-5 shadow-lg">

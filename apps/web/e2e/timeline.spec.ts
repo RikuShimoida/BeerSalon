@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { prisma } from "../src/lib/prisma";
 import { createAuthenticatedUser } from "./helpers/auth";
 
 test.describe("タイムライン（Dark Taproom）", () => {
@@ -48,5 +49,55 @@ test.describe("タイムライン（Dark Taproom）", () => {
 			"fill",
 			"currentColor",
 		);
+	});
+
+	test("投稿が上限を超えると初回20件表示 →「もっと見る」で続きが追加表示される", async ({
+		page,
+	}) => {
+		// スモークユーザーの投稿を上限(20)+3 件だけ直接投入し、ページングを確実に発火させる。
+		const smokeProfile = await prisma.userProfile.findFirst({
+			where: { nickname: "smoke-user" },
+			select: { id: true },
+		});
+		if (!smokeProfile) {
+			throw new Error("smoke-user の user_profiles が見つかりません");
+		}
+
+		const marker = `pager-${Date.now()}`;
+		const totalPosts = 23; // 20 + 3（2ページ目に確実に残る件数）
+		const barId = 100001n; // seed.e2e.sql で固定投入される店舗
+		try {
+			for (let i = 0; i < totalPosts; i++) {
+				await prisma.post.create({
+					data: {
+						userId: smokeProfile.id,
+						barId,
+						body: `${marker}-${String(i).padStart(2, "0")}`,
+						createdAt: new Date(Date.UTC(2026, 0, 1, 0, 0, i)),
+					},
+				});
+			}
+
+			await page.goto("/timeline");
+			await expect(
+				page.getByRole("heading", { name: "タイムライン" }),
+			).toBeVisible();
+
+			// 初回は上限(20)件までしか出ない = このマーカー投稿は初回に20件表示される。
+			const markerCards = page.locator("article", { hasText: marker });
+			await expect(markerCards).toHaveCount(20);
+
+			// 「もっと見る」で続きを読み込むと、残り3件が追加されて全23件になる。
+			const loadMore = page.getByRole("button", { name: "もっと見る" });
+			await expect(loadMore).toBeVisible();
+			await loadMore.click();
+
+			await expect(markerCards).toHaveCount(totalPosts);
+
+			// 全件読み込んだら「もっと見る」は消える（続きなし）。
+			await expect(loadMore).toHaveCount(0);
+		} finally {
+			await prisma.post.deleteMany({ where: { body: { startsWith: marker } } });
+		}
 	});
 });
