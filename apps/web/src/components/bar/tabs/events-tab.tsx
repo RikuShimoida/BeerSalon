@@ -13,8 +13,12 @@ interface EventsTabProps {
 	events: BarEvent[];
 }
 
+// Why not ロケール指定（ja-JP）だけに任せるか: ロケールは表記形式の指定であって
+// タイムゾーンの指定ではないため、timeZone 未指定だと実行環境の TZ が使われる。
+// サーバー（Vercel）は UTC のため、JST で登録した日時が9時間ずれて表示される。
 function formatEventDateTime(date: Date | string): string {
 	return new Date(date).toLocaleString("ja-JP", {
+		timeZone: "Asia/Tokyo",
 		year: "numeric",
 		month: "2-digit",
 		day: "2-digit",
