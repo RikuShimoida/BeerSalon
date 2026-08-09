@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateJst } from "@beersalon/shared";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { BarCoupon } from "@/types/database";
@@ -45,12 +46,8 @@ export default function CouponList({ barId, userRole }: CouponListProps) {
 
 	const formatPeriod = (coupon: BarCoupon) => {
 		if (!coupon.valid_from && !coupon.valid_until) return "期間なし";
-		const from = coupon.valid_from
-			? new Date(coupon.valid_from).toLocaleDateString("ja-JP")
-			: "";
-		const until = coupon.valid_until
-			? new Date(coupon.valid_until).toLocaleDateString("ja-JP")
-			: "";
+		const from = formatDateJst(coupon.valid_from);
+		const until = formatDateJst(coupon.valid_until);
 		if (from && until) return `${from} 〜 ${until}`;
 		if (from) return `${from} 〜`;
 		return `〜 ${until}`;

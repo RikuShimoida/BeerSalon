@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateJst } from "@beersalon/shared";
 import Image from "next/image";
 import Link from "next/link";
 import { LikeButton } from "@/components/post/like-button";
@@ -50,7 +51,7 @@ export function PostsTab({ posts, barId, barName }: PostsTabProps) {
 							{post.user.nickname}
 						</Link>
 						<span className="text-gray-500 text-sm ml-2">
-							{new Date(post.createdAt).toLocaleDateString("ja-JP")}
+							{formatDateJst(post.createdAt)}
 						</span>
 					</div>
 

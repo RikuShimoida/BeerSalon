@@ -1,3 +1,4 @@
+import { formatDateJst } from "@beersalon/shared";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -34,5 +35,5 @@ export function formatRelativeTime(
 		return `${diffDay}日前`;
 	}
 
-	return target.toLocaleDateString("ja-JP");
+	return formatDateJst(target);
 }

@@ -1,3 +1,4 @@
+import { formatDateTimeJst } from "@beersalon/shared";
 import Image from "next/image";
 
 interface BarEvent {
@@ -11,20 +12,6 @@ interface BarEvent {
 
 interface EventsTabProps {
 	events: BarEvent[];
-}
-
-// Why not ロケール指定（ja-JP）だけに任せるか: ロケールは表記形式の指定であって
-// タイムゾーンの指定ではないため、timeZone 未指定だと実行環境の TZ が使われる。
-// サーバー（Vercel）は UTC のため、JST で登録した日時が9時間ずれて表示される。
-function formatEventDateTime(date: Date | string): string {
-	return new Date(date).toLocaleString("ja-JP", {
-		timeZone: "Asia/Tokyo",
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-		hour: "2-digit",
-		minute: "2-digit",
-	});
 }
 
 export function EventsTab({ events }: EventsTabProps) {
@@ -61,10 +48,8 @@ export function EventsTab({ events }: EventsTabProps) {
 							<p className="text-gray-700 mb-3">{event.description}</p>
 						)}
 						<div className="text-xs text-gray-500 border-t border-gray-200 pt-2">
-							<p>開始: {formatEventDateTime(event.startDate)}</p>
-							{event.endDate && (
-								<p>終了: {formatEventDateTime(event.endDate)}</p>
-							)}
+							<p>開始: {formatDateTimeJst(event.startDate)}</p>
+							{event.endDate && <p>終了: {formatDateTimeJst(event.endDate)}</p>}
 						</div>
 					</div>
 				</div>
