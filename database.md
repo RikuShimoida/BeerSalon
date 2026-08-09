@@ -16,8 +16,13 @@
 - 画面で日時を整形するときは `@beersalon/shared` の JST フォーマッタ（`formatDateJst` / `formatDateLongJst` / `formatDateTimeJst` / `formatDateTimeLongJst` / `formatDateTimeWithSecondsJst`）を使う。`toLocaleDateString` / `toLocaleString` を直接呼ばない。
   - `toLocaleDateString("ja-JP")` の第1引数は**ロケール（表記形式）であってタイムゾーンではない**。`timeZone` を省略すると実行環境の TZ が使われ、サーバー TZ が UTC の Vercel 上で日時が9時間巻き戻る。
   - ローカル開発（Mac = JST）では再現せず、日付のみ表示する箇所は JST 00:00〜08:59 のデータでしか症状が出ないため見落としやすい（Issue #560 / #564）。
+- **ローカル TZ の getter（`getFullYear()` / `getMonth()` / `getDate()` / `getHours()` / `getMinutes()`）で日付・時刻を組み立てない**。これらは実行環境の TZ で値を返すため、`toLocale*` を使っていなくても同じ TZ ずれが起きる（Issue #568）。`toLocale*` の grep では検出できない別系統の漏れになるため、日付の組み立てには `@beersalon/shared` のフォーマッタを使う。
+  - 表示だけでなく**暦日でのグルーピング判定**（「今日／昨日」「Today／This Week」など）も対象。日付を画面に出さなくても日付境界で挙動が変わるため見落としやすい。暦日の算出には `toJstDayNumber` / `startOfDayJst` を使う。
+- **例外: `@db.Time` 型には JST 変換をかけてはいけない**。`open_time` / `close_time`（`bar_opening_hours`）は「時刻の瞬間」ではなく**壁時計の時刻**を表し、Prisma は `1970-01-01T<時刻>Z` として返す。`Asia/Tokyo` 変換（+09:00）をかけると `23:00` が `翌08:00` になり値が壊れる。**UTC getter（`getUTCHours()` / `getUTCMinutes()`）で扱う**こと。表示と判定で UTC / ローカルの getter を混在させない。
 - `birthday` のみ `date` 型。Prisma は UTC 深夜で返すが、JST 変換は +09:00 で同日内に収まるため日付はずれない。
 - 日時の TZ 検証テストは、実行環境の TZ に依存しない固定の期待値で書く。期待値に `toLocaleDateString` を再利用すると実装と両辺が同時に変わり、TZ 指定漏れを検出できない。
+  - テストの入力にも**オフセットを明示する**（`"2026-07-19T10:00:00+09:00"`）。`"2026-07-19T10:00:00"` や `new Date(2026, 6, 19)` は実行環境の TZ で解釈され、実装と期待値が同時にずれるため**どの TZ でも通ってしまう**。
+  - `apps/web` の Vitest は既定で `TZ: "Asia/Tokyo"` に固定している（開発者マシンと CI で結果が変わるのを防ぐため）。加えて `pnpm test:utc`（`vitest.config.utc.ts`）で UTC 実行も回す。**両方を回す必要がある**: `@db.Time` の getter 混在は JST 実行でのみ、暦日グルーピングの TZ 依存は UTC 実行でのみ露呈する。CI は両方を実行する。
 
 ### Row-Level Security（RLS）方針
 

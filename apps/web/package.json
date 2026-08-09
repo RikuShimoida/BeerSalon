@@ -14,6 +14,7 @@
 		"format": "biome format --write .",
 		"test": "vitest",
 		"test:coverage": "vitest --coverage",
+		"test:utc": "vitest run --config vitest.config.utc.ts",
 		"test:integration": "vitest run --config vitest.integration.config.ts",
 		"e2e": "playwright test",
 		"reset:modules": "rm -rf .next node_modules && pnpm install"

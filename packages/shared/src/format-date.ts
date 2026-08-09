@@ -126,3 +126,61 @@ export function formatDateTimeWithSecondsJst(
 		fallback,
 	);
 }
+
+/**
+ * Why not `new Date(d.getFullYear(), d.getMonth(), d.getDate())` で暦日を得るか:
+ * これらの getter は実行環境の TZ で値を返すため、サーバー TZ が UTC の環境では
+ * JST 00:00〜08:59 の `timestamptz` が前日の暦日に落ちる。表示だけでなく
+ * 「今日／昨日」のようなグルーピング判定でも境界がずれるため、暦日の算出自体を
+ * JST 固定にする。
+ *
+ * Why not `Intl.DateTimeFormat` の出力文字列をパースするか: フォーマット結果の
+ * 文字列表現に依存すると環境の ICU バージョン差で壊れうるため、`formatToParts` で
+ * 数値パートを取り出す。
+ */
+const jstDateParts = (date: Date): { year: number; month: number; day: number } => {
+	const parts = new Intl.DateTimeFormat("en-US", {
+		timeZone: APP_TIME_ZONE,
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	}).formatToParts(date);
+
+	const pick = (type: Intl.DateTimeFormatPartTypes): number =>
+		Number(parts.find((part) => part.type === type)?.value);
+
+	return {
+		year: pick("year"),
+		month: pick("month"),
+		day: pick("day"),
+	};
+};
+
+/**
+ * JST の暦日を表す通し番号（1970-01-01 を 0 とする日数）を返す。
+ * 差分を取ることで「今日／昨日／それ以前」を実行環境の TZ に依存せず判定できる。
+ */
+export function toJstDayNumber(value: DateInput): number {
+	const date = toDate(value);
+	if (!isValidDate(date)) {
+		return Number.NaN;
+	}
+
+	const { year, month, day } = jstDateParts(date);
+	return Math.floor(Date.UTC(year, month - 1, day) / 86_400_000);
+}
+
+/**
+ * JST における「その日の 0:00」の瞬間を `Date` で返す。
+ * 返り値は UTC 上の瞬間（JST 0:00 = 前日 15:00 UTC）であり、`timestamptz` と直接比較できる。
+ */
+export function startOfDayJst(value: DateInput): Date {
+	const date = toDate(value);
+	if (!isValidDate(date)) {
+		return new Date(Number.NaN);
+	}
+
+	const { year, month, day } = jstDateParts(date);
+	// JST は UTC+9 の固定オフセット（サマータイム無し）のため、9時間の減算で JST 0:00 の瞬間になる。
+	return new Date(Date.UTC(year, month - 1, day) - 9 * 60 * 60 * 1000);
+}

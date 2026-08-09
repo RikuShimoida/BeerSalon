@@ -6,6 +6,8 @@ export {
 	formatDateTimeJst,
 	formatDateTimeLongJst,
 	formatDateTimeWithSecondsJst,
+	startOfDayJst,
+	toJstDayNumber,
 } from "./format-date";
 export { logRequest } from "./middleware-logger";
 export {

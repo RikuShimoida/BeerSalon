@@ -6,6 +6,8 @@ import {
 	formatDateTimeJst,
 	formatDateTimeLongJst,
 	formatDateTimeWithSecondsJst,
+	startOfDayJst,
+	toJstDayNumber,
 } from "./format-date";
 
 /**
@@ -135,6 +137,66 @@ describe("JST フォーマッタ", () => {
 	describe("APP_TIME_ZONE", () => {
 		it("Asia/Tokyo を指す", () => {
 			expect(APP_TIME_ZONE).toBe("Asia/Tokyo");
+		});
+	});
+
+	describe("toJstDayNumber", () => {
+		it("JST 深夜1時は当日の暦日を返す（UTC では前日 16:00 に当たる）", () => {
+			// 2026-07-19T01:00+09:00 === 2026-07-18T16:00Z
+			expect(toJstDayNumber("2026-07-19T01:00:00+09:00")).toBe(
+				toJstDayNumber("2026-07-19T15:00:00+09:00"),
+			);
+		});
+
+		it("JST 0:00 ちょうどは当日、その1ミリ秒前は前日になる（暦日境界）", () => {
+			const midnight = toJstDayNumber("2026-07-19T00:00:00+09:00");
+			const justBefore = toJstDayNumber("2026-07-18T23:59:59.999+09:00");
+
+			expect(midnight - justBefore).toBe(1);
+		});
+
+		it("暦日の差が日数として取り出せる", () => {
+			const base = toJstDayNumber("2026-07-19T10:00:00+09:00");
+
+			expect(base - toJstDayNumber("2026-07-18T23:59:00+09:00")).toBe(1);
+			expect(base - toJstDayNumber("2026-07-17T00:00:00+09:00")).toBe(2);
+		});
+
+		it("同じ瞬間なら入力の表記（UTC 表記／JST 表記）に関わらず同じ暦日を返す", () => {
+			expect(toJstDayNumber("2026-07-18T16:00:00Z")).toBe(
+				toJstDayNumber("2026-07-19T01:00:00+09:00"),
+			);
+		});
+
+		it("不正な日付は NaN を返す", () => {
+			expect(toJstDayNumber("not-a-date")).toBeNaN();
+		});
+	});
+
+	describe("startOfDayJst", () => {
+		it("JST 深夜1時に対して当日の JST 0:00 の瞬間を返す", () => {
+			expect(startOfDayJst("2026-07-19T01:00:00+09:00").toISOString()).toBe(
+				"2026-07-18T15:00:00.000Z",
+			);
+		});
+
+		it("JST 23:59 に対しても同じ日の JST 0:00 を返す", () => {
+			expect(startOfDayJst("2026-07-19T23:59:00+09:00").toISOString()).toBe(
+				"2026-07-18T15:00:00.000Z",
+			);
+		});
+
+		it("返り値は JST 0:00 以降の瞬間との比較に使える", () => {
+			const todayStart = startOfDayJst("2026-07-19T15:00:00+09:00");
+
+			// JST 0:00:01 は当日に含まれる
+			expect(new Date("2026-07-19T00:00:01+09:00") >= todayStart).toBe(true);
+			// JST 前日 23:59:59 は含まれない
+			expect(new Date("2026-07-18T23:59:59+09:00") >= todayStart).toBe(false);
+		});
+
+		it("不正な日付は Invalid Date を返す", () => {
+			expect(startOfDayJst("not-a-date").getTime()).toBeNaN();
 		});
 	});
 });
