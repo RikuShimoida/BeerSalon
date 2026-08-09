@@ -45,6 +45,11 @@ jobs:
         env:
           DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
       - run: pnpm test
+      # JST 実行（既定）と UTC 実行では検出できる不具合が異なるため両方を回す。
+      # 例: 営業時間の UTC/ローカル getter 混在は JST 実行でのみ露呈し、
+      # 暦日グルーピングの TZ 依存は UTC 実行でのみ露呈する（Issue #568）。
+      - name: Run unit tests with TZ=UTC
+        run: pnpm test:utc
 
   integration:
     runs-on: ubuntu-latest

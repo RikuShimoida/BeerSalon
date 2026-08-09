@@ -104,8 +104,11 @@ function formatOpeningHours(openingHours: OpeningHour[]): string {
 						return "24時間営業";
 					}
 
-					const openHour = new Date(h.openTime).getHours();
-					const closeHour = new Date(h.closeTime).getHours();
+					// Why not getHours(): openTime / closeTime は `@db.Time` の「壁時計の時刻」で、
+					// Prisma が 1970-01-01T<時刻>Z として返す。ローカル TZ getter で読むと
+					// 実行環境の TZ 分だけずれ、上の formatTime（getUTCHours）と基準が食い違う。
+					const openHour = new Date(h.openTime).getUTCHours();
+					const closeHour = new Date(h.closeTime).getUTCHours();
 
 					if (closeHour < openHour || (closeHour === 0 && close !== "00:00")) {
 						return `${open}～翌${close}`;

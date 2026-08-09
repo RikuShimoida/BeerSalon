@@ -1,3 +1,4 @@
+import { formatDateJst } from "@beersalon/shared";
 import { Beer, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -20,12 +21,6 @@ export default async function ArticlePage({
 	if (!article) {
 		notFound();
 	}
-
-	const formatDate = (date: Date | null) => {
-		if (!date) return "";
-		const d = new Date(date);
-		return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
-	};
 
 	const imageUrls = getArticleImageUrls(article);
 
@@ -55,7 +50,7 @@ export default async function ArticlePage({
 						<ArticleShareButton title={article.title} />
 						{article.publishedAt && (
 							<p className="ml-auto text-sm text-subtext">
-								{formatDate(article.publishedAt)}
+								{formatDateJst(article.publishedAt)}
 							</p>
 						)}
 					</div>

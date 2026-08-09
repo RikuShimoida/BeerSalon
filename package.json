@@ -9,6 +9,7 @@
 		"format": "turbo run format",
 		"test": "turbo run test",
 		"test:unit": "turbo run test",
+		"test:utc": "turbo run test:utc",
 		"test:integration": "turbo run test:integration",
 		"dev:web": "pnpm --filter @beersalon/web dev",
 		"dev:admin": "pnpm --filter @beersalon/admin dev",
