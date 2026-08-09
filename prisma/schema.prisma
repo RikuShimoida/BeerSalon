@@ -29,8 +29,10 @@ model UserProfile {
   postLikes       PostLike[]
   posts           Post[]
   userCoupons     UserCoupon[]
-  following       UserFollowRelation[] @relation("Followee")
-  followedBy      UserFollowRelation[] @relation("Follower")
+  // following は「自分が follower 側の行」＝自分がフォローしている相手。
+  // followedBy は「自分が followee 側の行」＝自分をフォローしている相手。
+  following       UserFollowRelation[] @relation("Follower")
+  followedBy      UserFollowRelation[] @relation("Followee")
   viewHistories   ViewHistory[]
 
   @@map("user_profiles")
