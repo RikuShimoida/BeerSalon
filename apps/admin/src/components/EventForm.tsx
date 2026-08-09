@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toDateTimeLocalValue } from "@/lib/datetime-local";
 import type { BarEvent } from "@/types/database";
 
 interface EventFormProps {
@@ -48,12 +49,8 @@ export default function EventForm({ barId, eventId }: EventFormProps) {
 				setFormData({
 					title: event.title,
 					description: event.description || "",
-					start_date: event.start_date
-						? new Date(event.start_date).toISOString().slice(0, 16)
-						: "",
-					end_date: event.end_date
-						? new Date(event.end_date).toISOString().slice(0, 16)
-						: "",
+					start_date: toDateTimeLocalValue(event.start_date),
+					end_date: toDateTimeLocalValue(event.end_date),
 					is_active: event.is_active,
 				});
 

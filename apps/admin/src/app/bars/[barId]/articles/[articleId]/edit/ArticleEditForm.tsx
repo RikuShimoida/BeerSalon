@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toDateTimeLocalValue } from "@/lib/datetime-local";
 import type { ArticleStatus } from "@/lib/validators";
 import type { Article } from "@/types/database";
 import ArticleStatusField from "../../ArticleStatusField";
@@ -51,9 +52,7 @@ export default function ArticleEditForm({
 			setStatus(article.status);
 			setOriginalPublishedAt(article.published_at);
 			if (article.published_at) {
-				setPublishedAt(
-					new Date(article.published_at).toISOString().slice(0, 16),
-				);
+				setPublishedAt(toDateTimeLocalValue(article.published_at));
 			}
 
 			const existingImages: ImageSlot[] = [];
