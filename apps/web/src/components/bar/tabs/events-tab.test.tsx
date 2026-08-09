@@ -41,9 +41,10 @@ describe("EventsTab", () => {
 			).toBeInTheDocument();
 		});
 
-		it("開始日時が表示される", () => {
+		it("開始日時がJSTで表示される", () => {
 			render(<EventsTab events={[baseEvent]} />);
-			expect(screen.getByText(/開始:/)).toBeInTheDocument();
+			// 18:00+09:00 = 09:00 UTC。JSTで表示されるので 18:00 になる。
+			expect(screen.getByText(/開始: 2026\/07\/01 18:00/)).toBeInTheDocument();
 		});
 
 		it("終了日時が表示される", () => {
@@ -86,8 +87,37 @@ describe("EventsTab", () => {
 				endDate: "2026-07-01T13:00:00.000Z",
 			};
 			render(<EventsTab events={[event]} />);
-			expect(screen.getByText(/開始:/)).toBeInTheDocument();
-			expect(screen.getByText(/終了:/)).toBeInTheDocument();
+			expect(screen.getByText(/開始: 2026\/07\/01 18:00/)).toBeInTheDocument();
+			expect(screen.getByText(/終了: 2026\/07\/01 22:00/)).toBeInTheDocument();
+		});
+
+		// #560 の回帰防止。
+		// timeZone 未指定だと実行環境の TZ（Vercel は UTC）で描画され、UTCのまま表示されてしまう。
+		it("UTCで保存された日時をJSTに変換して表示する（UTCのまま出さない）", () => {
+			const event = {
+				...baseEvent,
+				// 00:00 UTC = 09:00 JST。TZ変換が漏れていると 00:00 と表示される。
+				startDate: "2026-09-01T00:00:00.000Z",
+				endDate: "2026-09-01T04:00:00.000Z",
+			};
+			render(<EventsTab events={[event]} />);
+
+			expect(screen.getByText(/開始: 2026\/09\/01 09:00/)).toBeInTheDocument();
+			expect(screen.getByText(/終了: 2026\/09\/01 13:00/)).toBeInTheDocument();
+			expect(screen.queryByText(/開始: 2026\/09\/01 00:00/)).toBeNull();
+		});
+
+		it("UTC基準で日付をまたぐ場合もJSTの日付で表示される", () => {
+			const event = {
+				...baseEvent,
+				// 2026-08-31 15:00 UTC = 2026-09-01 00:00 JST（日付が繰り上がる）
+				startDate: "2026-08-31T15:00:00.000Z",
+				endDate: "2026-08-31T18:00:00.000Z",
+			};
+			render(<EventsTab events={[event]} />);
+
+			expect(screen.getByText(/開始: 2026\/09\/01 00:00/)).toBeInTheDocument();
+			expect(screen.getByText(/終了: 2026\/09\/01 03:00/)).toBeInTheDocument();
 		});
 
 		it("複数イベントが表示される", () => {

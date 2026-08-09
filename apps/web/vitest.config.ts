@@ -9,6 +9,11 @@ export default defineConfig({
 		setupFiles: ["./src/test/setup.ts"],
 		globals: true,
 		exclude: ["node_modules", "e2e", ".next", "**/*.integration.test.ts"],
+		// Why not 実行環境の TZ に任せるか: 日時表示を検証するテストがあるため、
+		// 開発者のマシン（JST）と CI（UTC）で結果が変わり CI だけ落ちる。
+		env: {
+			TZ: "Asia/Tokyo",
+		},
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "html", "json"],
