@@ -1,3 +1,4 @@
+import { formatDateJst } from "@beersalon/shared";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -48,7 +49,7 @@ export function ArticlesTab({ articles }: ArticlesTabProps) {
 					</p>
 					{article.publishedAt && (
 						<p className="text-xs text-gray-500">
-							{new Date(article.publishedAt).toLocaleDateString("ja-JP")}
+							{formatDateJst(article.publishedAt)}
 						</p>
 					)}
 				</Link>

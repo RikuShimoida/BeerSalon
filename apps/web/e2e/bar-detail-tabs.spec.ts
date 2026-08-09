@@ -159,6 +159,51 @@ test.describe("店舗詳細ページ", () => {
 		});
 	});
 
+	test.describe("日時表示のタイムゾーン (#564)", () => {
+		// seed.e2e.sql が JST 08:00（= UTC 前日 23:00）固定のクーポン/イベントを投入する前提。
+		// timeZone 指定が漏れると、サーバー TZ が UTC の環境で日付が 2026/9/1 に巻き戻る。
+		// ローカル（JST）では両者が一致してしまうため、日付そのものを固定値で検証する。
+		test("クーポンの有効期間が JST の日付で表示される", async ({ page }) => {
+			await page.goto("/bars/100001");
+
+			const couponTab = page.getByRole("button", { name: "クーポン" });
+			await expect(couponTab).toBeVisible();
+			await couponTab.click();
+
+			const coupon = page
+				.locator("div")
+				.filter({ hasText: "E2E JST境界クーポン" })
+				.last();
+			await expect(coupon).toBeVisible();
+
+			await expect(coupon).toContainText("開始: 2026/9/2");
+			await expect(coupon).not.toContainText("開始: 2026/9/1");
+			await expect(coupon).toContainText("終了: 2026/12/2");
+		});
+
+		test("イベントの開始日時が JST の日付・時刻で表示される", async ({
+			page,
+		}) => {
+			await page.goto("/bars/100001");
+
+			const eventTab = page.getByRole("button", { name: "イベント" });
+			await expect(eventTab).toBeVisible();
+			await eventTab.click();
+
+			const event = page
+				.locator("div")
+				.filter({ hasText: "E2E JST境界イベント" })
+				.last();
+			await expect(event).toBeVisible();
+
+			// 日付が巻き戻らないこと、かつ時刻が9時間ずれない（23:00 にならない）こと。
+			await expect(event).toContainText("2026/09/02");
+			await expect(event).toContainText("08:00");
+			await expect(event).not.toContainText("2026/09/01");
+			await expect(event).not.toContainText("23:00");
+		});
+	});
+
 	test.describe("ヒーロースライダー (#485)", () => {
 		// seed.e2e.sql が bar 100002 に 動画1 + 画像2 のスライダーメディアを投入する前提。
 		// Why not: bar 100001 は admin の slider regression テスト (#318) が「slider 0枚から

@@ -1,3 +1,4 @@
+import { formatDateLongJst } from "@beersalon/shared";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/actions/user";
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
@@ -52,11 +53,7 @@ export default async function ProfileEditPage() {
 								lastName: userProfile.lastName,
 								firstName: userProfile.firstName,
 								email: authUser.email || "",
-								birthday: userProfile.birthday.toLocaleDateString("ja-JP", {
-									year: "numeric",
-									month: "long",
-									day: "numeric",
-								}),
+								birthday: formatDateLongJst(userProfile.birthday),
 								gender: genderLabel,
 								prefecture: userProfile.prefecture,
 							}}

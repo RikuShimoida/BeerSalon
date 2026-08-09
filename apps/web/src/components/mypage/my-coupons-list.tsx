@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateJst } from "@beersalon/shared";
 import { Ticket } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -148,7 +149,7 @@ export function MyCouponsList({ coupons }: MyCouponsListProps) {
 							{coupon.validUntil && (
 								<div className="text-sm text-subtext">
 									<span className="font-medium">有効期限：</span>
-									{new Date(coupon.validUntil).toLocaleDateString("ja-JP")}
+									{formatDateJst(coupon.validUntil)}
 								</div>
 							)}
 

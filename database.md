@@ -10,6 +10,15 @@
 - 画像は Supabase Storage に保存し、DB には `image_url` / `storage_path` などの文字列のみ保持する
 - タイムスタンプは `created_at`, `updated_at`（`timestamptz`）
 
+### 日時表示のタイムゾーン方針
+
+- `timestamptz` は UTC の「瞬間」を保持する。**表示は必ず日本時間（JST）に変換する**。
+- 画面で日時を整形するときは `@beersalon/shared` の JST フォーマッタ（`formatDateJst` / `formatDateLongJst` / `formatDateTimeJst` / `formatDateTimeLongJst` / `formatDateTimeWithSecondsJst`）を使う。`toLocaleDateString` / `toLocaleString` を直接呼ばない。
+  - `toLocaleDateString("ja-JP")` の第1引数は**ロケール（表記形式）であってタイムゾーンではない**。`timeZone` を省略すると実行環境の TZ が使われ、サーバー TZ が UTC の Vercel 上で日時が9時間巻き戻る。
+  - ローカル開発（Mac = JST）では再現せず、日付のみ表示する箇所は JST 00:00〜08:59 のデータでしか症状が出ないため見落としやすい（Issue #560 / #564）。
+- `birthday` のみ `date` 型。Prisma は UTC 深夜で返すが、JST 変換は +09:00 で同日内に収まるため日付はずれない。
+- 日時の TZ 検証テストは、実行環境の TZ に依存しない固定の期待値で書く。期待値に `toLocaleDateString` を再利用すると実装と両辺が同時に変わり、TZ 指定漏れを検出できない。
+
 ### Row-Level Security（RLS）方針
 
 - `public` スキーマの全テーブルで RLS を有効化し、既定は deny-by-default（ポリシー無し＝ `anon` / `authenticated` は全操作拒否）とする。ブラウザに露出する anon 公開鍵だけで機微データが読み書きされることを防ぐ。
