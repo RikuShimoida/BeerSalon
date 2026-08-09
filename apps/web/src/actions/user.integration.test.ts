@@ -17,7 +17,7 @@ vi.mock("@/lib/supabase/server", () => ({
 	}),
 }));
 
-import { followUser, unfollowUser } from "@/actions/user";
+import { followUser, getCurrentUser, unfollowUser } from "@/actions/user";
 
 const prisma = new PrismaClient({
 	adapter: new PrismaPg(
@@ -95,5 +95,42 @@ describe("followUser / unfollowUser (Integration)", () => {
 			},
 		});
 		expect(relation).toBeNull();
+	});
+});
+
+// #558 の回帰防止。
+// schema.prisma の @relation 名が逆に割り当てられており、following に「フォロワー数」が、
+// followedBy に「フォロー数」が入っていた。カウントの取り違えはリレーション名を辿らないと
+// 気づけないため、実DBで「A が B をフォローした」状態を作って両者の数を突き合わせる。
+describe("フォロー数 / フォロワー数のカウント (Integration)", () => {
+	it("A が B をフォローしたとき、A はフォロー1・フォロワー0、B はフォロー0・フォロワー1になる", async () => {
+		mockGetUser.mockResolvedValueOnce({
+			data: { user: { id: alice.authUserId } },
+		});
+		await followUser(bob.userProfileId);
+
+		// フォローした側（A）
+		mockGetUser.mockResolvedValueOnce({
+			data: { user: { id: alice.authUserId } },
+		});
+		const aliceProfile = await getCurrentUser();
+
+		expect(aliceProfile?.followingCount).toBe(1);
+		expect(aliceProfile?.followersCount).toBe(0);
+
+		// フォローされた側（B）
+		mockGetUser.mockResolvedValueOnce({
+			data: { user: { id: bob.authUserId } },
+		});
+		const bobProfile = await getCurrentUser();
+
+		expect(bobProfile?.followingCount).toBe(0);
+		expect(bobProfile?.followersCount).toBe(1);
+
+		// 後片付け
+		mockGetUser.mockResolvedValueOnce({
+			data: { user: { id: alice.authUserId } },
+		});
+		await unfollowUser(bob.userProfileId);
 	});
 });
