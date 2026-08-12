@@ -127,6 +127,28 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 ---
 
+## 🔍 未使用 API 検出スクリプト（`find-unused-api`）
+
+`apps/web` / `apps/admin` の `route.ts` を横断し、どこからも呼ばれていない未使用エンドポイントの候補を一覧化する棚卸しツール（#584）。`GET /api/master/beers` の削除（#581）のような未使用 API の発見を、目視 grep ではなく機械的に行うためのもの。
+
+```bash
+pnpm find-unused-api            # 人が読む形式で出力
+node scripts/find-unused-api.mjs --json    # JSON 形式
+node scripts/find-unused-api.mjs --strict  # 未使用候補が1件でもあれば終了コード1
+```
+
+- **出力は3区分**:
+  - **未使用候補**: 呼び出し元がゼロのルート。目視確認のうえ削除を検討する。
+  - **判定保留**: `/api/bars/${barId}/${endpoint}` のように末尾セグメントが実行時変数で組み立てられる呼び出しがあり、末尾値を静的に確定できないルート（例: `checkout` / `portal`）。誤検出・誤削除を避けるため未使用と断定せず別枠にする。
+  - **除外（allowlist）**: 外部から叩かれるため内部 fetch がゼロでも正当なエンドポイント（Supabase Auth の `/auth/callback`、Stripe Webhook の `/api/webhooks/stripe`）。`scripts/find-unused-api.lib.mjs` の `EXTERNAL_ENTRYPOINT_ALLOWLIST` で管理する。
+- **このスクリプトは削除を行わない**。あくまで候補一覧を提示するだけで、実際に消すかは人間が判断する（動的 URL の誤検出があり得るため安全側に倒す）。
+- **「判定保留」も定期的に目視すること**。保留判定は末尾変数呼び出しのプレフィックス一致だけで行い、呼び出し側の型情報（`endpoint: "checkout" | "portal"` のような union literal で実際に取り得る値が限定されるケース）は見ない。このため、プレフィックスは一致するが実際には決して呼ばれない **真の未使用が「判定保留」に埋もれる** ことがある（例: `endpoint` が `checkout` / `portal` に限定されているのに `/api/bars/[barId]/invoices` が保留に分類される）。保留を「安全だから放置」と扱わず、棚卸し時には保留分も目視で確認する。
+- **ローカルでは未ステージの変更が反映されない**。呼び出しソースの収集は git インデックス（`git show :<file>`）を読むため、`git add` していないワークツリー上の変更は照合対象に入らない。新しく `fetch(...)` の呼び出しを書いた直後にローカル実行すると、その呼び出しが無視されて **誤って「未使用」判定されることがある**。ローカルで正しい結果を得たい場合は対象の変更を `git add`（またはコミット）してから実行する。クリーンチェックアウトで動く CI では問題にならない。
+- 検出ロジック（パス導出・動的セグメント正規化・保留判定）は `scripts/find-unused-api.lib.mjs` に純粋関数として分離し、`pnpm test:scripts`（Vitest）で単体テストしている。
+- 現状は使い捨てスクリプトとしての運用。有用性が確認できたら `--strict` を使った CI（GitHub Actions）チェック化を別途検討する。
+
+---
+
 ## 🧩 開発ワークフロープラグイン（bs-workflow）
 
 Issue 起点の実装ワークフロー（`plan` → `pr` → `pr-review` → `merge`）と E2E 動作確認（`playwright`）を、
