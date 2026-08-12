@@ -61,6 +61,8 @@ Supabase Auth の `auth.users` に論理的に紐づくアプリ側のユーザ�
 | birthday        | date       | NOT NULL                               | 生年月日                       |
 | gender          | text       | NOT NULL                               | 性別（'male' / 'female' / ... 想定） |
 | prefecture      | text       | NOT NULL                               | 都道府県（文字列で持つ）       |
+| profile_image_url | text     | NULLABLE                               | プロフィール画像URL（Supabase Storage）。マイページ編集（`/mypage/edit`）で本人が設定。未設定時はニックネーム頭文字のアバターを表示 |
+| bio             | text       | NULLABLE                               | プロフィール文（自己紹介・ビールの好みなど、最大500文字）。マイページ編集（`/mypage/edit`）で本人が設定 |
 | is_active       | boolean    | NOT NULL DEFAULT true                  | 退会フラグなどに利用           |
 | created_at      | timestamptz| NOT NULL DEFAULT now()                 | 作成日時                       |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()                 | 更新日時                       |

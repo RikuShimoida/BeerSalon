@@ -278,12 +278,33 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 - UI:
   - フォロー数（リンク）→ `/mypage/following`
   - フォロワー数（リンク）→ `/mypage/followers`
+  - 「プロフィールを編集」ボタン → `/mypage/edit`
   - タブ構成:
     - 投稿タブ: 自分の投稿一覧を表示
     - 持っているクーポンタブ: 取得済みクーポン一覧を表示
       - 各クーポンに「クーポンを利用する」ボタン。押下で `user_coupons` を利用済み（`is_used=true` / `used_at`）にし、`bar_coupons.used_count` を +1 する（`redeemCoupon` Server Action → RPC `use_user_coupon`）。成功トースト「クーポンを利用しました」を表示し、ボタンを「使用済み」ラベルに切り替える
       - 利用済み・有効期限外（`valid_from` 未来 / `valid_until` 過去）・利用上限到達（`usage_limit` が非 NULL かつ `used_count >= usage_limit`）のクーポンはボタンを非活性化し、利用できない旨を表示する
       - 利用は本人の取得済みクーポンに対してのみ可能（他人のクーポンは利用不可）
+
+#### 2-5-1-2. プロフィール編集ページ
+
+- Path: `/mypage/edit`
+- 認証: 必須（未ログイン時は `/login` へリダイレクト）
+- 役割:
+  - 自分のプロフィールのうち、編集可能な項目（プロフィール画像・プロフィール文）を更新する
+- UI 要素:
+  - 編集可能:
+    - プロフィール画像（`user_profiles.profile_image_url`。ファイル選択でプレビュー表示、最大5MB。未設定時はニックネーム頭文字のアバター）
+    - プロフィール文（`user_profiles.bio`。テキストエリア、最大500文字。文字数カウンタ表示）
+  - 編集不可（表示のみ）: ニックネーム / 姓 / 名 / メールアドレス / 生年月日 / 性別 / 都道府県
+  - 「キャンセル」ボタン → `/mypage` へ戻る
+  - 「保存」ボタン → `updateProfile` Server Action で更新後、`/mypage` へ戻る
+
+#### 2-5-1-3. 旧クーポンページ（リダイレクト）
+
+- Path: `/mypage/coupons`
+- 役割:
+  - 取得済みクーポンはマイページ（`/mypage`）の「持っているクーポン」タブに統合済み。旧 URL 救済のため `/mypage` へリダイレクトするだけの互換ルート（独立した画面は持たない）
 
 #### 2-5-2. 自分のフォロー一覧
 
@@ -751,7 +772,9 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 
 以下のルートは廃止済み。実装が残っている場合は順次削除する。
 
-- `/admin/master/*`（マスタ管理: beer-styles, breweries, food-categories, event-categories）
+- `/admin/master/*`（マスタ管理画面: beer-styles, breweries, food-categories, event-categories）
+  - ※ **API の `/api/master/*` とは別物**。`GET /api/master/beer-categories`（`beer_categories` マスタ取得）は**現役**で、ビールメニュー登録フォーム（`/bars/[barId]/menus/new`）のカテゴリ・プルダウン取得に使われている（廃止対象ではない）。
+  - 一方 `GET /api/master/beers` は現状どこからも呼ばれていない未使用エンドポイント（削除候補）。
 - `/admin/users/*`（管理者ユーザー管理）
 - `/billing`（課金情報）
 
