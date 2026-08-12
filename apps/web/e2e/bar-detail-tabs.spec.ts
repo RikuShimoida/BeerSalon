@@ -163,7 +163,9 @@ test.describe("店舗詳細ページ", () => {
 		// seed.e2e.sql が bar 100001 に「E2E投稿A/B」の2件を投入する前提。
 		// getBarDetail の include.posts に take 上限(50)を付与した後も、
 		// 投稿タブが従来どおり表示・スクロールできる（デグレなし）ことを検証する。
-		test("投稿タブに紐づく投稿が表示され、スクロールできる", async ({ page }) => {
+		test("投稿タブに紐づく投稿が表示され、スクロールできる", async ({
+			page,
+		}) => {
 			await page.goto("/bars/100001");
 
 			const postsTab = page.getByRole("button", { name: "タグ付けされた投稿" });
