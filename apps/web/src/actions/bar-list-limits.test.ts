@@ -60,6 +60,17 @@ describe("bar 一覧取得の take 上限", () => {
 		);
 	});
 
+	it("getBars は新しい順（createdAt 降順・id 降順）で頭打ちにする", async () => {
+		// take で切り捨てる際に新規登録店が欠落しないよう、他一覧と揃えた降順であることを検証する
+		await getBars();
+
+		expect(mockBarFindMany).toHaveBeenCalledWith(
+			expect.objectContaining({
+				orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+			}),
+		);
+	});
+
 	it("getFavoriteBars は take に上限を渡す", async () => {
 		await getFavoriteBars();
 
