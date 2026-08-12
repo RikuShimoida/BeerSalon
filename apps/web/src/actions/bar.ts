@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
 	BAR_LIST_LIMIT,
 	FAVORITE_BAR_LIST_LIMIT,
+	USER_POST_LIST_LIMIT,
 	VIEW_HISTORY_LIST_LIMIT,
 } from "./list-limits";
 
@@ -220,6 +221,7 @@ export async function getBarDetail(barId: string) {
 				orderBy: {
 					createdAt: "desc",
 				},
+				take: USER_POST_LIST_LIMIT,
 			},
 			articles: {
 				where: {
