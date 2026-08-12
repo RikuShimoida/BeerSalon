@@ -774,7 +774,6 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 
 - `/admin/master/*`（マスタ管理画面: beer-styles, breweries, food-categories, event-categories）
   - ※ **API の `/api/master/*` とは別物**。`GET /api/master/beer-categories`（`beer_categories` マスタ取得）は**現役**で、ビールメニュー登録フォーム（`/bars/[barId]/menus/new`）のカテゴリ・プルダウン取得に使われている（廃止対象ではない）。
-  - 一方 `GET /api/master/beers` は現状どこからも呼ばれていない未使用エンドポイント（削除候補）。
 - `/admin/users/*`（管理者ユーザー管理）
 - `/billing`（課金情報）
 
