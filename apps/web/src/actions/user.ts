@@ -3,6 +3,12 @@
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import {
+	COUPON_LIST_LIMIT,
+	FOLLOWER_LIST_LIMIT,
+	FOLLOWING_LIST_LIMIT,
+	USER_POST_LIST_LIMIT,
+} from "./list-limits";
+import {
 	TIMELINE_PAGE_SIZE,
 	type TimelineCursor,
 	type TimelinePostsResult,
@@ -80,6 +86,7 @@ export async function getFollowingUsers() {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FOLLOWING_LIST_LIMIT,
 	});
 
 	return followingRelations.map((relation) => ({
@@ -120,6 +127,7 @@ export async function getFollowerUsers() {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FOLLOWER_LIST_LIMIT,
 	});
 
 	return followerRelations.map((relation) => ({
@@ -164,6 +172,7 @@ export async function getUserCoupons() {
 		orderBy: {
 			obtainedAt: "desc",
 		},
+		take: COUPON_LIST_LIMIT,
 	});
 
 	return userCoupons.map((userCoupon) => ({
@@ -259,6 +268,7 @@ export async function getUserPosts(userId: string) {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: USER_POST_LIST_LIMIT,
 	});
 
 	return posts.map((post) => ({
@@ -395,6 +405,7 @@ export async function getUserFollowing(userId: string) {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FOLLOWING_LIST_LIMIT,
 	});
 
 	return followingRelations.map((relation) => ({
@@ -416,6 +427,7 @@ export async function getUserFollowers(userId: string) {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FOLLOWER_LIST_LIMIT,
 	});
 
 	return followerRelations.map((relation) => ({

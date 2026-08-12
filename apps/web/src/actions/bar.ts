@@ -2,6 +2,11 @@
 
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import {
+	BAR_LIST_LIMIT,
+	FAVORITE_BAR_LIST_LIMIT,
+	VIEW_HISTORY_LIST_LIMIT,
+} from "./list-limits";
 
 export async function getBars(params?: {
 	q?: string;
@@ -96,9 +101,11 @@ export async function getBars(params?: {
 				take: 1,
 			},
 		},
-		orderBy: {
-			id: "asc",
-		},
+		// Why not id: "asc": take で頭打ちにすると「最古 BAR_LIST_LIMIT 件」になり、
+		// 店舗数が上限を超えた際に新規登録店が検索・地図から無言で欠落する。他一覧と揃えて
+		// createdAt 降順（新しい順）で頭打ちにする。同一 createdAt でも順序を決定的にするため id 降順を第2キーに添える。
+		orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+		take: BAR_LIST_LIMIT,
 	});
 
 	return bars.map((bar) => ({
@@ -391,6 +398,7 @@ export async function getFavoriteBars() {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FAVORITE_BAR_LIST_LIMIT,
 	});
 
 	return favoriteBars.map((favorite) => ({
@@ -576,6 +584,7 @@ export async function getViewHistories() {
 		orderBy: {
 			viewedAt: "desc",
 		},
+		take: VIEW_HISTORY_LIST_LIMIT,
 	});
 
 	return viewHistories.map((history) => ({
