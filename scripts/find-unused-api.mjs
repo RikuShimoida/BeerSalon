@@ -200,6 +200,9 @@ function printHuman({ routes, unused, held, allowlisted }) {
 		out.push(
 			"--- 判定保留（末尾が実行時変数の動的呼び出しがあり静的解決不能。要目視）---",
 		);
+		out.push(
+			"    ※ 型情報（union literal 等）を見ないため、実際には呼ばれない真の未使用がここに含まれ得る。目視で確認すること。",
+		);
 		for (const r of held) {
 			out.push(`  [${r.app}] ${r.urlPath}  (${r.file})`);
 		}
