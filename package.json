@@ -17,12 +17,15 @@
 		"e2e:admin": "pnpm --filter @beersalon/admin e2e",
 		"e2e:setup": "bash scripts/e2e-setup.sh",
 		"e2e": "pnpm e2e:web && pnpm e2e:admin",
-		"seed:dev": "psql \"postgresql://postgres:postgres@127.0.0.1:54422/postgres\" -f supabase/seed.sql"
+		"seed:dev": "psql \"postgresql://postgres:postgres@127.0.0.1:54422/postgres\" -f supabase/seed.sql",
+		"find-unused-api": "node scripts/find-unused-api.mjs",
+		"test:scripts": "vitest run --config scripts/vitest.config.mjs"
 	},
 	"devDependencies": {
 		"@prisma/client": "^7.1.0",
 		"prisma": "^7.1.0",
-		"turbo": "^2"
+		"turbo": "^2",
+		"vitest": "^4.1.8"
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
