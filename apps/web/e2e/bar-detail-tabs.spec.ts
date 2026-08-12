@@ -159,6 +159,32 @@ test.describe("店舗詳細ページ", () => {
 		});
 	});
 
+	test.describe("タグ付けされた投稿タブの上限適用 (#577)", () => {
+		// seed.e2e.sql が bar 100001 に「E2E投稿A/B」の2件を投入する前提。
+		// getBarDetail の include.posts に take 上限(50)を付与した後も、
+		// 投稿タブが従来どおり表示・スクロールできる（デグレなし）ことを検証する。
+		test("投稿タブに紐づく投稿が表示され、スクロールできる", async ({
+			page,
+		}) => {
+			await page.goto("/bars/100001");
+
+			const postsTab = page.getByRole("button", { name: "タグ付けされた投稿" });
+			await expect(postsTab).toBeVisible();
+			await postsTab.click();
+
+			// seed の2件が両方描画される（上限適用で欠落していない）
+			await expect(page.getByText("E2E投稿A(100001)")).toBeVisible();
+			await expect(page.getByText("E2E投稿B(100001)")).toBeVisible();
+
+			// 他店(100002)の投稿は混入しない
+			await expect(page.getByText("E2E投稿C(100002)")).toHaveCount(0);
+
+			// ページ末尾までスクロールしても投稿本文が可視のまま（スクロール導線が壊れていない）
+			await page.mouse.wheel(0, 2000);
+			await expect(page.getByText("E2E投稿B(100001)")).toBeVisible();
+		});
+	});
+
 	test.describe("日時表示のタイムゾーン (#564)", () => {
 		// seed.e2e.sql が JST 08:00（= UTC 前日 23:00）固定のクーポン/イベントを投入する前提。
 		// timeZone 指定が漏れると、サーバー TZ が UTC の環境で日付が 2026/9/1 に巻き戻る。
