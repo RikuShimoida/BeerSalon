@@ -4,7 +4,6 @@ import {
 	collectTrailingVariablePrefixMatchers,
 	deriveUrlPath,
 	EXTERNAL_ENTRYPOINT_ALLOWLIST,
-	hasDynamicSegment,
 	isHeldByTrailingVariable,
 	isReferenced,
 	urlPathToCallRegExp,
@@ -57,16 +56,6 @@ describe("deriveUrlPath", () => {
 
 	it("app ルートを特定できないパスは null を返す", () => {
 		expect(deriveUrlPath("packages/shared/src/index.ts")).toBeNull();
-	});
-});
-
-describe("hasDynamicSegment", () => {
-	it("動的セグメントを含む URL は true", () => {
-		expect(hasDynamicSegment("/api/bars/[barId]")).toBe(true);
-	});
-
-	it("静的 URL は false", () => {
-		expect(hasDynamicSegment("/api/master/beer-categories")).toBe(false);
 	});
 });
 
