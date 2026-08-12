@@ -2,6 +2,11 @@
 
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import {
+	BAR_LIST_LIMIT,
+	FAVORITE_BAR_LIST_LIMIT,
+	VIEW_HISTORY_LIST_LIMIT,
+} from "./list-limits";
 
 export async function getBars(params?: {
 	q?: string;
@@ -99,6 +104,7 @@ export async function getBars(params?: {
 		orderBy: {
 			id: "asc",
 		},
+		take: BAR_LIST_LIMIT,
 	});
 
 	return bars.map((bar) => ({
@@ -391,6 +397,7 @@ export async function getFavoriteBars() {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FAVORITE_BAR_LIST_LIMIT,
 	});
 
 	return favoriteBars.map((favorite) => ({
@@ -576,6 +583,7 @@ export async function getViewHistories() {
 		orderBy: {
 			viewedAt: "desc",
 		},
+		take: VIEW_HISTORY_LIST_LIMIT,
 	});
 
 	return viewHistories.map((history) => ({

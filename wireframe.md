@@ -536,6 +536,25 @@ Dark Taproom（8a / 8b）で実装（#446）。配色・タイポは `design_han
 
 ---
 
+## 7-3. 一覧の表示上限（#571）
+
+各一覧の取得（`findMany`）は全件返さず、最大表示件数を上限（`take`）として持つ。上限値は `apps/web/src/actions/list-limits.ts` に集約する。上限を超えた分は表示されない（現時点では「もっと見る」やページングの導線は設けない。ページングを要する画面はワイヤーフレーム上の仕様確定後に別途対応する）。タイムライン（`/`〜フィード）のみカーソルページング済みで、上限運用ではなく「もっと見る」で続きを取得する（7-3の対象外。§6-1 / #523 参照）。
+
+| 一覧 | 対象 URL | 取得関数 | 最大件数 |
+|---|---|---|---|
+| 店舗検索結果 | `/`（検索・地図） | `getBars` | 100 |
+| お気に入りバー | `/favorites/bars` | `getFavoriteBars` | 100 |
+| 閲覧履歴 | `/history/bars` | `getViewHistories` | 50 |
+| 通知 | `/notifications` | `getNotifications` | 50 |
+| 自分のフォロー | `/mypage/following` | `getFollowingUsers` / `getUserFollowing` | 100 |
+| 自分のフォロワー | `/mypage/followers` | `getFollowerUsers` / `getUserFollowers` | 100 |
+| 他人のフォロー | `/users/[userId]/following` | `getUserFollowing` | 100 |
+| 他人のフォロワー | `/users/[userId]/followers` | `getUserFollowers` | 100 |
+| 他人の投稿 | `/users/[userId]/posts` | `getUserPosts` | 50 |
+| 持っているクーポン | `/mypage`（クーポンタブ） | `getUserCoupons` | 100 |
+
+---
+
 ## 8. レスポンシブのざっくり方針（メモ）
 
 - モバイル:
