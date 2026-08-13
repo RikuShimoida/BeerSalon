@@ -307,6 +307,16 @@ pnpm --filter @beersalon/web theme dark-taproom
 4. **Vercel → 環境変数 `NEXT_PUBLIC_SITE_URL`**
    - production では必ず設定する（Host Header Injection 対策。`apps/web/src/lib/site-url.ts` の `getSiteUrl()` が最優先で参照する）。
 
+### 管理画面（apps/admin）のパスワード再設定メール
+
+上記 1〜4 は `apps/web`（Supabase Auth 経由）の認証メールの話。**管理画面（apps/admin）はカスタムJWT認証で Supabase Auth を使わない**ため、パスワード再設定メール（`/password/forgot`）は **Resend の API を直接呼び出して**送信する（`apps/admin/src/lib/email.ts`）。以下の環境変数が必要（dev/prod 両プロジェクト、および該当する Vercel プロジェクトに設定する）:
+
+- `RESEND_API_KEY`: Resend の送信用 API キー。未設定の環境ではメール送信をスキップする（ログインなど他機能は動作する）
+- `RESEND_FROM_EMAIL`: 送信元アドレス。独自ドメイン未取得の暫定期間は Resend 共有ドメイン（`onboarding@resend.dev`）でも動作するが、到達率は独自ドメインに劣る
+- 再設定リンクのオリジンは既存の `ADMIN_BASE_URL`（未設定時はリクエストヘッダーから解決）を使う
+
+ローカル開発では上記が未設定でもフロー自体は動作する（トークンは DB に発行されるがメールは送信されない）。実メール到達の検証は、Resend にドメイン/キーを設定した preview 環境で行う。
+
 ---
 
 ## ✅ MVPに含める機能
