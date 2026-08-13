@@ -742,6 +742,36 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 
 ---
 
+### 8-2. admin_password_reset_tokens
+
+管理画面のパスワード再設定トークン。管理画面はカスタムJWT認証（Supabase Auth 不使用）のため、Supabase のリカバリーフローが使えない。再設定用トークンを保持する専用テーブル。
+
+- **Table name:** `admin_password_reset_tokens`
+- **Description:** 管理画面パスワード再設定の一時トークン（`/password/forgot` で発行、`/password/reset` で消費）
+
+#### Columns
+
+| Column          | Type        | Constraints                                        | Description                 |
+|-----------------|------------|-----------------------------------------------------|-----------------------------|
+| id              | uuid       | PK, default gen_random_uuid()                       | トークンID                  |
+| admin_user_id   | uuid       | NOT NULL, FK → admin_users(id) ON DELETE CASCADE    | 対象の管理ユーザー          |
+| token_hash      | text       | NOT NULL                                            | トークンの SHA-256 ハッシュ（平文は保存しない）|
+| expires_at      | timestamptz| NOT NULL                                            | 有効期限（発行から1時間）   |
+| used_at         | timestamptz| NULLABLE                                            | 使用日時（二重使用防止。未使用は NULL）|
+| created_at      | timestamptz| NOT NULL DEFAULT now()                              | 作成日時                    |
+
+**インデックス**:
+- `admin_user_id`
+- `token_hash`
+
+**運用ルール**:
+- トークンの平文は DB に保存せず、SHA-256 ハッシュのみを保持する（`/password/reset` は受け取った平文を同じ方式でハッシュ化して一致検索する）
+- 検証は「ハッシュ一致 ∧ `used_at` が NULL ∧ `expires_at` が未来」の全成立で行う。いずれか欠けると無効
+- パスワード更新成功後にのみ `used_at` を記録する（更新失敗時にトークンだけ失効させない）
+- RLS 有効化（deny-by-default）。管理画面は `supabaseAdmin`（service_role）経由で RLS をバイパスする
+
+---
+
 ### 8-3. subscription_plans
 
 サブスクリプションプラン定義。
