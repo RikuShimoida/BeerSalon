@@ -317,3 +317,19 @@ pnpm --filter @beersalon/web theme dark-taproom
 
 - 本サービスは実験的プロダクトであり、
   実運用時にはプライバシーポリシー・利用規約を整備予定
+
+---
+
+## 📮 お問い合わせ
+
+BeerSalon は現在、開発環境で動作を確認しています。
+今後も機能を追加していく予定ですが、最低限の機能（MVP）は使える状態になっています。
+
+次のような方は、お気軽にご連絡ください。
+
+- このプロダクトの購入・譲渡に興味がある方
+- ビールに関わるお仕事をしていて、活用を考えている方
+- このプロダクトについて聞きたいことがある方
+- BeerSalon を作ったノウハウを聞いてみたい方
+
+連絡先: [GitHub の Issue](https://github.com/RikuShimoida/BeerSalon/issues)、または [X（@RikuJason）](https://x.com/RikuJason) の DM
