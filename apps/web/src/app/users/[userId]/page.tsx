@@ -1,3 +1,4 @@
+import { formatDateJst } from "@beersalon/shared";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -148,7 +149,7 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
 												{post.bar.name}
 											</Link>
 											<span className="text-muted-foreground tracking-wide">
-												{new Date(post.createdAt).toLocaleDateString("ja-JP")}
+												{formatDateJst(post.createdAt)}
 											</span>
 										</div>
 										<div className="flex justify-end">

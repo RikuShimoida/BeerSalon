@@ -127,6 +127,28 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 ---
 
+## 🔍 未使用 API 検出スクリプト（`find-unused-api`）
+
+`apps/web` / `apps/admin` の `route.ts` を横断し、どこからも呼ばれていない未使用エンドポイントの候補を一覧化する棚卸しツール（#584）。`GET /api/master/beers` の削除（#581）のような未使用 API の発見を、目視 grep ではなく機械的に行うためのもの。
+
+```bash
+pnpm find-unused-api            # 人が読む形式で出力
+node scripts/find-unused-api.mjs --json    # JSON 形式
+node scripts/find-unused-api.mjs --strict  # 未使用候補が1件でもあれば終了コード1
+```
+
+- **出力は3区分**:
+  - **未使用候補**: 呼び出し元がゼロのルート。目視確認のうえ削除を検討する。
+  - **判定保留**: `/api/bars/${barId}/${endpoint}` のように末尾セグメントが実行時変数で組み立てられる呼び出しがあり、末尾値を静的に確定できないルート（例: `checkout` / `portal`）。誤検出・誤削除を避けるため未使用と断定せず別枠にする。
+  - **除外（allowlist）**: 外部から叩かれるため内部 fetch がゼロでも正当なエンドポイント（Supabase Auth の `/auth/callback`、Stripe Webhook の `/api/webhooks/stripe`）。`scripts/find-unused-api.lib.mjs` の `EXTERNAL_ENTRYPOINT_ALLOWLIST` で管理する。
+- **このスクリプトは削除を行わない**。あくまで候補一覧を提示するだけで、実際に消すかは人間が判断する（動的 URL の誤検出があり得るため安全側に倒す）。
+- **「判定保留」も定期的に目視すること**。保留判定は末尾変数呼び出しのプレフィックス一致だけで行い、呼び出し側の型情報（`endpoint: "checkout" | "portal"` のような union literal で実際に取り得る値が限定されるケース）は見ない。このため、プレフィックスは一致するが実際には決して呼ばれない **真の未使用が「判定保留」に埋もれる** ことがある（例: `endpoint` が `checkout` / `portal` に限定されているのに `/api/bars/[barId]/invoices` が保留に分類される）。保留を「安全だから放置」と扱わず、棚卸し時には保留分も目視で確認する。
+- **ローカルでは未ステージの変更が反映されない**。呼び出しソースの収集は git インデックス（`git show :<file>`）を読むため、`git add` していないワークツリー上の変更は照合対象に入らない。新しく `fetch(...)` の呼び出しを書いた直後にローカル実行すると、その呼び出しが無視されて **誤って「未使用」判定されることがある**。ローカルで正しい結果を得たい場合は対象の変更を `git add`（またはコミット）してから実行する。クリーンチェックアウトで動く CI では問題にならない。
+- 検出ロジック（パス導出・動的セグメント正規化・保留判定）は `scripts/find-unused-api.lib.mjs` に純粋関数として分離し、`pnpm test:scripts`（Vitest）で単体テストしている。
+- 現状は使い捨てスクリプトとしての運用。有用性が確認できたら `--strict` を使った CI（GitHub Actions）チェック化を別途検討する。
+
+---
+
 ## 🧩 開発ワークフロープラグイン（bs-workflow）
 
 Issue 起点の実装ワークフロー（`plan` → `pr` → `pr-review` → `merge`）と E2E 動作確認（`playwright`）を、
@@ -285,6 +307,16 @@ pnpm --filter @beersalon/web theme dark-taproom
 4. **Vercel → 環境変数 `NEXT_PUBLIC_SITE_URL`**
    - production では必ず設定する（Host Header Injection 対策。`apps/web/src/lib/site-url.ts` の `getSiteUrl()` が最優先で参照する）。
 
+### 管理画面（apps/admin）のパスワード再設定メール
+
+上記 1〜4 は `apps/web`（Supabase Auth 経由）の認証メールの話。**管理画面（apps/admin）はカスタムJWT認証で Supabase Auth を使わない**ため、パスワード再設定メール（`/password/forgot`）は **Resend の API を直接呼び出して**送信する（`apps/admin/src/lib/email.ts`）。以下の環境変数が必要（dev/prod 両プロジェクト、および該当する Vercel プロジェクトに設定する）:
+
+- `RESEND_API_KEY`: Resend の送信用 API キー。未設定の環境ではメール送信をスキップする（ログインなど他機能は動作する）
+- `RESEND_FROM_EMAIL`: 送信元アドレス。独自ドメイン未取得の暫定期間は Resend 共有ドメイン（`onboarding@resend.dev`）でも動作するが、到達率は独自ドメインに劣る
+- 再設定リンクのオリジンは既存の `ADMIN_BASE_URL`（未設定時はリクエストヘッダーから解決）を使う
+
+ローカル開発では上記が未設定でもフロー自体は動作する（トークンは DB に発行されるがメールは送信されない）。実メール到達の検証は、Resend にドメイン/キーを設定した preview 環境で行う。
+
 ---
 
 ## ✅ MVPに含める機能
@@ -317,3 +349,19 @@ pnpm --filter @beersalon/web theme dark-taproom
 
 - 本サービスは実験的プロダクトであり、
   実運用時にはプライバシーポリシー・利用規約を整備予定
+
+---
+
+## 📮 お問い合わせ
+
+BeerSalon は現在、開発環境で動作を確認しています。
+今後も機能を追加していく予定ですが、最低限の機能（MVP）は使える状態になっています。
+
+次のような方は、お気軽にご連絡ください。
+
+- このプロダクトの購入・譲渡に興味がある方
+- ビールに関わるお仕事をしていて、活用を考えている方
+- このプロダクトについて聞きたいことがある方
+- BeerSalon を作ったノウハウを聞いてみたい方
+
+連絡先: [GitHub の Issue](https://github.com/RikuShimoida/BeerSalon/issues)、または [X（@RikuJason）](https://x.com/RikuJason) の DM

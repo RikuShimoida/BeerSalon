@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateTimeLongJst } from "@beersalon/shared";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -65,16 +66,6 @@ export default function EventDetail({
 		}
 	};
 
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleString("ja-JP", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	};
-
 	if (loading) {
 		return (
 			<div className="animate-pulse space-y-4">
@@ -124,7 +115,7 @@ export default function EventDetail({
 				<div>
 					<h3 className="text-sm font-medium text-gray-500 mb-1">開始日時</h3>
 					<p className="text-sm text-gray-900">
-						{formatDate(event.start_date)}
+						{formatDateTimeLongJst(event.start_date)}
 					</p>
 				</div>
 
@@ -132,7 +123,7 @@ export default function EventDetail({
 					<div>
 						<h3 className="text-sm font-medium text-gray-500 mb-1">終了日時</h3>
 						<p className="text-sm text-gray-900">
-							{formatDate(event.end_date)}
+							{formatDateTimeLongJst(event.end_date)}
 						</p>
 					</div>
 				)}

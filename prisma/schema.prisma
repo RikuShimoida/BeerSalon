@@ -29,8 +29,10 @@ model UserProfile {
   postLikes       PostLike[]
   posts           Post[]
   userCoupons     UserCoupon[]
-  following       UserFollowRelation[] @relation("Followee")
-  followedBy      UserFollowRelation[] @relation("Follower")
+  // following は「自分が follower 側の行」＝自分がフォローしている相手。
+  // followedBy は「自分が followee 側の行」＝自分をフォローしている相手。
+  following       UserFollowRelation[] @relation("Follower")
+  followedBy      UserFollowRelation[] @relation("Followee")
   viewHistories   ViewHistory[]
 
   @@map("user_profiles")
@@ -462,8 +464,25 @@ model AdminUser {
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
   bar           Bar?     @relation(fields: [barId], references: [id], onDelete: SetNull)
 
+  passwordResetTokens AdminPasswordResetToken[]
+
   @@index([barId])
   @@map("admin_users")
+}
+
+/// 管理画面パスワード再設定トークン
+model AdminPasswordResetToken {
+  id          String    @id @default(uuid()) @db.Uuid
+  adminUserId String    @map("admin_user_id") @db.Uuid
+  tokenHash   String    @map("token_hash")
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt      DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([tokenHash])
+  @@map("admin_password_reset_tokens")
 }
 
 /// 店舗イベント

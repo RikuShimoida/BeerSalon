@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateLongJst } from "@beersalon/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -71,14 +72,6 @@ export default function CouponDetail({
 		return `${c.discount_value.toLocaleString()}円引き`;
 	};
 
-	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString("ja-JP", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-	};
-
 	if (loading) {
 		return (
 			<div className="animate-pulse space-y-4">
@@ -143,11 +136,11 @@ export default function CouponDetail({
 					<h3 className="text-sm font-medium text-gray-500 mb-1">有効期間</h3>
 					<p className="text-sm text-gray-900">
 						{coupon.valid_from && coupon.valid_until
-							? `${formatDate(coupon.valid_from)} 〜 ${formatDate(coupon.valid_until)}`
+							? `${formatDateLongJst(coupon.valid_from)} 〜 ${formatDateLongJst(coupon.valid_until)}`
 							: coupon.valid_from
-								? `${formatDate(coupon.valid_from)} 〜`
+								? `${formatDateLongJst(coupon.valid_from)} 〜`
 								: coupon.valid_until
-									? `〜 ${formatDate(coupon.valid_until)}`
+									? `〜 ${formatDateLongJst(coupon.valid_until)}`
 									: "期間なし"}
 					</p>
 				</div>

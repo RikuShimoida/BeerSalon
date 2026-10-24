@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateTimeLongJst } from "@beersalon/shared";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -36,17 +37,6 @@ export default function EventList({ barId, userRole }: EventListProps) {
 	useEffect(() => {
 		fetchEvents();
 	}, [fetchEvents]);
-
-	const formatDate = (dateString: string) => {
-		const date = new Date(dateString);
-		return date.toLocaleDateString("ja-JP", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	};
 
 	if (loading) {
 		return (
@@ -124,11 +114,11 @@ export default function EventList({ barId, userRole }: EventListProps) {
 									{event.title}
 								</h3>
 								<p className="text-sm text-gray-600 mt-1">
-									{formatDate(event.start_date)}
+									{formatDateTimeLongJst(event.start_date)}
 								</p>
 								{event.end_date && (
 									<p className="text-xs text-gray-500">
-										〜 {formatDate(event.end_date)}
+										〜 {formatDateTimeLongJst(event.end_date)}
 									</p>
 								)}
 							</div>

@@ -11,6 +11,7 @@ vi.mock("@/lib/supabase/server", () => ({
 
 const mockUserProfileFindUnique = vi.fn();
 const mockNotificationUpdateMany = vi.fn();
+const mockNotificationFindMany = vi.fn();
 vi.mock("@/lib/prisma", () => ({
 	prisma: {
 		userProfile: {
@@ -18,6 +19,7 @@ vi.mock("@/lib/prisma", () => ({
 		},
 		notification: {
 			updateMany: (...args: unknown[]) => mockNotificationUpdateMany(...args),
+			findMany: (...args: unknown[]) => mockNotificationFindMany(...args),
 		},
 	},
 }));
@@ -26,7 +28,8 @@ vi.mock("next/cache", () => ({
 	revalidatePath: vi.fn(),
 }));
 
-import { markAllNotificationsAsRead } from "./notification";
+import { NOTIFICATION_LIST_LIMIT } from "./list-limits";
+import { getNotifications, markAllNotificationsAsRead } from "./notification";
 
 describe("markAllNotificationsAsRead", () => {
 	beforeEach(() => {
@@ -71,5 +74,50 @@ describe("markAllNotificationsAsRead", () => {
 			"User profile not found",
 		);
 		expect(mockNotificationUpdateMany).not.toHaveBeenCalled();
+	});
+});
+
+describe("getNotifications", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockGetUser.mockResolvedValue({
+			data: { user: { id: "auth-user" } },
+			error: null,
+		});
+		mockUserProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+		mockNotificationFindMany.mockResolvedValue([]);
+	});
+
+	it("上限件数を take として Prisma に渡す", async () => {
+		await getNotifications();
+
+		expect(mockNotificationFindMany).toHaveBeenCalledTimes(1);
+		expect(mockNotificationFindMany).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: { userId: "profile-1" },
+				orderBy: { createdAt: "desc" },
+				take: NOTIFICATION_LIST_LIMIT,
+			}),
+		);
+	});
+
+	it("上限を超えるデータでも返却件数は take で頭打ちになる", async () => {
+		// Prisma の take はDBクエリ側で件数を制限するため、モックも take 件数分だけ返す挙動を再現する
+		mockNotificationFindMany.mockImplementation(
+			async (args: { take: number }) =>
+				Array.from({ length: args.take }, (_, i) => ({
+					id: BigInt(i + 1),
+					type: "followed",
+					title: "t",
+					message: "m",
+					linkUrl: null,
+					isRead: false,
+					createdAt: new Date(),
+				})),
+		);
+
+		const result = await getNotifications();
+
+		expect(result).toHaveLength(NOTIFICATION_LIST_LIMIT);
 	});
 });

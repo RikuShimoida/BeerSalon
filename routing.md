@@ -278,12 +278,33 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 - UI:
   - フォロー数（リンク）→ `/mypage/following`
   - フォロワー数（リンク）→ `/mypage/followers`
+  - 「プロフィールを編集」ボタン → `/mypage/edit`
   - タブ構成:
     - 投稿タブ: 自分の投稿一覧を表示
     - 持っているクーポンタブ: 取得済みクーポン一覧を表示
       - 各クーポンに「クーポンを利用する」ボタン。押下で `user_coupons` を利用済み（`is_used=true` / `used_at`）にし、`bar_coupons.used_count` を +1 する（`redeemCoupon` Server Action → RPC `use_user_coupon`）。成功トースト「クーポンを利用しました」を表示し、ボタンを「使用済み」ラベルに切り替える
       - 利用済み・有効期限外（`valid_from` 未来 / `valid_until` 過去）・利用上限到達（`usage_limit` が非 NULL かつ `used_count >= usage_limit`）のクーポンはボタンを非活性化し、利用できない旨を表示する
       - 利用は本人の取得済みクーポンに対してのみ可能（他人のクーポンは利用不可）
+
+#### 2-5-1-2. プロフィール編集ページ
+
+- Path: `/mypage/edit`
+- 認証: 必須（未ログイン時は `/login` へリダイレクト）
+- 役割:
+  - 自分のプロフィールのうち、編集可能な項目（プロフィール画像・プロフィール文）を更新する
+- UI 要素:
+  - 編集可能:
+    - プロフィール画像（`user_profiles.profile_image_url`。ファイル選択でプレビュー表示、最大5MB。未設定時はニックネーム頭文字のアバター）
+    - プロフィール文（`user_profiles.bio`。テキストエリア、最大500文字。文字数カウンタ表示）
+  - 編集不可（表示のみ）: ニックネーム / 姓 / 名 / メールアドレス / 生年月日 / 性別 / 都道府県
+  - 「キャンセル」ボタン → `/mypage` へ戻る
+  - 「保存」ボタン → `updateProfile` Server Action で更新後、`/mypage` へ戻る
+
+#### 2-5-1-3. 旧クーポンページ（リダイレクト）
+
+- Path: `/mypage/coupons`
+- 役割:
+  - 取得済みクーポンはマイページ（`/mypage`）の「持っているクーポン」タブに統合済み。旧 URL 救済のため `/mypage` へリダイレクトするだけの互換ルート（独立した画面は持たない）
 
 #### 2-5-2. 自分のフォロー一覧
 
@@ -431,7 +452,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 ### 3-0. 共通ルール
 
 - ドメイン: `https://admin.beersalon.com`（想定）
-- 未ログインでアクセス可能なページ: `/login` と `/bars/register`（店舗セルフサーブ登録）
+- 未ログインでアクセス可能なページ: `/login`、`/bars/register`（店舗セルフサーブ登録）、`/password/forgot`・`/password/reset`（パスワード再設定）
 - それ以外はすべてログイン必須（未ログイン時は `/login` へリダイレクト）
 - 認証方式: カスタムJWT認証（jose + bcryptjs）。Supabase Auth は不使用
 - ログイン後の共通レイアウト:
@@ -450,6 +471,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - 店舗ID（テキストボックス）
   - パスワード（テキストボックス、8文字以上）
   - ログインボタン
+  - 「パスワードをお忘れの方」リンク → `/password/forgot`
   - 「店舗登録はこちら」リンク → `/bars/register`
 - ログイン後遷移先:
   - `admin` → `/bars`（店舗管理ページ）
@@ -483,7 +505,41 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
   - API: `POST /api/bars/[barId]/approve`（admin 専用）
   - ※却下（rejected）UI・承認通知メールは本スコープ外（別 Issue）。登録直後の課金（Stripe Checkout）連携は #335 で店舗詳細の課金カードとして実装済み（3-8 参照）
 
-### 3-1-3. ダッシュボード（bar_owner専用）
+#### 3-1-3. パスワード再設定申請ページ
+
+- Path: `/password/forgot`
+- 認証: 不要（パスワードを忘れてログインできないオーナーが使う公開ページ）
+- 役割:
+  - `bar_manage_id`（店舗ID）を入力し、パスワード再設定メールの送信を申請する
+  - 管理画面はカスタムJWT認証（Supabase Auth 不使用）のため、Supabase のリカバリーフローは使わず独自にトークンを発行し、メール送信は Resend で行う
+- UI 要素:
+  - 店舗ID（テキストボックス）
+  - 「再設定メールを送信」ボタン
+  - 「ログインに戻る」リンク → `/login`
+- 振る舞い:
+  - ユーザー列挙対策として、店舗IDの登録有無・`admin_users.contact_email` の有無に関わらず、常に同一の完了メッセージ「入力された店舗IDが登録されていれば、再設定メールを送信しました」を返す
+  - 登録済みかつ `contact_email` があるアカウントに対してのみ、有効期限1時間の再設定トークンを発行し `admin_password_reset_tokens` に保存、`contact_email` 宛に `/password/reset?token=...` のリンクをメール送信する
+  - API: `POST /api/auth/password/forgot`（未認証で叩ける公開エンドポイント）
+
+#### 3-1-4. パスワード再設定ページ
+
+- Path: `/password/reset?token=...`
+- 認証: 不要（メールのリンクから遷移する公開ページ）
+- 役割:
+  - メールで受け取ったトークンを用いて新しいパスワードを設定する
+- UI 要素:
+  - 新しいパスワード（8文字以上）／新しいパスワード（確認）
+  - 「パスワードを設定」ボタン
+  - 「ログインに戻る」リンク → `/login`
+- 振る舞い:
+  - `token` クエリが無い場合は「再設定リンクが無効です」を表示し、送信ボタンを無効化する
+  - パスワードと確認が不一致の場合はクライアント側で「パスワードが一致しません」を表示する
+  - トークン検証はハッシュ（SHA-256）一致・未使用（`used_at` が空）・未失効（`expires_at` が未来）で行う。無効・失効・使用済みのトークンは「再設定リンクが無効か、有効期限が切れています」を返す
+  - 検証成功時に `admin_users.password_hash` を bcrypt で更新し、当該トークンを `used_at` 記録して二重使用を防ぐ
+  - 設定完了後は完了画面を表示し、`/login` への導線を出す（自動ログインはしない）
+  - API: `POST /api/auth/password/reset`（未認証で叩ける公開エンドポイント）
+
+### 3-1-5. ダッシュボード（bar_owner専用）
 
 - Path: `/`
 - 認証: 必須
@@ -742,6 +798,7 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 - 店舗詳細ページの課金カードは、当該店舗の active サブスクリプション有無で導線を出し分ける（GET `/api/bars/[barId]/subscription` で判定）
   - **未サブスク（active 行なし）**: 「課金を開始する」ボタン → POST `/api/bars/[barId]/checkout` で Stripe Checkout セッション（mode: subscription）を生成し外部リダイレクト。決済完了後は webhook `customer.subscription.created` が `bar_subscriptions` を insert する（Checkout の `subscription_data.metadata` に埋めた `bar_id` / `subscription_plan_id` で紐付け）
   - **サブスク有り（active 行あり）**: 「支払い方法管理」ボタン → POST `/api/bars/[barId]/portal` で Stripe Customer Portal へ外部リダイレクト
+- Checkout の success/cancel URL、Portal の return_url（決済後の戻り先）は `resolveRequestOrigin`（`apps/admin/src/lib/request-origin.ts`）で解決する。解決順序は **env（`ADMIN_BASE_URL` → `NEXT_PUBLIC_APP_URL`）最優先 → `x-forwarded-host`+`x-forwarded-proto` → `host`（localhost は http）→ 解決不能なら 500**。web の `getSiteUrl`（認証メールのコールバックURL）と同じく env 最優先で、`x-forwarded-host` 由来の Host Header Injection を防ぐ。プレビューで戻り先が本番へ飛ぶ問題は、Preview の env をプレビュードメイン（`beer-salon-admin-develop.vercel.app`）に是正することで解決する（env・webhook の環境作業は `docs/stripe-webhook-setup.md`）
 - 既に active/trialing/past_due のサブスクがある店舗で Checkout を叩くと 409（二重課金防止）
 - Checkout に渡す `stripe_price_id` は `subscription_plans`（is_active な1件）から取得する
 - 管理画面内に専用ページは設けない（店舗詳細内のカードで完結）
@@ -750,7 +807,8 @@ Beer Salon の画面遷移・URL 設計をまとめたドキュメント。
 
 以下のルートは廃止済み。実装が残っている場合は順次削除する。
 
-- `/admin/master/*`（マスタ管理: beer-styles, breweries, food-categories, event-categories）
+- `/admin/master/*`（マスタ管理画面: beer-styles, breweries, food-categories, event-categories）
+  - ※ 廃止対象はこの画面ルートのみ。API の `GET /api/master/beer-categories`（`beer_categories` マスタ取得）は**現役**で、ビールメニュー登録フォーム（`/bars/[barId]/menus/new`）のカテゴリ・プルダウン取得に使われている。
 - `/admin/users/*`（管理者ユーザー管理）
 - `/billing`（課金情報）
 

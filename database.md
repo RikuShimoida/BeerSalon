@@ -10,6 +10,20 @@
 - 画像は Supabase Storage に保存し、DB には `image_url` / `storage_path` などの文字列のみ保持する
 - タイムスタンプは `created_at`, `updated_at`（`timestamptz`）
 
+### 日時表示のタイムゾーン方針
+
+- `timestamptz` は UTC の「瞬間」を保持する。**表示は必ず日本時間（JST）に変換する**。
+- 画面で日時を整形するときは `@beersalon/shared` の JST フォーマッタ（`formatDateJst` / `formatDateLongJst` / `formatDateTimeJst` / `formatDateTimeLongJst` / `formatDateTimeWithSecondsJst`）を使う。`toLocaleDateString` / `toLocaleString` を直接呼ばない。
+  - `toLocaleDateString("ja-JP")` の第1引数は**ロケール（表記形式）であってタイムゾーンではない**。`timeZone` を省略すると実行環境の TZ が使われ、サーバー TZ が UTC の Vercel 上で日時が9時間巻き戻る。
+  - ローカル開発（Mac = JST）では再現せず、日付のみ表示する箇所は JST 00:00〜08:59 のデータでしか症状が出ないため見落としやすい（Issue #560 / #564）。
+- **ローカル TZ の getter（`getFullYear()` / `getMonth()` / `getDate()` / `getHours()` / `getMinutes()`）で日付・時刻を組み立てない**。これらは実行環境の TZ で値を返すため、`toLocale*` を使っていなくても同じ TZ ずれが起きる（Issue #568）。`toLocale*` の grep では検出できない別系統の漏れになるため、日付の組み立てには `@beersalon/shared` のフォーマッタを使う。
+  - 表示だけでなく**暦日でのグルーピング判定**（「今日／昨日」「Today／This Week」など）も対象。日付を画面に出さなくても日付境界で挙動が変わるため見落としやすい。暦日の算出には `toJstDayNumber` / `startOfDayJst` を使う。
+- **例外: `@db.Time` 型には JST 変換をかけてはいけない**。`open_time` / `close_time`（`bar_opening_hours`）は「時刻の瞬間」ではなく**壁時計の時刻**を表し、Prisma は `1970-01-01T<時刻>Z` として返す。`Asia/Tokyo` 変換（+09:00）をかけると `23:00` が `翌08:00` になり値が壊れる。**UTC getter（`getUTCHours()` / `getUTCMinutes()`）で扱う**こと。表示と判定で UTC / ローカルの getter を混在させない。
+- `birthday` のみ `date` 型。Prisma は UTC 深夜で返すが、JST 変換は +09:00 で同日内に収まるため日付はずれない。
+- 日時の TZ 検証テストは、実行環境の TZ に依存しない固定の期待値で書く。期待値に `toLocaleDateString` を再利用すると実装と両辺が同時に変わり、TZ 指定漏れを検出できない。
+  - テストの入力にも**オフセットを明示する**（`"2026-07-19T10:00:00+09:00"`）。`"2026-07-19T10:00:00"` や `new Date(2026, 6, 19)` は実行環境の TZ で解釈され、実装と期待値が同時にずれるため**どの TZ でも通ってしまう**。
+  - `apps/web` の Vitest は既定で `TZ: "Asia/Tokyo"` に固定している（開発者マシンと CI で結果が変わるのを防ぐため）。加えて `pnpm test:utc`（`vitest.config.utc.ts`）で UTC 実行も回す。**両方を回す必要がある**: `@db.Time` の getter 混在は JST 実行でのみ、暦日グルーピングの TZ 依存は UTC 実行でのみ露呈する。CI は両方を実行する。
+
 ### Row-Level Security（RLS）方針
 
 - `public` スキーマの全テーブルで RLS を有効化し、既定は deny-by-default（ポリシー無し＝ `anon` / `authenticated` は全操作拒否）とする。ブラウザに露出する anon 公開鍵だけで機微データが読み書きされることを防ぐ。
@@ -30,7 +44,7 @@
 
 ### 1-1. user_profiles
 
-Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロフィール。
+Supabase Auth の `auth.users` に論理的に紐づくアプリ側のユーザプロフィール。紐付けは `user_auth_id` カラムをアプリ層で `auth.uid()` と照合することで行い、DB外部キー制約は持たない。
 
 - **Table name:** `user_profiles`
 - **Description:** Beer Salon のユーザー基本情報を保持
@@ -40,13 +54,15 @@ Supabase Auth の `auth.users` にぶら下がるアプリ側のユーザプロ�
 | Column          | Type        | Constraints                           | Description                    |
 |-----------------|------------|----------------------------------------|--------------------------------|
 | id              | uuid       | PK, default gen_random_uuid()         | アプリ内でのユーザID（将来拡張用） |
-| user_auth_id         | uuid       | NOT NULL, UNIQUE, FK → auth.users(id) | Supabase Auth のユーザID       |
+| user_auth_id         | uuid       | NOT NULL, UNIQUE                        | Supabase Auth のユーザID。アプリ層で `user_auth_id = auth.uid()` により論理参照する（DB外部キー制約は無い） |
 | last_name       | text       | NOT NULL                               | 姓                            |
 | first_name      | text       | NOT NULL                               | 名                            |
 | nickname        | text       | NOT NULL                               | ニックネーム                   |
 | birthday        | date       | NOT NULL                               | 生年月日                       |
 | gender          | text       | NOT NULL                               | 性別（'male' / 'female' / ... 想定） |
 | prefecture      | text       | NOT NULL                               | 都道府県（文字列で持つ）       |
+| profile_image_url | text     | NULLABLE                               | プロフィール画像URL（Supabase Storage）。マイページ編集（`/mypage/edit`）で本人が設定。未設定時はニックネーム頭文字のアバターを表示 |
+| bio             | text       | NULLABLE                               | プロフィール文（自己紹介・ビールの好みなど、最大500文字）。マイページ編集（`/mypage/edit`）で本人が設定 |
 | is_active       | boolean    | NOT NULL DEFAULT true                  | 退会フラグなどに利用           |
 | created_at      | timestamptz| NOT NULL DEFAULT now()                 | 作成日時                       |
 | updated_at      | timestamptz| NOT NULL DEFAULT now()                 | 更新日時                       |
@@ -723,6 +739,36 @@ BeerSalonAdmin（管理画面）専用のテーブル。ユーザー向けアプ
 **権限**:
 - `bar_owner`: 自店舗（`bar_id` で紐づく店舗）の全データを編集可能
 - `admin`: 全店舗の店舗情報（`bars`）を閲覧・編集可能。ただし店舗配下データ（メニュー・記事・クーポン・イベント）は参照のみで編集不可
+
+---
+
+### 8-2. admin_password_reset_tokens
+
+管理画面のパスワード再設定トークン。管理画面はカスタムJWT認証（Supabase Auth 不使用）のため、Supabase のリカバリーフローが使えない。再設定用トークンを保持する専用テーブル。
+
+- **Table name:** `admin_password_reset_tokens`
+- **Description:** 管理画面パスワード再設定の一時トークン（`/password/forgot` で発行、`/password/reset` で消費）
+
+#### Columns
+
+| Column          | Type        | Constraints                                        | Description                 |
+|-----------------|------------|-----------------------------------------------------|-----------------------------|
+| id              | uuid       | PK, default gen_random_uuid()                       | トークンID                  |
+| admin_user_id   | uuid       | NOT NULL, FK → admin_users(id) ON DELETE CASCADE    | 対象の管理ユーザー          |
+| token_hash      | text       | NOT NULL                                            | トークンの SHA-256 ハッシュ（平文は保存しない）|
+| expires_at      | timestamptz| NOT NULL                                            | 有効期限（発行から1時間）   |
+| used_at         | timestamptz| NULLABLE                                            | 使用日時（二重使用防止。未使用は NULL）|
+| created_at      | timestamptz| NOT NULL DEFAULT now()                              | 作成日時                    |
+
+**インデックス**:
+- `admin_user_id`
+- `token_hash`
+
+**運用ルール**:
+- トークンの平文は DB に保存せず、SHA-256 ハッシュのみを保持する（`/password/reset` は受け取った平文を同じ方式でハッシュ化して一致検索する）
+- 検証は「ハッシュ一致 ∧ `used_at` が NULL ∧ `expires_at` が未来」の全成立で行う。いずれか欠けると無効
+- パスワード更新成功後にのみ `used_at` を記録する（更新失敗時にトークンだけ失効させない）
+- RLS 有効化（deny-by-default）。管理画面は `supabaseAdmin`（service_role）経由で RLS をバイパスする
 
 ---
 

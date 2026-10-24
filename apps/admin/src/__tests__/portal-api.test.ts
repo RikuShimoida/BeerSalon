@@ -27,9 +27,13 @@ vi.mock("@/lib/stripe", () => ({
 
 import { POST } from "@/app/api/bars/[barId]/portal/route";
 
-function createMockRequest(): Parameters<typeof POST>[0] {
+// return_url の元になるオリジン解決を検証するため、リクエストヘッダーを差し込めるようにする。
+function createMockRequest(
+	headers: Record<string, string> = {},
+): Parameters<typeof POST>[0] {
 	return {
 		method: "POST",
+		headers: new Headers(headers),
 	} as Parameters<typeof POST>[0];
 }
 
@@ -55,6 +59,7 @@ function mockSupabaseChain(result: { data: unknown; error: unknown }) {
 describe("POST /api/bars/[barId]/portal", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		process.env.ADMIN_BASE_URL = "";
 		process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3001";
 	});
 
@@ -128,6 +133,94 @@ describe("POST /api/bars/[barId]/portal", () => {
 			customer: "cus_test123",
 			return_url: "http://localhost:3001/bars/1",
 		});
+	});
+
+	it("env は偽装された x-forwarded-host より優先される（Host Header Injection 対策）", async () => {
+		process.env.NEXT_PUBLIC_APP_URL =
+			"https://beer-salon-admin-develop.vercel.app";
+		mockGetCurrentUser.mockResolvedValue({
+			id: "user-1",
+			role: "bar_owner",
+			barId: 1,
+		});
+		mockCanAccessBar.mockReturnValue(true);
+		mockSupabaseChain({
+			data: { stripe_customer_id: "cus_test123" },
+			error: null,
+		});
+		mockPortalSessionsCreate.mockResolvedValue({
+			url: "https://billing.stripe.com/session/env_session",
+		});
+
+		const response = await POST(
+			createMockRequest({
+				"x-forwarded-host": "evil.example.com",
+				"x-forwarded-proto": "https",
+			}),
+			createMockParams("1"),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mockPortalSessionsCreate).toHaveBeenCalledWith({
+			customer: "cus_test123",
+			return_url: "https://beer-salon-admin-develop.vercel.app/bars/1",
+		});
+	});
+
+	it("env 未設定時は x-forwarded-host から return_url を解決する", async () => {
+		process.env.ADMIN_BASE_URL = "";
+		process.env.NEXT_PUBLIC_APP_URL = "";
+		mockGetCurrentUser.mockResolvedValue({
+			id: "user-1",
+			role: "bar_owner",
+			barId: 1,
+		});
+		mockCanAccessBar.mockReturnValue(true);
+		mockSupabaseChain({
+			data: { stripe_customer_id: "cus_test123" },
+			error: null,
+		});
+		mockPortalSessionsCreate.mockResolvedValue({
+			url: "https://billing.stripe.com/session/header_session",
+		});
+
+		const response = await POST(
+			createMockRequest({
+				"x-forwarded-host": "beer-salon-admin-develop.vercel.app",
+				"x-forwarded-proto": "https",
+			}),
+			createMockParams("1"),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mockPortalSessionsCreate).toHaveBeenCalledWith({
+			customer: "cus_test123",
+			return_url: "https://beer-salon-admin-develop.vercel.app/bars/1",
+		});
+	});
+
+	it("env・ヘッダーとも未設定の場合は500を返す", async () => {
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		process.env.ADMIN_BASE_URL = "";
+		process.env.NEXT_PUBLIC_APP_URL = "";
+		mockGetCurrentUser.mockResolvedValue({
+			id: "user-1",
+			role: "bar_owner",
+			barId: 1,
+		});
+		mockCanAccessBar.mockReturnValue(true);
+		mockSupabaseChain({
+			data: { stripe_customer_id: "cus_test123" },
+			error: null,
+		});
+
+		const response = await POST(createMockRequest(), createMockParams("1"));
+		const body = await response.json();
+
+		expect(response.status).toBe(500);
+		expect(body.error).toBe("Stripe Customer Portalの作成に失敗しました");
+		expect(mockPortalSessionsCreate).not.toHaveBeenCalled();
+		consoleSpy.mockRestore();
 	});
 
 	it("Stripe APIエラー時は500を返し、エラーをログ出力する", async () => {

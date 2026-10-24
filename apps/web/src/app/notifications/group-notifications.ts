@@ -1,3 +1,5 @@
+import { toJstDayNumber } from "@beersalon/shared";
+
 export type NotificationGroupKey = "today" | "yesterday" | "earlier";
 
 export const NOTIFICATION_GROUP_LABELS: Record<NotificationGroupKey, string> = {
@@ -6,21 +8,16 @@ export const NOTIFICATION_GROUP_LABELS: Record<NotificationGroupKey, string> = {
 	earlier: "それ以前",
 };
 
-// Why not: createdAt の生比較（過去24時間 / 48時間）ではなく暦日（ローカル日付）で
-// 判定する。深夜1時に届いた通知を「今日」ではなく前日扱いにしないため、時刻を切り捨てた
+// Why not: createdAt の生比較（過去24時間 / 48時間）ではなく暦日で判定する。
+// 深夜1時に届いた通知を「今日」ではなく前日扱いにしないため、時刻を切り捨てた
 // 日付の差で today / yesterday / earlier を分類する。
-function toDayNumber(date: Date): number {
-	return Math.floor(
-		new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() /
-			86_400_000,
-	);
-}
-
+// 暦日は JST 固定で算出する（サーバー TZ が UTC の環境では、ローカル TZ getter だと
+// JST 00:00〜08:59 の通知が丸ごと「昨日」に落ちるため）。
 export function classifyNotificationGroup(
 	createdAt: Date,
 	now: Date = new Date(),
 ): NotificationGroupKey {
-	const diffDays = toDayNumber(now) - toDayNumber(createdAt);
+	const diffDays = toJstDayNumber(now) - toJstDayNumber(createdAt);
 	if (diffDays <= 0) {
 		return "today";
 	}

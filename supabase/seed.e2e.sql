@@ -141,6 +141,31 @@ SELECT setval(
   GREATEST((SELECT MAX(id) FROM articles), 100002001)
 );
 
+-- クーポン/イベント: JST 08:00（= UTC 前日 23:00）固定。
+-- timeZone 指定が漏れると UTC 環境で日付が1日巻き戻るため、TZ ずれを検出できる境界値として使う。
+-- CURRENT_TIMESTAMP を使わないのは、実行時刻によっては境界をまたがず検証にならないため。
+INSERT INTO bar_coupons (id, bar_id, title, description, discount_type, discount_value, valid_from, valid_until, is_active)
+VALUES
+  (100001101, 100001, 'E2E JST境界クーポン', 'JST早朝の日付表示検証用', 'fixed_amount', 500,
+   TIMESTAMPTZ '2026-09-02 08:00:00+09', TIMESTAMPTZ '2026-12-02 08:00:00+09', true)
+ON CONFLICT (id) DO NOTHING;
+
+SELECT setval(
+  pg_get_serial_sequence('bar_coupons', 'id'),
+  GREATEST((SELECT MAX(id) FROM bar_coupons), 100001101)
+);
+
+INSERT INTO bar_events (id, bar_id, title, description, start_date, end_date, is_active)
+VALUES
+  (100001201, 100001, 'E2E JST境界イベント', 'JST早朝の日時表示検証用',
+   TIMESTAMPTZ '2026-09-02 08:00:00+09', TIMESTAMPTZ '2026-09-02 20:00:00+09', true)
+ON CONFLICT (id) DO NOTHING;
+
+SELECT setval(
+  pg_get_serial_sequence('bar_events', 'id'),
+  GREATEST((SELECT MAX(id) FROM bar_events), 100001201)
+);
+
 -- 閲覧履歴: 100001 を 2ユーザー閲覧（=2）、100002 を 1ユーザー閲覧（混入しないこと）
 INSERT INTO view_histories (user_id, bar_id)
 VALUES

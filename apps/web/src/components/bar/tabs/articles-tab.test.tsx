@@ -54,13 +54,11 @@ describe("ArticlesTab", () => {
 			).toBeInTheDocument();
 		});
 
-		it("投稿日が表示される", () => {
+		// Why not 期待値に toLocaleDateString を再利用しないか: 実装と期待値の両辺が
+		// 同時に変わる自己参照アサーションになり、TZ 指定漏れのようなバグを検出できないため。
+		it("投稿日が JST の日付で表示される", () => {
 			render(<ArticlesTab articles={[baseArticle]} />);
-			expect(
-				screen.getByText(
-					new Date(baseArticle.publishedAt).toLocaleDateString("ja-JP"),
-				),
-			).toBeInTheDocument();
+			expect(screen.getByText("2026/6/15")).toBeInTheDocument();
 		});
 
 		it("記事リンクが /articles/[articleId] を指す", () => {
@@ -89,11 +87,7 @@ describe("ArticlesTab", () => {
 		it("publishedAtがnullの場合は投稿日が表示されない", () => {
 			const article = { ...baseArticle, publishedAt: null };
 			render(<ArticlesTab articles={[article]} />);
-			expect(
-				screen.queryByText(
-					new Date("2026-06-15T10:00:00+09:00").toLocaleDateString("ja-JP"),
-				),
-			).not.toBeInTheDocument();
+			expect(screen.queryByText("2026/6/15")).not.toBeInTheDocument();
 		});
 
 		it("複数記事が表示される", () => {

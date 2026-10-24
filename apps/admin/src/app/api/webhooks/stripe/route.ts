@@ -77,11 +77,17 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 
 	const sub = subscription as unknown as {
 		status: string;
-		current_period_start: number;
-		current_period_end: number;
+		current_period_start?: number;
+		current_period_end?: number;
 		cancel_at_period_end: boolean;
 		canceled_at: number | null;
 		metadata: Record<string, string> | null;
+		items?: {
+			data?: Array<{
+				current_period_start?: number;
+				current_period_end?: number;
+			}>;
+		};
 	};
 
 	const status = sub.status as
@@ -90,12 +96,26 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 		| "past_due"
 		| "trialing"
 		| "incomplete";
-	const currentPeriodStart = new Date(
-		sub.current_period_start * 1000,
-	).toISOString();
-	const currentPeriodEnd = new Date(
-		sub.current_period_end * 1000,
-	).toISOString();
+
+	// Stripe API 2026-05-27.dahlia で current_period_* が items.data[0] 配下へ移動したため、
+	// items 配下を優先し、旧APIバージョンのイベント（トップレベル）をフォールバックで拾う。
+	const item = sub.items?.data?.[0];
+	const periodStartUnix =
+		item?.current_period_start ?? sub.current_period_start;
+	const periodEndUnix = item?.current_period_end ?? sub.current_period_end;
+
+	// current_period_* は bar_subscriptions の NOT NULL カラム。両形状とも取れない場合、
+	// throw すると 500 → Stripe が無限リトライ（本 Issue #573 の再発）になるため、
+	// 警告ログを残してスキップし 200 で受理する。
+	if (periodStartUnix == null || periodEndUnix == null) {
+		console.warn(
+			`bar_subscriptions upsert/update をスキップ: current_period_* を取得できません (subscription=${subscriptionId})`,
+		);
+		return;
+	}
+
+	const currentPeriodStart = new Date(periodStartUnix * 1000).toISOString();
+	const currentPeriodEnd = new Date(periodEndUnix * 1000).toISOString();
 	const cancelAtPeriodEnd = sub.cancel_at_period_end || false;
 	const canceledAt = sub.canceled_at
 		? new Date(sub.canceled_at * 1000).toISOString()
@@ -173,10 +193,28 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
 		.eq("stripe_subscription_id", subscriptionId);
 }
 
+// Stripe API 2026-05-27.dahlia で invoice トップレベルの subscription が廃止され、
+// parent.subscription_details.subscription へ移動した（string | Stripe.Subscription）。
+// parent 配下を優先し、旧APIバージョンのトップレベル subscription をフォールバックで拾う。
+function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
+	const inv = invoice as unknown as {
+		subscription?: string | { id: string } | null;
+		parent?: {
+			subscription_details?: {
+				subscription?: string | { id: string } | null;
+			} | null;
+		} | null;
+	};
+
+	const fromParent = inv.parent?.subscription_details?.subscription;
+	const raw = fromParent ?? inv.subscription;
+	if (!raw) return null;
+	return typeof raw === "string" ? raw : raw.id;
+}
+
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
 	const inv = invoice as unknown as {
 		id: string;
-		subscription: string | null;
 		amount_paid: number;
 		amount_due: number;
 		currency: string;
@@ -184,7 +222,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 		status_transitions: { paid_at: number | null };
 	};
 
-	const subscriptionId = inv.subscription;
+	const subscriptionId = extractSubscriptionId(invoice);
 
 	if (!subscriptionId) return;
 
@@ -212,11 +250,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-	const inv = invoice as unknown as {
-		subscription: string | null;
-	};
-
-	const subscriptionId = inv.subscription;
+	const subscriptionId = extractSubscriptionId(invoice);
 
 	if (!subscriptionId) return;
 

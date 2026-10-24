@@ -1,3 +1,4 @@
+import { formatDateLongJst } from "@beersalon/shared";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import { redirect } from "next/navigation";
@@ -81,11 +82,7 @@ export default async function ConfirmPage() {
 						<div className="border-b pb-3">
 							<p className="text-sm text-gray-500 mb-1">生年月日</p>
 							<p className="text-lg font-medium">
-								{new Date(profileData.birthday).toLocaleDateString("ja-JP", {
-									year: "numeric",
-									month: "long",
-									day: "numeric",
-								})}
+								{formatDateLongJst(profileData.birthday)}
 							</p>
 						</div>
 

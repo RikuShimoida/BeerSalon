@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateJst } from "@beersalon/shared";
 import { useState } from "react";
 import { toast } from "sonner";
 import { obtainCoupon } from "@/actions/coupon";
@@ -109,16 +110,10 @@ export function CouponsTab({ coupons }: CouponsTabProps) {
 						{(coupon.validFrom || coupon.validUntil) && (
 							<div className="text-xs text-gray-500 border-t border-gray-200 pt-2">
 								{coupon.validFrom && (
-									<p>
-										開始:{" "}
-										{new Date(coupon.validFrom).toLocaleDateString("ja-JP")}
-									</p>
+									<p>開始: {formatDateJst(coupon.validFrom)}</p>
 								)}
 								{coupon.validUntil && (
-									<p>
-										終了:{" "}
-										{new Date(coupon.validUntil).toLocaleDateString("ja-JP")}
-									</p>
+									<p>終了: {formatDateJst(coupon.validUntil)}</p>
 								)}
 							</div>
 						)}

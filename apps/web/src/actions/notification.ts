@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { NOTIFICATION_LIST_LIMIT } from "./list-limits";
 
 export async function getNotifications() {
 	const supabase = await createClient();
@@ -31,6 +32,7 @@ export async function getNotifications() {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: NOTIFICATION_LIST_LIMIT,
 	});
 
 	return notifications.map((notification) => ({

@@ -123,10 +123,16 @@ export default function LoginPage() {
 					</div>
 				</form>
 
-				<div className="text-center">
+				<div className="text-center space-y-2">
+					<Link
+						href="/password/forgot"
+						className="block text-sm text-gray-600 hover:underline"
+					>
+						パスワードをお忘れの方
+					</Link>
 					<Link
 						href="/bars/register"
-						className="text-sm text-gray-600 hover:underline"
+						className="block text-sm text-gray-600 hover:underline"
 					>
 						店舗登録はこちら
 					</Link>

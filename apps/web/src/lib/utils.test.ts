@@ -130,11 +130,17 @@ describe("formatRelativeTime", () => {
 			expect(formatRelativeTime(target, now)).toBe("6日前");
 		});
 
+		// Why not 期待値に toLocaleDateString を再利用しないか: 実装と期待値の両辺が
+		// 同時に変わる自己参照アサーションになり、TZ 指定漏れのようなバグを検出できないため。
 		it("7日以上は日付表記を返す", () => {
 			const target = new Date("2026-07-10T12:00:00Z");
-			expect(formatRelativeTime(target, now)).toBe(
-				target.toLocaleDateString("ja-JP"),
-			);
+			expect(formatRelativeTime(target, now)).toBe("2026/7/10");
+		});
+
+		it("7日以上かつ JST 早朝のデータで日付が前日に巻き戻らない", () => {
+			// JST 2026-07-10 08:00（= UTC 07-09 23:00）。TZ 指定が漏れると 2026/7/9 になる。
+			const target = new Date("2026-07-10T08:00:00+09:00");
+			expect(formatRelativeTime(target, now)).toBe("2026/7/10");
 		});
 
 		it("ISO文字列を受け取れる", () => {

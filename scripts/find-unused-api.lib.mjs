@@ -1,0 +1,178 @@
+/**
+ * 未使用 API 検出のコアロジック（純粋関数）。
+ *
+ * ここには I/O（ファイル列挙・grep 実行）を持ち込まない。
+ * 「route.ts のファイルパス → URL パス導出」「動的セグメントの正規化」
+ * 「呼び出しソース文字列に対する一致判定」だけを担い、単体テスト可能に保つ。
+ */
+
+/**
+ * 外部（ブラウザ・外部サービス）から叩かれるため、内部 fetch がゼロでも「未使用」ではないルート。
+ * これらを未使用判定から除外する allowlist。URL パス（先頭スラッシュ付き）で指定する。
+ *
+ * - /auth/callback: Supabase Auth の OAuth リダイレクト先。内部 fetch ではなくブラウザ遷移で叩かれる。
+ * - /api/webhooks/stripe: Stripe からの Webhook 受信口。内部 fetch では呼ばれない。
+ */
+export const EXTERNAL_ENTRYPOINT_ALLOWLIST = [
+	"/auth/callback",
+	"/api/webhooks/stripe",
+];
+
+/**
+ * route.ts の絶対/相対パスから、アプリの app ルートを基準に URL パスを導出する。
+ *
+ * 例: apps/admin/src/app/api/master/beer-categories/route.ts → /api/master/beer-categories
+ *     apps/web/src/app/auth/callback/route.ts               → /auth/callback
+ *
+ * ルートグループ（(group)）と並行ルート（@slot）は URL に現れないため除去する。
+ *
+ * @param {string} routeFilePath route.ts へのパス（POSIX 区切り前提。呼び出し側で正規化する）
+ * @returns {string|null} URL パス。app ルートを特定できない場合は null
+ */
+export function deriveUrlPath(routeFilePath) {
+	const marker = "/src/app/";
+	const idx = routeFilePath.indexOf(marker);
+	if (idx === -1) {
+		return null;
+	}
+
+	const afterApp = routeFilePath.slice(idx + marker.length);
+	// 末尾の /route.ts（または /route.tsx）を取り除く
+	const withoutFile = afterApp.replace(/\/route\.tsx?$/, "");
+
+	const segments = withoutFile
+		.split("/")
+		// ルートグループ (group) と並行ルート @slot は URL に反映されない
+		.filter(
+			(seg) =>
+				seg.length > 0 &&
+				!(seg.startsWith("(") && seg.endsWith(")")) &&
+				!seg.startsWith("@"),
+		);
+
+	return `/${segments.join("/")}`;
+}
+
+/**
+ * URL パスを、呼び出しソース（テンプレートリテラル等）に対して一致判定するための正規表現に変換する。
+ *
+ * 動的セグメント [barId] は、呼び出し側では `${barId}` のように値が実行時に埋め込まれる。
+ * このため各動的セグメントを「1 セグメント分の任意文字列（スラッシュを含まない）」にマッチさせる。
+ *
+ * 具体的には次のいずれにもマッチさせたい:
+ *   /api/bars/[barId]/coupons
+ *     → `/api/bars/${barId}/coupons`（テンプレートリテラル）
+ *     → `/api/bars/abc123/coupons`（静的に組んだ文字列）
+ *
+ * セグメント区切り `/` はそのまま境界として扱い、動的部分は `[^/`'"\)]+`（区切り・引用符・閉じ括弧以外）で吸収する。
+ *
+ * 生成する正規表現は左端をアンカーしない（`^` を付けない）。呼び出しソースの行内の任意位置で
+ * URL 文字列が現れ得るため。この副作用として、無関係な長い文字列の suffix が偶然この URL と一致し得るが、
+ * その場合は「参照あり（＝未使用ではない）」側に倒れるため、未使用の見逃し方向であり誤削除は招かない
+ * （安全側の誤り）。逆に本当に未使用なルートを取りこぼす可能性は残るが、棚卸しツールとしては許容する。
+ *
+ * @param {string} urlPath
+ * @returns {RegExp}
+ */
+export function urlPathToCallRegExp(urlPath) {
+	const segments = urlPath.split("/");
+	const lastSegmentIsDynamic = /^\[.*\]$/.test(
+		segments[segments.length - 1] ?? "",
+	);
+
+	const escaped = segments
+		.map((seg) => {
+			if (seg.length === 0) {
+				return "";
+			}
+			// 動的セグメント（[barId] / [...slug] / [[...slug]]）は 1 セグメント分の任意文字列に置換
+			if (/^\[.*\]$/.test(seg)) {
+				return "[^/`'\"\\)]+";
+			}
+			// 静的セグメントは正規表現メタ文字をエスケープ
+			return seg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		})
+		.join("/");
+
+	// 末尾セグメントが動的な URL は、直後に `/` を許すと親ルートが子ルートの呼び出しに誤マッチする。
+	// 例: /api/bars/[barId] が `/api/bars/${barId}/coupons` に反応してしまう。
+	// このため末尾が動的なときだけ、URL 終端（引用符/バッククォート/クエリ/閉じ括弧/文末）のみを境界とする。
+	// 末尾が静的なら、その後に別セグメントが続くこと自体が別ルートなので `/` を境界に含めても誤らない。
+	const boundary = lastSegmentIsDynamic ? "(?=[?`'\")]|$)" : "(?=[/?`'\")]|$)";
+	return new RegExp(`${escaped}${boundary}`);
+}
+
+/**
+ * あるルートの URL パスが、与えられた呼び出しソース群のいずれかから参照されているか判定する。
+ *
+ * @param {string} urlPath 判定対象のルート URL
+ * @param {string[]} callSites 呼び出しソースの行文字列（fetch(...) を含む行など）
+ * @returns {boolean} いずれかの呼び出しソースにマッチすれば true
+ */
+export function isReferenced(urlPath, callSites) {
+	const re = urlPathToCallRegExp(urlPath);
+	return callSites.some((line) => re.test(line));
+}
+
+/**
+ * 呼び出しソースから「末尾が実行時変数の動的呼び出し」のプレフィックスを抽出する。
+ *
+ * 例: `/api/bars/${barId}/${endpoint}` のように末尾セグメントが変数の呼び出しは、
+ * 末尾セグメントの値を静的 grep で確定できない。この呼び出しが叩き得るルートは
+ * 「プレフィックス `/api/bars/[barId]/` の直下 1 階層」に限られるため、
+ * そのプレフィックスを正規表現化して返す。判定保留の対象を必要最小限に絞るために使う。
+ *
+ * @param {string[]} callSites
+ * @returns {RegExp[]} 末尾変数呼び出しのプレフィックスにマッチする正規表現の配列
+ */
+export function collectTrailingVariablePrefixMatchers(callSites) {
+	// /xxx/.../${last} の直前まで（末尾が単一のテンプレート変数で終わる呼び出しのプレフィックス）を捕捉。
+	// 末尾が固定セグメント（/coupons 等）で終わる呼び出しは、末尾値が確定しているので対象外。
+	const re = /(["'`])(\/[^"'`]*?)\/\$\{[^}]+\}\1/g;
+	const matchers = [];
+	const seen = new Set();
+
+	for (const line of callSites) {
+		re.lastIndex = 0;
+		let m = re.exec(line);
+		while (m !== null) {
+			const prefix = m[2]; // 例: /api/bars/${barId}
+			if (!seen.has(prefix)) {
+				seen.add(prefix);
+				// プレフィックス配下の直下 1 階層のみを対象にする（さらに深い階層は末尾変数では叩けない）。
+				// ${...} を 1 セグメント分の任意文字列に、末尾に「/ + 区切り無しの 1 セグメント + 終端」を付ける。
+				const escaped = prefix
+					.split("/")
+					.map((seg) => {
+						if (seg.length === 0) return "";
+						if (/^\$\{[^}]+\}$/.test(seg)) return "[^/`'\"\\)]+";
+						return seg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+					})
+					.join("/");
+				matchers.push(new RegExp(`^${escaped}/[^/]+$`));
+			}
+			m = re.exec(line);
+		}
+	}
+	return matchers;
+}
+
+/**
+ * あるルート URL が、末尾変数呼び出しのプレフィックス配下（直下 1 階層）に該当するか。
+ * 該当する場合、末尾変数経由で叩かれ得るため未使用と断定できず「判定保留」に回す。
+ *
+ * @param {string} urlPath ルート URL（動的セグメントは [param] 形式）
+ * @param {RegExp[]} matchers collectTrailingVariablePrefixMatchers の戻り値
+ * @returns {boolean}
+ */
+export function isHeldByTrailingVariable(urlPath, matchers) {
+	// ルート側の [param] を、プレフィックス側の [^/...]+ と同じ「1 セグメント任意文字列」に正規化して照合する。
+	const normalized = urlPath
+		.split("/")
+		.map((seg) => (/^\[.*\]$/.test(seg) ? "x" : seg))
+		.join("/");
+	return matchers.some((re) => {
+		// matcher は実文字列前提なので、ルート側動的セグメントのプレースホルダを任意 1 セグメントとして通す。
+		return re.test(normalized);
+	});
+}

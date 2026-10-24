@@ -35,6 +35,58 @@ const openingHour = {
 	isClosed: false,
 };
 
+describe("TopTab 営業時間の翌日跨ぎ判定", () => {
+	// openTime / closeTime は `@db.Time` の「壁時計の時刻」で、Prisma は
+	// 1970-01-01T<時刻>Z として返す。表示・判定ともに UTC getter で読むのが正しく、
+	// ローカル TZ getter を混ぜると実行環境の TZ 分だけ判定がずれる。
+	const renderWithHours = (openTime: Date, closeTime: Date) =>
+		render(
+			<TopTab
+				bar={{
+					...baseBar,
+					openingHours: [{ ...openingHour, openTime, closeTime }],
+				}}
+			/>,
+		);
+
+	it("閉店時刻が開店時刻より前の深夜営業は「翌」を付けて表示する", () => {
+		renderWithHours(
+			new Date("1970-01-01T23:00:00Z"),
+			new Date("1970-01-01T03:00:00Z"),
+		);
+
+		expect(screen.getByText(/月曜日: 23:00～翌03:00/)).toBeInTheDocument();
+	});
+
+	it("日付を跨がない営業時間には「翌」を付けない", () => {
+		renderWithHours(
+			new Date("1970-01-01T17:00:00Z"),
+			new Date("1970-01-01T23:00:00Z"),
+		);
+
+		expect(screen.getByText(/月曜日: 17:00～23:00/)).toBeInTheDocument();
+		expect(screen.queryByText(/翌/)).not.toBeInTheDocument();
+	});
+
+	it("閉店が 00:00 ちょうどの場合も「翌」を付けない（24時間営業と誤判定しない）", () => {
+		renderWithHours(
+			new Date("1970-01-01T18:00:00Z"),
+			new Date("1970-01-01T00:00:00Z"),
+		);
+
+		expect(screen.getByText(/月曜日: 18:00～翌00:00/)).toBeInTheDocument();
+	});
+
+	it("00:00〜23:59 は24時間営業として表示する", () => {
+		renderWithHours(
+			new Date("1970-01-01T00:00:00Z"),
+			new Date("1970-01-01T23:59:00Z"),
+		);
+
+		expect(screen.getByText(/月曜日: 24時間営業/)).toBeInTheDocument();
+	});
+});
+
 describe("TopTab 定休日補足（regularHoliday）の表示", () => {
 	it("曜日別営業時間があっても regularHoliday を併記表示する（排他ではない）", () => {
 		render(

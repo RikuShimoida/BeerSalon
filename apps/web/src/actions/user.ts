@@ -2,6 +2,17 @@
 
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import {
+	COUPON_LIST_LIMIT,
+	FOLLOWER_LIST_LIMIT,
+	FOLLOWING_LIST_LIMIT,
+	USER_POST_LIST_LIMIT,
+} from "./list-limits";
+import {
+	TIMELINE_PAGE_SIZE,
+	type TimelineCursor,
+	type TimelinePostsResult,
+} from "./timeline-types";
 
 export async function getCurrentUser() {
 	const supabase = await createClient();
@@ -75,6 +86,7 @@ export async function getFollowingUsers() {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FOLLOWING_LIST_LIMIT,
 	});
 
 	return followingRelations.map((relation) => ({
@@ -115,6 +127,7 @@ export async function getFollowerUsers() {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FOLLOWER_LIST_LIMIT,
 	});
 
 	return followerRelations.map((relation) => ({
@@ -159,6 +172,7 @@ export async function getUserCoupons() {
 		orderBy: {
 			obtainedAt: "desc",
 		},
+		take: COUPON_LIST_LIMIT,
 	});
 
 	return userCoupons.map((userCoupon) => ({
@@ -254,6 +268,7 @@ export async function getUserPosts(userId: string) {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: USER_POST_LIST_LIMIT,
 	});
 
 	return posts.map((post) => ({
@@ -390,6 +405,7 @@ export async function getUserFollowing(userId: string) {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FOLLOWING_LIST_LIMIT,
 	});
 
 	return followingRelations.map((relation) => ({
@@ -411,6 +427,7 @@ export async function getUserFollowers(userId: string) {
 		orderBy: {
 			createdAt: "desc",
 		},
+		take: FOLLOWER_LIST_LIMIT,
 	});
 
 	return followerRelations.map((relation) => ({
@@ -421,7 +438,9 @@ export async function getUserFollowers(userId: string) {
 	}));
 }
 
-export async function getTimelinePosts() {
+export async function getTimelinePosts(
+	cursor?: TimelineCursor,
+): Promise<TimelinePostsResult | null> {
 	const supabase = await createClient();
 	const {
 		data: { user },
@@ -488,31 +507,50 @@ export async function getTimelinePosts() {
 				},
 			},
 		},
-		orderBy: {
-			createdAt: "desc",
-		},
+		// Why not createdAt 単独の orderBy: 同一 createdAt の投稿でカーソル境界が不安定になり
+		// ページ跨ぎで重複/欠落が起きるため、主キー id を第2キーに加えた複合順序で安定させる。
+		orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+		// Why not offset ページング: 投稿追加時に境界がズレて重複/欠落するため、
+		// 主キー id を基点にしたカーソルで安定ページングする（skip:1 でカーソル行自身を除外）。
+		...(cursor
+			? {
+					cursor: { id: BigInt(cursor.id) },
+					skip: 1,
+				}
+			: {}),
+		// +1 件多く取得し、超過分の有無で次ページの存在を判定する。
+		take: TIMELINE_PAGE_SIZE + 1,
 	});
 
-	return posts.map((post) => ({
-		id: post.id,
-		body: post.body,
-		createdAt: post.createdAt,
-		likeCount: post.likeCount,
-		isLikedByCurrentUser: post.postLikes.length > 0,
-		user: {
-			id: post.user.id,
-			nickname: post.user.nickname,
-			profileImageUrl: post.user.profileImageUrl,
-		},
-		images: post.postImages.map((img) => ({
-			id: img.id,
-			url: img.imageUrl,
+	const hasNext = posts.length > TIMELINE_PAGE_SIZE;
+	const pagePosts = hasNext ? posts.slice(0, TIMELINE_PAGE_SIZE) : posts;
+	const lastPost = pagePosts.at(-1);
+	const nextCursor =
+		hasNext && lastPost ? { id: lastPost.id.toString() } : null;
+
+	return {
+		posts: pagePosts.map((post) => ({
+			id: post.id,
+			body: post.body,
+			createdAt: post.createdAt,
+			likeCount: post.likeCount,
+			isLikedByCurrentUser: post.postLikes.length > 0,
+			user: {
+				id: post.user.id,
+				nickname: post.user.nickname,
+				profileImageUrl: post.user.profileImageUrl,
+			},
+			images: post.postImages.map((img) => ({
+				id: img.id,
+				url: img.imageUrl,
+			})),
+			bar: {
+				id: post.bar.id,
+				name: post.bar.name,
+				prefecture: post.bar.prefecture,
+				city: post.bar.city,
+			},
 		})),
-		bar: {
-			id: post.bar.id,
-			name: post.bar.name,
-			prefecture: post.bar.prefecture,
-			city: post.bar.city,
-		},
-	}));
+		nextCursor,
+	};
 }

@@ -1,3 +1,5 @@
+import { startOfDayJst } from "@beersalon/shared";
+
 export interface ViewHistoryItem {
 	id: string;
 	viewedAt: Date;
@@ -24,20 +26,19 @@ const GROUP_LABELS: Record<ViewHistoryGroupKey, string> = {
 	earlier: "それ以前",
 };
 
-function startOfDay(date: Date): Date {
-	return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
 // Why not viewedAt を単純比較で振り分けない: 「今日」は暦日の 0:00 起点、「今週」は
 // 今日を除く直近7日境界（今日の 0:00 から6日前の 0:00 まで）で判定する必要があり、
 // 経過ミリ秒だけでは日付境界をまたぐケース（例: 昨夜と今朝）を正しく分けられないため。
+// 日境界は JST 固定で算出する（サーバー TZ が UTC の環境では、ローカル TZ getter だと
+// JST 早朝の閲覧が「Today」から外れるため）。
 export function groupViewHistories(
 	histories: ViewHistoryItem[],
 	now: Date = new Date(),
 ): ViewHistoryGroup[] {
-	const todayStart = startOfDay(now);
-	const weekStart = new Date(todayStart);
-	weekStart.setDate(weekStart.getDate() - 6);
+	const todayStart = startOfDayJst(now);
+	// Why not setDate(): JST 0:00 の瞬間から6日分を引くだけでよく、ローカル TZ に
+	// 依存する setDate を挟むと基準がずれる。JST は固定オフセットのため単純減算が成立する。
+	const weekStart = new Date(todayStart.getTime() - 6 * 86_400_000);
 
 	const today: ViewHistoryItem[] = [];
 	const thisWeek: ViewHistoryItem[] = [];

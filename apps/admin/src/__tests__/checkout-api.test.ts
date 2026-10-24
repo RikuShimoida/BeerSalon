@@ -27,9 +27,13 @@ vi.mock("@/lib/stripe", () => ({
 
 import { POST } from "@/app/api/bars/[barId]/checkout/route";
 
-function createMockRequest(): Parameters<typeof POST>[0] {
+// success_url の元になるオリジン解決を検証するため、リクエストヘッダーを差し込めるようにする。
+function createMockRequest(
+	headers: Record<string, string> = {},
+): Parameters<typeof POST>[0] {
 	return {
 		method: "POST",
+		headers: new Headers(headers),
 	} as Parameters<typeof POST>[0];
 }
 
@@ -76,6 +80,7 @@ describe("POST /api/bars/[barId]/checkout", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		process.env.ADMIN_BASE_URL = "http://localhost:3001";
+		process.env.NEXT_PUBLIC_APP_URL = "";
 	});
 
 	it("未認証の場合は401を返す", async () => {
@@ -174,6 +179,78 @@ describe("POST /api/bars/[barId]/checkout", () => {
 			success_url: "http://localhost:3001/bars/1",
 			cancel_url: "http://localhost:3001/bars/1",
 		});
+	});
+
+	it("ADMIN_BASE_URL は偽装された x-forwarded-host より優先される（Host Header Injection 対策）", async () => {
+		process.env.ADMIN_BASE_URL = "https://beer-salon-admin-develop.vercel.app";
+		mockGetCurrentUser.mockResolvedValue({
+			id: "user-1",
+			role: "bar_owner",
+			barId: 1,
+		});
+		mockCanAccessBar.mockReturnValue(true);
+		mockSupabaseTables({
+			activeSub: { data: null },
+			plan: {
+				data: { id: 42, stripe_price_id: "price_test_5000" },
+				error: null,
+			},
+		});
+		mockCheckoutSessionsCreate.mockResolvedValue({
+			url: "https://checkout.stripe.com/c/pay/env_session",
+		});
+
+		const response = await POST(
+			createMockRequest({
+				"x-forwarded-host": "evil.example.com",
+				"x-forwarded-proto": "https",
+			}),
+			createMockParams("1"),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mockCheckoutSessionsCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				success_url: "https://beer-salon-admin-develop.vercel.app/bars/1",
+				cancel_url: "https://beer-salon-admin-develop.vercel.app/bars/1",
+			}),
+		);
+	});
+
+	it("env 未設定時は x-forwarded-host からオリジンを解決する", async () => {
+		process.env.ADMIN_BASE_URL = "";
+		process.env.NEXT_PUBLIC_APP_URL = "";
+		mockGetCurrentUser.mockResolvedValue({
+			id: "user-1",
+			role: "bar_owner",
+			barId: 1,
+		});
+		mockCanAccessBar.mockReturnValue(true);
+		mockSupabaseTables({
+			activeSub: { data: null },
+			plan: {
+				data: { id: 42, stripe_price_id: "price_test_5000" },
+				error: null,
+			},
+		});
+		mockCheckoutSessionsCreate.mockResolvedValue({
+			url: "https://checkout.stripe.com/c/pay/header_session",
+		});
+
+		const response = await POST(
+			createMockRequest({
+				"x-forwarded-host": "beer-salon-admin-develop.vercel.app",
+				"x-forwarded-proto": "https",
+			}),
+			createMockParams("1"),
+		);
+
+		expect(response.status).toBe(200);
+		expect(mockCheckoutSessionsCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				success_url: "https://beer-salon-admin-develop.vercel.app/bars/1",
+			}),
+		);
 	});
 
 	it("Stripe APIエラー時は500を返し、エラーをログ出力する", async () => {

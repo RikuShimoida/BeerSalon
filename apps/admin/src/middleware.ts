@@ -6,7 +6,14 @@ import { verifyToken } from "@/lib/auth";
 // /bars/register は未ログインの店舗オーナーがセルフサーブ登録するための公開ページ。
 // /bars/[barId] や /bars/new（いずれもログイン必須）より前に startsWith で判定するため、
 // より具体的なプレフィックスとして publicPaths に含める。
-const publicPaths = ["/login", "/bars/register"];
+// /password/forgot・/password/reset はパスワードを忘れた（＝ログインできない）オーナーが
+// 使う公開ページのため、認証保護から除外する。
+const publicPaths = [
+	"/login",
+	"/bars/register",
+	"/password/forgot",
+	"/password/reset",
+];
 
 const MUTATION_METHODS = ["POST", "PUT", "DELETE", "PATCH"];
 

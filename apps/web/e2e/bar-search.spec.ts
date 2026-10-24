@@ -63,6 +63,12 @@ test.describe("トップページ（検索ページ）", () => {
 	}) => {
 		await page.goto("/");
 
+		// 検索前の初期状態（両店舗が見える）まで hydration を待つ。
+		// これを待たずに fill+click すると、CI では検索ボタンの onClick が hydrate 前に
+		// 空振りし router.replace が発火せず URL が / のまま更新されないことがある（#419 と同経路）。
+		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
+		await expect(page.getByText("E2Eテストバー東京")).toBeVisible();
+
 		await page.fill("#search-keyword", "東京");
 		await page.getByRole("button", { name: "検索" }).click();
 
@@ -73,6 +79,11 @@ test.describe("トップページ（検索ページ）", () => {
 
 	test("ブラウザバックで検索条件が復元される", async ({ page }) => {
 		await page.goto("/");
+
+		// 検索前の初期状態（両店舗が見える）まで hydration を待つ（フリーワード検索テストと同様）。
+		// goto 直後に fill+click すると hydrate 前で router.replace が空振りし得るため。
+		await expect(page.getByText("E2Eテストバー静岡")).toBeVisible();
+		await expect(page.getByText("E2Eテストバー東京")).toBeVisible();
 
 		await page.fill("#search-keyword", "静岡");
 		await page.getByRole("button", { name: "検索" }).click();

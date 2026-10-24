@@ -30,6 +30,7 @@
 		},
 		"lint": {},
 		"test": {},
+		"test:utc": {},
 		"test:integration": {
 			"dependsOn": ["db:generate"],
 			"cache": false,

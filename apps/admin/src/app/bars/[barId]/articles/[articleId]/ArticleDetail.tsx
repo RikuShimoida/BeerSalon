@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateTimeWithSecondsJst } from "@beersalon/shared";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -69,18 +70,6 @@ export default function ArticleDetail({
 		}
 	};
 
-	const formatDate = (dateString: string) => {
-		const date = new Date(dateString);
-		return date.toLocaleString("ja-JP", {
-			year: "numeric",
-			month: "2-digit",
-			day: "2-digit",
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-		});
-	};
-
 	if (loading) {
 		return (
 			<div className="animate-pulse space-y-4">
@@ -131,10 +120,10 @@ export default function ArticleDetail({
 
 			<p className="text-sm text-gray-500">
 				{article.status === "scheduled" && article.published_at
-					? `公開予定: ${formatDate(article.published_at)}`
+					? `公開予定: ${formatDateTimeWithSecondsJst(article.published_at)}`
 					: article.published_at
-						? formatDate(article.published_at)
-						: formatDate(article.created_at)}
+						? formatDateTimeWithSecondsJst(article.published_at)
+						: formatDateTimeWithSecondsJst(article.created_at)}
 			</p>
 
 			{imageUrls.length > 0 && (
