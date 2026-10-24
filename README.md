@@ -367,5 +367,4 @@ BeerSalon は現在、開発環境で動作を確認しています。
 連絡先:
 
 - [GitHub の Issue](https://github.com/RikuShimoida/BeerSalon/issues)
-- [X（@RikuJason）](https://x.com/RikuJason) の DM
 - メール: [xiajingtianlu@gmail.com](mailto:xiajingtianlu@gmail.com)
