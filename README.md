@@ -27,6 +27,20 @@ Beer Salon は以下を1つの場所に集約します。
 
 ---
 
+## 📸 画面イメージ
+
+| 店舗検索（地図・一覧） | 店舗詳細 | タイムライン |
+|:---:|:---:|:---:|
+| <img src="docs/images/screenshot-search.jpg" alt="店舗検索画面" width="260"> | <img src="docs/images/screenshot-bar-detail.jpg" alt="店舗詳細画面" width="260"> | <img src="docs/images/screenshot-timeline.jpg" alt="タイムライン画面" width="260"> |
+
+**管理画面（店舗オーナー向けダッシュボード）**
+
+<img src="docs/images/screenshot-admin-dashboard.jpg" alt="管理画面のダッシュボード" width="800">
+
+※ 画面はローカル環境のサンプルデータで撮影しています（店舗・投稿は架空のもの。写真は Unsplash より）。
+
+---
+
 ## 🎯 このサービスで解決したい課題
 
 - クラフトビールの情報が点在しすぎている
@@ -363,5 +377,7 @@ BeerSalon は現在、開発環境で動作を確認しています。
 - ビールに関わるお仕事をしていて、活用を考えている方
 - このプロダクトについて聞きたいことがある方
 - BeerSalon を作ったノウハウを聞いてみたい方
+
+サービスURL: https://beer-salon.vercel.app （要アカウント登録）
 
 連絡先（メール）: [xiajingtianlu@gmail.com](mailto:xiajingtianlu@gmail.com)
