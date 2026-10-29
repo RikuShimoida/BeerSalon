@@ -15,8 +15,10 @@ runs:
   steps:
     - name: Setup Supabase CLI
       uses: supabase/setup-cli@v1
+      # Why not version: latest: CLI の更新で同梱 Auth(GoTrue) が上がり、seed のユーザー作成が
+      # 予告なく失敗した（v2.122.0 で GoTrue v2.197.0 になりパスワード長検査が追加）。上げるときは意図して変える。
       with:
-        version: latest
+        version: 2.122.0
 
     - name: Start Supabase local stack
       shell: bash
