@@ -2,9 +2,6 @@ name: "Setup E2E Database"
 description: "Start Supabase, export keys to GITHUB_ENV, and seed E2E data"
 
 inputs:
-  e2e-test-user-password:
-    description: "E2E test user password (Supabase Auth)"
-    required: true
   database-url:
     description: "Postgres connection string (Supabase local)"
     required: false
@@ -40,9 +37,17 @@ runs:
         PGPASSWORD: postgres
       run: psql -h 127.0.0.1 -p 54422 -U postgres -d postgres -f supabase/seed.e2e.sql
 
+    # Why not GitHub Secret: 使い捨てのローカル DB 専用の値なので秘匿は不要。Secret だと値の長さが
+    # リポジトリの外に隠れ、Auth の検査強化（最小6文字）で CI が全滅しても気づけなかった。
+    - name: Generate E2E test user password
+      shell: bash
+      run: |
+        password="$(openssl rand -hex 16)"
+        echo "::add-mask::${password}"
+        echo "E2E_TEST_USER_PASSWORD=${password}" >> "$GITHUB_ENV"
+
     - name: Apply E2E seed (Auth users)
       shell: bash
       env:
-        E2E_TEST_USER_PASSWORD: ${{ inputs.e2e-test-user-password }}
         DATABASE_URL: ${{ inputs.database-url }}
       run: pnpm --filter @beersalon/web exec tsx ../../prisma/seed-e2e.ts
