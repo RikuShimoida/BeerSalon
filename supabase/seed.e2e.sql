@@ -155,11 +155,14 @@ SELECT setval(
   GREATEST((SELECT MAX(id) FROM bar_coupons), 100001101)
 );
 
+-- Why not 開始と同じ日の終了日時: 終了が過ぎたイベントは店舗詳細から除外されるため、
+-- 時間の経過だけでテストが壊れる（2026/9/2 経過後に e2e-web が失敗）。
+-- Why not DO NOTHING: 既存のローカル DB に過去の終了日時が残ったままになるため。
 INSERT INTO bar_events (id, bar_id, title, description, start_date, end_date, is_active)
 VALUES
   (100001201, 100001, 'E2E JST境界イベント', 'JST早朝の日時表示検証用',
-   TIMESTAMPTZ '2026-09-02 08:00:00+09', TIMESTAMPTZ '2026-09-02 20:00:00+09', true)
-ON CONFLICT (id) DO NOTHING;
+   TIMESTAMPTZ '2026-09-02 08:00:00+09', TIMESTAMPTZ '2099-09-02 20:00:00+09', true)
+ON CONFLICT (id) DO UPDATE SET end_date = EXCLUDED.end_date;
 
 SELECT setval(
   pg_get_serial_sequence('bar_events', 'id'),
