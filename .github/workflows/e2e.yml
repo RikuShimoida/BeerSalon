@@ -14,7 +14,10 @@ jobs:
       DIRECT_URL: postgresql://postgres:postgres@127.0.0.1:54422/postgres
       JWT_SECRET: ${{ secrets.E2E_JWT_SECRET }}
       E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: "dummy-google-maps-key"
+      # Why not ダミーの NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ダミーキーでも Google の地図スクリプトを
+      # 本物から読み込むため、InvalidKeyMapError の後にピン描画が例外を投げてトップページごと落ち、
+      # 地図の読み込みが間に合ったときだけ検索 E2E が失敗した。地図を検証するテストは無いので、
+      # キーを渡さず「キー未設定」の表示にして外部スクリプトに依存させない。
     steps:
       - uses: actions/checkout@v4
 
