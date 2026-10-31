@@ -149,10 +149,11 @@ docker exec -i "$SUPABASE_DB" psql -U postgres -d postgres -c "SELECT count(*) F
 | `E2E_SUPABASE_ANON_KEY` | Supabase ローカルの anon key |
 | `E2E_SUPABASE_SERVICE_ROLE_KEY` | Supabase Auth 管理 API 用 |
 | `E2E_JWT_SECRET` | admin の JWT 署名鍵 |
-| `E2E_TEST_USER_PASSWORD` | `smoke-user@example.test` の平文パスワード |
 | `E2E_ADMIN_PASSWORD` | `seed.e2e.sql` 内 admin_users のパスワード（参考） |
 
 Supabase ローカルの anon key / service_role key は固定値だが、平文をリポジトリにコミットしないため Secrets で管理する。
+
+`smoke-user@example.test` のパスワード（`E2E_TEST_USER_PASSWORD`）は Secret ではなく、`setup-db` がジョブごとにランダム生成して `GITHUB_ENV` に書き出す（使い捨てのローカル DB 専用のため）。Supabase Auth の最小文字数（6文字）を満たす32文字の値になる。
 
 ### ワークフロー全体像
 
@@ -162,6 +163,7 @@ Supabase ローカルの anon key / service_role key は固定値だが、平文
 4. composite action `.github/actions/setup-db`
    - `supabase start`（`supabase/migrations/*.sql` を自動適用）
    - `supabase/seed.e2e.sql` 投入
+   - `E2E_TEST_USER_PASSWORD` をランダム生成
    - `prisma/seed-e2e.ts` で Supabase Auth ユーザー作成
 5. `pnpm e2e:web` または `pnpm e2e:admin`
 6. 失敗時は Playwright の HTML レポートを artifact として保存

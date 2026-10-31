@@ -2,9 +2,6 @@ name: "Setup E2E Database"
 description: "Start Supabase, export keys to GITHUB_ENV, and seed E2E data"
 
 inputs:
-  e2e-test-user-password:
-    description: "E2E test user password (Supabase Auth)"
-    required: true
   database-url:
     description: "Postgres connection string (Supabase local)"
     required: false
@@ -15,8 +12,10 @@ runs:
   steps:
     - name: Setup Supabase CLI
       uses: supabase/setup-cli@v1
+      # Why not version: latest: CLI の更新で同梱 Auth(GoTrue) が上がり、seed のユーザー作成が
+      # 予告なく失敗した（v2.122.0 で GoTrue v2.197.0 になりパスワード長検査が追加）。上げるときは意図して変える。
       with:
-        version: latest
+        version: 2.122.0
 
     - name: Start Supabase local stack
       shell: bash
@@ -38,9 +37,17 @@ runs:
         PGPASSWORD: postgres
       run: psql -h 127.0.0.1 -p 54422 -U postgres -d postgres -f supabase/seed.e2e.sql
 
+    # Why not GitHub Secret: 使い捨てのローカル DB 専用の値なので秘匿は不要。Secret だと値の長さが
+    # リポジトリの外に隠れ、Auth の検査強化（最小6文字）で CI が全滅しても気づけなかった。
+    - name: Generate E2E test user password
+      shell: bash
+      run: |
+        password="$(openssl rand -hex 16)"
+        echo "::add-mask::${password}"
+        echo "E2E_TEST_USER_PASSWORD=${password}" >> "$GITHUB_ENV"
+
     - name: Apply E2E seed (Auth users)
       shell: bash
       env:
-        E2E_TEST_USER_PASSWORD: ${{ inputs.e2e-test-user-password }}
         DATABASE_URL: ${{ inputs.database-url }}
       run: pnpm --filter @beersalon/web exec tsx ../../prisma/seed-e2e.ts
