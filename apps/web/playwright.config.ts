@@ -35,12 +35,27 @@ export default defineConfig({
 	projects: [
 		{
 			name: "chromium",
-			use: { ...devices["Desktop Chrome"] },
+			use: {
+				...devices["Desktop Chrome"],
+				// Why not 本物の Google 地図スクリプトを読む: Google 側の更新で挙動が予告なく変わり、
+				// ダミーキーだとピン描画の例外で検索 E2E が時々落ちた。地図の検証は
+				// e2e/map-error-fallback.spec.ts が page.route で偽スクリプトを返して行う。
+				launchOptions: {
+					args: [
+						"--host-resolver-rules=MAP maps.googleapis.com ~NOTFOUND, MAP maps.gstatic.com ~NOTFOUND",
+					],
+				},
+			},
 		},
 	],
 	webServer: {
 		command: `pnpm exec next dev -p ${basePort}`,
 		url: baseURL,
 		reuseExistingServer: !process.env.CI,
+		// Why not キー未設定のまま: 未設定だと地図コンポーネント自体を描画せず「キー未設定」の表示になり、
+		// 地図が失敗したときの差し替え表示を E2E で確かめられない。キーの値は使われない（Google へは繋がない）。
+		env: {
+			NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: "e2e-dummy-google-maps-key",
+		},
 	},
 });

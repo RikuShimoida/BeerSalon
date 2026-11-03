@@ -183,6 +183,21 @@ E2E から `/bars/[barId]` にアクセスする場合は、必ず `seed.e2e.sql
 `seed.e2e.sql` のみが投入されるため存在せず、404 になってテストが失敗する。
 ローカルだけ通って CI で落ちる典型パターンなので注意する。
 
+### Google 地図は本物を読み込まない
+
+web の E2E では、`apps/web/playwright.config.ts` が次の2つを設定している。
+
+- E2E 用のダミーキー（`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`）を dev サーバーに渡す
+- ブラウザから `maps.googleapis.com` / `maps.gstatic.com` への通信を遮断する
+
+そのため、地図はどのテストでも読み込みに失敗した状態で表示される。地図の挙動を確かめたいテストは、
+`e2e/map-error-fallback.spec.ts` のように `page.route` で偽の地図スクリプトを返すこと。
+本物のスクリプトは Google 側の更新で挙動が予告なく変わるため、E2E が時々落ちる原因になる
+（ダミーキーでピン描画が例外を投げ、検索 E2E が落ちた実例あり）。
+
+ローカルで起動済みの dev サーバーを再利用した場合は、ダミーキーではなく `.env.local` のキーで動く。
+ただし通信遮断はブラウザ側の設定なので、その場合も本物の地図は読み込まれない。
+
 ### `loginAsSmokeUser` の URL 検証
 
 `apps/web/e2e/helpers/auth.ts` の `loginAsSmokeUser` は、ログイン後に `/` への到達だけでなく
