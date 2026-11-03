@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { BarSummary } from "@/components/bar/bar-summary";
+import { MapErrorBoundary } from "@/components/map/map-error-boundary";
 import { CITY_COORDINATES } from "@/lib/constants/city-coordinates";
 import { type BarPin, toBarPins } from "@/lib/map/bar-pins";
 import { resolveMapView } from "@/lib/map/map-view";
@@ -145,40 +146,60 @@ export function GoogleMap({ city, bars, defaultZoom = 12 }: GoogleMapProps) {
 
 	if (!apiKey) {
 		return (
-			<div className="flex h-64 items-center justify-center overflow-hidden rounded-[18px] border border-border bg-card modern-shadow md:h-full md:min-h-80">
-				<div className="text-center text-subtext">
-					<p className="text-sm font-medium tracking-wide">
-						Google Maps APIキーが設定されていません
-					</p>
-					<p className="mt-1 text-xs tracking-wide">
-						環境変数 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY を設定してください
-					</p>
-				</div>
-			</div>
+			<MapNotice
+				title="Google Maps APIキーが設定されていません"
+				description="環境変数 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY を設定してください"
+			/>
 		);
 	}
 
 	const pins = toBarPins(bars);
 
 	return (
-		<div className="h-64 overflow-hidden rounded-[18px] border border-border modern-shadow md:h-full md:min-h-80">
-			<APIProvider apiKey={apiKey}>
-				<GoogleMapComponent
-					defaultCenter={center}
-					defaultZoom={defaultZoom}
-					mapId="beer-salon-map"
-					className="w-full h-full"
-					gestureHandling="greedy"
-					disableDefaultUI={false}
-				>
-					<MapContent
-						pins={pins}
-						userLocation={userLocation}
-						fallbackCenter={center}
-						fallbackZoom={defaultZoom}
-					/>
-				</GoogleMapComponent>
-			</APIProvider>
+		<MapErrorBoundary
+			fallback={
+				<MapNotice
+					title="地図を表示できませんでした"
+					description="お店は一覧から探せます"
+				/>
+			}
+		>
+			<div className="h-64 overflow-hidden rounded-[18px] border border-border modern-shadow md:h-full md:min-h-80">
+				<APIProvider apiKey={apiKey}>
+					<GoogleMapComponent
+						defaultCenter={center}
+						defaultZoom={defaultZoom}
+						mapId="beer-salon-map"
+						className="w-full h-full"
+						gestureHandling="greedy"
+						disableDefaultUI={false}
+					>
+						<MapContent
+							pins={pins}
+							userLocation={userLocation}
+							fallbackCenter={center}
+							fallbackZoom={defaultZoom}
+						/>
+					</GoogleMapComponent>
+				</APIProvider>
+			</div>
+		</MapErrorBoundary>
+	);
+}
+
+function MapNotice({
+	title,
+	description,
+}: {
+	title: string;
+	description: string;
+}) {
+	return (
+		<div className="flex h-64 items-center justify-center overflow-hidden rounded-[18px] border border-border bg-card modern-shadow md:h-full md:min-h-80">
+			<div className="text-center text-subtext">
+				<p className="text-sm font-medium tracking-wide">{title}</p>
+				<p className="mt-1 text-xs tracking-wide">{description}</p>
+			</div>
 		</div>
 	);
 }
