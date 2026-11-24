@@ -22,7 +22,7 @@ ON CONFLICT DO NOTHING;
 -- Bar Owner テストアカウント（平文のパスワードは git 管理外の email-pass.txt で管理）
 -- テスト用バーが存在する場合のみ紐付け
 INSERT INTO admin_users (bar_manage_id, password_hash, name, role, bar_id, is_active)
-SELECT 'fuji-beer-bar', '$2b$10$HSvZ0cZc.2yXwsTvHKNeruh4T7FfTJ26J6Lqt2bR4v5crKC8e/lWa', 'ビアバー御殿場オーナー', 'bar_owner', b.id, true
+SELECT 'fuji-beer-bar', '$2b$10$BdmKTR7hldxAWCUmP9mRmeqFrr/mMg3VvwqMAjCqW0Whn35hQsJ/S', 'ビアバー御殿場オーナー', 'bar_owner', b.id, true
 FROM bars b WHERE b.name = 'ビアバー御殿場'
 ON CONFLICT (bar_manage_id) DO NOTHING;
 
