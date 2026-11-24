@@ -2,10 +2,9 @@
 -- Beer Salon - Seed Data
 -- ============================================================
 
--- Admin テストアカウント
--- password: admin1234
+-- Admin テストアカウント（平文のパスワードは git 管理外の email-pass.txt で管理）
 INSERT INTO admin_users (bar_manage_id, password_hash, name, role, bar_id, is_active)
-VALUES ('admin', '$2b$10$wzjVvOFTvvCdDshrCpiICu/6LCLmrZWNZ8r10UgiO58LFvzivMgBu', 'システム管理者', 'admin', NULL, true)
+VALUES ('admin', '$2b$10$HSvZ0cZc.2yXwsTvHKNeruh4T7FfTJ26J6Lqt2bR4v5crKC8e/lWa', 'システム管理者', 'admin', NULL, true)
 ON CONFLICT (bar_manage_id) DO NOTHING;
 
 -- ============================================================
