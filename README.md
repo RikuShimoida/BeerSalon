@@ -134,6 +134,11 @@ pnpm e2e              # E2E 7本を実行 (web 5本 + admin 2本)
 
 詳細・トラブルシューティング・UIモード起動方法は `docs/e2e.md` を参照。
 
+> **ローカルの管理画面ログイン**：`supabase db reset` で投入される `seed.sql` の管理画面アカウント
+> （`admin` / `fuji-beer-bar`）のパスワードは、リポジトリに書かず git 管理外の `email-pass.txt` で管理する。
+> seed にはハッシュだけを置く。リモート（dev / prod）の `admin_users` には seed と同じパスワードを使わない。
+> seed は `ON CONFLICT DO NOTHING` のため、既存のローカル DB は `supabase db reset` するまで以前のパスワードのまま。
+
 > **impl スキル経由の場合は dev サーバーの手動起動は不要**：`impl` 実行時、`check-docker.sh` フックが
 > Docker（＝ローカル Supabase の実体）の起動を検証し（未起動ならブロック）、`check-dev-servers.sh` →
 > `start-dev-servers.sh` フックが dev:web(3000)/dev:admin(3001) を自動起動してから E2E フェーズに入る。

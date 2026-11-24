@@ -215,11 +215,20 @@ web の E2E では、`apps/web/playwright.config.ts` が次の2つを設定し�
 
 ### bcrypt パスワードハッシュを再生成したい
 
+平文をコマンドの引数に書くとシェル履歴に残るため、`read -s` で入力して環境変数で渡す。
+
 ```bash
-node -e "console.log(require('./apps/admin/node_modules/bcryptjs').hashSync('<新パスワード>', 10))"
+read -rs NEW_PW && NEW_PW="$NEW_PW" node -e "console.log(require('./apps/admin/node_modules/bcryptjs').hashSync(process.env.NEW_PW, 10))"; unset NEW_PW
 ```
 
-生成したハッシュを `supabase/seed.e2e.sql` の `password_hash` に反映する。
+生成したハッシュの反映先:
+
+| 対象 | ハッシュの反映先 | 平文の管理先 |
+|---|---|---|
+| E2E 用アカウント | `supabase/seed.e2e.sql` の `password_hash` | `apps/admin/.env.e2e.local` の `E2E_ADMIN_PASSWORD` |
+| ローカル開発用アカウント（`admin` / `fuji-beer-bar`） | `supabase/seed.sql` の `password_hash` | `email-pass.txt`（git 管理外） |
+
+seed にはハッシュだけを書き、平文はコメントにも書かない。
 
 ### Playwright のブラウザインストールでこける
 
